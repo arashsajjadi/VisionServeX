@@ -7,6 +7,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.0rc3] - 2026-05-15
+
+### Release Audit and GPU Safety Pass
+
+**Decision:** v1.0.0rc3 (not final). Remaining blockers documented below are
+honest, not silent — OpenMMLab requires docker/manual, TensorRT is dry-run,
+MPS is implemented but unverified. No fake predictions returned.
+
+### Added
+- **`visionservex gpu guard-status`** — live VRAM safety guard report. Shows
+  total/used/free VRAM, safety budget, active GPU processes, and policy.
+- **`visionservex gpu processes`** — list GPU compute processes with
+  VisionServeX/pytest marked safe-to-terminate and GUI processes protected.
+- **`visionservex gpu cleanup`** — safely terminate VisionServeX/pytest/
+  benchmark GPU processes. Never kills GUI processes (gnome-shell, Xwayland,
+  browsers, editors, terminals). Requires confirmation unless `--yes`.
+- **`visionservex gpu cleanup --dry-run`** — preview what would be terminated.
+- **`visionservex gpu reset-advice`** — print emergency VRAM recovery commands.
+  VisionServeX never auto-resets the GPU.
+- **`visionservex gpu smoke-test --serial --max-vram-fraction --min-free-vram-gb
+  --stop-on-vram-risk --allow-high-vram`** — VRAM safety flags on smoke-test.
+  Runs serially by default and clears torch cache between models.
+- **`visionservex openmmlab pull <model_id>`** — prepare OpenMMLab checkpoint
+  cache directory; print exact download instructions with official model zoo
+  links. Supports `--from-url` for direct download if user provides URL.
+  Returns `CHECKPOINT_REQUIRED` structured response (not fake output) when no
+  auto-download URL is available.
+- **`visionservex scheduler set-policy <model_id>`** — runtime policy override
+  for concurrency (runtime-only, not persisted).
+- **`visionservex scheduler benchmark-policy <model_id>`** — show
+  benchmark-derived concurrency policy for a model.
+- **`visionservex downloads-audit --strict`** — exit 1 if any model has
+  missing required download metadata (currently always passes: 0 missing).
+- **`visionservex parallel-test --stop-on-vram-risk --max-vram-fraction
+  --min-free-vram-gb`** — VRAM guard flags for parallel inference test.
+- **VRAM safety guard** (`gpu_commands.py`): `_get_vram_state()`,
+  `_compute_safety_budget()`, `_get_gpu_processes()`. Configurable via
+  `VISIONSERVEX_RUNTIME__MAX_VRAM_FRACTION`, `MIN_FREE_VRAM_GB`,
+  `RESERVE_GUI_VRAM`, `DESKTOP_GPU`, `ALLOW_HIGH_VRAM`.
+
+### Fixed
+- **Models audit** now correctly treats `status: manual` and `status: external`
+  as self-documenting statuses — stubs with these statuses no longer produce
+  spurious "stub without notes/warnings" audit warnings.
+- **Registry**: Added `notes` fields to `rfdetr-seg-large`, `rfdetr-seg-xlarge`,
+  `rfdetr-seg-2xlarge` (experimental stubs with no prior explanation).
+- **Registry**: Added `notes` to `grounding-dino-1.6` (external/API, now
+  clearly documented as API-gated).
+- **Models audit** also checks `warnings` (not only `notes`) for external
+  status documentation — `grounding-dino-1.5` already had `warnings:` and
+  no longer triggers a false positive.
+
+### Remaining Blockers Before v1.0.0 Final
+- OpenMMLab checkpoint auto-download: `openmmlab pull` exists, but real
+  inference still requires mmpose/mmdet packages and a valid checkpoint URL.
+  Returns `CHECKPOINT_REQUIRED` structured error — no fake output.
+- RTMPose / RTMDet-R2 real end-to-end inference: requires mmpose/mmrotate
+  and actual checkpoint file. Status: `docker_checkpoint_required`.
+- MPS verification: not verified (no Apple Silicon hardware). Documented.
+- TensorRT: dry-run only. Documented. No overclaim.
+
 ## [1.0.0rc2] - 2026-05-15
 
 ### Security and Privacy Hardening Pass

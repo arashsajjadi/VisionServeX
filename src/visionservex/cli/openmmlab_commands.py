@@ -257,4 +257,234 @@ def list_models(json_: bool = typer.Option(False, "--json")) -> None:
     console.print(table)
 
 
+# Official OpenMMLab checkpoint pull metadata.
+# download_url may be None when the exact file path is model-dependent or version-locked.
+# In that case the pull command prints exact download instructions.
+_PULL_METADATA: dict[str, dict] = {
+    "rtmpose-s": {
+        "display": "RTMPose (Small)",
+        "config_repo": "https://github.com/open-mmlab/mmpose/tree/main/configs/body_2d_keypoint/rtmpose/coco",
+        "model_zoo": "https://mmpose.readthedocs.io/en/latest/model_zoo_papers/algorithms.html#rtmpose",
+        "checkpoint_page": "https://github.com/open-mmlab/mmpose/blob/main/configs/body_2d_keypoint/rtmpose/coco/rtmpose-s_8xb256-420e_coco-256x192.py",
+        "install": "pip install openmim && mim install mmengine mmcv mmpose",
+        "cache_subdir": "rtmpose-s",
+        "checkpoint_filename": "rtmpose-s_simcc-body7_pt-body7_420e-256x192.pth",
+        "download_url": None,  # User must obtain from official model zoo
+    },
+    "rtmpose-t": {
+        "display": "RTMPose (Tiny)",
+        "config_repo": "https://github.com/open-mmlab/mmpose/tree/main/configs/body_2d_keypoint/rtmpose/coco",
+        "model_zoo": "https://mmpose.readthedocs.io/en/latest/model_zoo_papers/algorithms.html#rtmpose",
+        "install": "pip install openmim && mim install mmengine mmcv mmpose",
+        "cache_subdir": "rtmpose-t",
+        "checkpoint_filename": "rtmpose-t_simcc-body7_pt-body7_420e-256x192.pth",
+        "download_url": None,
+    },
+    "rtmdet-r2-s": {
+        "display": "RTMDet-R2 (Small)",
+        "config_repo": "https://github.com/open-mmlab/mmrotate/tree/main/configs/rotated_rtmdet",
+        "model_zoo": "https://github.com/open-mmlab/mmrotate/blob/main/configs/rotated_rtmdet/README.md",
+        "checkpoint_page": "https://github.com/open-mmlab/mmrotate/tree/main/configs/rotated_rtmdet",
+        "install": "pip install openmim && mim install mmengine mmcv mmdet mmrotate",
+        "cache_subdir": "rtmdet-r2-s",
+        "checkpoint_filename": "rtmdet-r2-s.pth",
+        "download_url": None,
+    },
+    "rtmdet-r2-t": {
+        "display": "RTMDet-R2 (Tiny)",
+        "config_repo": "https://github.com/open-mmlab/mmrotate/tree/main/configs/rotated_rtmdet",
+        "model_zoo": "https://github.com/open-mmlab/mmrotate/blob/main/configs/rotated_rtmdet/README.md",
+        "install": "pip install openmim && mim install mmengine mmcv mmdet mmrotate",
+        "cache_subdir": "rtmdet-r2-t",
+        "checkpoint_filename": "rtmdet-r2-t.pth",
+        "download_url": None,
+    },
+}
+
+
+@app.command("pull", help="Download an OpenMMLab checkpoint to the VisionServeX cache.")
+def pull(
+    model_id: str = typer.Argument(..., help="Model ID to pull (e.g. rtmpose-s, rtmdet-r2-s)."),
+    from_url: str | None = typer.Option(
+        None,
+        "--from-url",
+        help="Direct download URL for the checkpoint (from official model zoo).",
+    ),
+    cache_dir: str | None = typer.Option(
+        None,
+        "--cache-dir",
+        help="Override cache directory (default: ~/.cache/visionservex/openmmlab/).",
+    ),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Download an OpenMMLab checkpoint to the local VisionServeX cache.
+
+    VisionServeX cannot auto-download OpenMMLab checkpoints because they are
+    hosted on OpenMMLab's CDN and require the user to accept the upstream
+    terms. This command prepares the cache directory and, when --from-url is
+    provided, downloads the checkpoint.
+
+    Usage:
+      # Show download instructions
+      visionservex openmmlab pull rtmpose-s
+
+      # Download once you have the URL from the official model zoo
+      visionservex openmmlab pull rtmpose-s --from-url https://download.openmmlab.com/...
+    """
+    import pathlib
+    import urllib.request
+
+    meta = _PULL_METADATA.get(model_id)
+    base_cache = pathlib.Path(
+        cache_dir or pathlib.Path.home() / ".cache" / "visionservex" / "openmmlab"
+    )
+
+    model_cache = base_cache / meta["cache_subdir"] if meta else base_cache / model_id
+
+    model_cache.mkdir(parents=True, exist_ok=True)
+
+    if not meta:
+        msg = (
+            f"No pull metadata for model '{model_id}'. "
+            f"Supported: {', '.join(_PULL_METADATA)}. "
+            "Use --from-url to download a checkpoint directly."
+        )
+        if json_:
+            typer.echo(
+                json.dumps(
+                    {
+                        "model_id": model_id,
+                        "status": "no_metadata",
+                        "message": msg,
+                        "cache_dir": str(model_cache),
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            console.print(f"[yellow]{msg}[/yellow]")
+        return
+
+    checkpoint_path = model_cache / meta["checkpoint_filename"]
+
+    # Check if already cached
+    if checkpoint_path.exists():
+        if json_:
+            typer.echo(
+                json.dumps(
+                    {
+                        "model_id": model_id,
+                        "status": "cached",
+                        "path": str(checkpoint_path),
+                        "size_bytes": checkpoint_path.stat().st_size,
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            console.print(f"[green]Checkpoint already cached:[/green] {checkpoint_path}")
+        return
+
+    # Determine download URL
+    url = from_url or meta.get("download_url")
+
+    if not url:
+        # No auto-download URL — print instructions
+        instructions = f"""
+[bold]Manual checkpoint download required for {meta["display"]}[/bold]
+
+1. Install the OpenMMLab toolchain:
+   [cyan]{meta["install"]}[/cyan]
+
+2. Browse the official model zoo:
+   [cyan]{meta.get("model_zoo") or meta["config_repo"]}[/cyan]
+
+3. Download the checkpoint and place it at:
+   [cyan]{checkpoint_path}[/cyan]
+
+4. Or use mim to download directly (requires mmpose/mmrotate installed):
+   [cyan]mim download mmpose --config <config_name>[/cyan]
+
+5. Then run this command again or provide the URL:
+   [cyan]visionservex openmmlab pull {model_id} --from-url <url>[/cyan]
+"""
+        if json_:
+            typer.echo(
+                json.dumps(
+                    {
+                        "model_id": model_id,
+                        "status": "CHECKPOINT_REQUIRED",
+                        "cache_dir": str(model_cache),
+                        "expected_path": str(checkpoint_path),
+                        "model_zoo": meta.get("model_zoo"),
+                        "config_repo": meta["config_repo"],
+                        "install_cmd": meta["install"],
+                        "hint": f"Place checkpoint at {checkpoint_path} or use --from-url <url>",
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            console.print(instructions)
+        return
+
+    # Attempt download from provided URL
+    if not json_:
+        console.print(f"Downloading [bold]{meta['display']}[/bold] checkpoint...")
+        console.print(f"  URL:  {url}")
+        console.print(f"  Dest: {checkpoint_path}")
+
+    try:
+        tmp_path = checkpoint_path.with_suffix(".tmp")
+
+        def _report(block_num: int, block_size: int, total_size: int) -> None:
+            if not json_ and total_size > 0:
+                pct = min(100, block_num * block_size * 100 // total_size)
+                if block_num % 100 == 0:
+                    console.print(f"  {pct}%", end="\r")
+
+        urllib.request.urlretrieve(url, tmp_path, reporthook=_report)
+        tmp_path.rename(checkpoint_path)
+
+        size_mb = checkpoint_path.stat().st_size / (1024 * 1024)
+
+        if json_:
+            typer.echo(
+                json.dumps(
+                    {
+                        "model_id": model_id,
+                        "status": "ok",
+                        "path": str(checkpoint_path),
+                        "size_mb": round(size_mb, 1),
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            console.print(f"\n[green]Downloaded {size_mb:.1f} MB → {checkpoint_path}[/green]")
+            console.print(
+                "\nNext step: Start the sidecar and set VISIONSERVEX_OPENMMLAB_SIDECAR_URL."
+            )
+            console.print("  See: [cyan]docs/openmmlab_expert_models.md[/cyan]")
+
+    except Exception as exc:
+        if tmp_path.exists():
+            tmp_path.unlink(missing_ok=True)
+        if json_:
+            typer.echo(
+                json.dumps(
+                    {
+                        "model_id": model_id,
+                        "status": "error",
+                        "error": str(exc),
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            console.print(f"[red]Download failed:[/red] {exc}")
+            console.print(f"  Place the checkpoint manually at: [cyan]{checkpoint_path}[/cyan]")
+        raise typer.Exit(1)
+
+
 __all__ = ["app"]

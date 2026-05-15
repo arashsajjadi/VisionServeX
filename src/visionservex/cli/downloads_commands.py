@@ -194,4 +194,23 @@ def info_cmd(model_id: str, json_: bool = typer.Option(False, "--json")) -> None
             console.print(f"[yellow]⚠[/yellow]  {w}")
 
 
-__all__ = ["app"]
+def audit_missing_required_count() -> int:
+    """Return the number of models missing required download metadata."""
+    from visionservex.registry import default_registry
+
+    reg = default_registry()
+    count = 0
+    for entry in reg.list():
+        dt = entry.download_type
+        skip_install_extra = dt in {"synthetic", "external_api", "not_available"}
+        for field in _REQUIRED_FIELDS:
+            if field == "install_extra" and skip_install_extra:
+                continue
+            val = getattr(entry, field, None)
+            if not val and val != 0:
+                count += 1
+                break
+    return count
+
+
+__all__ = ["app", "audit_missing_required_count"]

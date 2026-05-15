@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__version__ = "1.0.0rc2"
+__version__ = "1.0.0rc3"
 __author__ = "Arash Sajjadi"
 __email__ = "arash.sajjadi@usask.ca"
 __license__ = "Apache-2.0"

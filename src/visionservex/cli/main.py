@@ -1420,9 +1420,49 @@ def parallel_test_alias(
     concurrency: int = typer.Option(2, "--concurrency"),
     runs: int = typer.Option(5, "--runs"),
     device: str = typer.Option("auto", "--device"),
+    stop_on_vram_risk: bool = typer.Option(
+        False,
+        "--stop-on-vram-risk",
+        help="Check VRAM before running; abort if safety buffer is at risk.",
+    ),
+    max_vram_fraction: float = typer.Option(
+        0.80,
+        "--max-vram-fraction",
+        help="VRAM safety fraction (only checked with --stop-on-vram-risk).",
+    ),
+    min_free_vram_gb: float = typer.Option(
+        3.0, "--min-free-vram-gb", help="Min free VRAM GB (only checked with --stop-on-vram-risk)."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Shortcut: runs `visionservex benchmark parallel-test`."""
+    if stop_on_vram_risk and device not in ("cpu",):
+        from visionservex.cli.gpu_commands import (
+            _DEFAULT_VRAM_POLICY,
+            _compute_safety_budget,
+            _get_vram_state,
+        )
+
+        policy = _DEFAULT_VRAM_POLICY.copy()
+        policy["max_vram_fraction"] = max_vram_fraction
+        policy["min_free_vram_gb"] = min_free_vram_gb
+        vram = _get_vram_state()
+        if vram["source"] != "unavailable":
+            budget = _compute_safety_budget(vram, policy)
+            if not budget.get("safe", True):
+                msg = (
+                    f"GPU_MEMORY_GUARD: VRAM at risk (free={vram['free_gb']:.2f}GB). "
+                    "Aborting parallel-test to protect system stability."
+                )
+                if json_:
+                    _emit(
+                        {"error": "GPU_MEMORY_GUARD", "message": msg, "vram": vram}, json_mode=json_
+                    )
+                else:
+                    console.print(f"[red]{msg}[/red]")
+                    console.print("[dim]Run: visionservex gpu processes[/dim]")
+                raise typer.Exit(1)
+
     from visionservex.cli.benchmark_commands import parallel_test
 
     parallel_test(
@@ -1438,12 +1478,31 @@ def parallel_test_alias(
 @app.command("downloads-audit", help="Audit download metadata for all registry models.")
 def downloads_audit_alias(
     verbose: bool = typer.Option(False, "--verbose", "-v"),
+    strict: bool = typer.Option(
+        False,
+        "--strict",
+        help="Exit 1 if any required metadata is missing.",
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Shortcut: runs `visionservex downloads audit`."""
     from visionservex.cli.downloads_commands import audit
 
     audit(verbose=verbose, json_=json_)
+
+    # --strict: fail only if the audit itself reports missing required metadata
+    if strict:
+        from visionservex.cli.downloads_commands import audit_missing_required_count
+
+        n_missing = audit_missing_required_count()
+        if n_missing > 0:
+            if not json_:
+                console.print(
+                    f"[red]--strict: {n_missing} model(s) missing required download metadata[/red]"
+                )
+            raise typer.Exit(1)
+        if not json_:
+            console.print("[green]--strict: all models have required download metadata[/green]")
 
 
 @app.command("mps", help="Apple MPS smoke test.")
@@ -1487,15 +1546,24 @@ def models_audit(
     issues = []
     status_counts: dict[str, int] = {}
 
+    # Statuses that are self-explanatory: "manual" means user must install/download
+    # manually (this IS the explanation); "external" is API-gated.
+    _SELF_DOCUMENTING_STATUSES = {"manual", "external", "optional"}
+
     for entry in reg.list():
         status_counts[entry.implementation_status] = (
             status_counts.get(entry.implementation_status, 0) + 1
         )
         model_issues = []
-        if entry.implementation_status == "stub" and not entry.notes and not entry.warnings:
+        if (
+            entry.implementation_status == "stub"
+            and not entry.notes
+            and not entry.warnings
+            and entry.status not in _SELF_DOCUMENTING_STATUSES
+        ):
             model_issues.append("stub without notes/warnings")
-        if entry.status == "external" and not entry.notes:
-            model_issues.append("external without notes")
+        if entry.status == "external" and not entry.notes and not entry.warnings:
+            model_issues.append("external without notes/warnings")
         if not entry.license:
             model_issues.append("missing license")
         if not entry.upstream_url:

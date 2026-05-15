@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-1.0.0rc2-informational.svg" alt="v1.0.0rc2">
+  <img src="https://img.shields.io/badge/version-1.0.0rc3-informational.svg" alt="v1.0.0rc3">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -88,8 +88,9 @@ result = client.classify("swinv2-tiny", "image.jpg")
 | **ONNX export** | SwinV2 | — | working | `[onnx]` |
 | **TensorRT** | — | — | dry-run only | — |
 
-**GPU:** CUDA verified on RTX 5080 in v0.7.0 for 6 model families. Run `visionservex gpu smoke-test` on your hardware.  
-**MPS:** Implemented, unverified (no Apple Silicon test hardware).
+**GPU:** CUDA verified on RTX 5080 for 6+ model families. Run `visionservex gpu smoke-test` on your hardware.  
+**MPS:** Implemented, unverified (no Apple Silicon test hardware).  
+**VRAM safety:** Desktop GPU guard reserves buffer for GUI/system stability. GPU tests run serially by default.
 
 > **"beta" means:** CPU-verified, CUDA-verified when noted, CLI/Python/gateway tested. No known regressions. May have edge cases.
 

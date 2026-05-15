@@ -274,6 +274,7 @@ models:
     difficulty: expert
     status: external
     implementation_status: stub
+    notes: "API-gated by IDEA-Research. Weights not openly downloadable. Requires upstream API token. VisionServeX does not call external APIs without admin-configured token."
 
   # =====================================================================
   # =====================================================================
@@ -602,6 +603,7 @@ models:
     requires_optional_extra: true
     install_extra: rfdetr
     implementation_status: stub
+    notes: "Larger RF-DETR-Seg variant; not yet wired in this build. Use rfdetr-seg-nano/small/medium for verified inference."
     supported_devices: [cuda]
     supported_precisions: [fp16, bf16]
     minimum_vram_gb: 6.0
@@ -623,6 +625,7 @@ models:
     requires_optional_extra: true
     install_extra: rfdetr
     implementation_status: stub
+    notes: "XL RF-DETR-Seg variant; not yet wired. Requires 10+ GB VRAM. Use rfdetr-seg-nano/small for CPU-capable inference."
     supported_devices: [cuda]
     supported_precisions: [fp16, bf16]
     minimum_vram_gb: 10.0
@@ -644,6 +647,7 @@ models:
     requires_optional_extra: true
     install_extra: rfdetr
     implementation_status: stub
+    notes: "2XL RF-DETR-Seg variant; not yet wired. Requires 16+ GB VRAM. Expert use only."
     supported_devices: [cuda]
     supported_precisions: [fp16, bf16]
     minimum_vram_gb: 16.0

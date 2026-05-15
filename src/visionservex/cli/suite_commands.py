@@ -229,6 +229,122 @@ def scheduler_recommend(
     console.print(f"  Config:              {payload['env_suggestion']}")
 
 
+@scheduler_app.command("set-policy", help="Override concurrency policy for a model.")
+def scheduler_set_policy(
+    model_id: str = typer.Argument(..., help="Model ID to configure."),
+    policy: str = typer.Option(
+        ...,
+        "--policy",
+        help="Policy: gpu_exclusive | queue_recommended | acceptable_parallelism | cpu_parallel",
+    ),
+    max_concurrency: int = typer.Option(1, "--max-concurrency"),
+    note: str = typer.Option("", "--note"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Set a runtime concurrency policy override for a model.
+
+    Writes to an in-process cache only (not persisted to disk).
+    To persist, set VISIONSERVEX_RUNTIME__PER_MODEL_CONCURRENCY in your env.
+    """
+    _VALID_POLICIES = {
+        "gpu_exclusive",
+        "queue_recommended",
+        "acceptable_parallelism",
+        "cpu_parallel",
+        "batch_preferred",
+        "default",
+    }
+    if policy not in _VALID_POLICIES:
+        msg = f"Unknown policy {policy!r}. Valid: {', '.join(sorted(_VALID_POLICIES))}"
+        if json_:
+            typer.echo(json.dumps({"error": msg}))
+        else:
+            console.print(f"[red]{msg}[/red]")
+        raise typer.Exit(1)
+
+    _MODEL_POLICIES[model_id] = {
+        "policy": policy,
+        "max_concurrency": max_concurrency,
+        "note": note or "Manually set via CLI",
+    }
+
+    payload = {
+        "model_id": model_id,
+        "policy": policy,
+        "max_concurrency": max_concurrency,
+        "note": note,
+        "status": "set",
+        "persistence_note": "Runtime-only. To persist: VISIONSERVEX_RUNTIME__PER_MODEL_CONCURRENCY env var.",
+    }
+    if json_:
+        typer.echo(json.dumps(payload, indent=2))
+    else:
+        console.print(
+            f"[green]Policy set:[/green] {model_id} → {policy} (max_concurrency={max_concurrency})"
+        )
+        console.print(
+            "[dim]Note: This override is runtime-only and applies to this process only.[/dim]"
+        )
+
+
+@scheduler_app.command("benchmark-policy", help="Show benchmark results and policy recommendation.")
+def scheduler_benchmark_policy(
+    model_id: str = typer.Argument(..., help="Model ID to show benchmark policy for."),
+    device: str = typer.Option("cuda", "--device"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Show current benchmark-derived concurrency policy for a model.
+
+    Run `visionservex parallel-test <model_id> <image>` to generate fresh benchmark data.
+    """
+    policy = _MODEL_POLICIES.get(model_id)
+
+    if policy is None:
+        msg = (
+            f"No benchmark data recorded for {model_id!r}. "
+            f"Run: visionservex parallel-test {model_id} examples/images/street.jpg"
+        )
+        if json_:
+            typer.echo(
+                json.dumps(
+                    {
+                        "model_id": model_id,
+                        "device": device,
+                        "status": "no_data",
+                        "message": msg,
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            console.print(f"[yellow]{msg}[/yellow]")
+        return
+
+    payload = {
+        "model_id": model_id,
+        "device": device,
+        "policy": policy.get("policy"),
+        "max_concurrency": policy.get("max_concurrency", 1),
+        "note": policy.get("note", ""),
+        "recommendation": (
+            "Queue or run serially on GPU."
+            if policy.get("policy") in ("gpu_exclusive", "queue_recommended")
+            else "Parallel execution may be acceptable."
+        ),
+    }
+
+    if json_:
+        typer.echo(json.dumps(payload, indent=2))
+        return
+
+    console.print(f"[bold]Benchmark policy for {model_id}[/bold] on {device}")
+    console.print(f"  Policy:          {payload['policy']}")
+    console.print(f"  Max concurrency: {payload['max_concurrency']}")
+    if payload["note"]:
+        console.print(f"  Note:            {payload['note']}")
+    console.print(f"  Recommendation:  {payload['recommendation']}")
+
+
 def get_model_max_concurrency(model_id: str) -> int:
     """Return the recommended max concurrency for a model."""
     return _MODEL_POLICIES.get(model_id, {}).get("max_concurrency", 2)
