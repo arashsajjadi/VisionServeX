@@ -48,10 +48,12 @@ def test_grounded_sam_in_registry():
     assert e.status == "beta"
 
 
-def test_sam2_hiera_still_stub():
+def test_sam2_hiera_tiny_now_wired():
     e = default_registry().get("sam2-hiera-tiny")
-    assert e.implementation_status == "stub"
-    assert e.status == "experimental"
+    assert e.implementation_status == "wired"
+    assert e.engine == "sam2_hf"
+    assert e.status == "beta"
+    assert e.hf_repo_id == "facebook/sam2-hiera-tiny"
 
 
 # ============================================================

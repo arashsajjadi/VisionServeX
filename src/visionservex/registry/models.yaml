@@ -25,7 +25,7 @@ models:
     engine: mock
     license: Apache-2.0
     license_notes: "Built into VisionServeX."
-    upstream_url: https://github.com/example/visionservex
+    upstream_url: https://github.com/arashsajjadi/VisionServeX
     download_type: synthetic
     auto_download: true
     supported_devices: [cpu]
@@ -46,7 +46,7 @@ models:
     backend: mock
     engine: mock
     license: Apache-2.0
-    upstream_url: https://github.com/example/visionservex
+    upstream_url: https://github.com/arashsajjadi/VisionServeX
     download_type: synthetic
     auto_download: true
     supported_devices: [cpu]
@@ -65,7 +65,7 @@ models:
     backend: mock
     engine: mock
     license: Apache-2.0
-    upstream_url: https://github.com/example/visionservex
+    upstream_url: https://github.com/arashsajjadi/VisionServeX
     download_type: synthetic
     auto_download: true
     supported_devices: [cpu]
@@ -83,7 +83,7 @@ models:
     backend: mock
     engine: mock
     license: Apache-2.0
-    upstream_url: https://github.com/example/visionservex
+    upstream_url: https://github.com/arashsajjadi/VisionServeX
     download_type: synthetic
     auto_download: true
     supported_devices: [cpu]
@@ -100,7 +100,7 @@ models:
     backend: mock
     engine: mock
     license: Apache-2.0
-    upstream_url: https://github.com/example/visionservex
+    upstream_url: https://github.com/arashsajjadi/VisionServeX
     download_type: synthetic
     auto_download: true
     supported_devices: [cpu]
@@ -117,7 +117,7 @@ models:
     backend: mock
     engine: mock
     license: Apache-2.0
-    upstream_url: https://github.com/example/visionservex
+    upstream_url: https://github.com/arashsajjadi/VisionServeX
     download_type: synthetic
     auto_download: true
     supported_devices: [cpu]
@@ -134,7 +134,7 @@ models:
     backend: mock
     engine: mock
     license: Apache-2.0
-    upstream_url: https://github.com/example/visionservex
+    upstream_url: https://github.com/arashsajjadi/VisionServeX
     download_type: synthetic
     auto_download: true
     supported_devices: [cpu]
@@ -151,7 +151,7 @@ models:
     backend: mock
     engine: mock
     license: Apache-2.0
-    upstream_url: https://github.com/example/visionservex
+    upstream_url: https://github.com/arashsajjadi/VisionServeX
     download_type: synthetic
     auto_download: true
     supported_devices: [cpu]
@@ -276,22 +276,24 @@ models:
     implementation_status: stub
 
   # =====================================================================
-  # Object detection — D-FINE
+  # =====================================================================
+  # Object detection — D-FINE (via HF Transformers ustc-community checkpoints)
   # =====================================================================
   - id: dfine-n
-    display_name: "D-FINE (Nano)"
+    display_name: "D-FINE (Nano, COCO)"
     task: detect
     family: dfine
-    backend: pytorch
+    backend: huggingface_dfine
     engine: dfine
     license: Apache-2.0
     upstream_url: https://github.com/Peterande/D-FINE
-    download_type: github_release
-    auto_download: false
+    download_type: huggingface
+    hf_repo_id: ustc-community/dfine-nano-coco
+    auto_download: true
     requires_optional_extra: true
-    install_extra: dfine
-    implementation_notes: "Engine wiring is a stub in 0.2.x; mock fallback only on opt-in."
-    implementation_status: stub
+    install_extra: hf
+    implementation_notes: "Uses transformers AutoModelForObjectDetection with d_fine model type."
+    implementation_status: wired
     supported_devices: [cpu, cuda]
     recommended_device: cpu
     supported_precisions: [fp32, fp16]
@@ -299,27 +301,26 @@ models:
     recommended_vram_gb: 1.0
     minimum_ram_gb: 2.0
     difficulty: very_easy
-    batch_support: true
+    batch_support: false
     export_support: [onnx]
-    best_for: ["very low-resource detection", "edge devices"]
+    best_for: ["very low-resource detection", "CPU inference", "edge devices"]
     beginner_recommendation: true
-    status: experimental
-    warnings:
-      - "Real D-FINE backend wiring is incomplete. Track upstream changes."
+    status: beta
 
   - id: dfine-s
-    display_name: "D-FINE (Small)"
+    display_name: "D-FINE (Small, Obj365+COCO)"
     task: detect
     family: dfine
-    backend: pytorch
+    backend: huggingface_dfine
     engine: dfine
     license: Apache-2.0
     upstream_url: https://github.com/Peterande/D-FINE
-    download_type: github_release
-    auto_download: false
+    download_type: huggingface
+    hf_repo_id: ustc-community/dfine-small-obj2coco
+    auto_download: true
     requires_optional_extra: true
-    install_extra: dfine
-    implementation_status: stub
+    install_extra: hf
+    implementation_status: wired
     supported_devices: [cpu, cuda]
     recommended_device: cpu
     supported_precisions: [fp32, fp16]
@@ -327,72 +328,76 @@ models:
     recommended_vram_gb: 2.0
     minimum_ram_gb: 3.0
     difficulty: easy
-    batch_support: true
+    batch_support: false
     export_support: [onnx]
-    status: experimental
+    beginner_recommendation: true
+    status: beta
 
   - id: dfine-m
-    display_name: "D-FINE (Medium)"
+    display_name: "D-FINE (Medium, Obj365+COCO)"
     task: detect
     family: dfine
-    backend: pytorch
+    backend: huggingface_dfine
     engine: dfine
     license: Apache-2.0
     upstream_url: https://github.com/Peterande/D-FINE
-    download_type: github_release
-    auto_download: false
+    download_type: huggingface
+    hf_repo_id: ustc-community/dfine-medium-obj2coco
+    auto_download: true
     requires_optional_extra: true
-    install_extra: dfine
-    implementation_status: stub
+    install_extra: hf
+    implementation_status: wired
     supported_devices: [cpu, cuda]
     supported_precisions: [fp32, fp16]
     minimum_vram_gb: 2.0
     recommended_vram_gb: 4.0
     difficulty: medium
-    batch_support: true
+    batch_support: false
     export_support: [onnx]
-    status: experimental
+    status: beta
 
   - id: dfine-l
-    display_name: "D-FINE (Large)"
+    display_name: "D-FINE (Large, Obj365+COCO)"
     task: detect
     family: dfine
-    backend: pytorch
+    backend: huggingface_dfine
     engine: dfine
     license: Apache-2.0
     upstream_url: https://github.com/Peterande/D-FINE
-    download_type: github_release
+    download_type: huggingface
+    hf_repo_id: ustc-community/dfine-large-obj2coco-e25
     auto_download: false
     requires_optional_extra: true
-    install_extra: dfine
-    implementation_status: stub
+    install_extra: hf
+    implementation_status: wired
     supported_devices: [cuda]
     recommended_device: cuda
     supported_precisions: [fp16, bf16]
     minimum_vram_gb: 4.0
     recommended_vram_gb: 8.0
     difficulty: medium
-    status: experimental
+    status: beta
 
   - id: dfine-x
     display_name: "D-FINE (XLarge, Obj365+COCO)"
     task: detect
     family: dfine
-    backend: pytorch
+    backend: huggingface_dfine
     engine: dfine
     license: Apache-2.0
     upstream_url: https://github.com/Peterande/D-FINE
-    download_type: github_release
+    download_type: huggingface
+    hf_repo_id: ustc-community/dfine-xlarge-obj2coco
     auto_download: false
     requires_optional_extra: true
-    install_extra: dfine
-    implementation_status: stub
+    install_extra: hf
+    implementation_status: wired
     supported_devices: [cuda]
     supported_precisions: [fp16, bf16]
     minimum_vram_gb: 8.0
     recommended_vram_gb: 12.0
     difficulty: hard
-    status: experimental
+    status: beta
 
   # =====================================================================
   # Object detection — RF-DETR (Roboflow)
@@ -1288,21 +1293,20 @@ models:
   # Foundation segmentation — SAM 2 / SAM 2.1 (manual — requires sam2 pkg)
   # =====================================================================
   - id: sam2-hiera-tiny
-    display_name: "SAM 2.1 (Hiera Tiny)"
+    display_name: "SAM 2 (Hiera Tiny) via HF Transformers"
     task: foundation_segment
     family: sam2
-    backend: sam2
-    engine: sam2
+    backend: huggingface_sam2
+    engine: sam2_hf
     license: Apache-2.0
     upstream_url: https://github.com/facebookresearch/sam2
     download_type: huggingface
-    hf_repo_id: facebook/sam2.1-hiera-tiny
-    auto_download: false
+    hf_repo_id: facebook/sam2-hiera-tiny
+    auto_download: true
     requires_optional_extra: true
-    install_extra: sam2
-    requires_custom_code: true
-    implementation_notes: "Requires upstream `sam2` package: pip install git+https://github.com/facebookresearch/sam2.git"
-    implementation_status: stub
+    install_extra: hf
+    implementation_notes: "Uses transformers Sam2Model. No CUDA extensions required."
+    implementation_status: wired
     supported_devices: [cpu, cuda, mps]
     recommended_device: cuda
     supported_precisions: [fp32, fp16, bf16]
@@ -1310,79 +1314,75 @@ models:
     recommended_vram_gb: 4.0
     minimum_ram_gb: 4.0
     difficulty: medium
-    beginner_recommendation: false
-    status: experimental
-    warnings:
-      - "Requires the `sam2` package installed from GitHub (not on PyPI as of writing)."
-      - "For a working SAM backend right now, use `sam-vit-base` instead."
+    beginner_recommendation: true
+    status: beta
+    best_for: ["prompt-based segmentation", "point/box prompts", "fine-grained masks"]
 
   - id: sam2-hiera-small
-    display_name: "SAM 2.1 (Hiera Small)"
+    display_name: "SAM 2 (Hiera Small) via HF Transformers"
     task: foundation_segment
     family: sam2
-    backend: sam2
-    engine: sam2
+    backend: huggingface_sam2
+    engine: sam2_hf
     license: Apache-2.0
     upstream_url: https://github.com/facebookresearch/sam2
     download_type: huggingface
-    hf_repo_id: facebook/sam2.1-hiera-small
-    auto_download: false
+    hf_repo_id: facebook/sam2-hiera-small
+    auto_download: true
     requires_optional_extra: true
-    install_extra: sam2
-    requires_custom_code: true
-    implementation_status: stub
-    supported_devices: [cuda, mps, cpu]
+    install_extra: hf
+    implementation_status: wired
+    supported_devices: [cpu, cuda, mps]
     recommended_device: cuda
-    supported_precisions: [fp16, bf16]
+    supported_precisions: [fp32, fp16, bf16]
     minimum_vram_gb: 2.0
     recommended_vram_gb: 6.0
     difficulty: medium
-    status: experimental
+    beginner_recommendation: true
+    status: beta
 
   - id: sam2-hiera-base-plus
-    display_name: "SAM 2.1 (Hiera Base+)"
+    display_name: "SAM 2 (Hiera Base+) via HF Transformers"
     task: foundation_segment
     family: sam2
-    backend: sam2
-    engine: sam2
+    backend: huggingface_sam2
+    engine: sam2_hf
     license: Apache-2.0
     upstream_url: https://github.com/facebookresearch/sam2
     download_type: huggingface
-    hf_repo_id: facebook/sam2.1-hiera-base-plus
+    hf_repo_id: facebook/sam2-hiera-base-plus
     auto_download: false
     requires_optional_extra: true
-    install_extra: sam2
-    requires_custom_code: true
-    implementation_status: stub
-    supported_devices: [cuda, mps]
-    supported_precisions: [fp16, bf16]
+    install_extra: hf
+    implementation_status: wired
+    supported_devices: [cuda, mps, cpu]
+    supported_precisions: [fp32, fp16, bf16]
     minimum_vram_gb: 4.0
     recommended_vram_gb: 8.0
     difficulty: medium
-    status: experimental
+    status: beta
 
   - id: sam2-hiera-large
-    display_name: "SAM 2.1 (Hiera Large)"
+    display_name: "SAM 2 (Hiera Large) via HF Transformers"
     task: foundation_segment
     family: sam2
-    backend: sam2
-    engine: sam2
+    backend: huggingface_sam2
+    engine: sam2_hf
     license: Apache-2.0
     upstream_url: https://github.com/facebookresearch/sam2
     download_type: huggingface
-    hf_repo_id: facebook/sam2.1-hiera-large
+    hf_repo_id: facebook/sam2-hiera-large
     auto_download: false
     requires_optional_extra: true
-    install_extra: sam2
-    requires_custom_code: true
-    implementation_status: stub
+    install_extra: hf
+    implementation_status: wired
     supported_devices: [cuda]
     recommended_device: cuda
-    supported_precisions: [fp16, bf16]
+    supported_precisions: [fp32, fp16, bf16]
     minimum_vram_gb: 8.0
     recommended_vram_gb: 12.0
     difficulty: hard
-    status: experimental
+    status: beta
 
   # =====================================================================
   # Grounded / universal segmentation
@@ -1481,11 +1481,11 @@ models:
     status: manual
 
   - id: oneformer-swin-large
-    display_name: "OneFormer (Swin-Large, COCO)"
+    display_name: "OneFormer (Swin-Large, COCO) — semantic/instance/panoptic"
     task: segment
     family: oneformer
-    backend: huggingface
-    engine: huggingface
+    backend: huggingface_oneformer
+    engine: oneformer
     license: MIT
     upstream_url: https://github.com/SHI-Labs/OneFormer
     download_type: huggingface
@@ -1493,21 +1493,23 @@ models:
     auto_download: false
     requires_optional_extra: true
     install_extra: hf
-    implementation_status: stub
+    implementation_notes: "Supports semantic, instance, and panoptic tasks via task kwarg."
+    implementation_status: wired
     supported_devices: [cuda, cpu]
     recommended_device: cuda
-    supported_precisions: [fp16, fp32]
+    supported_precisions: [fp32, fp16]
     minimum_vram_gb: 6.0
     recommended_vram_gb: 12.0
     difficulty: hard
-    status: experimental
+    status: beta
+    best_for: ["panoptic segmentation", "semantic scene parsing", "multi-task segmentation"]
 
   - id: oneformer-dinat-large
-    display_name: "OneFormer (DiNAT-Large)"
+    display_name: "OneFormer (DiNAT-Large, COCO)"
     task: segment
     family: oneformer
-    backend: huggingface
-    engine: huggingface
+    backend: huggingface_oneformer
+    engine: oneformer
     license: MIT
     upstream_url: https://github.com/SHI-Labs/OneFormer
     download_type: huggingface
@@ -1515,20 +1517,20 @@ models:
     auto_download: false
     requires_optional_extra: true
     install_extra: hf
-    implementation_status: stub
+    implementation_status: wired
     supported_devices: [cuda]
-    supported_precisions: [fp16]
+    supported_precisions: [fp32, fp16]
     minimum_vram_gb: 8.0
     recommended_vram_gb: 14.0
     difficulty: hard
-    status: experimental
+    status: beta
 
   - id: oneformer-convnext-large
-    display_name: "OneFormer (ConvNeXt-Large)"
+    display_name: "OneFormer (ConvNeXt-Large, ADE20K)"
     task: segment
     family: oneformer
-    backend: huggingface
-    engine: huggingface
+    backend: huggingface_oneformer
+    engine: oneformer
     license: MIT
     upstream_url: https://github.com/SHI-Labs/OneFormer
     download_type: huggingface
@@ -1536,9 +1538,9 @@ models:
     auto_download: false
     requires_optional_extra: true
     install_extra: hf
-    implementation_status: stub
+    implementation_status: wired
     supported_devices: [cuda, cpu]
-    supported_precisions: [fp16, fp32]
+    supported_precisions: [fp32, fp16]
     minimum_vram_gb: 6.0
     recommended_vram_gb: 12.0
     difficulty: hard

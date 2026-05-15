@@ -79,7 +79,19 @@ def _cuda_info() -> DeviceInfo:
             extras={"index": idx, "count": torch.cuda.device_count()},
         )
     except Exception as exc:  # pragma: no cover - hardware-specific
-        return DeviceInfo(name="cuda", available=False, detail=f"torch.cuda probe failed: {exc}")
+        # GPU is visible but CUDA runtime is broken (e.g. missing libnvrtc-builtins.so).
+        # Mark unavailable so auto-selection falls back to CPU rather than crashing at
+        # inference time.
+        short = str(exc).split("\n")[0][:120]
+        return DeviceInfo(
+            name="cuda",
+            available=False,
+            detail=(
+                f"GPU detected but CUDA runtime is broken: {short}. "
+                "Run `visionservex doctor` for fix suggestions. "
+                "Using CPU fallback."
+            ),
+        )
 
 
 def _nvidia_smi_summary() -> str | None:

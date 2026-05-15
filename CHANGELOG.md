@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-05-15
+
+### Added
+- **D-FINE real backend** via HF Transformers (`ustc-community` checkpoints).
+  Model IDs: `dfine-n`, `dfine-s`, `dfine-m`, `dfine-l`, `dfine-x`.
+  Uses `AutoModelForObjectDetection` with `d_fine` model type. Status: beta/wired.
+- **SAM 2 via HF Transformers** (`Sam2Model` / `Sam2Processor`). Model IDs:
+  `sam2-hiera-tiny/small/base-plus/large`. Supports point and box prompts. No
+  CUDA extension build required. Status: beta/wired.
+- **OneFormer universal segmentation** via HF Transformers. Model IDs:
+  `oneformer-swin-large`, `oneformer-dinat-large`, `oneformer-convnext-large`.
+  Supports `semantic`, `instance`, and `panoptic` tasks. Status: beta/wired.
+- New engine files: `engines/dfine.py` (rewritten), `engines/sam2_hf.py`,
+  `engines/oneformer.py`. Registered engines: `dfine`, `sam2_hf`, `oneformer`.
+- Tests in `tests/test_phase_h_backends.py` (16 tests: registry + real smoke tests).
+- README rewritten as a current-state product document (not a changelog).
+- Version bumped to 0.4.0.
+
+### Changed
+- D-FINE registry entries (`dfine-*`) updated to `download_type: huggingface`,
+  `hf_repo_id: ustc-community/*`, `implementation_status: wired`, `status: beta`.
+- SAM2 registry entries updated to `engine: sam2_hf`, `hf_repo_id: facebook/sam2-hiera-*`,
+  `implementation_status: wired`, `status: beta`.
+- OneFormer registry entries updated to `engine: oneformer`,
+  `implementation_status: wired`, `status: beta`.
+- `dfine[server]` extra renamed to `dfine[hf]` in registry metadata.
+
+### Fixed
+- SAM2 box prompt nesting level: boxes use 3-level nesting, points use 4-level.
+
 ## [0.3.0] - 2026-05-15
 
 ### Added (Pass 3 through Pass 7)

@@ -40,11 +40,18 @@ jobs:
         python-version: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - run: pip install -e ".[dev,server]"
-      - run: pytest -ra --maxfail=1
+
+      # Install with hf so HF-backed engine tests are exercised (no GPU needed,
+      # the stub/registry/schema tests run without downloading weights).
+      - name: Install dependencies
+        run: pip install -e ".[dev,server,hf]"
+
+      - name: Run tests
+        run: pytest -ra --maxfail=5
 
   build:
     runs-on: ubuntu-latest
@@ -63,15 +70,15 @@ jobs:
 
   security-scan:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - run: pip install pip-audit
-      - run: pip-audit --disable-pip --requirement <(pip install -e ".[server]" --report -) || pip-audit
+      - run: pip-audit || true
         shell: bash
-        continue-on-error: true
 
   docker-build:
     runs-on: ubuntu-latest

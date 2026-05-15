@@ -62,7 +62,7 @@ following BibTeX entry:
   author       = {Arash Sajjadi},
   title        = {{VisionServeX: A permissive-license-aware framework for local computer vision model serving}},
   year         = {2026},
-  url          = {https://github.com/example/visionservex},
+  url          = {https://github.com/arashsajjadi/VisionServeX},
   note         = {Developed under the supervision of Prof. Mark Eramian,
                   Department of Computer Science, University of Saskatchewan.}
 }
