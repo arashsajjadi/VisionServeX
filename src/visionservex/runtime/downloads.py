@@ -150,6 +150,15 @@ def cached_path(entry: ModelEntry) -> Path | None:
     """Return the path to a verified-cached primary checkpoint, or None."""
     if entry.download_type == "synthetic":
         return model_dir(entry)
+    if entry.download_type == "package_managed":
+        # For package-managed models, the manifest records the package cache.
+        manifest = read_manifest(entry)
+        if not manifest:
+            return None
+        saved_to = manifest.get("saved_to")
+        if saved_to and Path(saved_to).exists():
+            return Path(saved_to)
+        return None
     if not entry.checkpoint_filename and not entry.checkpoint_url and not entry.hf_repo_id:
         return None
     manifest = read_manifest(entry)
@@ -201,6 +210,9 @@ def download(
     if entry.download_type == "synthetic":
         return _emit_done(entry, progress, message="built-in mock model; no download required",
                           path=model_dir(entry))
+
+    if entry.download_type == "package_managed":
+        return _download_package_managed(entry, progress)
 
     if entry.download_type == "manual":
         raise ManualDownloadRequired(
@@ -258,6 +270,8 @@ def download(
             return _download_huggingface(entry, progress)
         if entry.download_type in {"direct_url", "github_release"}:
             return _download_direct(entry, progress)
+        if entry.download_type == "package_managed":
+            return _download_package_managed(entry, progress)
 
         raise DownloadError(f"unknown download_type {entry.download_type!r} for {entry.id!r}")
 
@@ -446,6 +460,48 @@ def _download_huggingface(entry: ModelEntry, progress: ProgressCallback | None) 
         "files": sorted(str(p.relative_to(local)) for p in local.rglob("*") if p.is_file()),
     })
     return _emit_done(entry, progress, message="downloaded from Hugging Face", path=primary)
+
+
+# =================================================================
+# Package-managed download (e.g. rfdetr)
+# =================================================================
+
+def _download_package_managed(entry: ModelEntry, progress: ProgressCallback | None) -> Path:
+    """Trigger a package-managed model download by instantiating its engine.
+
+    Models like RF-DETR manage their own checkpoint download inside the package
+    (``maybe_download_pretrain_weights``). We call a lightweight probe function
+    that triggers the download, then write a manifest pointing at the package's
+    own cache so ``is_cached`` returns True on subsequent calls.
+    """
+    started = time.monotonic()
+    _emit(progress, DownloadProgress(
+        model_id=entry.id, phase="starting",
+        message=f"package-managed download for {entry.id}",
+        started_at=started,
+    ))
+
+    # The engine module provides a ``_trigger_package_download`` helper.
+    try:
+        from visionservex.engines.rfdetr import trigger_package_download
+        cache_path = trigger_package_download(entry)
+    except ImportError as exc:
+        raise DownloadError(
+            f"engine module for {entry.id!r} is not available. "
+            f"Install with: pip install 'visionservex[{entry.install_extra or 'rfdetr'}]'"
+        ) from exc
+
+    write_manifest(entry, {
+        "saved_to": str(cache_path),
+        "download_type": "package_managed",
+        "package": entry.install_extra or "unknown",
+    })
+    _emit(progress, DownloadProgress(
+        model_id=entry.id, phase="done",
+        message=f"weights in {cache_path}",
+        started_at=started,
+    ))
+    return cache_path
 
 
 # =================================================================

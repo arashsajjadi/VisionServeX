@@ -1,15 +1,274 @@
-"""RF-DETR engine stub."""
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Arash Sajjadi
+"""RF-DETR inference engine.
+
+Real backend uses the Roboflow ``rfdetr`` PyPI package which auto-downloads
+weights on first instantiation and wraps them behind a clean predict API.
+
+Install:
+    pip install 'visionservex[rfdetr]'
+
+The engine maps VisionServeX model IDs to rfdetr class names, instantiates
+the right class, and converts ``supervision.Detections`` to our stable result
+schema.
+
+Supported model IDs:
+    rfdetr-nano, rfdetr-small, rfdetr-base, rfdetr-medium, rfdetr-large
+    rfdetr-seg-nano, rfdetr-seg-small, rfdetr-seg-medium
+
+Segmentation models return masks via sv.Detections.mask.
+"""
 
 from __future__ import annotations
 
+import time
+from pathlib import Path
+from typing import Any, Sequence
+
+import numpy as np
+from PIL import Image
+
+from visionservex.core.results import (
+    BaseResult,
+    Box,
+    Detection,
+    DetectionResult,
+    Segment,
+    SegmentationResult,
+)
 from visionservex.engines._stub import StubEngine
+from visionservex.engines.base import MissingDependencyError
 from visionservex.engines.registry import register_engine
 from visionservex.registry import ModelEntry
+from visionservex.utils.logging import get_logger
+
+_log = get_logger(__name__)
+
+# Map model id → rfdetr class name (string to keep import lazy)
+_DETECT_CLASSES: dict[str, str] = {
+    "rfdetr-nano": "RFDETRNano",
+    "rfdetr-small": "RFDETRSmall",
+    "rfdetr-base": "RFDETRBase",
+    "rfdetr-medium": "RFDETRMedium",
+    "rfdetr-large": "RFDETRLarge",
+}
+_SEG_CLASSES: dict[str, str] = {
+    "rfdetr-seg-nano": "RFDETRSegNano",
+    "rfdetr-seg-small": "RFDETRSegSmall",
+    "rfdetr-seg-medium": "RFDETRSegMedium",
+    "rfdetr-seg-large": "RFDETRSegLarge",
+    "rfdetr-seg-xlarge": "RFDETRSegXLarge",
+    "rfdetr-seg-2xlarge": "RFDETRSeg2XLarge",
+}
+_ALL_CLASSES = {**_DETECT_CLASSES, **_SEG_CLASSES}
+
+
+def _load_rfdetr_class(class_name: str):
+    """Import and return the rfdetr class by name."""
+    try:
+        import rfdetr  # type: ignore
+    except ImportError as exc:
+        raise MissingDependencyError(
+            "rfdetr package is not installed",
+            install_hint="pip install 'visionservex[rfdetr]'",
+        ) from exc
+    cls = getattr(rfdetr, class_name, None)
+    if cls is None:
+        raise MissingDependencyError(
+            f"rfdetr.{class_name} not found in installed rfdetr package",
+            install_hint="pip install --upgrade 'visionservex[rfdetr]'",
+        )
+    return cls
+
+
+def trigger_package_download(entry: ModelEntry) -> Path:
+    """Instantiate the rfdetr model on CPU to trigger checkpoint download.
+
+    The rfdetr package downloads to ``~/.cache/rfdetr/`` and verifies the MD5
+    hash. After the first call, the weights are cached and subsequent loads
+    skip the download. Returns the rfdetr internal cache directory path so
+    VisionServeX can write a manifest.
+    """
+    class_name = _ALL_CLASSES.get(entry.id)
+    if not class_name:
+        from visionservex.runtime.downloads import model_dir
+        return model_dir(entry)
+
+    cls = _load_rfdetr_class(class_name)
+    _log.info("triggering rfdetr weight download for %s via %s", entry.id, class_name)
+    instance = cls(device="cpu")  # instantiation triggers maybe_download_pretrain_weights()
+    del instance
+
+    # Locate the weight file in the rfdetr package cache.
+    import pathlib
+    import importlib.resources as ir
+    try:
+        pkg_cache = pathlib.Path.home() / ".cache" / "rfdetr"
+        if pkg_cache.exists():
+            return pkg_cache
+    except Exception:
+        pass
+    from visionservex.runtime.downloads import model_dir
+    return model_dir(entry)
 
 
 class RFDETREngine(StubEngine):
-    real_install_extra = "torch"
-    real_modules = ("torch",)
+    """Real RF-DETR and RF-DETR-Seg engine backed by the `rfdetr` package."""
+
+    real_install_extra = "rfdetr"
+    real_modules = ("rfdetr", "supervision")
+    backend_label = "rfdetr_package"
+
+    def __init__(self, entry: ModelEntry) -> None:
+        super().__init__(entry)
+        self._rfdetr_model: Any = None
+        self._is_seg: bool = entry.id in _SEG_CLASSES
+
+    # ------ lifecycle ------
+
+    def _real_load(self, *, device: str, precision: str) -> None:
+        class_name = _ALL_CLASSES.get(self.entry.id)
+        if not class_name:
+            raise MissingDependencyError(
+                f"no rfdetr class mapping for model id {self.entry.id!r}",
+                install_hint="check visionservex list-models for supported ids",
+            )
+        cls = _load_rfdetr_class(class_name)
+        _log.info("loading %s on device=%s", class_name, device)
+        # rfdetr accepts a device string; use 'cuda' or 'cpu'.
+        # AMP is on by default in rfdetr (fp16 on GPU, fp32 on CPU).
+        self._rfdetr_model = cls(device=device)
+        _log.info("%s ready", class_name)
+
+    def unload(self) -> None:
+        if self._rfdetr_model is not None:
+            del self._rfdetr_model
+            self._rfdetr_model = None
+        super().unload()
+
+    def warmup(self) -> None:
+        if not self._real_ready:
+            return
+        try:
+            dummy = Image.new("RGB", (384, 384), "black")
+            self._rfdetr_model.predict(dummy, threshold=0.3)
+        except Exception:
+            pass
+
+    # ------ inference ------
+
+    def predict(
+        self,
+        image: Image.Image,
+        *,
+        prompts: Sequence[str] | None = None,
+        threshold: float = 0.3,
+        **kwargs: Any,
+    ) -> BaseResult:
+        if not self._real_ready:
+            return super().predict(image, prompts=prompts, **kwargs)
+
+        # rfdetr can accept PIL directly
+        dets = self._rfdetr_model.predict(image, threshold=threshold)
+        return self._sv_to_result(dets, image)
+
+    def infer(self, preprocessed: Any, **kwargs: Any) -> Any:
+        """Not called when predict() is overridden."""
+        return preprocessed
+
+    def postprocess(self, raw: Any, *, image: Any, **kwargs: Any) -> BaseResult:
+        """Not called when predict() is overridden."""
+        return self._mock.postprocess(raw, image=image, **kwargs)
+
+    def _sv_to_result(self, dets: Any, image: Image.Image) -> BaseResult:
+        """Convert supervision.Detections → VisionServeX result."""
+        w, h = image.size
+        class_names = getattr(self._rfdetr_model, "class_names", None) or []
+
+        if self._is_seg:
+            segments = _sv_to_segments(dets, class_names)
+            return SegmentationResult(
+                kind="segmentation",
+                model_id=self.entry.id,
+                task=self.entry.task,
+                image_size=(w, h),
+                device=self.device,
+                precision=self.precision,
+                backend=self.backend_label,
+                segments=segments,
+            )
+        else:
+            detections = _sv_to_detections(dets, class_names)
+            return DetectionResult(
+                kind="detection",
+                model_id=self.entry.id,
+                task=self.entry.task,
+                image_size=(w, h),
+                device=self.device,
+                precision=self.precision,
+                backend=self.backend_label,
+                detections=detections,
+            )
+
+
+def _sv_to_detections(dets: Any, class_names: list[str]) -> list[Detection]:
+    """Convert sv.Detections to our Detection list."""
+    out: list[Detection] = []
+    if dets is None or len(dets) == 0:
+        return out
+    xyxy = dets.xyxy
+    conf = dets.confidence if dets.confidence is not None else np.ones(len(xyxy))
+    class_ids = dets.class_id if dets.class_id is not None else np.zeros(len(xyxy), dtype=int)
+    # Try data["class_name"] first (set by rfdetr)
+    names_arr = (dets.data or {}).get("class_name", None)
+    for i in range(len(xyxy)):
+        box = xyxy[i].tolist()
+        label = ""
+        if names_arr is not None and i < len(names_arr):
+            label = str(names_arr[i])
+        elif 0 <= int(class_ids[i]) < len(class_names):
+            label = class_names[int(class_ids[i])]
+        else:
+            label = f"class_{int(class_ids[i])}"
+        out.append(Detection(
+            box=Box(x1=float(box[0]), y1=float(box[1]), x2=float(box[2]), y2=float(box[3])),
+            score=float(conf[i]),
+            label=label,
+            class_id=int(class_ids[i]),
+        ))
+    return out
+
+
+def _sv_to_segments(dets: Any, class_names: list[str]) -> list[Segment]:
+    """Convert sv.Detections (with mask) to our Segment list."""
+    out: list[Segment] = []
+    if dets is None or len(dets) == 0:
+        return out
+    xyxy = dets.xyxy
+    conf = dets.confidence if dets.confidence is not None else np.ones(len(xyxy))
+    class_ids = dets.class_id if dets.class_id is not None else np.zeros(len(xyxy), dtype=int)
+    masks = dets.mask if dets.mask is not None else [None] * len(xyxy)
+    names_arr = (dets.data or {}).get("class_name", None)
+    for i in range(len(xyxy)):
+        box = xyxy[i].tolist()
+        label = ""
+        if names_arr is not None and i < len(names_arr):
+            label = str(names_arr[i])
+        elif 0 <= int(class_ids[i]) < len(class_names):
+            label = class_names[int(class_ids[i])]
+        else:
+            label = f"class_{int(class_ids[i])}"
+        mask_arr = masks[i] if masks[i] is not None else np.zeros((1, 1), dtype=np.uint8)
+        if hasattr(mask_arr, "astype"):
+            mask_arr = mask_arr.astype(np.uint8)
+        out.append(Segment(
+            box=Box(x1=float(box[0]), y1=float(box[1]), x2=float(box[2]), y2=float(box[3])),
+            score=float(conf[i]),
+            label=label,
+            mask=mask_arr,
+            class_id=int(class_ids[i]),
+        ))
+    return out
 
 
 def _factory(entry: ModelEntry) -> RFDETREngine:
@@ -18,4 +277,4 @@ def _factory(entry: ModelEntry) -> RFDETREngine:
 
 register_engine("rfdetr", _factory)
 
-__all__ = ["RFDETREngine"]
+__all__ = ["RFDETREngine", "trigger_package_download"]

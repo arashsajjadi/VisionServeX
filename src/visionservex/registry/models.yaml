@@ -396,26 +396,27 @@ models:
 
   # =====================================================================
   # Object detection — RF-DETR (Roboflow)
+  # Note: the `rfdetr` PyPI package manages its own checkpoint download.
+  # Install with: pip install 'visionservex[rfdetr]'
   # =====================================================================
   - id: rfdetr-nano
     display_name: "RF-DETR (Nano)"
     task: detect
     family: rfdetr
-    backend: pytorch
+    backend: rfdetr_package
     engine: rfdetr
     license: Apache-2.0
-    license_notes: "Apache-2.0 framework; verify per-checkpoint license on HF."
+    license_notes: "Apache-2.0 (rfdetr package). Pretrained weights on COCO."
     upstream_url: https://github.com/roboflow/rf-detr
-    download_type: huggingface
-    hf_repo_id: roboflow/rf-detr-nano
-    auto_download: false
+    download_type: package_managed
+    auto_download: true
     requires_optional_extra: true
     install_extra: rfdetr
-    implementation_notes: "Real backend wiring pending; engine stubbed in 0.2.x."
-    implementation_status: stub
+    implementation_notes: "Uses the `rfdetr` package. Weights auto-downloaded on first load (~349 MB)."
+    implementation_status: wired
     supported_devices: [cpu, cuda]
     recommended_device: cpu
-    supported_precisions: [fp32, fp16]
+    supported_precisions: [fp32]
     minimum_vram_gb: 0.5
     recommended_vram_gb: 1.5
     minimum_ram_gb: 2.0
@@ -423,25 +424,26 @@ models:
     batch_support: true
     export_support: [onnx]
     beginner_recommendation: true
-    status: experimental
+    status: beta
+    best_for: ["fast detection on CPU or GPU", "laptop demos", "COCO-class detection"]
+    notes: "Recommended beginner detection model when rfdetr is installed."
 
   - id: rfdetr-small
     display_name: "RF-DETR (Small)"
     task: detect
     family: rfdetr
-    backend: pytorch
+    backend: rfdetr_package
     engine: rfdetr
     license: Apache-2.0
     upstream_url: https://github.com/roboflow/rf-detr
-    download_type: huggingface
-    hf_repo_id: roboflow/rf-detr-small
-    auto_download: false
+    download_type: package_managed
+    auto_download: true
     requires_optional_extra: true
     install_extra: rfdetr
-    implementation_status: stub
+    implementation_status: wired
     supported_devices: [cpu, cuda]
     recommended_device: cuda
-    supported_precisions: [fp32, fp16]
+    supported_precisions: [fp32]
     minimum_vram_gb: 1.0
     recommended_vram_gb: 3.0
     minimum_ram_gb: 4.0
@@ -449,119 +451,137 @@ models:
     batch_support: true
     export_support: [onnx]
     beginner_recommendation: true
-    status: experimental
+    status: beta
+
+  - id: rfdetr-base
+    display_name: "RF-DETR (Base)"
+    task: detect
+    family: rfdetr
+    backend: rfdetr_package
+    engine: rfdetr
+    license: Apache-2.0
+    upstream_url: https://github.com/roboflow/rf-detr
+    download_type: package_managed
+    auto_download: true
+    requires_optional_extra: true
+    install_extra: rfdetr
+    implementation_status: wired
+    supported_devices: [cpu, cuda]
+    supported_precisions: [fp32]
+    minimum_vram_gb: 2.0
+    recommended_vram_gb: 4.0
+    difficulty: easy
+    batch_support: true
+    status: beta
 
   - id: rfdetr-medium
     display_name: "RF-DETR (Medium)"
     task: detect
     family: rfdetr
-    backend: pytorch
+    backend: rfdetr_package
     engine: rfdetr
     license: Apache-2.0
     upstream_url: https://github.com/roboflow/rf-detr
-    download_type: huggingface
-    hf_repo_id: roboflow/rf-detr-medium
-    auto_download: false
+    download_type: package_managed
+    auto_download: true
     requires_optional_extra: true
     install_extra: rfdetr
-    implementation_status: stub
+    implementation_status: wired
     supported_devices: [cpu, cuda]
-    supported_precisions: [fp16, bf16]
+    supported_precisions: [fp32]
     minimum_vram_gb: 3.0
     recommended_vram_gb: 6.0
     difficulty: medium
-    status: experimental
+    status: beta
 
   - id: rfdetr-large
     display_name: "RF-DETR (Large)"
     task: detect
     family: rfdetr
-    backend: pytorch
+    backend: rfdetr_package
     engine: rfdetr
     license: Apache-2.0
     upstream_url: https://github.com/roboflow/rf-detr
-    download_type: huggingface
-    hf_repo_id: roboflow/rf-detr-large
-    auto_download: false
+    download_type: package_managed
+    auto_download: true
     requires_optional_extra: true
     install_extra: rfdetr
-    implementation_status: stub
+    implementation_status: wired
     supported_devices: [cuda]
     recommended_device: cuda
-    supported_precisions: [fp16, bf16]
+    supported_precisions: [fp32]
     minimum_vram_gb: 6.0
     recommended_vram_gb: 12.0
     difficulty: medium
-    status: experimental
+    status: beta
 
   # =====================================================================
   # Instance segmentation — RF-DETR-Seg
+  # Note: the `rfdetr` PyPI package manages its own checkpoint download.
   # =====================================================================
   - id: rfdetr-seg-nano
     display_name: "RF-DETR-Seg (Nano)"
     task: segment
     family: rfdetr
-    backend: pytorch
+    backend: rfdetr_package
     engine: rfdetr
     license: Apache-2.0
     upstream_url: https://github.com/roboflow/rf-detr
-    download_type: huggingface
-    hf_repo_id: roboflow/rf-detr-seg-nano
-    auto_download: false
+    download_type: package_managed
+    auto_download: true
     requires_optional_extra: true
     install_extra: rfdetr
-    implementation_status: stub
+    implementation_status: wired
     supported_devices: [cpu, cuda]
     recommended_device: cuda
-    supported_precisions: [fp32, fp16]
+    supported_precisions: [fp32]
     minimum_vram_gb: 1.0
     recommended_vram_gb: 2.0
     difficulty: easy
-    status: experimental
+    beginner_recommendation: true
+    status: beta
 
   - id: rfdetr-seg-small
     display_name: "RF-DETR-Seg (Small)"
     task: segment
     family: rfdetr
-    backend: pytorch
+    backend: rfdetr_package
     engine: rfdetr
     license: Apache-2.0
     upstream_url: https://github.com/roboflow/rf-detr
-    download_type: huggingface
-    hf_repo_id: roboflow/rf-detr-seg-small
-    auto_download: false
+    download_type: package_managed
+    auto_download: true
     requires_optional_extra: true
     install_extra: rfdetr
-    implementation_status: stub
+    implementation_status: wired
     supported_devices: [cpu, cuda]
     recommended_device: cuda
-    supported_precisions: [fp32, fp16]
+    supported_precisions: [fp32]
     minimum_vram_gb: 1.5
     recommended_vram_gb: 3.0
     difficulty: easy
     beginner_recommendation: true
-    status: experimental
+    status: beta
 
   - id: rfdetr-seg-medium
     display_name: "RF-DETR-Seg (Medium)"
     task: segment
     family: rfdetr
-    backend: pytorch
+    backend: rfdetr_package
     engine: rfdetr
     license: Apache-2.0
     upstream_url: https://github.com/roboflow/rf-detr
-    download_type: huggingface
-    hf_repo_id: roboflow/rf-detr-seg-medium
-    auto_download: false
+    download_type: package_managed
+    auto_download: true
     requires_optional_extra: true
     install_extra: rfdetr
-    implementation_status: stub
+    implementation_status: wired
     supported_devices: [cuda]
-    supported_precisions: [fp16, bf16]
+    supported_precisions: [fp32]
     minimum_vram_gb: 4.0
     recommended_vram_gb: 8.0
     difficulty: medium
-    status: experimental
+    status: beta
 
   - id: rfdetr-seg-large
     display_name: "RF-DETR-Seg (Large)"
@@ -977,21 +997,23 @@ models:
 
   # =====================================================================
   # Classification — Swin Transformer V2 (HF)
+  # Uses AutoModelForImageClassification + AutoImageProcessor
   # =====================================================================
   - id: swinv2-tiny
     display_name: "Swin V2 (Tiny, ImageNet-1k)"
     task: classify
     family: swinv2
     backend: huggingface
-    engine: huggingface
+    engine: swinv2
     license: MIT
     upstream_url: https://github.com/microsoft/Swin-Transformer
     download_type: huggingface
     hf_repo_id: microsoft/swinv2-tiny-patch4-window8-256
-    auto_download: false
+    auto_download: true
     requires_optional_extra: true
     install_extra: hf
-    implementation_status: stub
+    implementation_notes: "Uses transformers.AutoModelForImageClassification (1000 ImageNet-1k classes)."
+    implementation_status: wired
     supported_devices: [cpu, cuda]
     recommended_device: cpu
     supported_precisions: [fp32, fp16]
@@ -1001,22 +1023,23 @@ models:
     difficulty: very_easy
     batch_support: true
     beginner_recommendation: true
-    status: experimental
+    status: beta
+    best_for: ["ImageNet-1k classification", "laptop demo", "CPU inference"]
 
   - id: swinv2-small
     display_name: "Swin V2 (Small)"
     task: classify
     family: swinv2
     backend: huggingface
-    engine: huggingface
+    engine: swinv2
     license: MIT
     upstream_url: https://github.com/microsoft/Swin-Transformer
     download_type: huggingface
     hf_repo_id: microsoft/swinv2-small-patch4-window8-256
-    auto_download: false
+    auto_download: true
     requires_optional_extra: true
     install_extra: hf
-    implementation_status: stub
+    implementation_status: wired
     supported_devices: [cpu, cuda]
     supported_precisions: [fp32, fp16]
     minimum_vram_gb: 1.0
@@ -1024,36 +1047,36 @@ models:
     difficulty: easy
     batch_support: true
     beginner_recommendation: true
-    status: experimental
+    status: beta
 
   - id: swinv2-base
     display_name: "Swin V2 (Base)"
     task: classify
     family: swinv2
     backend: huggingface
-    engine: huggingface
+    engine: swinv2
     license: MIT
     upstream_url: https://github.com/microsoft/Swin-Transformer
     download_type: huggingface
     hf_repo_id: microsoft/swinv2-base-patch4-window8-256
-    auto_download: false
+    auto_download: true
     requires_optional_extra: true
     install_extra: hf
-    implementation_status: stub
+    implementation_status: wired
     supported_devices: [cpu, cuda]
     supported_precisions: [fp32, fp16]
     minimum_vram_gb: 1.5
     recommended_vram_gb: 3.0
     difficulty: easy
     batch_support: true
-    status: experimental
+    status: beta
 
   - id: swinv2-large
     display_name: "Swin V2 (Large)"
     task: classify
     family: swinv2
     backend: huggingface
-    engine: huggingface
+    engine: swinv2
     license: MIT
     upstream_url: https://github.com/microsoft/Swin-Transformer
     download_type: huggingface
@@ -1061,13 +1084,13 @@ models:
     auto_download: false
     requires_optional_extra: true
     install_extra: hf
-    implementation_status: stub
+    implementation_status: wired
     supported_devices: [cuda]
     supported_precisions: [fp16, bf16]
     minimum_vram_gb: 3.0
     recommended_vram_gb: 6.0
     difficulty: medium
-    status: experimental
+    status: beta
 
   # =====================================================================
   # Classification — InternImage (OpenMMLab)
@@ -1184,7 +1207,85 @@ models:
     status: manual
 
   # =====================================================================
-  # Foundation segmentation — SAM 2 / SAM 2.1
+  # Foundation segmentation — SAM v1 via HF Transformers (wired)
+  # These use the original Segment Anything (SAM v1) models from Meta AI.
+  # If you need SAM v2/2.1, see sam2-hiera-* below (manual install).
+  # =====================================================================
+  - id: sam-vit-base
+    display_name: "SAM (ViT-Base) via Hugging Face"
+    task: foundation_segment
+    family: sam
+    backend: huggingface
+    engine: sam_hf
+    license: Apache-2.0
+    upstream_url: https://github.com/facebookresearch/segment-anything
+    download_type: huggingface
+    hf_repo_id: facebook/sam-vit-base
+    auto_download: true
+    requires_optional_extra: true
+    install_extra: hf
+    implementation_notes: "Uses transformers.SamModel + SamProcessor. Supports point and box prompts."
+    implementation_status: wired
+    supported_devices: [cpu, cuda, mps]
+    recommended_device: cuda
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 1.0
+    recommended_vram_gb: 2.0
+    minimum_ram_gb: 4.0
+    difficulty: easy
+    beginner_recommendation: true
+    status: beta
+    best_for: ["interactive segmentation", "mask generation with prompts", "CPU-capable segmentation"]
+    notes: "SAM v1 (ViT-Base). Point/box prompts supported. For SAM 2, see sam2-hiera-* (requires separate install)."
+
+  - id: sam-vit-large
+    display_name: "SAM (ViT-Large) via Hugging Face"
+    task: foundation_segment
+    family: sam
+    backend: huggingface
+    engine: sam_hf
+    license: Apache-2.0
+    upstream_url: https://github.com/facebookresearch/segment-anything
+    download_type: huggingface
+    hf_repo_id: facebook/sam-vit-large
+    auto_download: true
+    requires_optional_extra: true
+    install_extra: hf
+    implementation_status: wired
+    supported_devices: [cpu, cuda, mps]
+    recommended_device: cuda
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 2.0
+    recommended_vram_gb: 6.0
+    minimum_ram_gb: 6.0
+    difficulty: medium
+    status: beta
+
+  - id: sam-vit-huge
+    display_name: "SAM (ViT-Huge) via Hugging Face"
+    task: foundation_segment
+    family: sam
+    backend: huggingface
+    engine: sam_hf
+    license: Apache-2.0
+    upstream_url: https://github.com/facebookresearch/segment-anything
+    download_type: huggingface
+    hf_repo_id: facebook/sam-vit-huge
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: hf
+    implementation_status: wired
+    supported_devices: [cuda]
+    recommended_device: cuda
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 6.0
+    recommended_vram_gb: 12.0
+    minimum_ram_gb: 12.0
+    difficulty: hard
+    status: beta
+
+  # =====================================================================
+  # Foundation segmentation — SAM 2 / SAM 2.1 (manual — requires sam2 pkg)
   # =====================================================================
   - id: sam2-hiera-tiny
     display_name: "SAM 2.1 (Hiera Tiny)"
@@ -1200,7 +1301,7 @@ models:
     requires_optional_extra: true
     install_extra: sam2
     requires_custom_code: true
-    implementation_notes: "Requires upstream `sam2` package installed from GitHub."
+    implementation_notes: "Requires upstream `sam2` package: pip install git+https://github.com/facebookresearch/sam2.git"
     implementation_status: stub
     supported_devices: [cpu, cuda, mps]
     recommended_device: cuda
@@ -1209,10 +1310,11 @@ models:
     recommended_vram_gb: 4.0
     minimum_ram_gb: 4.0
     difficulty: medium
-    beginner_recommendation: true
+    beginner_recommendation: false
     status: experimental
     warnings:
-      - "Build/install issues are common; run `visionservex doctor` after install."
+      - "Requires the `sam2` package installed from GitHub (not on PyPI as of writing)."
+      - "For a working SAM backend right now, use `sam-vit-base` instead."
 
   - id: sam2-hiera-small
     display_name: "SAM 2.1 (Hiera Small)"
@@ -1285,8 +1387,34 @@ models:
   # =====================================================================
   # Grounded / universal segmentation
   # =====================================================================
+  - id: grounded-sam
+    display_name: "Grounded SAM (Grounding DINO Tiny + SAM ViT-Base)"
+    task: grounded_segment
+    family: grounded-sam
+    backend: composed
+    engine: grounded_sam  # composed pipeline engine
+    license: Apache-2.0
+    upstream_url: https://github.com/IDEA-Research/Grounded-Segment-Anything
+    download_type: huggingface
+    auto_download: true
+    requires_optional_extra: true
+    install_extra: grounding
+    implementation_notes: "Grounding DINO locates boxes; SAM v1 (HF) segments each box. Both backends via HF Transformers."
+    implementation_status: wired
+    supported_devices: [cpu, cuda]
+    recommended_device: cuda
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 3.0
+    recommended_vram_gb: 6.0
+    minimum_ram_gb: 8.0
+    difficulty: medium
+    beginner_recommendation: true
+    status: beta
+    best_for: ["prompt-driven segmentation", "find-and-segment by text"]
+    notes: "Composes Grounding DINO Tiny + SAM ViT-Base for text-prompted mask generation. Not claimed as a benchmark winner."
+
   - id: grounded-sam2
-    display_name: "Grounded SAM 2 (Grounding DINO + SAM 2)"
+    display_name: "Grounded SAM 2 (Grounding DINO + SAM 2 — requires sam2 pkg)"
     task: grounded_segment
     family: grounded-sam
     backend: composed
@@ -1297,7 +1425,7 @@ models:
     auto_download: false
     requires_optional_extra: true
     install_extra: grounding
-    implementation_notes: "Composes Grounding DINO + SAM 2 at runtime. Both backends required."
+    implementation_notes: "Requires sam2 package from GitHub. Use `grounded-sam` for the wired alternative."
     implementation_status: stub
     supported_devices: [cuda, cpu]
     recommended_device: cuda
@@ -1306,6 +1434,8 @@ models:
     recommended_vram_gb: 12.0
     difficulty: hard
     status: experimental
+    warnings:
+      - "SAM 2 package not on PyPI as of this build. Use `grounded-sam` (SAM v1) instead."
     notes: "Capability-matched to prompt-based universal segmentation. Not advertised as a benchmark winner."
 
   - id: seem-focal-t

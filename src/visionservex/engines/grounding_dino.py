@@ -118,10 +118,35 @@ class GroundingDINOEngine(StubEngine):
 
         inputs = self._processor(
             images=image, text=prompt_text, return_tensors="pt"
-        ).to(self._model.device)
+        )
+        # Move inputs to the model's device and cast float tensors to the model dtype.
+        # Token tensors (input_ids, attention_mask, token_type_ids) must stay integer —
+        # we only cast fp tensors.
+        model_device = next(self._model.parameters()).device
+        model_dtype = next(self._model.parameters()).dtype
+        inputs_on_device = {}
+        for k, v in inputs.items():
+            v = v.to(device=model_device)
+            if v.is_floating_point():
+                v = v.to(dtype=model_dtype)
+            inputs_on_device[k] = v
 
         with self._torch.no_grad():
-            outputs = self._model(**inputs)
+            try:
+                outputs = self._model(**inputs_on_device)
+            except RuntimeError as exc:
+                # Fallback: retry on CPU with fp32 if dtype/device mismatch on GPU.
+                if "input type" in str(exc).lower() or "dtype" in str(exc).lower():
+                    _log.warning(
+                        "dtype mismatch on %s fp%s; retrying on CPU fp32. Error: %s",
+                        model_device, str(model_dtype).replace("torch.", ""), exc,
+                    )
+                    inputs_cpu = {k: v.cpu().float() for k, v in inputs.items()}
+                    self._model.cpu()
+                    outputs = self._model(**inputs_cpu)
+                    self._model.to(model_device)
+                else:
+                    raise
 
         # Recent versions of transformers renamed ``box_threshold`` → ``threshold``.
         post = self._processor.post_process_grounded_object_detection

@@ -14,6 +14,9 @@ from visionservex.engines import (  # noqa: F401,E402
     pytorch as _torch,
     rfdetr as _rfdetr,
     sam2 as _sam,
+    sam_hf as _sam_hf,
+    swinv2 as _swinv2,
+    grounded_sam as _grounded_sam,
 )
 from visionservex.engines.mock import MockEngine  # noqa: E402
 

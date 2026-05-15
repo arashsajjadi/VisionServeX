@@ -68,4 +68,5 @@ def test_registry_required_fields():
         assert e.download_type in {
             "huggingface", "github_release", "direct_url",
             "manual", "external_api", "not_available", "synthetic",
+            "package_managed",
         }

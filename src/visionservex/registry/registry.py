@@ -52,7 +52,8 @@ DownloadType = Literal[
     "manual",
     "external_api",
     "not_available",
-    "synthetic",  # built-in mock — no download needed
+    "synthetic",       # built-in mock — no download needed
+    "package_managed", # the engine package manages its own download (e.g. rfdetr)
 ]
 
 
@@ -158,7 +159,9 @@ class ModelEntry(BaseModel):
         return device.lower() in {d.lower() for d in self.supported_devices}
 
     def is_downloadable(self) -> bool:
-        return self.download_type in {"huggingface", "github_release", "direct_url", "synthetic"}
+        return self.download_type in {
+            "huggingface", "github_release", "direct_url", "synthetic", "package_managed"
+        }
 
     def is_built_in(self) -> bool:
         return self.download_type == "synthetic"

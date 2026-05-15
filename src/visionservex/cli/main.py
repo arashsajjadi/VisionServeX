@@ -110,6 +110,87 @@ def _global(
 
 # ---------- meta ----------
 
+@app.command("getting-started", help="Beginner guide: check device, recommend a model, show exact next commands.")
+def getting_started() -> None:
+    settings = get_settings()
+    best = best_device()
+    pick = first_beginner_pick(task="detect")
+    seg_pick = first_beginner_pick(task="foundation_segment")
+
+    console.print(Panel.fit(
+        f"[bold]VisionServeX {__version__} — Getting Started[/bold]\n"
+        f"by Arash Sajjadi · Apache-2.0",
+        border_style="green",
+    ))
+    if best.name != "cpu":
+        console.print(f"[green]GPU detected:[/green] {best.detail}")
+        if best.total_vram_gb:
+            console.print(f"  VRAM: {best.total_vram_gb} GB total, {best.free_vram_gb or '?'} GB free")
+    else:
+        console.print("[yellow]No GPU detected.[/yellow] VisionServeX runs on CPU (slower for large models).")
+
+    console.print()
+    console.print("[bold]Step 1 — Get a full diagnosis:[/bold]")
+    console.print("  [cyan]$[/cyan] visionservex doctor")
+    console.print()
+    console.print("[bold]Step 2 — See available models:[/bold]")
+    console.print("  [cyan]$[/cyan] visionservex list-models --easy")
+    console.print()
+    console.print("[bold]Step 3 — Get a recommendation:[/bold]")
+    console.print("  [cyan]$[/cyan] visionservex recommend --task detect --simple")
+    console.print()
+    if pick:
+        console.print(f"[bold]Step 4 — Download {pick.id} (recommended for detection):[/bold]")
+        console.print(f"  [cyan]$[/cyan] visionservex pull {pick.id}")
+        console.print()
+        console.print(f"[bold]Step 5 — Run a prediction:[/bold]")
+        console.print(f"  [cyan]$[/cyan] visionservex predict {pick.id} examples/images/street.jpg --save outputs/out.jpg")
+    console.print()
+    console.print("[bold]Step 6 — Start the API server:[/bold]")
+    console.print("  [cyan]$[/cyan] visionservex serve")
+    console.print()
+    console.print("[bold]Step 7 — Call the API:[/bold]")
+    console.print("  [cyan]$[/cyan] curl -F 'image=@examples/images/street.jpg' \\")
+    console.print("       -F 'model_id=mock-detect' http://127.0.0.1:8080/detect | jq")
+    console.print()
+    console.print("[dim]For public exposure, see `visionservex tunnel doctor`.[/dim]")
+
+
+@app.command(help="Show package version, server status, cache info, and next recommended action.")
+def status(json_: bool = typer.Option(False, "--json")) -> None:
+    settings = get_settings()
+    best = best_device()
+    from visionservex.runtime.downloads import cache_listing
+    cached = cache_listing()
+    pick = first_beginner_pick(task="detect")
+    payload = {
+        "version": __version__,
+        "device": best.to_dict(),
+        "cache_dir": str(settings.cache.cache_dir),
+        "cached_models": len(cached),
+        "cached_model_ids": [c["model_id"] for c in cached],
+        "auth_enabled": settings.auth.enabled,
+        "server_bind": f"{settings.server.host}:{settings.server.port}",
+        "auto_pull": settings.models.auto_pull,
+        "beginner_pick": pick.id if pick else None,
+    }
+    if json_:
+        _emit(payload, json_mode=True)
+        return
+    console.print(Panel.fit(
+        f"[bold]VisionServeX {__version__}[/bold]",
+        border_style="cyan",
+    ))
+    console.print(f"Device:  {best.name} — {best.detail}")
+    console.print(f"Cache:   {settings.cache.cache_dir} ({len(cached)} model(s) cached)")
+    if cached:
+        console.print(f"  Cached: {', '.join(c['model_id'] for c in cached[:6])}")
+    console.print(f"Auth:    {'enabled' if settings.auth.enabled else 'disabled'}")
+    console.print(f"Server:  {settings.server.host}:{settings.server.port}")
+    if pick:
+        console.print(f"\nNext recommended action: [cyan]visionservex pull {pick.id}[/cyan]")
+
+
 @app.command(help="Print version information.")
 def version(json_: bool = typer.Option(False, "--json")) -> None:
     payload = {
@@ -125,7 +206,10 @@ def version(json_: bool = typer.Option(False, "--json")) -> None:
 # ---------- doctor ----------
 
 @app.command(help="Run friendly diagnostics: system, devices, dependencies, recommendations.")
-def doctor(json_: bool = typer.Option(False, "--json")) -> None:
+def doctor(
+    json_: bool = typer.Option(False, "--json"),
+    fix_suggestions: bool = typer.Option(False, "--fix-suggestions", help="Print actionable fix commands."),
+) -> None:
     settings = get_settings()
     sysinfo = collect()
     devices = [d.to_dict() for d in available_devices()]
@@ -148,11 +232,60 @@ def doctor(json_: bool = typer.Option(False, "--json")) -> None:
         "beginner_pick": pick.id if pick else None,
         "next_commands": _next_commands(pick),
     }
+    if fix_suggestions:
+        _print_fix_suggestions(deps, payload["warnings"])
+        return
     if json_:
+        payload["fix_suggestions"] = _compute_fix_suggestions(deps, payload["warnings"])
         _emit(payload, json_mode=True)
         return
 
     _print_doctor_human(payload)
+
+
+def _compute_fix_suggestions(deps: dict, warnings: list[str]) -> list[dict]:
+    suggestions = []
+    if not deps.get("torch", {}).get("installed"):
+        suggestions.append({
+            "issue": "PyTorch not installed",
+            "fix": "pip install 'visionservex[torch]'",
+            "docs": "docs/installation.md",
+        })
+    if not deps.get("transformers", {}).get("installed"):
+        suggestions.append({
+            "issue": "Hugging Face Transformers not installed",
+            "fix": "pip install 'visionservex[hf]'",
+            "docs": "docs/installation.md",
+        })
+    if not deps.get("fastapi", {}).get("installed"):
+        suggestions.append({
+            "issue": "FastAPI not installed (server mode unavailable)",
+            "fix": "pip install 'visionservex[server]'",
+            "docs": "docs/installation.md",
+        })
+    for w in warnings:
+        if "AUTH" in w:
+            suggestions.append({
+                "issue": w,
+                "fix": "export VISIONSERVEX_AUTH__ENABLED=true && "
+                       "export VISIONSERVEX_AUTH__API_KEY=$(python -c \"import secrets;print(secrets.token_urlsafe(48))\")",
+                "docs": "docs/security.md",
+            })
+    return suggestions
+
+
+def _print_fix_suggestions(deps: dict, warnings: list[str]) -> None:
+    suggestions = _compute_fix_suggestions(deps, warnings)
+    if not suggestions:
+        console.print("[green]No actionable issues found.[/green]")
+        return
+    console.print("[bold]Fix suggestions:[/bold]")
+    for s in suggestions:
+        console.print(f"  [yellow]Issue:[/yellow] {s['issue']}")
+        console.print(f"  [cyan]Fix  :[/cyan] {s['fix']}")
+        if s.get("docs"):
+            console.print(f"  [blue]Docs :[/blue] {s['docs']}")
+        console.print()
 
 
 def _next_commands(pick) -> list[str]:
@@ -259,6 +392,7 @@ def list_models(
     family: Optional[str] = typer.Option(None, "--family"),
     easy: bool = typer.Option(False, "--easy", help="Show only beginner-friendly models."),
     can_run: bool = typer.Option(False, "--can-run", help="Show only models that can run on current devices."),
+    friendly: bool = typer.Option(False, "--friendly", help="Human-readable table with more details."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     reg = default_registry()
@@ -272,6 +406,30 @@ def list_models(
     if json_:
         _emit([e.model_dump() for e in entries], json_mode=True)
         return
+
+    if friendly:
+        table = Table(title=f"Models ({len(entries)}) — use `visionservex info <id>` for full details")
+        for col in ("Model ID", "Task", "Difficulty", "Status", "Impl", "Auto-DL", "License", "Best for"):
+            table.add_column(col)
+        for e in entries:
+            impl_color = {"wired": "green", "partial": "yellow", "stub": "grey50"}.get(
+                e.implementation_status, "white"
+            )
+            best_for = (e.best_for[0] if e.best_for else "") or ""
+            table.add_row(
+                e.id,
+                e.task,
+                e.difficulty,
+                e.status,
+                f"[{impl_color}]{e.implementation_status}[/{impl_color}]",
+                "[green]yes[/green]" if e.auto_download else "[grey50]no[/grey50]",
+                e.license,
+                best_for[:30],
+            )
+        console.print(table)
+        console.print(f"\nLegend: impl=[green]wired[/green]=real backend, [yellow]partial[/yellow]=in progress, [grey50]stub[/grey50]=registry only")
+        return
+
     table = Table(title=f"Models ({len(entries)})")
     for col in ("id", "task", "status", "impl", "diff", "license", "devices", "auto-DL"):
         table.add_column(col)

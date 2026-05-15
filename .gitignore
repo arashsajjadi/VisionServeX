@@ -1,60 +1,118 @@
+# =============================================================
 # Python
+# =============================================================
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
 *$py.class
 *.so
+
+# Packaging / build
 *.egg
 *.egg-info/
 .eggs/
-.Python
 build/
 dist/
 wheels/
+MANIFEST
 pip-wheel-metadata/
 .installed.cfg
-MANIFEST
 
+# =============================================================
 # Virtual environments
+# =============================================================
 .venv/
 venv/
 env/
 ENV/
+.virtualenv/
 
-# Test / coverage
+# =============================================================
+# Test & coverage
+# =============================================================
 .pytest_cache/
 .coverage
 .coverage.*
-.cache/
 htmlcov/
 .tox/
-.mypy_cache/
-.ruff_cache/
 coverage.xml
 *.cover
+junit*.xml
 
+# =============================================================
+# Type checking & linting caches
+# =============================================================
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+
+# =============================================================
 # IDE
+# =============================================================
 .idea/
 .vscode/
 *.swp
+*.swo
+*~
 
+# =============================================================
 # Logs
+# =============================================================
 *.log
 logs/
 
-# Local model cache (when developing inside the repo)
+# =============================================================
+# Model weight files — never commit model weights to git.
+# Download via `visionservex pull <model_id>` instead.
+# =============================================================
+*.pth
+*.pt
+*.bin
+*.ckpt
+*.safetensors
+*.onnx
+*.trt
+*.engine
+*.pkl
+
+# =============================================================
+# Model cache directories
+# =============================================================
 .cache/
 models_cache/
 .visionservex/
+model_weights/
+weights/
+checkpoints/
 
-# Secrets
+# =============================================================
+# Inference outputs — generated at runtime
+# =============================================================
+outputs/
+
+# =============================================================
+# Secrets — never commit
+# =============================================================
 .env
 .env.local
+.env.*.local
 
+# =============================================================
 # OS
+# =============================================================
 .DS_Store
+.DS_Store?
+._*
 Thumbs.db
+ehthumbs.db
+desktop.ini
 
-# Cloudflared
-*.pem
+# =============================================================
+# Cloudflare Tunnel credentials & generated configs
+# =============================================================
 cert.pem
-*.cloudflared-credentials.json
+*.pem
+# cloudflared credential files (UUID-named)
+[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]-*.json
+tunnel*.yaml

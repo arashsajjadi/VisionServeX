@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "visionservex"
-version = "0.2.0"
+version = "0.3.0"
 description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -72,9 +72,10 @@ hf = [
     "safetensors>=0.4",
 ]
 rfdetr = [
+    "rfdetr>=1.6",
+    "supervision>=0.22",
     "torch>=2.1",
     "torchvision>=0.16",
-    "huggingface_hub>=0.24",
 ]
 dfine = [
     "torch>=2.1",
@@ -164,3 +165,8 @@ show_error_codes = true
 addopts = "-ra --strict-markers"
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = [
+    "real_model: test requires real model weights and optional dependencies (slow)",
+    "gpu: test requires a GPU device",
+    "slow: test is slow (typically >10s)",
+]

@@ -3,185 +3,241 @@
 
 # VisionServeX
 
-> A permissive-license-aware Python framework for serving modern computer
-> vision models locally and over Cloudflare Tunnel.
->
-> By **Arash Sajjadi** · PhD Candidate, Department of Computer Science,
-> University of Saskatchewan · supervised by **Prof. Mark Eramian** at the
-> Computer Vision Lab.
+**Secure, beginner-friendly Python API serving for permissive computer vision models.**
 
-VisionServeX is designed to be **easy enough for a complete beginner**:
-install → `doctor` → `recommend` → `pull` → `predict` → `serve`. No need to
-understand CUDA, PyTorch internals, HuggingFace Hub semantics, or
-Cloudflare DNS to get started.
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](.github/workflows/ci.yml)
+[![Code Style: ruff](https://img.shields.io/badge/code%20style-ruff-orange.svg)](https://docs.astral.sh/ruff/)
 
-The framework is intentionally:
+VisionServeX is a permissive-license-aware Python framework for serving
+modern computer vision models locally and over Cloudflare Tunnel. It is
+designed to be easy enough for a complete beginner — no CUDA expertise, no
+HuggingFace Hub internals, no Cloudflare DNS knowledge required.
 
-- **Beginner-friendly.** `visionservex doctor` tells you what your machine
-  can run, and `visionservex recommend` picks a model for you.
-- **Permissive-license aware.** Default models are Apache-2.0, MIT, or BSD.
-  Anything restricted, gated, or commercially uncertain is clearly labelled.
-- **Honest about implementation status.** Each registry entry says whether
-  this build is `wired`, `partial`, or `stub`. Stubs do **not** silently
-  fake real predictions.
-- **Predictable.** Stable JSON schemas across the Python API, CLI
-  (`--json` everywhere), and HTTP. Designed for LLM agents.
-- **Secure by default.** Bound to `127.0.0.1`, public mode requires auth
-  and explicit opt-in, SSRF and decompression-bomb guards, log redaction,
-  catch-all 404 in Cloudflare ingress.
+**Author:** Arash Sajjadi · PhD Candidate, Department of Computer Science,
+University of Saskatchewan  
+**Supervision:** Developed under the supervision of Prof. Mark Eramian,
+Department of Computer Science, University of Saskatchewan, Computer Vision Lab.
 
-## Beginner quickstart
+> This project is not an official product of the University of Saskatchewan.
+
+---
+
+## Beginner quickstart (< 5 minutes)
 
 ```bash
-# 1. install
-pip install 'visionservex[server]'
+pip install 'visionservex[server,hf]'
 
-# 2. see what your machine can run
+# 1. Diagnose your system
 visionservex doctor
 
-# 3. ask the system to recommend a model
+# 2. Get personalized recommendations
 visionservex recommend --task detect --simple
 
-# 4. download a model (the recommended one — or any other)
-visionservex pull mock-detect          # always works — no extras needed
-# visionservex pull rfdetr-small       # once the rfdetr backend is wired
+# 3. Download a model
+visionservex pull grounding-dino-tiny        # real, wired, text-prompted
+# or
+visionservex pull rfdetr-nano                # real, wired, COCO detection (needs `visionservex[rfdetr]`)
+# or
+visionservex pull mock-detect               # always works, no deps
 
-# 5. run a prediction
-visionservex predict mock-detect examples/images/street.jpg --save outputs/out.jpg
+# 4. Predict
+visionservex predict grounding-dino-tiny examples/images/street.jpg \
+    --prompt "car,person" --save outputs/out.jpg
 
-# 6. start the API
+# 5. Start the API
 visionservex serve
-
-# 7. call it
-curl -F "image=@examples/images/street.jpg" -F "model_id=mock-detect" \
-     http://127.0.0.1:8080/detect
 ```
 
-## Installation
-
-Basic install (CLI, registry, Python API, mock backend, system diagnostics):
+In another terminal:
 
 ```bash
-pip install visionservex
+curl -F "image=@examples/images/street.jpg" \
+     -F "model_id=grounding-dino-tiny" \
+     -F "prompts=car,person" \
+     http://127.0.0.1:8080/predict | jq
 ```
 
-Optional extras:
+---
 
-```bash
-pip install 'visionservex[server]'      # FastAPI HTTP server
-pip install 'visionservex[hf]'          # Hugging Face Transformers/Hub
-pip install 'visionservex[grounding]'   # Grounding DINO (real backend)
-pip install 'visionservex[rfdetr]'      # RF-DETR
-pip install 'visionservex[dfine]'       # D-FINE
-pip install 'visionservex[sam2]'        # SAM 2 / SAM 2.1
-pip install 'visionservex[onnx]'        # ONNX Runtime
-pip install 'visionservex[all]'         # server + onnx + hf + cloudflare
-```
+## "I have…" quickstart paths
 
-OpenMMLab integrations (`rtmpose`, `rtmdet-r`, `co-dino-inst`, `internimage`)
-are installed via `openmim`; see [`docs/installation.md`](docs/installation.md).
+| I have…               | Recommended model           | Install command                                   |
+| --------------------- | --------------------------- | ------------------------------------------------- |
+| No GPU                | `grounding-dino-tiny` (CPU) | `pip install 'visionservex[hf]'`                  |
+| NVIDIA GPU            | `rfdetr-nano` or GD-tiny    | `pip install 'visionservex[rfdetr,hf]'`           |
+| Just Python           | `mock-detect`               | `pip install visionservex` (no extras)            |
+| Need detection        | `rfdetr-nano`, `rfdetr-small` | `pip install 'visionservex[rfdetr]'`             |
+| Need segmentation     | `rfdetr-seg-nano`           | `pip install 'visionservex[rfdetr]'`              |
+| Need text-prompt detection | `grounding-dino-tiny`  | `pip install 'visionservex[hf]'`                  |
+| Need text-prompt masks | `grounded-sam`             | `pip install 'visionservex[hf]'`                  |
+| Need classification   | `swinv2-tiny`               | `pip install 'visionservex[hf]'`                  |
+| Need SAM segmentation | `sam-vit-base`              | `pip install 'visionservex[hf]'`                  |
+| Need an API server    | any model                   | `pip install 'visionservex[server]'`              |
+| Need Cloudflare Tunnel | any model + tunnel docs    | `pip install 'visionservex[server]'`              |
+
+---
+
+## Real model backends (Pass 3)
+
+| Family                   | Model IDs                             | Task             | Status   | Backend          | CPU works? |
+| ------------------------ | ------------------------------------- | ---------------- | -------- | ---------------- | ---------- |
+| Mock (built-in)          | `mock-*`                              | All tasks        | stable   | built-in         | yes        |
+| Grounding DINO           | `grounding-dino-tiny / swin-t / swin-b` | text-prompt detect | beta  | HF Transformers  | yes        |
+| RF-DETR detection        | `rfdetr-nano / small / base / medium / large` | detect      | beta     | rfdetr package   | yes        |
+| RF-DETR segmentation     | `rfdetr-seg-nano / small / medium`    | segment          | beta     | rfdetr package   | yes        |
+| SwinV2 classification    | `swinv2-tiny / small / base / large`  | classify         | beta     | HF Transformers  | yes        |
+| SAM v1                   | `sam-vit-base / large / huge`         | foundation_seg   | beta     | HF Transformers  | yes        |
+| Grounded SAM (composed)  | `grounded-sam`                        | grounded_seg     | beta     | HF (GD + SAM)    | yes        |
+
+Models still as stubs (registry-only, no real inference yet):
+D-FINE, SAM 2 / 2.1 (needs `sam2` pip package), RTMPose, RTMDet-R/R2, InternImage, Co-DINO, SEEM, OneFormer, Grounded-SAM-2.
+
+---
 
 ## Python API
 
 ```python
 from visionservex import VisionModel
 
-model = VisionModel("mock-detect")              # works without optional deps
-result = model.predict("image.jpg")
+# Detection with RF-DETR (real, wired)
+m = VisionModel("rfdetr-nano")
+result = m.predict("examples/images/street.jpg")
 print(result.summary())
-print(result.to_json())
-result.save("annotated.jpg")
+for det in result.detections:
+    print(det.label, det.score, det.box.to_xyxy())
+
+# Text-prompted detection with Grounding DINO (real, wired)
+m = VisionModel("grounding-dino-tiny")
+result = m.predict("image.jpg", prompts=["red car", "person walking"])
+
+# Classification with SwinV2 (real, wired)
+m = VisionModel("swinv2-tiny")
+result = m.predict("dog.jpg")
+for label, score in result.top_k[:5]:
+    print(label, score)
+
+# Foundation segmentation with SAM v1 (real, wired)
+m = VisionModel("sam-vit-base")
+result = m.predict("image.jpg", points=[[100, 150]], point_labels=[1])
+result.save("mask.jpg")
+
+# Grounded segmentation (composed GD + SAM, real, wired)
+m = VisionModel("grounded-sam")
+result = m.predict("image.jpg", prompts=["dog", "leash"])
+result.save("grounded.jpg")
 ```
 
-Open-vocabulary detection (Grounding DINO; requires `visionservex[grounding]`):
+Auto-pull (download weights on first use):
 
 ```python
-m = VisionModel("grounding-dino-tiny", auto_pull=True)
-result = m.predict("image.jpg", prompts=["red car", "person", "leash"])
+m = VisionModel("rfdetr-small", auto_pull=True)
+result = m.predict("image.jpg")
 ```
 
-## What's actually wired, honestly
+---
 
-| Family                         | Models                                                        | This build                        |
-| ------------------------------ | ------------------------------------------------------------- | --------------------------------- |
-| Mock (deterministic)           | `mock-*`                                                      | **wired** (no install required)   |
-| Open-vocabulary detection      | `grounding-dino-tiny`, `grounding-dino-swin-t`, `…-swin-b`    | **wired** (HF Transformers)       |
-| Object detection (D-FINE)      | `dfine-n / s / m / l / x`                                     | stub — registry only              |
-| Object detection (RF-DETR)     | `rfdetr-nano / small / medium / large`                        | stub — registry only              |
-| Instance segmentation (RF-DETR-Seg) | `rfdetr-seg-nano / small / medium / large / xlarge / 2xlarge` | stub — registry only         |
-| Pose (RTMPose)                 | `rtmpose-t / s / m / l / m-384 / l-384`                       | stub — manual install             |
-| OBB (RTMDet-R, RTMDet-R2)      | `rtmdet-r-t/s/m/l`, `rtmdet-r2-t/s/m/l`                       | stub — manual install             |
-| Classification (Swin V2)       | `swinv2-tiny / small / base / large`                          | stub — registry only              |
-| Classification (InternImage)   | `internimage-t / s / b / l / h`                               | stub — manual install (CUDA ops)  |
-| Foundation segmentation (SAM 2)| `sam2-hiera-tiny / small / base-plus / large`                 | stub — optional install           |
-| Grounded universal seg         | `grounded-sam2`, `seem-*`, `oneformer-*`                      | stub — composed pipeline pending  |
-| External / API-only            | `grounding-dino-1.5`, `grounding-dino-1.6`                    | external — no self-hosting        |
-
-This table is generated from the bundled registry (`visionservex list-models`).
-A stub does **not** silently return mock predictions; it raises a clear
-"missing dependency" error unless you explicitly set
-`VISIONSERVEX_MODELS__ALLOW_MOCK_FALLBACK=true`.
-
-## Which model should I start with?
-
-- **I just want detection that works right now**: `mock-detect`.
-- **I want text-prompt detection that really runs**: `grounding-dino-tiny`
-  (after `pip install 'visionservex[grounding]'`).
-- **I have an NVIDIA GPU**: run `visionservex doctor`; it picks for you.
-- **I have a small laptop**: stick with `mock-*` and `grounding-dino-tiny`
-  at small image sizes.
-
-## HTTP server
-
-```bash
-visionservex serve   # 127.0.0.1:8080 by default
-```
-
-Stable response shape:
+## Stable API response
 
 ```json
 {
-  "request_id": "...",
+  "request_id": "abc123",
   "status": "completed",
-  "model_id": "mock-detect",
+  "model_id": "rfdetr-nano",
   "task": "detect",
-  "backend": "mock",
+  "backend": "rfdetr_package",
   "device": "cpu",
   "precision": "fp32",
-  "latency_ms": 3.1,
-  "model_loaded_from": null,
-  "cache_path": null,
-  "fallback_reason": null,
-  "results": [...],
+  "latency_ms": 61.4,
+  "model_loaded_from": "cache",
+  "results": [
+    {"box": {"x1": 59.0, "y1": 300.0, "x2": 201.5, "y2": 383.0},
+     "score": 0.723, "label": "fire hydrant", "class_id": 10}
+  ],
   "warnings": [],
   "metadata": {}
 }
 ```
 
-Auto-pull during requests is opt-in (`VISIONSERVEX_MODELS__AUTO_PULL=true`)
-and policy-controlled (`auto_pull_policy=never|easy_only|registry_allowed|all_auto_downloadable`).
+---
 
-When a model is missing and the client passes `?wait_for_download=false`,
-the server returns a **job id** and progress URL:
+## CLI reference
 
-```json
-{
-  "request_id": "...",
-  "status": "downloading",
-  "job_id": "abc123",
-  "model_id": "grounding-dino-tiny",
-  "message": "Model weights are being downloaded.",
-  "progress_url": "/jobs/abc123"
-}
+```bash
+# Diagnostics
+visionservex getting-started              # beginner guide with exact next commands
+visionservex doctor                       # full system + device + dependency report
+visionservex doctor --fix-suggestions     # actionable fix commands
+visionservex status                       # quick package/cache/device status
+visionservex devices
+
+# Models
+visionservex list-models --friendly       # human-readable table
+visionservex list-models --easy --can-run # only easy auto-downloadable models
+visionservex recommend --task detect --simple
+visionservex info grounding-dino-tiny
+
+# Downloads
+visionservex pull rfdetr-nano
+visionservex pull-easy                    # all beginner auto-downloadable
+visionservex pull-all --task detect --yes-i-understand-large-downloads
+
+# Inference
+visionservex predict rfdetr-nano examples/images/street.jpg --save outputs/out.jpg
+visionservex predict grounding-dino-tiny examples/images/street.jpg \
+    --prompt "car,person" --save outputs/gd.jpg
+visionservex benchmark mock-detect examples/images/simple_shapes.jpg --n 20
+
+# Server
+visionservex serve --host 127.0.0.1 --port 8080
+
+# Cloudflare Tunnel
+visionservex tunnel doctor
+visionservex tunnel config api.example.com --out tunnel.yaml
+visionservex tunnel run tunnel.yaml --i-understand-this-is-public
 ```
 
-## Secure public exposure
+---
+
+## Auto-pull during server requests
+
+```bash
+export VISIONSERVEX_MODELS__AUTO_PULL=true
+export VISIONSERVEX_MODELS__AUTO_PULL_POLICY=easy_only
+visionservex serve
+```
+
+Client-side: pass `?wait_for_download=false` to get a job id when the model is missing.  
+Track progress at `GET /jobs/{id}`.
+
+---
+
+## Security defaults
+
+| Default                     | Value              |
+| ----------------------------| -------------------|
+| Server bind address         | `127.0.0.1`        |
+| Public mode                 | disabled           |
+| API key authentication      | disabled           |
+| Remote URL image input      | disabled           |
+| Local file path input       | disabled           |
+| CORS                        | disabled           |
+| Max upload size             | 20 MiB             |
+| Max image pixels            | ~33 MP             |
+| Rate limit                  | 120 / minute       |
+| Decompression-bomb guard    | enabled            |
+| SSRF protection             | enabled            |
+| Path traversal protection   | enabled            |
+| Secret redaction in logs    | enabled            |
+
+## Secure Cloudflare Tunnel
 
 ```bash
 export VISIONSERVEX_AUTH__ENABLED=true
 export VISIONSERVEX_AUTH__API_KEY=$(python -c "import secrets;print(secrets.token_urlsafe(48))")
 
-visionservex tunnel doctor                 # checks for cloudflared
+visionservex tunnel doctor
 visionservex tunnel create visionservex
 visionservex tunnel route visionservex api.example.com
 visionservex tunnel config api.example.com --out tunnel.yaml
@@ -189,35 +245,55 @@ visionservex serve &
 visionservex tunnel run tunnel.yaml --i-understand-this-is-public
 ```
 
-See [`docs/cloudflare_tunnel.md`](docs/cloudflare_tunnel.md) and
-[`docs/security.md`](docs/security.md).
+- The CLI refuses to start the tunnel unless auth is enabled AND the
+  `--i-understand-this-is-public` flag is passed.
+- The generated `tunnel.yaml` always ends with a catch-all `http_status:404`.
+- We recommend adding a Cloudflare Access policy (service tokens for automation,
+  mTLS for high-value clients). See [`docs/cloudflare_tunnel.md`](docs/cloudflare_tunnel.md).
 
-## Docs
+---
 
-- [`docs/index.md`](docs/index.md)
-- [`docs/installation.md`](docs/installation.md)
-- [`docs/beginner_quickstart.md`](docs/beginner_quickstart.md)
-- [`docs/device_check.md`](docs/device_check.md)
-- [`docs/model_downloads.md`](docs/model_downloads.md)
-- [`docs/model_zoo.md`](docs/model_zoo.md)
-- [`docs/model_licenses.md`](docs/model_licenses.md)
-- [`docs/cloudflare_tunnel.md`](docs/cloudflare_tunnel.md)
-- [`docs/security.md`](docs/security.md)
-- [`docs/cli.md`](docs/cli.md) · [`docs/api_reference.md`](docs/api_reference.md) · [`docs/python_api.md`](docs/python_api.md)
-- [`docs/troubleshooting.md`](docs/troubleshooting.md) · [`docs/performance.md`](docs/performance.md)
-- [`docs/llm_agent_guide.md`](docs/llm_agent_guide.md)
-- [`docs/about.md`](docs/about.md)
+## Documentation
+
+| Document                                                           | Topic                           |
+| ------------------------------------------------------------------ | ------------------------------- |
+| [`docs/beginner_quickstart.md`](docs/beginner_quickstart.md)       | 5-minute walkthrough            |
+| [`docs/installation.md`](docs/installation.md)                     | All install options             |
+| [`docs/device_check.md`](docs/device_check.md)                     | GPU/CPU/MPS/ROCm guide          |
+| [`docs/model_downloads.md`](docs/model_downloads.md)               | Download system, auto-pull      |
+| [`docs/model_zoo.md`](docs/model_zoo.md)                           | Model table + "Which model?"    |
+| [`docs/model_licenses.md`](docs/model_licenses.md)                 | Per-model license details       |
+| [`docs/cloudflare_tunnel.md`](docs/cloudflare_tunnel.md)           | Secure public exposure          |
+| [`docs/security.md`](docs/security.md)                             | Security model, threat model    |
+| [`docs/api_reference.md`](docs/api_reference.md)                   | Full HTTP API spec              |
+| [`docs/python_api.md`](docs/python_api.md)                         | Python API reference            |
+| [`docs/cli.md`](docs/cli.md)                                       | CLI reference                   |
+| [`docs/troubleshooting.md`](docs/troubleshooting.md)               | Common errors + fixes           |
+| [`docs/llm_agent_guide.md`](docs/llm_agent_guide.md)               | For LLM agents / automation     |
+| [`docs/about.md`](docs/about.md)                                   | Author, citation, acknowledgment |
+
+---
+
+## Honest status
+
+We do not claim benchmark superiority for any model. Each registry entry
+carries `implementation_status`:
+
+- `wired` — real inference runs when the optional extra is installed.
+- `partial` — code path exists but has rough edges.
+- `stub` — registry entry only; no real inference in this build.
+
+Models with uncertain licensing are flagged `license_uncertain=true` and
+disabled/labelled accordingly.
+
+---
 
 ## License
 
-Apache-2.0 (`SPDX-License-Identifier: Apache-2.0`). See [`LICENSE`](LICENSE)
-and [`NOTICE`](NOTICE). Each integrated upstream model retains its own
-license; see [`docs/model_licenses.md`](docs/model_licenses.md).
+Apache-2.0 (`SPDX-License-Identifier: Apache-2.0`). See [`LICENSE`](LICENSE),
+[`NOTICE`](NOTICE), and [`docs/model_licenses.md`](docs/model_licenses.md).
 
 ## Citation
-
-If you use VisionServeX in academic work, please cite it via
-[`CITATION.cff`](CITATION.cff). Suggested BibTeX:
 
 ```bibtex
 @software{sajjadi2026visionservex,
@@ -225,11 +301,9 @@ If you use VisionServeX in academic work, please cite it via
   title  = {{VisionServeX: A permissive-license-aware framework for local computer vision model serving}},
   year   = {2026},
   url    = {https://github.com/example/visionservex},
-  note   = {Developed under the supervision of Prof. Mark Eramian, University of Saskatchewan.}
+  note   = {Developed under the supervision of Prof. Mark Eramian,
+            Department of Computer Science, University of Saskatchewan.}
 }
 ```
 
-## Security
-
-Report vulnerabilities privately per [`SECURITY.md`](SECURITY.md). Review
-the public-exposure checklist before running `visionservex tunnel run`.
+See also [`CITATION.cff`](CITATION.cff).
