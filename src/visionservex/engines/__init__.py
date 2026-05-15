@@ -1,27 +1,30 @@
 """Inference engine implementations and registration."""
 
-from visionservex.engines.base import BaseEngine, EngineError, MissingDependencyError
-from visionservex.engines.registry import build_engine, register_engine
+# ruff: noqa: F401
+# All imports below are intentional side-effect imports that register engines
+# via register_engine() calls in each module. They appear unused to the linter
+# because they are imported only for their side effects.
 
-# Order matters: mock first because the stub engines fall back to MockEngine.
-from visionservex.engines import mock as _mock  # noqa: F401,E402
-from visionservex.engines import (  # noqa: F401,E402
-    dfine as _dfine,
-    grounding_dino as _gd,
-    grounded_sam as _grounded_sam,
-    grounded_sam2 as _grounded_sam2,
-    huggingface as _hf,
-    oneformer as _oneformer,
-    onnx as _onnx,
-    openmmlab as _mm,
-    pytorch as _torch,
-    rfdetr as _rfdetr,
-    sam2 as _sam,
-    sam2_hf as _sam2_hf,
-    sam_hf as _sam_hf,
-    swinv2 as _swinv2,
-)
-from visionservex.engines.mock import MockEngine  # noqa: E402
+from visionservex.engines import dfine as _dfine
+from visionservex.engines import grounded_sam as _grounded_sam
+from visionservex.engines import grounded_sam2 as _grounded_sam2
+from visionservex.engines import grounding_dino as _gd
+from visionservex.engines import huggingface as _hf
+
+# Order matters: mock must be first because the stub engines fall back to MockEngine.
+from visionservex.engines import mock as _mock
+from visionservex.engines import oneformer as _oneformer
+from visionservex.engines import onnx as _onnx
+from visionservex.engines import openmmlab as _mm
+from visionservex.engines import pytorch as _torch
+from visionservex.engines import rfdetr as _rfdetr
+from visionservex.engines import sam2 as _sam
+from visionservex.engines import sam2_hf as _sam2_hf
+from visionservex.engines import sam_hf as _sam_hf
+from visionservex.engines import swinv2 as _swinv2
+from visionservex.engines.base import BaseEngine, EngineError, MissingDependencyError
+from visionservex.engines.mock import MockEngine
+from visionservex.engines.registry import build_engine, register_engine
 
 __all__ = [
     "BaseEngine",

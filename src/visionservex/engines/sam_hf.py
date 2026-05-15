@@ -14,7 +14,8 @@ Supported model IDs:
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
 from PIL import Image
@@ -63,6 +64,7 @@ class SAMHFEngine(StubEngine):
                 install_hint=self._install_hint(),
             )
         from visionservex.runtime.downloads import download
+
         download(self.entry)
 
         import torch  # type: ignore
@@ -129,7 +131,9 @@ class SAMHFEngine(StubEngine):
         if point_labels is not None:
             proc_kwargs["input_labels"] = [list(point_labels)]
         if boxes is not None:
-            proc_kwargs["input_boxes"] = [[[float(b[0]), float(b[1]), float(b[2]), float(b[3])] for b in boxes]]
+            proc_kwargs["input_boxes"] = [
+                [[float(b[0]), float(b[1]), float(b[2]), float(b[3])] for b in boxes]
+            ]
 
         inputs = self._processor(**proc_kwargs)
 
@@ -169,8 +173,10 @@ class SAMHFEngine(StubEngine):
             ys, xs = np.where(mask_uint8)
             if len(xs) > 0:
                 box = Box(
-                    x1=float(xs.min()), y1=float(ys.min()),
-                    x2=float(xs.max()), y2=float(ys.max()),
+                    x1=float(xs.min()),
+                    y1=float(ys.min()),
+                    x2=float(xs.max()),
+                    y2=float(ys.max()),
                 )
                 score = float(batch_iou[best_idx])
             else:

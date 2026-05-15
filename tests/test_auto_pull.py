@@ -6,14 +6,11 @@ from __future__ import annotations
 
 import base64
 import io
-import time
 
-import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
 
 from visionservex.config import reload_settings
-from visionservex.runtime.jobs import get_job_store
 from visionservex.server.app import create_app
 
 
@@ -97,7 +94,9 @@ def test_pull_endpoint_synchronous_synthetic_model(monkeypatch):
 def test_predict_returns_enriched_envelope(monkeypatch):
     c = _client({}, monkeypatch)
     img = Image.new("RGB", (96, 72), "green")
-    buf = io.BytesIO(); img.save(buf, "JPEG"); buf.seek(0)
+    buf = io.BytesIO()
+    img.save(buf, "JPEG")
+    buf.seek(0)
     r = c.post(
         "/detect",
         files={"image": ("x.jpg", buf, "image/jpeg")},

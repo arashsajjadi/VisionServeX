@@ -50,9 +50,8 @@ def validate_remote_url(
     if host in _FORBIDDEN_HOSTS:
         raise URLValidationError(f"host {host!r} is not allowed")
 
-    if allowlist_hosts:
-        if host not in {h.lower() for h in allowlist_hosts}:
-            raise URLValidationError(f"host {host!r} is not in the allowlist")
+    if allowlist_hosts and host not in {h.lower() for h in allowlist_hosts}:
+        raise URLValidationError(f"host {host!r} is not in the allowlist")
 
     # Resolve all addresses and reject if any is private/loopback/link-local.
     try:
@@ -60,7 +59,7 @@ def validate_remote_url(
     except socket.gaierror as exc:
         raise URLValidationError(f"could not resolve host {host!r}") from exc
 
-    for family, _type, _proto, _canon, sockaddr in infos:
+    for _family, _type, _proto, _canon, sockaddr in infos:
         ip_str = sockaddr[0]
         try:
             ip = ipaddress.ip_address(ip_str)
@@ -74,9 +73,7 @@ def validate_remote_url(
             or ip.is_multicast
             or ip.is_unspecified
         ):
-            raise URLValidationError(
-                f"host {host!r} resolves to disallowed address {ip}"
-            )
+            raise URLValidationError(f"host {host!r} resolves to disallowed address {ip}")
 
     return parsed.geturl()
 

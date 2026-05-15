@@ -109,8 +109,10 @@ def test_url_inputs_disabled_by_default():
 
 def test_base64_input_works():
     import base64
+
     img = Image.new("RGB", (64, 48), "blue")
-    buf = io.BytesIO(); img.save(buf, format="PNG")
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
     b64 = base64.b64encode(buf.getvalue()).decode("ascii")
     app = create_app(reload_settings())
     c = TestClient(app)

@@ -123,14 +123,14 @@ class DownloadingResponse(BaseModel):
 
 
 __all__ = [
+    "DownloadingResponse",
     "HealthResponse",
-    "VersionResponse",
-    "ModelListItem",
-    "ModelListResponse",
-    "PromptRequest",
-    "UrlInput",
-    "PredictionResponse",
     "JobProgress",
     "JobResponse",
-    "DownloadingResponse",
+    "ModelListItem",
+    "ModelListResponse",
+    "PredictionResponse",
+    "PromptRequest",
+    "UrlInput",
+    "VersionResponse",
 ]

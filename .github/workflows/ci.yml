@@ -17,9 +17,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install ruff
-      - run: ruff check .
-      - run: ruff format --check .
+      - name: Install ruff
+        run: pip install ruff
+      - name: Check lint
+        run: ruff check .
+      - name: Check format
+        run: ruff format --check .
 
   type-check:
     runs-on: ubuntu-latest
@@ -29,7 +32,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install -e ".[dev,server]" mypy
-      - run: mypy src/visionservex || true   # advisory until codebase is fully typed
+      - run: mypy src/visionservex || true
 
   test:
     runs-on: ${{ matrix.os }}
@@ -40,18 +43,15 @@ jobs:
         python-version: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-
-      # Install with hf so HF-backed engine tests are exercised (no GPU needed,
-      # the stub/registry/schema tests run without downloading weights).
       - name: Install dependencies
         run: pip install -e ".[dev,server,hf]"
-
-      - name: Run tests
+      - name: Run unit and integration tests
         run: pytest -ra --maxfail=5
+        # VISION_SERVEX_RUN_REAL_MODEL_TESTS is intentionally not set.
+        # real_model / slow tests are skipped automatically via conftest.py.
 
   build:
     runs-on: ubuntu-latest

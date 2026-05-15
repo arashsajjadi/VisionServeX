@@ -12,7 +12,6 @@ from visionservex.cli.main import app
 from visionservex.registry import default_registry
 from visionservex.runtime.recommendations import first_beginner_pick, recommend
 
-
 runner = CliRunner()
 
 
@@ -66,7 +65,12 @@ def test_registry_required_fields():
         assert e.difficulty in {"very_easy", "easy", "medium", "hard", "expert"}
         assert e.implementation_status in {"wired", "partial", "stub"}
         assert e.download_type in {
-            "huggingface", "github_release", "direct_url",
-            "manual", "external_api", "not_available", "synthetic",
+            "huggingface",
+            "github_release",
+            "direct_url",
+            "manual",
+            "external_api",
+            "not_available",
+            "synthetic",
             "package_managed",
         }

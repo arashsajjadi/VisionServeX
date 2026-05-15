@@ -42,7 +42,8 @@ def test_validate_image_bytes_accepts_normal(jpeg_bytes):
 
 def test_validate_image_bytes_rejects_dim():
     big = Image.new("RGB", (200, 200), "blue")
-    buf = io.BytesIO(); big.save(buf, format="PNG")
+    buf = io.BytesIO()
+    big.save(buf, format="PNG")
     limits = LimitsConfig(max_image_dim=64)
     with pytest.raises(InputValidationError):
         validate_image_bytes(buf.getvalue(), limits)

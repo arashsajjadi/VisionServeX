@@ -9,7 +9,6 @@ import json
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -35,7 +34,9 @@ def _json_or_text(payload, *, json_mode: bool, text: str | None = None) -> None:
         typer.echo(json.dumps(payload, indent=2, default=str))
 
 
-@app.command("doctor", help="Check that `cloudflared` is installed and tells you how to install it if not.")
+@app.command(
+    "doctor", help="Check that `cloudflared` is installed and tells you how to install it if not."
+)
 def doctor(json_: bool = typer.Option(False, "--json")) -> None:
     report = cloudflared_doctor()
     _json_or_text(report, json_mode=json_)
@@ -48,7 +49,7 @@ def login() -> None:
 
 
 @app.command("create", help="Create a named tunnel.")
-def create(name: Optional[str] = typer.Argument(None)) -> None:
+def create(name: str | None = typer.Argument(None)) -> None:
     _ensure_cloudflared()
     settings = get_settings()
     tunnel_name = name or settings.tunnel.tunnel_name
@@ -67,8 +68,8 @@ def route(tunnel_name: str, hostname: str) -> None:
 @app.command("config", help="Generate a safe ingress config for the local API.")
 def config(
     hostname: str = typer.Argument(..., help="Public hostname, e.g. api.example.com"),
-    tunnel_name: Optional[str] = typer.Option(None, "--tunnel-name"),
-    output: Optional[Path] = typer.Option(None, "--out"),
+    tunnel_name: str | None = typer.Option(None, "--tunnel-name"),
+    output: Path | None = typer.Option(None, "--out"),
     print_only: bool = typer.Option(False, "--print"),
 ) -> None:
     settings = get_settings()

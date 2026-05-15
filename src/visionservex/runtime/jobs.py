@@ -21,11 +21,13 @@ contracts in sync.
 
 from __future__ import annotations
 
+import contextlib
 import secrets
 import threading
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 
 JobStatus = Literal[
     "queued",
@@ -121,10 +123,8 @@ class JobStore:
                 job.error = error
             job.updated_at = time.time()
             for listener in self._listeners.get(job_id, []):
-                try:
+                with contextlib.suppress(Exception):
                     listener(job)
-                except Exception:
-                    pass
             return job
 
     def cancel(self, job_id: str) -> bool:

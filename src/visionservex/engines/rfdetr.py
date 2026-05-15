@@ -21,9 +21,9 @@ Segmentation models return masks via sv.Detections.mask.
 
 from __future__ import annotations
 
-import time
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 import numpy as np
 from PIL import Image
@@ -92,6 +92,7 @@ def trigger_package_download(entry: ModelEntry) -> Path:
     class_name = _ALL_CLASSES.get(entry.id)
     if not class_name:
         from visionservex.runtime.downloads import model_dir
+
         return model_dir(entry)
 
     cls = _load_rfdetr_class(class_name)
@@ -101,7 +102,7 @@ def trigger_package_download(entry: ModelEntry) -> Path:
 
     # Locate the weight file in the rfdetr package cache.
     import pathlib
-    import importlib.resources as ir
+
     try:
         pkg_cache = pathlib.Path.home() / ".cache" / "rfdetr"
         if pkg_cache.exists():
@@ -109,6 +110,7 @@ def trigger_package_download(entry: ModelEntry) -> Path:
     except Exception:
         pass
     from visionservex.runtime.downloads import model_dir
+
     return model_dir(entry)
 
 
@@ -230,12 +232,14 @@ def _sv_to_detections(dets: Any, class_names: list[str]) -> list[Detection]:
             label = class_names[int(class_ids[i])]
         else:
             label = f"class_{int(class_ids[i])}"
-        out.append(Detection(
-            box=Box(x1=float(box[0]), y1=float(box[1]), x2=float(box[2]), y2=float(box[3])),
-            score=float(conf[i]),
-            label=label,
-            class_id=int(class_ids[i]),
-        ))
+        out.append(
+            Detection(
+                box=Box(x1=float(box[0]), y1=float(box[1]), x2=float(box[2]), y2=float(box[3])),
+                score=float(conf[i]),
+                label=label,
+                class_id=int(class_ids[i]),
+            )
+        )
     return out
 
 
@@ -261,13 +265,15 @@ def _sv_to_segments(dets: Any, class_names: list[str]) -> list[Segment]:
         mask_arr = masks[i] if masks[i] is not None else np.zeros((1, 1), dtype=np.uint8)
         if hasattr(mask_arr, "astype"):
             mask_arr = mask_arr.astype(np.uint8)
-        out.append(Segment(
-            box=Box(x1=float(box[0]), y1=float(box[1]), x2=float(box[2]), y2=float(box[3])),
-            score=float(conf[i]),
-            label=label,
-            mask=mask_arr,
-            class_id=int(class_ids[i]),
-        ))
+        out.append(
+            Segment(
+                box=Box(x1=float(box[0]), y1=float(box[1]), x2=float(box[2]), y2=float(box[3])),
+                score=float(conf[i]),
+                label=label,
+                mask=mask_arr,
+                class_id=int(class_ids[i]),
+            )
+        )
     return out
 
 

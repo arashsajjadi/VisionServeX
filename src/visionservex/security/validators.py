@@ -48,7 +48,7 @@ def validate_path_input(path: str, *, root: Path, inputs: InputsConfig) -> Path:
 
 __all__ = [
     "InputValidationError",
-    "validate_mime_type",
     "validate_image_bytes",
+    "validate_mime_type",
     "validate_path_input",
 ]

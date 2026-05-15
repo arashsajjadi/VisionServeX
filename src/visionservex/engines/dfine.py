@@ -18,7 +18,8 @@ Install:
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from PIL import Image
 
@@ -90,7 +91,7 @@ class DFINEEngine(StubEngine):
         # Use `dtype` (new API); fall back to `torch_dtype` for older transformers.
         kwargs: dict[str, Any] = {}
         if torch_dtype is not torch.float32:
-            kwargs["dtype"] = torch_dtype   # new name in transformers ≥ 4.x
+            kwargs["dtype"] = torch_dtype  # new name in transformers ≥ 4.x
 
         _log.info("loading D-FINE %s from %s on %s", self.entry.id, repo, device)
         self._processor = AutoImageProcessor.from_pretrained(repo, use_fast=True)
@@ -162,14 +163,17 @@ class DFINEEngine(StubEngine):
             first["boxes"].tolist(),
             first["scores"].tolist(),
             first["labels"].tolist(),
+            strict=False,
         ):
             label = self._id2label.get(int(label_id), f"class_{label_id}")
-            detections.append(Detection(
-                box=Box(x1=box[0], y1=box[1], x2=box[2], y2=box[3]),
-                score=float(score),
-                label=label,
-                class_id=int(label_id),
-            ))
+            detections.append(
+                Detection(
+                    box=Box(x1=box[0], y1=box[1], x2=box[2], y2=box[3]),
+                    score=float(score),
+                    label=label,
+                    class_id=int(label_id),
+                )
+            )
 
         return DetectionResult(
             kind="detection",

@@ -6,17 +6,17 @@ these objects; never raw dictionaries. Tests assert on their JSON output.
 
 from __future__ import annotations
 
-import io
 import json
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Iterable, Literal
+from typing import Any, Literal
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-
 # -------------------- primitives --------------------
+
 
 @dataclass(frozen=True)
 class Box:
@@ -147,9 +147,7 @@ class BaseResult:
         return json.dumps(self.to_dict(), indent=indent, default=_json_default)
 
     def to_coco(self) -> dict[str, Any]:  # pragma: no cover - default raises
-        raise NotImplementedError(
-            f"to_coco() is not defined for {self.__class__.__name__}"
-        )
+        raise NotImplementedError(f"to_coco() is not defined for {self.__class__.__name__}")
 
     # ----- visualization -----
 
@@ -194,6 +192,7 @@ class BaseResult:
 
 
 # -------------------- concrete result classes --------------------
+
 
 @dataclass(kw_only=True)
 class DetectionResult(BaseResult):
@@ -281,6 +280,7 @@ class OpenVocabularyResult(BaseResult):
 
 # -------------------- helpers --------------------
 
+
 def _result_to_dict(result: BaseResult) -> dict[str, Any]:
     data = asdict(result)
     data.pop("_image", None)
@@ -312,10 +312,7 @@ def _draw_overlay(image: Image.Image, result: BaseResult, *, font_size: int) -> 
     except TypeError:  # older Pillow
         font = ImageFont.load_default()
 
-    if isinstance(result, DetectionResult):
-        for det in result.detections:
-            _draw_box(draw, det.box, f"{det.label} {det.score:.2f}", font)
-    elif isinstance(result, OpenVocabularyResult):
+    if isinstance(result, (DetectionResult, OpenVocabularyResult)):
         for det in result.detections:
             _draw_box(draw, det.box, f"{det.label} {det.score:.2f}", font)
     elif isinstance(result, SegmentationResult):
@@ -334,7 +331,7 @@ def _draw_overlay(image: Image.Image, result: BaseResult, *, font_size: int) -> 
     elif isinstance(result, OrientedDetectionResult):
         for det in result.detections:
             corners = det.box.corners()
-            draw.line(corners + [corners[0]], fill=(255, 0, 0), width=2)
+            draw.line([*corners, corners[0]], fill=(255, 0, 0), width=2)
             draw.text(corners[0], f"{det.label} {det.score:.2f}", fill=(255, 0, 0), font=font)
     elif isinstance(result, ClassificationResult):
         text = " | ".join(f"{lbl}:{score:.2f}" for lbl, score in result.top_k[:3])
@@ -363,18 +360,18 @@ def _overlay_mask(image: Image.Image, mask: np.ndarray) -> None:
 
 
 __all__ = [
-    "Box",
-    "OrientedBox",
-    "Keypoint",
-    "Detection",
-    "OrientedDetection",
-    "Segment",
-    "PoseInstance",
     "BaseResult",
-    "DetectionResult",
-    "SegmentationResult",
-    "PoseResult",
+    "Box",
     "ClassificationResult",
-    "OrientedDetectionResult",
+    "Detection",
+    "DetectionResult",
+    "Keypoint",
     "OpenVocabularyResult",
+    "OrientedBox",
+    "OrientedDetection",
+    "OrientedDetectionResult",
+    "PoseInstance",
+    "PoseResult",
+    "Segment",
+    "SegmentationResult",
 ]

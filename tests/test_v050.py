@@ -5,10 +5,8 @@
 from __future__ import annotations
 
 import io
-import threading
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-import numpy as np
 import pytest
 from PIL import Image
 
@@ -24,8 +22,10 @@ def _img(size=(128, 128), color="blue") -> Image.Image:
 # Device module — sanity check + multi-GPU
 # ============================================================
 
+
 def test_device_info_has_sanity_fields():
     from visionservex.runtime.device import available_devices
+
     devs = available_devices()
     cpu = next(d for d in devs if d.name == "cpu")
     assert cpu.sanity_ok is True
@@ -34,6 +34,7 @@ def test_device_info_has_sanity_fields():
 
 def test_cpu_always_available():
     from visionservex.runtime.device import best_device, resolve_device
+
     bd = best_device(supported=["cpu"])
     assert bd.name == "cpu"
     res = resolve_device(preference="cpu", supported=["cpu", "cuda"])
@@ -42,23 +43,29 @@ def test_cpu_always_available():
 
 def test_broken_cuda_not_selected():
     """If CUDA sanity fails, auto-selection must not pick it."""
-    from visionservex.runtime.device import resolve_device, DeviceInfo
     import visionservex.runtime.device as dmod
+    from visionservex.runtime.device import DeviceInfo, resolve_device
 
     broken_cuda = DeviceInfo(
-        name="cuda", available=True, detail="GPU detected but broken",
-        sanity_ok=False, sanity_error="test error",
+        name="cuda",
+        available=True,
+        detail="GPU detected but broken",
+        sanity_ok=False,
+        sanity_error="test error",
     )
-    cpu = DeviceInfo(name="cpu", available=True, sanity_ok=True)
+    DeviceInfo(name="cpu", available=True, sanity_ok=True)
 
-    with patch.object(dmod, "_all_cuda_devices", return_value=[broken_cuda]), \
-         patch.object(dmod, "_mps_info", return_value=DeviceInfo("mps", False)):
+    with (
+        patch.object(dmod, "_all_cuda_devices", return_value=[broken_cuda]),
+        patch.object(dmod, "_mps_info", return_value=DeviceInfo("mps", False)),
+    ):
         selected = resolve_device(preference="auto", supported=["cpu", "cuda"])
         assert selected == "cpu", f"Expected CPU fallback, got {selected}"
 
 
 def test_device_benchmark_cpu():
     from visionservex.runtime.device import device_benchmark
+
     result = device_benchmark("cpu", quick=True)
     assert result["ok"] is True
     assert result["avg_ms"] > 0
@@ -67,6 +74,7 @@ def test_device_benchmark_cpu():
 
 def test_device_to_dict_includes_sanity():
     from visionservex.runtime.device import available_devices
+
     for d in available_devices():
         data = d.to_dict()
         assert "sanity_ok" in data
@@ -76,6 +84,7 @@ def test_device_to_dict_includes_sanity():
 # ============================================================
 # Registry — grounded-sam2
 # ============================================================
+
 
 def test_grounded_sam2_wired():
     e = default_registry().get("grounded-sam2")
@@ -97,15 +106,18 @@ def test_grounded_sam2_metadata_has_submodels():
 # Concurrency — scheduler and backpressure
 # ============================================================
 
+
 def test_retry_after_in_busy_error_details(monkeypatch, tmp_path):
     """The BUSY error details must include retry_after_seconds."""
     monkeypatch.setenv("VISIONSERVEX_CACHE__CACHE_DIR", str(tmp_path))
     monkeypatch.setenv("VISIONSERVEX_RUNTIME__SERVER_BUSY_RETRY_AFTER_S", "3")
     s = reload_settings()
-    from visionservex.server.app import create_app
-    from fastapi.testclient import TestClient
-    from visionservex.runtime.scheduler import BackpressureError, RequestScheduler
     from contextlib import asynccontextmanager
+
+    from fastapi.testclient import TestClient
+
+    from visionservex.runtime.scheduler import BackpressureError, RequestScheduler
+    from visionservex.server.app import create_app
 
     app = create_app(s)
     client = TestClient(app)
@@ -124,6 +136,7 @@ def test_retry_after_in_busy_error_details(monkeypatch, tmp_path):
     mock_sched.reserve = _raise
 
     import visionservex.server.app as srv_app
+
     with patch.object(srv_app, "get_scheduler", return_value=mock_sched):
         buf.seek(0)
         r = client.post(
@@ -150,6 +163,7 @@ def test_config_has_new_runtime_fields():
 # ============================================================
 # ONNX export
 # ============================================================
+
 
 @pytest.mark.real_model
 def test_swinv2_onnx_export(tmp_path):
@@ -183,6 +197,7 @@ def test_export_unsupported_format_raises():
 # ============================================================
 # Grounded-SAM2 engine real smoke test
 # ============================================================
+
 
 @pytest.mark.real_model
 def test_grounded_sam2_real_pipeline():

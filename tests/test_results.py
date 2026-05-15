@@ -45,7 +45,9 @@ def test_mock_engine_returns_expected_kind(model_id, result_kind):
 
 def test_detection_to_coco():
     r = DetectionResult(
-        model_id="x", task="detect", image_size=(10, 10),
+        model_id="x",
+        task="detect",
+        image_size=(10, 10),
         detections=[Detection(box=Box(0, 0, 5, 5), score=0.9, label="cat", class_id=0)],
     )
     coco = r.to_coco()
@@ -56,7 +58,9 @@ def test_detection_to_coco():
 def test_segmentation_to_dict_strips_mask():
     mask = np.ones((4, 4), dtype=np.uint8)
     r = SegmentationResult(
-        model_id="x", task="segment", image_size=(4, 4),
+        model_id="x",
+        task="segment",
+        image_size=(4, 4),
         segments=[Segment(box=Box(0, 0, 4, 4), score=0.9, label="z", mask=mask)],
     )
     d = r.to_dict()

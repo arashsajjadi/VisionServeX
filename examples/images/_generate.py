@@ -53,10 +53,14 @@ def make_dog_like(path: Path) -> None:
     d = ImageDraw.Draw(img)
     d.ellipse([100, 200, 380, 380], outline=(120, 80, 40), width=3, fill=(180, 130, 80))  # body
     d.ellipse([300, 140, 440, 280], outline=(120, 80, 40), width=3, fill=(180, 130, 80))  # head
-    d.polygon([(320, 150), (340, 110), (360, 150)], fill=(150, 100, 60))                   # ear
-    d.ellipse([350, 190, 370, 210], fill=(20, 20, 20))                                     # eye
-    d.text((10, 10), "VisionServeX sample: dog-like (not a real dog)",
-           fill=(40, 40, 40), font=_font(14))
+    d.polygon([(320, 150), (340, 110), (360, 150)], fill=(150, 100, 60))  # ear
+    d.ellipse([350, 190, 370, 210], fill=(20, 20, 20))  # eye
+    d.text(
+        (10, 10),
+        "VisionServeX sample: dog-like (not a real dog)",
+        fill=(40, 40, 40),
+        font=_font(14),
+    )
     img.save(path, "JPEG", quality=88)
 
 

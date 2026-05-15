@@ -18,7 +18,7 @@ from typing import Any, Literal
 
 import yaml
 from platformdirs import user_cache_dir
-from pydantic import BaseModel, Field, IPvAnyAddress, field_validator
+from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -65,9 +65,7 @@ class CorsConfig(BaseModel):
     allowed_origins: list[str] = Field(default_factory=list)
     allow_credentials: bool = False
     allow_methods: list[str] = Field(default_factory=lambda: ["GET", "POST"])
-    allow_headers: list[str] = Field(
-        default_factory=lambda: ["Authorization", "Content-Type"]
-    )
+    allow_headers: list[str] = Field(default_factory=lambda: ["Authorization", "Content-Type"])
 
 
 class CacheConfig(BaseModel):
@@ -117,9 +115,9 @@ class ModelsConfig(BaseModel):
     """Behavior around model availability and downloads."""
 
     auto_pull: bool = False
-    auto_pull_policy: Literal[
-        "never", "easy_only", "registry_allowed", "all_auto_downloadable"
-    ] = "easy_only"
+    auto_pull_policy: Literal["never", "easy_only", "registry_allowed", "all_auto_downloadable"] = (
+        "easy_only"
+    )
     auto_pull_timeout_s: float = 600.0
     auto_pull_max_size_gb: float = 5.0
     auto_pull_require_auth: bool = True
@@ -129,9 +127,7 @@ class ModelsConfig(BaseModel):
 class TunnelConfig(BaseModel):
     provider: Literal["cloudflare", "none"] = "cloudflare"
     tunnel_name: str = "visionservex"
-    config_dir: Path = Field(
-        default_factory=lambda: Path.home() / ".visionservex" / "tunnel"
-    )
+    config_dir: Path = Field(default_factory=lambda: Path.home() / ".visionservex" / "tunnel")
     require_auth_for_public: bool = True
 
 
@@ -192,9 +188,7 @@ class Settings(BaseSettings):
                 "Anyone able to reach the server can run inference."
             )
         if self.auth.enabled and not self.auth.api_key:
-            warnings.append(
-                "AUTH IS ENABLED BUT API_KEY IS EMPTY. All requests will be rejected."
-            )
+            warnings.append("AUTH IS ENABLED BUT API_KEY IS EMPTY. All requests will be rejected.")
         if self.server.host == "0.0.0.0" and not self.auth.enabled:
             warnings.append(
                 "SERVER IS BOUND TO 0.0.0.0 WITHOUT AUTHENTICATION. "
@@ -231,15 +225,15 @@ def reload_settings(**overrides: Any) -> Settings:
 
 
 __all__ = [
-    "Settings",
-    "ServerConfig",
     "AuthConfig",
-    "LimitsConfig",
-    "CorsConfig",
     "CacheConfig",
-    "RuntimeConfig",
+    "CorsConfig",
     "InputsConfig",
+    "LimitsConfig",
     "ModelsConfig",
+    "RuntimeConfig",
+    "ServerConfig",
+    "Settings",
     "TunnelConfig",
     "get_settings",
     "reload_settings",

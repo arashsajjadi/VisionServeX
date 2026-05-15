@@ -85,9 +85,7 @@ def generate_config(*, tunnel_name: str, hostname: str) -> str:
     settings = get_settings()
     port = settings.server.port
 
-    credentials_hint = (
-        f"~/.cloudflared/<TUNNEL_UUID>.json (set automatically by `cloudflared tunnel create {tunnel_name}`)"
-    )
+    credentials_hint = f"~/.cloudflared/<TUNNEL_UUID>.json (set automatically by `cloudflared tunnel create {tunnel_name}`)"
     payload = {
         "tunnel": tunnel_name,
         "credentials-file": credentials_hint,
@@ -144,8 +142,8 @@ def public_checklist(*, auth_enabled: bool) -> list[str]:
 
 __all__ = [
     "CloudflaredNotFound",
-    "cloudflared_install_hint",
     "cloudflared_doctor",
+    "cloudflared_install_hint",
     "generate_config",
     "public_checklist",
 ]

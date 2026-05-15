@@ -138,6 +138,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
 # ---------- auth dep ----------
 
+
 async def _require_auth(request: Request) -> None:
     settings: Settings = request.app.state.settings
     if not settings.auth.enabled:
@@ -150,6 +151,7 @@ async def _require_auth(request: Request) -> None:
 
 
 # ---------- routes ----------
+
 
 def _register_routes(app: FastAPI) -> None:
     @app.get("/health", response_model=HealthResponse, tags=["meta"])
@@ -237,8 +239,9 @@ def _register_routes(app: FastAPI) -> None:
             try:
                 path = await asyncio.get_running_loop().run_in_executor(None, download, entry)
             except ManualDownloadRequired as exc:
-                raise unprocessable("MANUAL_DOWNLOAD_REQUIRED", str(exc),
-                                    hint=f"see {entry.upstream_url}")
+                raise unprocessable(
+                    "MANUAL_DOWNLOAD_REQUIRED", str(exc), hint=f"see {entry.upstream_url}"
+                )
             except DownloadError as exc:
                 raise unprocessable("DOWNLOAD_FAILED", str(exc))
             return {
@@ -324,7 +327,11 @@ def _register_routes(app: FastAPI) -> None:
         wait_for_download: bool = Query(default=True),
     ):
         return await _predict_endpoint(
-            request, image, model_id, None, expected="detect",
+            request,
+            image,
+            model_id,
+            None,
+            expected="detect",
             wait_for_download=wait_for_download,
         )
 
@@ -336,7 +343,11 @@ def _register_routes(app: FastAPI) -> None:
         wait_for_download: bool = Query(default=True),
     ):
         return await _predict_endpoint(
-            request, image, model_id, None, expected="segment",
+            request,
+            image,
+            model_id,
+            None,
+            expected="segment",
             wait_for_download=wait_for_download,
         )
 
@@ -348,7 +359,11 @@ def _register_routes(app: FastAPI) -> None:
         wait_for_download: bool = Query(default=True),
     ):
         return await _predict_endpoint(
-            request, image, model_id, None, expected="pose",
+            request,
+            image,
+            model_id,
+            None,
+            expected="pose",
             wait_for_download=wait_for_download,
         )
 
@@ -360,7 +375,11 @@ def _register_routes(app: FastAPI) -> None:
         wait_for_download: bool = Query(default=True),
     ):
         return await _predict_endpoint(
-            request, image, model_id, None, expected="classify",
+            request,
+            image,
+            model_id,
+            None,
+            expected="classify",
             wait_for_download=wait_for_download,
         )
 
@@ -373,8 +392,13 @@ def _register_routes(app: FastAPI) -> None:
         await _require_auth(request)
         pil, warns = await _read_json_image(request, body)
         return await _run_and_wire(
-            request, body.model_id, pil, body.prompts, expected="open_vocab_detect",
-            warns=warns, wait_for_download=wait_for_download,
+            request,
+            body.model_id,
+            pil,
+            body.prompts,
+            expected="open_vocab_detect",
+            warns=warns,
+            wait_for_download=wait_for_download,
         )
 
     @app.post("/grounded-segment", response_model=PredictionResponse, tags=["inference"])
@@ -386,8 +410,13 @@ def _register_routes(app: FastAPI) -> None:
         await _require_auth(request)
         pil, warns = await _read_json_image(request, body)
         return await _run_and_wire(
-            request, body.model_id, pil, body.prompts, expected="grounded_segment",
-            warns=warns, wait_for_download=wait_for_download,
+            request,
+            body.model_id,
+            pil,
+            body.prompts,
+            expected="grounded_segment",
+            warns=warns,
+            wait_for_download=wait_for_download,
         )
 
     @app.post("/batch-predict", response_model=list[PredictionResponse], tags=["inference"])
@@ -404,8 +433,10 @@ def _register_routes(app: FastAPI) -> None:
             if isinstance(res, PredictionResponse):
                 out.append(res)
             else:
-                raise unprocessable("DOWNLOAD_REQUIRED",
-                                    "batch endpoint requires preloaded models; pull weights first")
+                raise unprocessable(
+                    "DOWNLOAD_REQUIRED",
+                    "batch endpoint requires preloaded models; pull weights first",
+                )
         return out
 
     @app.post("/predict/annotated", tags=["inference"])
@@ -417,8 +448,9 @@ def _register_routes(app: FastAPI) -> None:
         await _require_auth(request)
         pil, _ = await _read_upload(request, image)
         settings: Settings = request.app.state.settings
-        result = await _do_predict(request, model_id, pil, None,
-                                   auto_pull_allowed=settings.models.auto_pull)
+        result = await _do_predict(
+            request, model_id, pil, None, auto_pull_allowed=settings.models.auto_pull
+        )
         if not isinstance(result, BaseResult):
             raise unprocessable("DOWNLOAD_REQUIRED", "weights missing; pull first")
         annotated = result.plot(pil)
@@ -437,6 +469,7 @@ def _register_routes(app: FastAPI) -> None:
 
 # ---------- predict helpers ----------
 
+
 async def _predict_endpoint(
     request: Request,
     image: UploadFile,
@@ -450,7 +483,12 @@ async def _predict_endpoint(
     pil, warns = await _read_upload(request, image)
     parsed = _parse_prompts(prompts)
     return await _run_and_wire(
-        request, model_id, pil, parsed, expected=expected, warns=warns,
+        request,
+        model_id,
+        pil,
+        parsed,
+        expected=expected,
+        warns=warns,
         wait_for_download=wait_for_download,
     )
 
@@ -497,14 +535,20 @@ async def _run_and_wire(
                 progress_url=f"/jobs/{job.job_id}",
             )
 
-    result = await _do_predict(request, model_id, image, prompts, auto_pull_allowed=auto_pull_allowed)
+    result = await _do_predict(
+        request, model_id, image, prompts, auto_pull_allowed=auto_pull_allowed
+    )
     return _wire_response(request, result, warns or [])
 
 
 def _auto_pull_allowed(settings: Settings, entry) -> bool:
     if not settings.models.auto_pull:
         return False
-    if settings.server.public_mode and settings.models.auto_pull_require_auth and not settings.auth.enabled:
+    if (
+        settings.server.public_mode
+        and settings.models.auto_pull_require_auth
+        and not settings.auth.enabled
+    ):
         return False
     policy = settings.models.auto_pull_policy
     if policy == "never":
@@ -525,26 +569,41 @@ def _start_pull_job(entry) -> Job:
 
     def _runner() -> None:
         try:
+
             def _cb(ev: DownloadProgress) -> None:
-                store.update(job.job_id,
-                             status=("downloading" if ev.phase == "downloading" else
-                                     "verifying" if ev.phase == "verifying" else
-                                     "checking_dependencies" if ev.phase == "starting" else
-                                     "loading_model" if ev.phase == "loading" else
-                                     "downloading"),
-                             message=ev.message, progress=ev.to_dict())
+                store.update(
+                    job.job_id,
+                    status=(
+                        "downloading"
+                        if ev.phase == "downloading"
+                        else "verifying"
+                        if ev.phase == "verifying"
+                        else "checking_dependencies"
+                        if ev.phase == "starting"
+                        else "loading_model"
+                        if ev.phase == "loading"
+                        else "downloading"
+                    ),
+                    message=ev.message,
+                    progress=ev.to_dict(),
+                )
+
             path = download(entry, progress=_cb)
-            store.update(job.job_id, status="completed", message="ok",
-                         result={"path": str(path)})
+            store.update(job.job_id, status="completed", message="ok", result={"path": str(path)})
         except ManualDownloadRequired as exc:
-            store.update(job.job_id, status="failed",
-                         error={"code": "MANUAL_DOWNLOAD_REQUIRED", "message": str(exc)})
+            store.update(
+                job.job_id,
+                status="failed",
+                error={"code": "MANUAL_DOWNLOAD_REQUIRED", "message": str(exc)},
+            )
         except DownloadError as exc:
-            store.update(job.job_id, status="failed",
-                         error={"code": "DOWNLOAD_FAILED", "message": str(exc)})
+            store.update(
+                job.job_id, status="failed", error={"code": "DOWNLOAD_FAILED", "message": str(exc)}
+            )
         except Exception as exc:
-            store.update(job.job_id, status="failed",
-                         error={"code": "INTERNAL_ERROR", "message": str(exc)})
+            store.update(
+                job.job_id, status="failed", error={"code": "INTERNAL_ERROR", "message": str(exc)}
+            )
 
     t = threading.Thread(target=_runner, daemon=True, name=f"pull-{entry.id}")
     t.start()
@@ -589,8 +648,11 @@ async def _do_predict(
         metrics.error("TIMEOUT")
         raise unprocessable("TIMEOUT", str(exc), hint="raise request_timeout_s in config")
     except MissingDependencyError as exc:
-        raise unprocessable("ENGINE_UNAVAILABLE", str(exc),
-                            hint=f"install: {exc.install_hint}" if exc.install_hint else "")
+        raise unprocessable(
+            "ENGINE_UNAVAILABLE",
+            str(exc),
+            hint=f"install: {exc.install_hint}" if exc.install_hint else "",
+        )
 
 
 def _wire_response(request: Request, result: BaseResult, warns: list[str]) -> PredictionResponse:
@@ -621,8 +683,9 @@ async def _read_upload(request: Request, upload: UploadFile) -> tuple[Image.Imag
     try:
         validate_mime_type(upload.content_type, settings.inputs)
     except InputValidationError as exc:
-        raise unprocessable("BAD_MIME_TYPE", str(exc),
-                            hint=f"allowed: {settings.inputs.allowed_mime_types}")
+        raise unprocessable(
+            "BAD_MIME_TYPE", str(exc), hint=f"allowed: {settings.inputs.allowed_mime_types}"
+        )
     data = await upload.read()
     try:
         validate_image_bytes(data, settings.limits)
@@ -699,6 +762,7 @@ def _parse_prompts(prompts: str | None) -> list[str] | None:
     if prompts.startswith("["):
         try:
             import json
+
             data = json.loads(prompts)
             if isinstance(data, list):
                 return [str(x) for x in data]

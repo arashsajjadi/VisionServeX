@@ -4,15 +4,13 @@
 
 from __future__ import annotations
 
-import io
-
 import numpy as np
 import pytest
 from PIL import Image
 
+from visionservex.config import reload_settings
 from visionservex.engines.rfdetr import RFDETREngine, _sv_to_detections, _sv_to_segments
 from visionservex.registry import default_registry
-from visionservex.config import reload_settings
 
 
 def _img(size=(64, 64), color="red") -> Image.Image:
@@ -20,6 +18,7 @@ def _img(size=(64, 64), color="red") -> Image.Image:
 
 
 # ---- registry metadata ----
+
 
 def test_rfdetr_nano_in_registry():
     reg = default_registry()
@@ -42,7 +41,13 @@ def test_rfdetr_seg_nano_in_registry():
 
 def test_rfdetr_models_have_required_fields():
     reg = default_registry()
-    for model_id in ("rfdetr-nano", "rfdetr-small", "rfdetr-base", "rfdetr-seg-nano", "rfdetr-seg-small"):
+    for model_id in (
+        "rfdetr-nano",
+        "rfdetr-small",
+        "rfdetr-base",
+        "rfdetr-seg-nano",
+        "rfdetr-seg-small",
+    ):
         e = reg.get(model_id)
         assert e.license == "Apache-2.0"
         assert e.upstream_url
@@ -52,8 +57,10 @@ def test_rfdetr_models_have_required_fields():
 
 # ---- sv helper functions ----
 
+
 class _FakeDetections:
     """Minimal simulation of supervision.Detections."""
+
     def __init__(self, xyxy, conf, class_ids, class_names=None, mask=None):
         self.xyxy = np.array(xyxy)
         self.confidence = np.array(conf)
@@ -117,14 +124,17 @@ def test_sv_to_segments_no_mask():
 
 # ---- stub behavior (without rfdetr installed) ----
 
+
 def test_rfdetr_engine_missing_dep_without_mock_fallback(monkeypatch, tmp_path):
     """Without rfdetr installed, the engine must raise MissingDependencyError."""
     import sys
+
     monkeypatch.setitem(sys.modules, "rfdetr", None)  # block import
     monkeypatch.setenv("VISIONSERVEX_MODELS__ALLOW_MOCK_FALLBACK", "false")
     monkeypatch.setenv("VISIONSERVEX_CACHE__CACHE_DIR", str(tmp_path))
     reload_settings()
     from visionservex.engines.base import MissingDependencyError
+
     e = default_registry().get("rfdetr-nano")
     engine = RFDETREngine(e)
     with pytest.raises(MissingDependencyError):
@@ -134,6 +144,7 @@ def test_rfdetr_engine_missing_dep_without_mock_fallback(monkeypatch, tmp_path):
 def test_rfdetr_engine_mock_fallback_when_allowed(monkeypatch, tmp_path):
     """With mock_fallback=true, a missing rfdetr gives mock output with warning."""
     import sys
+
     monkeypatch.setitem(sys.modules, "rfdetr", None)  # block import
     monkeypatch.setenv("VISIONSERVEX_MODELS__ALLOW_MOCK_FALLBACK", "true")
     monkeypatch.setenv("VISIONSERVEX_CACHE__CACHE_DIR", str(tmp_path))
@@ -144,10 +155,18 @@ def test_rfdetr_engine_mock_fallback_when_allowed(monkeypatch, tmp_path):
     assert engine._loaded
     result = engine.predict(_img())
     # Fallback: result should be a detection result (mock output) or have warning
-    assert result.kind in {"detection", "classification", "segmentation", "pose", "obb", "open_vocab"}
+    assert result.kind in {
+        "detection",
+        "classification",
+        "segmentation",
+        "pose",
+        "obb",
+        "open_vocab",
+    }
 
 
 # ---- real model smoke test (requires rfdetr installed) ----
+
 
 @pytest.mark.real_model
 def test_rfdetr_nano_real_inference():

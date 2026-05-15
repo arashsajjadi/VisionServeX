@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Callable
 from pathlib import Path
-from typing import BinaryIO, Callable
-
+from typing import BinaryIO
 
 _CHUNK = 1024 * 1024
 

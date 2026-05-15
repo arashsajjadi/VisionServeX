@@ -70,6 +70,8 @@ hf = [
     "torch>=2.1",
     "torchvision>=0.16",
     "safetensors>=0.4",
+    # scipy is required by OneFormer via HF Transformers (OneFormerLoss).
+    "scipy>=1.10",
 ]
 rfdetr = [
     "rfdetr>=1.6",
@@ -152,6 +154,13 @@ ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["B011"]
+# Typer/Click require function calls in argument defaults (B008) — this is
+# the standard pattern for the framework and cannot be refactored away.
+"src/visionservex/cli/*" = ["B008"]
+# FastAPI/Starlette File() calls in endpoint signatures are also standard.
+# B904: the server deliberately does not chain HTTP-layer exceptions — raising
+# without `from` is intentional to hide internal details from HTTP clients.
+"src/visionservex/server/*" = ["B008", "B904"]
 
 [tool.mypy]
 python_version = "3.10"

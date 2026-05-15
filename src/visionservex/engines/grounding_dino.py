@@ -13,7 +13,8 @@ sets ``VISIONSERVEX_MODELS__ALLOW_MOCK_FALLBACK=true``.
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from PIL import Image
 
@@ -27,6 +28,9 @@ from visionservex.engines._stub import StubEngine, assert_modules
 from visionservex.engines.base import MissingDependencyError
 from visionservex.engines.registry import register_engine
 from visionservex.registry import ModelEntry
+from visionservex.utils.logging import get_logger
+
+_log = get_logger(__name__)
 
 
 class GroundingDINOEngine(StubEngine):
@@ -116,9 +120,7 @@ class GroundingDINOEngine(StubEngine):
             prompts = ["object"]
         prompt_text = ". ".join(p.strip().rstrip(".") for p in prompts) + "."
 
-        inputs = self._processor(
-            images=image, text=prompt_text, return_tensors="pt"
-        )
+        inputs = self._processor(images=image, text=prompt_text, return_tensors="pt")
         # Move inputs to the model's device and cast float tensors to the model dtype.
         # Token tensors (input_ids, attention_mask, token_type_ids) must stay integer —
         # we only cast fp tensors.
@@ -139,7 +141,9 @@ class GroundingDINOEngine(StubEngine):
                 if "input type" in str(exc).lower() or "dtype" in str(exc).lower():
                     _log.warning(
                         "dtype mismatch on %s fp%s; retrying on CPU fp32. Error: %s",
-                        model_device, str(model_dtype).replace("torch.", ""), exc,
+                        model_device,
+                        str(model_dtype).replace("torch.", ""),
+                        exc,
                     )
                     inputs_cpu = {k: v.cpu().float() for k, v in inputs.items()}
                     self._model.cpu()
@@ -175,7 +179,7 @@ class GroundingDINOEngine(StubEngine):
             labels_iter = first.get("text_labels", [])
 
         detections: list[Detection] = []
-        for box, score, label in zip(first["boxes"], first["scores"], labels_iter):
+        for box, score, label in zip(first["boxes"], first["scores"], labels_iter, strict=False):
             xyxy = [float(v) for v in (box.tolist() if hasattr(box, "tolist") else box)]
             detections.append(
                 Detection(

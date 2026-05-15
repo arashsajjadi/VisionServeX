@@ -11,19 +11,18 @@ from __future__ import annotations
 import threading
 import time
 from collections import OrderedDict
-from typing import Optional
 
 from visionservex.config import get_settings
 from visionservex.utils.logging import get_logger
 
 if False:  # type-checking only; avoid runtime circular import
-    from visionservex.core.model import VisionModel  # noqa: F401
+    from visionservex.core.model import VisionModel
 
 _log = get_logger(__name__)
 
 
 class ModelCache:
-    def __init__(self, max_loaded: Optional[int] = None) -> None:
+    def __init__(self, max_loaded: int | None = None) -> None:
         settings = get_settings()
         self.max_loaded = max_loaded or settings.runtime.max_loaded_models
         self.idle_unload_s = settings.runtime.model_idle_unload_s
@@ -38,8 +37,9 @@ class ModelCache:
         with self._lock:
             return [e.info() for e in self._items.values()]
 
-    def get(self, model_id: str) -> "VisionModel":
+    def get(self, model_id: str) -> VisionModel:
         from visionservex.core.model import VisionModel as _VisionModel
+
         with self._lock:
             entry = self._items.get(model_id)
             if entry is not None:
@@ -73,7 +73,8 @@ class ModelCache:
         with self._lock:
             now = time.monotonic()
             to_remove = [
-                mid for mid, entry in self._items.items()
+                mid
+                for mid, entry in self._items.items()
                 if self.idle_unload_s > 0 and (now - entry.last_used) > self.idle_unload_s
             ]
             for mid in to_remove:
@@ -92,9 +93,9 @@ class ModelCache:
 
 
 class _CacheEntry:
-    __slots__ = ("model", "loaded_at", "last_used")
+    __slots__ = ("last_used", "loaded_at", "model")
 
-    def __init__(self, model: "VisionModel") -> None:
+    def __init__(self, model: VisionModel) -> None:
         self.model = model
         self.loaded_at = time.monotonic()
         self.last_used = self.loaded_at

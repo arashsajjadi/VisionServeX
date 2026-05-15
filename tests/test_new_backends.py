@@ -20,6 +20,7 @@ def _img(size=(128, 128), color="gray") -> Image.Image:
 # Registry metadata
 # ============================================================
 
+
 def test_swinv2_tiny_in_registry():
     e = default_registry().get("swinv2-tiny")
     assert e.task == "classify"
@@ -60,14 +61,17 @@ def test_sam2_hiera_tiny_now_wired():
 # SwinV2 engine
 # ============================================================
 
+
 def test_swinv2_engine_missing_dep_without_fallback(monkeypatch, tmp_path):
     import sys
+
     monkeypatch.setitem(sys.modules, "transformers", None)
     monkeypatch.setenv("VISIONSERVEX_MODELS__ALLOW_MOCK_FALLBACK", "false")
     monkeypatch.setenv("VISIONSERVEX_CACHE__CACHE_DIR", str(tmp_path))
     reload_settings()
     from visionservex.engines.base import MissingDependencyError
     from visionservex.engines.swinv2 import SwinV2Engine
+
     e = default_registry().get("swinv2-tiny")
     engine = SwinV2Engine(e)
     with pytest.raises(MissingDependencyError):
@@ -78,6 +82,7 @@ def test_swinv2_engine_missing_dep_without_fallback(monkeypatch, tmp_path):
 def test_swinv2_tiny_real_inference():
     pytest.importorskip("transformers")
     from visionservex.engines.swinv2 import SwinV2Engine
+
     e = default_registry().get("swinv2-tiny")
     engine = SwinV2Engine(e)
     engine.load(device="cpu", precision="fp32")
@@ -92,6 +97,7 @@ def test_swinv2_tiny_real_inference():
 def test_swinv2_classification_result_schema():
     pytest.importorskip("transformers")
     from visionservex import VisionModel
+
     m = VisionModel("swinv2-tiny", device="cpu")
     r = m.predict(_img(size=(256, 256)))
     assert r.kind == "classification"
@@ -99,17 +105,19 @@ def test_swinv2_classification_result_schema():
     assert len(r.top_k) >= 1
     for label, score in r.top_k:
         assert isinstance(label, str)
-        assert 0.0 <= float(score)
+        assert float(score) >= 0.0
 
 
 # ============================================================
 # SAM HF engine
 # ============================================================
 
+
 @pytest.mark.real_model
 def test_sam_hf_point_prompt():
     pytest.importorskip("transformers")
     from visionservex.engines.sam_hf import SAMHFEngine
+
     e = default_registry().get("sam-vit-base")
     engine = SAMHFEngine(e)
     engine.load(device="cpu", precision="fp32")
@@ -128,6 +136,7 @@ def test_sam_hf_point_prompt():
 def test_sam_hf_box_prompt():
     pytest.importorskip("transformers")
     from visionservex import VisionModel
+
     m = VisionModel("sam-vit-base", device="cpu")
     r = m.predict(_img(size=(256, 256)), boxes=[[30, 30, 120, 120]])
     assert r.kind == "segmentation"
@@ -140,6 +149,7 @@ def test_sam_hf_default_prompt():
     """Without any prompts, SAM should still return at least one mask."""
     pytest.importorskip("transformers")
     from visionservex import VisionModel
+
     m = VisionModel("sam-vit-base", device="cpu")
     r = m.predict(_img(size=(128, 128)))
     assert len(r.segments) >= 1
@@ -149,10 +159,12 @@ def test_sam_hf_default_prompt():
 # Grounded SAM
 # ============================================================
 
+
 @pytest.mark.real_model
 def test_grounded_sam_pipeline():
     pytest.importorskip("transformers")
     from visionservex import VisionModel
+
     m = VisionModel("grounded-sam", device="cpu", precision="fp32")
     r = m.predict(_img(size=(256, 256), color="green"), prompts=["green object"])
     assert r.task == "grounded_segment"
@@ -165,10 +177,12 @@ def test_grounded_sam_pipeline():
 # Grounding DINO fp16 fallback test
 # ============================================================
 
+
 @pytest.mark.real_model
 def test_grounding_dino_cpu_fp32():
     pytest.importorskip("transformers")
     from visionservex import VisionModel
+
     m = VisionModel("grounding-dino-tiny", device="cpu", precision="fp32")
     r = m.predict(_img(size=(320, 240)), prompts=["object"])
     assert r.kind == "open_vocab"

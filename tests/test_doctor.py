@@ -11,7 +11,6 @@ from typer.testing import CliRunner
 from visionservex.cli.main import app
 from visionservex.utils.system import collect, probe_dependencies
 
-
 runner = CliRunner()
 
 
@@ -28,7 +27,7 @@ def test_probe_dependencies_includes_known_packages():
     assert "torch" in deps
     assert "transformers" in deps
     assert "huggingface_hub" in deps
-    for name, info in deps.items():
+    for _name, info in deps.items():
         assert "installed" in info
         assert info["installed"] in (True, False)
 

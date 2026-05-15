@@ -8,7 +8,8 @@ output so the rest of the system can be exercised end-to-end.
 from __future__ import annotations
 
 import hashlib
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
 from PIL import Image
@@ -203,7 +204,9 @@ def _fake_pose(rng: np.random.Generator, w: int, h: int) -> list[PoseInstance]:
 def _fake_obb(rng: np.random.Generator, w: int, h: int) -> list[OrientedDetection]:
     return [
         OrientedDetection(
-            box=OrientedBox(cx=w / 2, cy=h / 2, w=w / 4, h=h / 5, theta=float(rng.uniform(0, 3.14))),
+            box=OrientedBox(
+                cx=w / 2, cy=h / 2, w=w / 4, h=h / 5, theta=float(rng.uniform(0, 3.14))
+            ),
             score=0.81,
             label="object",
             class_id=0,

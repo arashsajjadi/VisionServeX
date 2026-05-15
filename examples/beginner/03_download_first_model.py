@@ -35,7 +35,9 @@ def main() -> None:
     def _cb(ev: DownloadProgress) -> None:
         if ev.phase == "downloading" and ev.total_bytes:
             pct = ev.percent
-            print(f"  {pct:5.1f}%  ({ev.downloaded_bytes / 1e6:.1f} MB / {ev.total_bytes / 1e6:.1f} MB)")
+            print(
+                f"  {pct:5.1f}%  ({ev.downloaded_bytes / 1e6:.1f} MB / {ev.total_bytes / 1e6:.1f} MB)"
+            )
 
     try:
         path = download(entry, progress=_cb)

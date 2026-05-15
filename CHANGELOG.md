@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-05-15
+
+### Fixed (CI fix pass)
+- **Lint**: applied `ruff check . --fix` + `ruff format .`; fixed 165 auto-fixable
+  violations; manually fixed F821 (`_log` undefined in `grounding_dino.py`, `Path`
+  undefined in `swinv2.py`), B017 (blind except → specific exception), B904 (added
+  per-file ignore for `server/` where exception chaining is intentionally omitted),
+  B008 (Typer/FastAPI argument defaults, per-file ignore for `cli/` and `server/`),
+  SIM102 (combined nested ifs).
+- **Test markers**: `conftest.py` now skips `@pytest.mark.real_model`, `@pytest.mark.gpu`,
+  and `@pytest.mark.slow` tests unless `VISION_SERVEX_RUN_REAL_MODEL_TESTS=1` or
+  `VISION_SERVEX_RUN_GPU_TESTS=1` is set. This fixes the CI matrix failure caused by
+  OneFormer tests trying to download weights.
+- **OneFormer scipy**: `scipy>=1.10` added to `[project.optional-dependencies].hf`
+  since `OneFormerLoss` requires scipy via HF Transformers.
+- **CI workflow**: `pip install -e ".[dev,server,hf]"` in test matrix (was `[dev,server]`);
+  `VISION_SERVEX_RUN_REAL_MODEL_TESTS` not set, so real model tests are correctly skipped.
+- **`engines/__init__.py`**: added `# ruff: noqa: F401` file-level directive; rewrote
+  to single-import-per-line style to survive ruff auto-formatting.
+- **Git hygiene**: removed stale `outputs/swinv2-tiny.onnx.data` file.
+
 ## [0.5.0] - 2026-05-15
 
 ### Added

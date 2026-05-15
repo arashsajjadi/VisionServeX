@@ -7,7 +7,7 @@ engine for a registry entry. Unknown or unavailable backends raise a
 
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 
 from visionservex.engines.base import BaseEngine, EngineError
 from visionservex.registry import ModelEntry
@@ -27,10 +27,9 @@ def build_engine(entry: ModelEntry) -> BaseEngine:
         factory = _FACTORIES[entry.engine]
     except KeyError as exc:
         raise EngineError(
-            f"no engine registered for {entry.engine!r}. "
-            f"Available engines: {sorted(_FACTORIES)}"
+            f"no engine registered for {entry.engine!r}. Available engines: {sorted(_FACTORIES)}"
         ) from exc
     return factory(entry)
 
 
-__all__ = ["register_engine", "build_engine"]
+__all__ = ["build_engine", "register_engine"]

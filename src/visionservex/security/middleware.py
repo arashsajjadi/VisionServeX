@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict, deque
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -25,7 +25,7 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         start = time.perf_counter()
         try:
             response = await call_next(request)
-        except Exception as exc:  # pragma: no cover - defensive
+        except Exception:  # pragma: no cover - defensive
             metrics.error("unhandled")
             _log.exception("unhandled error during request %s", rid)
             return JSONResponse(
@@ -63,7 +63,13 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
             try:
                 size = int(cl)
             except ValueError:
-                return _err(request, 400, "BAD_CONTENT_LENGTH", "invalid content-length", "send a valid integer")
+                return _err(
+                    request,
+                    400,
+                    "BAD_CONTENT_LENGTH",
+                    "invalid content-length",
+                    "send a valid integer",
+                )
             if size > self.limits.max_upload_bytes:
                 return _err(
                     request,
@@ -122,7 +128,7 @@ def _err(request: Request, status: int, code: str, message: str, hint: str) -> J
 
 
 __all__ = [
-    "RequestContextMiddleware",
     "BodySizeLimitMiddleware",
     "RateLimitMiddleware",
+    "RequestContextMiddleware",
 ]

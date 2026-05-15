@@ -57,4 +57,4 @@ def writeable(path: Path | str) -> bool:
         return False
 
 
-__all__ = ["PathTraversalError", "safe_join", "ensure_dir", "is_within", "writeable"]
+__all__ = ["PathTraversalError", "ensure_dir", "is_within", "safe_join", "writeable"]

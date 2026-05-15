@@ -16,8 +16,8 @@ Returns dataclasses so callers can format CLI/JSON output uniformly.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 from visionservex.registry import ModelEntry, Task, default_registry
 from visionservex.runtime.device import DeviceInfo, available_devices, best_device
@@ -69,14 +69,18 @@ _STATUS_SCORE = {
 _IMPL_SCORE = {"wired": 5.0, "partial": 3.0, "stub": 1.0}
 
 
-def _device_score(entry: ModelEntry, devices: list[DeviceInfo], vram_hint: float | None) -> tuple[float, list[str]]:
+def _device_score(
+    entry: ModelEntry, devices: list[DeviceInfo], vram_hint: float | None
+) -> tuple[float, list[str]]:
     available = {d.name for d in devices if d.available}
     can_run = bool(set(entry.supported_devices) & available)
     reasons: list[str] = []
     score = 0.0
     if can_run:
         score += 3.0
-        reasons.append(f"runs on available device(s): {sorted(set(entry.supported_devices) & available)}")
+        reasons.append(
+            f"runs on available device(s): {sorted(set(entry.supported_devices) & available)}"
+        )
     else:
         score -= 5.0
         reasons.append(f"none of supported devices {entry.supported_devices} are available")
@@ -169,4 +173,4 @@ def first_beginner_pick(*, task: Task | str | None = None) -> ModelEntry | None:
     return recs[0].entry if recs else None
 
 
-__all__ = ["Recommendation", "recommend", "first_beginner_pick"]
+__all__ = ["Recommendation", "first_beginner_pick", "recommend"]

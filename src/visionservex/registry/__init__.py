@@ -13,13 +13,13 @@ from visionservex.registry.registry import (
 )
 
 __all__ = [
+    "Difficulty",
+    "DownloadType",
+    "ImplementationStatus",
     "ModelEntry",
     "ModelRegistry",
     "RegistryError",
-    "default_registry",
-    "Task",
     "Status",
-    "ImplementationStatus",
-    "Difficulty",
-    "DownloadType",
+    "Task",
+    "default_registry",
 ]

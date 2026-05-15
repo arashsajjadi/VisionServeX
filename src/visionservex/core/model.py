@@ -10,14 +10,15 @@ behind a single object.
 from __future__ import annotations
 
 import time
+from collections.abc import Iterable, Sequence
 from pathlib import Path
-from typing import Any, Iterable, Sequence
+from typing import Any
 
 from PIL import Image
 
 from visionservex.config import get_settings
 from visionservex.core.results import BaseResult
-from visionservex.engines.base import BaseEngine, MissingDependencyError
+from visionservex.engines.base import BaseEngine
 from visionservex.engines.registry import build_engine
 from visionservex.registry import ModelEntry, default_registry
 from visionservex.runtime.device import resolve_device
@@ -61,8 +62,7 @@ class VisionModel:
         self.entry: ModelEntry = default_registry().get(model_id)
         if task is not None and task != self.entry.task:
             raise ValueError(
-                f"model {model_id!r} is registered for task {self.entry.task!r}, "
-                f"not {task!r}"
+                f"model {model_id!r} is registered for task {self.entry.task!r}, not {task!r}"
             )
 
         chosen_device = resolve_device(
@@ -119,9 +119,7 @@ class VisionModel:
             self._cache_path = str(path)
             self._model_loaded_from = self.entry.download_type
         except DownloadError as exc:
-            raise RuntimeError(
-                f"could not auto-pull weights for {self.entry.id!r}: {exc}"
-            ) from exc
+            raise RuntimeError(f"could not auto-pull weights for {self.entry.id!r}: {exc}") from exc
 
     def _ensure_loaded(self) -> None:
         if not self._loaded:
@@ -154,7 +152,9 @@ class VisionModel:
         result.task = self.entry.task
         result.device = self.device
         result.precision = self.precision
-        result.backend = getattr(self.engine, "backend_label", self.entry.backend) or self.entry.backend
+        result.backend = (
+            getattr(self.engine, "backend_label", self.entry.backend) or self.entry.backend
+        )
         result.model_loaded_from = self._model_loaded_from
         result.cache_path = self._cache_path
         result.image_size = pil.size
@@ -236,9 +236,13 @@ class VisionModel:
                 raise ValueError("image pixel area exceeds max_image_pixels")
             return image.convert("RGB") if image.mode != "RGB" else image
         if isinstance(image, (bytes, bytearray)):
-            return open_safe(bytes(image), max_pixels=limits.max_image_pixels, max_dim=limits.max_image_dim)
+            return open_safe(
+                bytes(image), max_pixels=limits.max_image_pixels, max_dim=limits.max_image_dim
+            )
         if isinstance(image, (str, Path)):
-            return open_safe(Path(image), max_pixels=limits.max_image_pixels, max_dim=limits.max_image_dim)
+            return open_safe(
+                Path(image), max_pixels=limits.max_image_pixels, max_dim=limits.max_image_dim
+            )
         raise TypeError(f"unsupported image input type: {type(image).__name__}")
 
 

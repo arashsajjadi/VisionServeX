@@ -15,7 +15,9 @@ Supported model IDs:
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from pathlib import Path
+from typing import Any
 
 from PIL import Image
 
@@ -53,6 +55,7 @@ class SwinV2Engine(StubEngine):
             )
         # Trigger download first
         from visionservex.runtime.downloads import download
+
         download(self.entry)
 
         import torch  # type: ignore
@@ -129,7 +132,7 @@ class SwinV2Engine(StubEngine):
         probs = self._torch.softmax(logits.float(), dim=-1)
         top = self._torch.topk(probs, min(top_k, len(probs)))
         results = []
-        for idx, score in zip(top.indices.tolist(), top.values.tolist()):
+        for idx, score in zip(top.indices.tolist(), top.values.tolist(), strict=False):
             label = self._id2label.get(idx, f"class_{idx}")
             results.append((label, float(score)))
 
@@ -150,8 +153,8 @@ class SwinV2Engine(StubEngine):
     def postprocess(self, raw: Any, *, image: Any, **kwargs: Any) -> BaseResult:
         return self._mock.postprocess(raw, image=image, **kwargs)
 
-    def export(self, format: str, output_path) -> "Path":
-        from pathlib import Path
+    def export(self, format: str, output_path) -> Path:
+
         out = Path(output_path)
         if format.lower() not in {"onnx"}:
             raise NotImplementedError(
@@ -159,9 +162,7 @@ class SwinV2Engine(StubEngine):
                 "Only 'onnx' is supported for SwinV2."
             )
         if not self._real_ready:
-            raise RuntimeError(
-                "model must be loaded before export. Call load() first."
-            )
+            raise RuntimeError("model must be loaded before export. Call load() first.")
         out.parent.mkdir(parents=True, exist_ok=True)
         import torch  # type: ignore
         from PIL import Image as _Image

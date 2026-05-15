@@ -24,9 +24,10 @@ Implementation status (separate from project status):
 from __future__ import annotations
 
 import threading
+from collections.abc import Iterable
 from importlib import resources
 from pathlib import Path
-from typing import Iterable, Literal
+from typing import Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -52,8 +53,8 @@ DownloadType = Literal[
     "manual",
     "external_api",
     "not_available",
-    "synthetic",       # built-in mock — no download needed
-    "package_managed", # the engine package manages its own download (e.g. rfdetr)
+    "synthetic",  # built-in mock — no download needed
+    "package_managed",  # the engine package manages its own download (e.g. rfdetr)
 ]
 
 
@@ -77,7 +78,7 @@ class ModelEntry(BaseModel):
     task: Task
     family: str
     backend: str = ""  # short label: pytorch / hf / onnx / mock / openmmlab / ...
-    engine: str        # engines.registry key
+    engine: str  # engines.registry key
 
     # Licensing
     license: str
@@ -160,7 +161,11 @@ class ModelEntry(BaseModel):
 
     def is_downloadable(self) -> bool:
         return self.download_type in {
-            "huggingface", "github_release", "direct_url", "synthetic", "package_managed"
+            "huggingface",
+            "github_release",
+            "direct_url",
+            "synthetic",
+            "package_managed",
         }
 
     def is_built_in(self) -> bool:
@@ -277,13 +282,13 @@ def default_registry() -> ModelRegistry:
 
 
 __all__ = [
+    "Difficulty",
+    "DownloadType",
+    "ImplementationStatus",
     "ModelEntry",
     "ModelRegistry",
     "RegistryError",
-    "default_registry",
-    "Task",
     "Status",
-    "ImplementationStatus",
-    "Difficulty",
-    "DownloadType",
+    "Task",
+    "default_registry",
 ]

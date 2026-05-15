@@ -5,9 +5,7 @@
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -67,7 +65,8 @@ console = Console()
 
 # ---------- helpers ----------
 
-def _emit(payload, *, json_mode: bool, summary: Optional[str] = None) -> None:
+
+def _emit(payload, *, json_mode: bool, summary: str | None = None) -> None:
     if json_mode:
         typer.echo(json.dumps(payload, indent=2, default=str))
     elif summary is not None:
@@ -76,7 +75,9 @@ def _emit(payload, *, json_mode: bool, summary: Optional[str] = None) -> None:
         typer.echo(json.dumps(payload, indent=2, default=str))
 
 
-def _die(message: str, *, json_mode: bool, code: str = "ERROR", hint: str = "", exit_code: int = 1) -> None:
+def _die(
+    message: str, *, json_mode: bool, code: str = "ERROR", hint: str = "", exit_code: int = 1
+) -> None:
     if json_mode:
         payload = {"error": {"code": code, "message": message, "hint": hint}}
         typer.echo(json.dumps(payload), err=True)
@@ -90,7 +91,7 @@ def _die(message: str, *, json_mode: bool, code: str = "ERROR", hint: str = "", 
 @app.callback()
 def _global(
     debug: bool = typer.Option(False, "--debug", help="Enable verbose logs and stack traces."),
-    config_file: Optional[Path] = typer.Option(
+    config_file: Path | None = typer.Option(
         None,
         "--config",
         help="Path to a YAML config file (also honored via VISIONSERVEX_CONFIG_FILE).",
@@ -104,30 +105,41 @@ def _global(
         configure_logging("INFO")
     if config_file:
         import os
+
         os.environ["VISIONSERVEX_CONFIG_FILE"] = str(config_file)
         reload_settings()
 
 
 # ---------- meta ----------
 
-@app.command("getting-started", help="Beginner guide: check device, recommend a model, show exact next commands.")
+
+@app.command(
+    "getting-started",
+    help="Beginner guide: check device, recommend a model, show exact next commands.",
+)
 def getting_started() -> None:
-    settings = get_settings()
+    get_settings()
     best = best_device()
     pick = first_beginner_pick(task="detect")
-    seg_pick = first_beginner_pick(task="foundation_segment")
+    first_beginner_pick(task="foundation_segment")
 
-    console.print(Panel.fit(
-        f"[bold]VisionServeX {__version__} — Getting Started[/bold]\n"
-        f"by Arash Sajjadi · Apache-2.0",
-        border_style="green",
-    ))
+    console.print(
+        Panel.fit(
+            f"[bold]VisionServeX {__version__} — Getting Started[/bold]\n"
+            f"by Arash Sajjadi · Apache-2.0",
+            border_style="green",
+        )
+    )
     if best.name != "cpu":
         console.print(f"[green]GPU detected:[/green] {best.detail}")
         if best.total_vram_gb:
-            console.print(f"  VRAM: {best.total_vram_gb} GB total, {best.free_vram_gb or '?'} GB free")
+            console.print(
+                f"  VRAM: {best.total_vram_gb} GB total, {best.free_vram_gb or '?'} GB free"
+            )
     else:
-        console.print("[yellow]No GPU detected.[/yellow] VisionServeX runs on CPU (slower for large models).")
+        console.print(
+            "[yellow]No GPU detected.[/yellow] VisionServeX runs on CPU (slower for large models)."
+        )
 
     console.print()
     console.print("[bold]Step 1 — Get a full diagnosis:[/bold]")
@@ -143,8 +155,10 @@ def getting_started() -> None:
         console.print(f"[bold]Step 4 — Download {pick.id} (recommended for detection):[/bold]")
         console.print(f"  [cyan]$[/cyan] visionservex pull {pick.id}")
         console.print()
-        console.print(f"[bold]Step 5 — Run a prediction:[/bold]")
-        console.print(f"  [cyan]$[/cyan] visionservex predict {pick.id} examples/images/street.jpg --save outputs/out.jpg")
+        console.print("[bold]Step 5 — Run a prediction:[/bold]")
+        console.print(
+            f"  [cyan]$[/cyan] visionservex predict {pick.id} examples/images/street.jpg --save outputs/out.jpg"
+        )
     console.print()
     console.print("[bold]Step 6 — Start the API server:[/bold]")
     console.print("  [cyan]$[/cyan] visionservex serve")
@@ -161,6 +175,7 @@ def status(json_: bool = typer.Option(False, "--json")) -> None:
     settings = get_settings()
     best = best_device()
     from visionservex.runtime.downloads import cache_listing
+
     cached = cache_listing()
     pick = first_beginner_pick(task="detect")
     payload = {
@@ -177,10 +192,12 @@ def status(json_: bool = typer.Option(False, "--json")) -> None:
     if json_:
         _emit(payload, json_mode=True)
         return
-    console.print(Panel.fit(
-        f"[bold]VisionServeX {__version__}[/bold]",
-        border_style="cyan",
-    ))
+    console.print(
+        Panel.fit(
+            f"[bold]VisionServeX {__version__}[/bold]",
+            border_style="cyan",
+        )
+    )
     console.print(f"Device:  {best.name} — {best.detail}")
     console.print(f"Cache:   {settings.cache.cache_dir} ({len(cached)} model(s) cached)")
     if cached:
@@ -200,15 +217,22 @@ def version(json_: bool = typer.Option(False, "--json")) -> None:
         "supervisor": "Prof. Mark Eramian, University of Saskatchewan",
         "license": "Apache-2.0",
     }
-    _emit(payload, json_mode=json_, summary=f"VisionServeX {__version__} — by Arash Sajjadi (Apache-2.0)")
+    _emit(
+        payload,
+        json_mode=json_,
+        summary=f"VisionServeX {__version__} — by Arash Sajjadi (Apache-2.0)",
+    )
 
 
 # ---------- doctor ----------
 
+
 @app.command(help="Run friendly diagnostics: system, devices, dependencies, recommendations.")
 def doctor(
     json_: bool = typer.Option(False, "--json"),
-    fix_suggestions: bool = typer.Option(False, "--fix-suggestions", help="Print actionable fix commands."),
+    fix_suggestions: bool = typer.Option(
+        False, "--fix-suggestions", help="Print actionable fix commands."
+    ),
 ) -> None:
     settings = get_settings()
     sysinfo = collect()
@@ -246,31 +270,39 @@ def doctor(
 def _compute_fix_suggestions(deps: dict, warnings: list[str]) -> list[dict]:
     suggestions = []
     if not deps.get("torch", {}).get("installed"):
-        suggestions.append({
-            "issue": "PyTorch not installed",
-            "fix": "pip install 'visionservex[torch]'",
-            "docs": "docs/installation.md",
-        })
+        suggestions.append(
+            {
+                "issue": "PyTorch not installed",
+                "fix": "pip install 'visionservex[torch]'",
+                "docs": "docs/installation.md",
+            }
+        )
     if not deps.get("transformers", {}).get("installed"):
-        suggestions.append({
-            "issue": "Hugging Face Transformers not installed",
-            "fix": "pip install 'visionservex[hf]'",
-            "docs": "docs/installation.md",
-        })
+        suggestions.append(
+            {
+                "issue": "Hugging Face Transformers not installed",
+                "fix": "pip install 'visionservex[hf]'",
+                "docs": "docs/installation.md",
+            }
+        )
     if not deps.get("fastapi", {}).get("installed"):
-        suggestions.append({
-            "issue": "FastAPI not installed (server mode unavailable)",
-            "fix": "pip install 'visionservex[server]'",
-            "docs": "docs/installation.md",
-        })
+        suggestions.append(
+            {
+                "issue": "FastAPI not installed (server mode unavailable)",
+                "fix": "pip install 'visionservex[server]'",
+                "docs": "docs/installation.md",
+            }
+        )
     for w in warnings:
         if "AUTH" in w:
-            suggestions.append({
-                "issue": w,
-                "fix": "export VISIONSERVEX_AUTH__ENABLED=true && "
-                       "export VISIONSERVEX_AUTH__API_KEY=$(python -c \"import secrets;print(secrets.token_urlsafe(48))\")",
-                "docs": "docs/security.md",
-            })
+            suggestions.append(
+                {
+                    "issue": w,
+                    "fix": "export VISIONSERVEX_AUTH__ENABLED=true && "
+                    'export VISIONSERVEX_AUTH__API_KEY=$(python -c "import secrets;print(secrets.token_urlsafe(48))")',
+                    "docs": "docs/security.md",
+                }
+            )
     return suggestions
 
 
@@ -303,11 +335,13 @@ def _next_commands(pick) -> list[str]:
 def _print_doctor_human(p: dict) -> None:
     sys_ = p["system"]
     best = p["best_device"]
-    console.print(Panel.fit(
-        f"[bold]VisionServeX[/bold] {__version__}\n"
-        f"by Arash Sajjadi · University of Saskatchewan",
-        border_style="cyan",
-    ))
+    console.print(
+        Panel.fit(
+            f"[bold]VisionServeX[/bold] {__version__}\n"
+            f"by Arash Sajjadi · University of Saskatchewan",
+            border_style="cyan",
+        )
+    )
 
     table = Table(show_header=False, box=None, pad_edge=False)
     table.add_column("k", style="cyan")
@@ -317,15 +351,23 @@ def _print_doctor_human(p: dict) -> None:
     table.add_row("Package path", sys_["package_install_path"])
     table.add_row("Cache dir", sys_["cache_path"])
     mem = sys_["memory"]
-    table.add_row("Memory", f"{mem['total_gb']:.1f} GB total · {mem['available_gb']:.1f} GB available")
+    table.add_row(
+        "Memory", f"{mem['total_gb']:.1f} GB total · {mem['available_gb']:.1f} GB available"
+    )
     dsk = sys_["disk"]
     table.add_row("Disk (cache)", f"{dsk['free_gb']:.1f} GB free of {dsk['total_gb']:.1f} GB")
-    table.add_row("CPU", f"{sys_['cpu'].get('logical_cores')} logical cores ({sys_['cpu'].get('brand') or 'unknown'})")
+    table.add_row(
+        "CPU",
+        f"{sys_['cpu'].get('logical_cores')} logical cores ({sys_['cpu'].get('brand') or 'unknown'})",
+    )
     console.print(table)
 
     console.print()
     dt = Table(title="Devices", show_lines=False)
-    dt.add_column("Name"); dt.add_column("Available"); dt.add_column("Detail"); dt.add_column("VRAM")
+    dt.add_column("Name")
+    dt.add_column("Available")
+    dt.add_column("Detail")
+    dt.add_column("VRAM")
     for d in p["devices"]:
         avail = "[green]yes[/green]" if d["available"] else "[grey50]no[/grey50]"
         vram = ""
@@ -338,7 +380,10 @@ def _print_doctor_human(p: dict) -> None:
 
     console.print()
     deptab = Table(title="Optional dependencies (only matters for real backends)")
-    deptab.add_column("Package"); deptab.add_column("Installed"); deptab.add_column("Version"); deptab.add_column("Install hint")
+    deptab.add_column("Package")
+    deptab.add_column("Installed")
+    deptab.add_column("Version")
+    deptab.add_column("Install hint")
     for name, info in p["dependencies"].items():
         installed = "[green]yes[/green]" if info["installed"] else "[grey50]no[/grey50]"
         deptab.add_row(name, installed, str(info.get("version") or "-"), info.get("hint") or "")
@@ -350,9 +395,13 @@ def _print_doctor_human(p: dict) -> None:
 
     console.print()
     if best.get("available") and best.get("name") != "cpu":
-        console.print(f"[green]Good news:[/green] VisionServeX can use [bold]{best['name'].upper()}[/bold] on your system.")
+        console.print(
+            f"[green]Good news:[/green] VisionServeX can use [bold]{best['name'].upper()}[/bold] on your system."
+        )
         if best.get("total_vram_gb"):
-            console.print(f"GPU memory: {best['total_vram_gb']} GB total · {best.get('free_vram_gb') or '?'} GB free.")
+            console.print(
+                f"GPU memory: {best['total_vram_gb']} GB total · {best.get('free_vram_gb') or '?'} GB free."
+            )
     else:
         console.print("[yellow]Note:[/yellow] no GPU detected. VisionServeX can still run on CPU.")
 
@@ -365,13 +414,17 @@ def _print_doctor_human(p: dict) -> None:
 
 # ---------- devices ----------
 
+
 @app.command(help="Show available compute devices with sanity check status.")
 def devices(
     json_: bool = typer.Option(False, "--json"),
-    benchmark_: bool = typer.Option(False, "--benchmark", help="Run a tiny synthetic benchmark on available devices."),
+    benchmark_: bool = typer.Option(
+        False, "--benchmark", help="Run a tiny synthetic benchmark on available devices."
+    ),
     quick: bool = typer.Option(True, "--quick/--full", help="Quick benchmark (default) or full."),
 ) -> None:
     from visionservex.runtime.device import device_benchmark
+
     items = [d.to_dict() for d in available_devices()]
     if benchmark_:
         bm_results = {}
@@ -383,17 +436,33 @@ def devices(
             _emit({"devices": items, "benchmark": bm_results}, json_mode=True)
             return
         table = Table(title="Device benchmark")
-        table.add_column("Device"); table.add_column("Available"); table.add_column("VRAM")
-        table.add_column("Sanity"); table.add_column("Avg ms"); table.add_column("GFLOPS"); table.add_column("Detail")
+        table.add_column("Device")
+        table.add_column("Available")
+        table.add_column("VRAM")
+        table.add_column("Sanity")
+        table.add_column("Avg ms")
+        table.add_column("GFLOPS")
+        table.add_column("Detail")
         for d in items:
             avail = "[green]yes[/green]" if d["available"] else "[grey50]no[/grey50]"
-            sanity = "[green]ok[/green]" if d.get("sanity_ok") else ("[red]FAIL[/red]" if d.get("sanity_ok") is False else "-")
-            vram = f"{d['total_vram_gb']}/{d.get('free_vram_gb') or '?'} GB" if d.get("total_vram_gb") else "-"
+            sanity = (
+                "[green]ok[/green]"
+                if d.get("sanity_ok")
+                else ("[red]FAIL[/red]" if d.get("sanity_ok") is False else "-")
+            )
+            vram = (
+                f"{d['total_vram_gb']}/{d.get('free_vram_gb') or '?'} GB"
+                if d.get("total_vram_gb")
+                else "-"
+            )
             bm = bm_results.get(d["name"], {})
             table.add_row(
-                d["name"], avail, vram, sanity,
-                f"{bm.get('avg_ms','?')} ms" if bm.get("ok") else "-",
-                f"{bm.get('throughput_gflops','?')}" if bm.get("ok") else "-",
+                d["name"],
+                avail,
+                vram,
+                sanity,
+                f"{bm.get('avg_ms', '?')} ms" if bm.get("ok") else "-",
+                f"{bm.get('throughput_gflops', '?')}" if bm.get("ok") else "-",
                 d["detail"][:60],
             )
         console.print(table)
@@ -402,11 +471,18 @@ def devices(
         _emit(items, json_mode=True)
         return
     table = Table(title="Compute devices")
-    table.add_column("Name"); table.add_column("Available"); table.add_column("Sanity")
-    table.add_column("Detail"); table.add_column("VRAM (total/free)")
+    table.add_column("Name")
+    table.add_column("Available")
+    table.add_column("Sanity")
+    table.add_column("Detail")
+    table.add_column("VRAM (total/free)")
     for d in items:
         avail = "[green]yes[/green]" if d["available"] else "[grey50]no[/grey50]"
-        sanity = "[green]ok[/green]" if d.get("sanity_ok") else ("[red]FAIL[/red]" if d.get("sanity_ok") is False else "[grey50]-[/grey50]")
+        sanity = (
+            "[green]ok[/green]"
+            if d.get("sanity_ok")
+            else ("[red]FAIL[/red]" if d.get("sanity_ok") is False else "[grey50]-[/grey50]")
+        )
         vram = "-"
         if d.get("total_vram_gb"):
             vram = f"{d['total_vram_gb']} / {d.get('free_vram_gb') or '?'} GB"
@@ -416,14 +492,19 @@ def devices(
 
 # ---------- list / info / recommend ----------
 
+
 @app.command("list-models", help="List models available in the registry.")
 def list_models(
-    task: Optional[str] = typer.Option(None, "--task"),
-    status: Optional[str] = typer.Option(None, "--status"),
-    family: Optional[str] = typer.Option(None, "--family"),
+    task: str | None = typer.Option(None, "--task"),
+    status: str | None = typer.Option(None, "--status"),
+    family: str | None = typer.Option(None, "--family"),
     easy: bool = typer.Option(False, "--easy", help="Show only beginner-friendly models."),
-    can_run: bool = typer.Option(False, "--can-run", help="Show only models that can run on current devices."),
-    friendly: bool = typer.Option(False, "--friendly", help="Human-readable table with more details."),
+    can_run: bool = typer.Option(
+        False, "--can-run", help="Show only models that can run on current devices."
+    ),
+    friendly: bool = typer.Option(
+        False, "--friendly", help="Human-readable table with more details."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     reg = default_registry()
@@ -439,8 +520,19 @@ def list_models(
         return
 
     if friendly:
-        table = Table(title=f"Models ({len(entries)}) — use `visionservex info <id>` for full details")
-        for col in ("Model ID", "Task", "Difficulty", "Status", "Impl", "Auto-DL", "License", "Best for"):
+        table = Table(
+            title=f"Models ({len(entries)}) — use `visionservex info <id>` for full details"
+        )
+        for col in (
+            "Model ID",
+            "Task",
+            "Difficulty",
+            "Status",
+            "Impl",
+            "Auto-DL",
+            "License",
+            "Best for",
+        ):
             table.add_column(col)
         for e in entries:
             impl_color = {"wired": "green", "partial": "yellow", "stub": "grey50"}.get(
@@ -458,7 +550,9 @@ def list_models(
                 best_for[:30],
             )
         console.print(table)
-        console.print(f"\nLegend: impl=[green]wired[/green]=real backend, [yellow]partial[/yellow]=in progress, [grey50]stub[/grey50]=registry only")
+        console.print(
+            "\nLegend: impl=[green]wired[/green]=real backend, [yellow]partial[/yellow]=in progress, [grey50]stub[/grey50]=registry only"
+        )
         return
 
     table = Table(title=f"Models ({len(entries)})")
@@ -497,9 +591,9 @@ def info(model_id: str, json_: bool = typer.Option(False, "--json")) -> None:
 
 @app.command(help="Recommend a model for the current device + task.")
 def recommend_cmd(
-    task: Optional[str] = typer.Option(None, "--task"),
-    device: Optional[str] = typer.Option(None, "--device"),
-    vram: Optional[float] = typer.Option(None, "--vram", help="Available VRAM in GB."),
+    task: str | None = typer.Option(None, "--task"),
+    device: str | None = typer.Option(None, "--device"),
+    vram: float | None = typer.Option(None, "--vram", help="Available VRAM in GB."),
     simple: bool = typer.Option(False, "--simple", help="Prefer beginner-friendly models."),
     limit: int = typer.Option(5, "--limit"),
     json_: bool = typer.Option(False, "--json"),
@@ -517,9 +611,13 @@ def recommend_cmd(
     for r in recs:
         e = r.entry
         table.add_row(
-            e.id, e.task, e.status, e.implementation_status,
+            e.id,
+            e.task,
+            e.status,
+            e.implementation_status,
             f"{r.score:.1f}",
-            ",".join(e.supported_devices), e.license,
+            ",".join(e.supported_devices),
+            e.license,
         )
     console.print(table)
     top = recs[0].entry
@@ -527,7 +625,9 @@ def recommend_cmd(
     if top.auto_download:
         console.print(f"  [cyan]$[/cyan] visionservex pull {top.id}")
     else:
-        console.print(f"  [cyan]$[/cyan] visionservex info {top.id}  # then follow upstream instructions")
+        console.print(
+            f"  [cyan]$[/cyan] visionservex info {top.id}  # then follow upstream instructions"
+        )
 
 
 # we expose it as `recommend` for the CLI surface
@@ -535,6 +635,7 @@ app.command("recommend", help="Recommend a model for the current device + task."
 
 
 # ---------- pull / pull-easy / pull-all ----------
+
 
 def _pull_with_progress(entry, *, force: bool = False, offline: bool = False) -> Path:
     with Progress(
@@ -551,7 +652,9 @@ def _pull_with_progress(entry, *, force: bool = False, offline: bool = False) ->
         def _cb(ev: DownloadProgress) -> None:
             if ev.total_bytes:
                 progress.update(task_id, total=ev.total_bytes)
-            progress.update(task_id, completed=ev.downloaded_bytes, description=f"{entry.id}: {ev.phase}")
+            progress.update(
+                task_id, completed=ev.downloaded_bytes, description=f"{entry.id}: {ev.phase}"
+            )
 
         path = download(entry, progress=_cb, force=force, offline=offline)
         progress.update(task_id, description=f"{entry.id}: done")
@@ -577,15 +680,19 @@ def pull(
         else:
             path = _pull_with_progress(entry, force=force, offline=offline)
     except ManualDownloadRequired as exc:
-        _die(str(exc), json_mode=json_, code="MANUAL_DOWNLOAD_REQUIRED",
-             hint=f"see {entry.upstream_url}", exit_code=2)
+        _die(
+            str(exc),
+            json_mode=json_,
+            code="MANUAL_DOWNLOAD_REQUIRED",
+            hint=f"see {entry.upstream_url}",
+            exit_code=2,
+        )
         return
     except DownloadError as exc:
         _die(str(exc), json_mode=json_, code="DOWNLOAD_FAILED")
         return
 
-    _emit({"model_id": entry.id, "path": str(path)}, json_mode=json_,
-          summary=f"saved to {path}")
+    _emit({"model_id": entry.id, "path": str(path)}, json_mode=json_, summary=f"saved to {path}")
 
 
 @app.command("pull-easy", help="Download all beginner-friendly auto-downloadable models.")
@@ -614,7 +721,7 @@ def pull_recommended(
 
 @app.command("pull-all", help="Download many models. Use --task or --only-auto-downloadable.")
 def pull_all(
-    task: Optional[str] = typer.Option(None, "--task"),
+    task: str | None = typer.Option(None, "--task"),
     only_auto: bool = typer.Option(True, "--only-auto-downloadable/--include-non-auto"),
     yes: bool = typer.Option(False, "--yes-i-understand-large-downloads"),
     json_: bool = typer.Option(False, "--json"),
@@ -635,26 +742,30 @@ def pull_all(
 
 def _pull_many(entries: list, *, yes: bool, json_mode: bool, label: str) -> None:
     if not entries:
-        _emit({"pulled": [], "skipped": []}, json_mode=json_mode,
-              summary=f"no models matched ({label})")
+        _emit(
+            {"pulled": [], "skipped": []},
+            json_mode=json_mode,
+            summary=f"no models matched ({label})",
+        )
         return
     pulled, skipped = [], []
     for entry in entries:
         try:
-            if json_mode:
-                path = download(entry)
-            else:
-                path = _pull_with_progress(entry)
+            path = download(entry) if json_mode else _pull_with_progress(entry)
             pulled.append({"id": entry.id, "path": str(path)})
         except DownloadError as exc:
             skipped.append({"id": entry.id, "reason": str(exc)})
             if not json_mode:
                 console.print(f"  [yellow]skipped[/yellow] {entry.id}: {exc}")
-    _emit({"pulled": pulled, "skipped": skipped}, json_mode=json_mode,
-          summary=f"pulled {len(pulled)}, skipped {len(skipped)}")
+    _emit(
+        {"pulled": pulled, "skipped": skipped},
+        json_mode=json_mode,
+        summary=f"pulled {len(pulled)}, skipped {len(skipped)}",
+    )
 
 
 # ---------- cache ----------
+
 
 @cache_app.command("path", help="Print the cache directory path.")
 def cache_path_cmd(json_: bool = typer.Option(False, "--json")) -> None:
@@ -669,15 +780,17 @@ def cache_list(json_: bool = typer.Option(False, "--json")) -> None:
         _emit(items, json_mode=True)
         return
     table = Table(title="Cached models")
-    table.add_column("id"); table.add_column("size MiB"); table.add_column("path")
+    table.add_column("id")
+    table.add_column("size MiB")
+    table.add_column("path")
     for item in items:
-        table.add_row(item["model_id"], f"{item['size_bytes'] / (1024*1024):.1f}", item["path"])
+        table.add_row(item["model_id"], f"{item['size_bytes'] / (1024 * 1024):.1f}", item["path"])
     console.print(table)
 
 
 @cache_app.command("clean", help="Delete cached files for a model (or all).")
 def cache_clean_cmd(
-    model_id: Optional[str] = typer.Argument(None),
+    model_id: str | None = typer.Argument(None),
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation prompt."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
@@ -686,13 +799,12 @@ def cache_clean_cmd(
         if not typer.confirm(f"Delete {what}?"):
             raise typer.Exit(1)
     freed = cache_clean(model_id)
-    _emit({"bytes_freed": freed}, json_mode=json_,
-          summary=f"freed {freed / (1024*1024):.1f} MiB")
+    _emit({"bytes_freed": freed}, json_mode=json_, summary=f"freed {freed / (1024 * 1024):.1f} MiB")
 
 
 @cache_app.command("verify", help="Verify cached models (SHA-256 where known).")
 def cache_verify_cmd(
-    model_id: Optional[str] = typer.Argument(None),
+    model_id: str | None = typer.Argument(None),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     report = cache_verify(model_id)
@@ -703,7 +815,10 @@ def cache_verify_cmd(
         console.print("nothing cached to verify")
         return
     table = Table(title="Cache verification")
-    table.add_column("id"); table.add_column("status"); table.add_column("path"); table.add_column("reason")
+    table.add_column("id")
+    table.add_column("status")
+    table.add_column("path")
+    table.add_column("reason")
     for r in report:
         status = "[green]ok[/green]" if r["ok"] else "[red]bad[/red]"
         table.add_row(r["model_id"], status, r.get("path") or "-", r["reason"])
@@ -713,18 +828,26 @@ def cache_verify_cmd(
 @cache_app.command("repair", help="Re-scan a cached model directory and rebuild its manifest.")
 def cache_repair_cmd(model_id: str, json_: bool = typer.Option(False, "--json")) -> None:
     ok = cache_repair(model_id)
-    _emit({"repaired": ok, "model_id": model_id}, json_mode=json_,
-          summary="repaired" if ok else "could not repair")
+    _emit(
+        {"repaired": ok, "model_id": model_id},
+        json_mode=json_,
+        summary="repaired" if ok else "could not repair",
+    )
 
 
 # ---------- predict / benchmark / export ----------
+
 
 @app.command(help="Run inference from the command line.")
 def predict(
     model_id: str,
     input_path: Path,
-    save: Optional[Path] = typer.Option(None, "--save", help="Where to write the annotated image or JSON."),
-    prompt: Optional[str] = typer.Option(None, "--prompt", help="Comma-separated prompts for open-vocab models."),
+    save: Path | None = typer.Option(
+        None, "--save", help="Where to write the annotated image or JSON."
+    ),
+    prompt: str | None = typer.Option(
+        None, "--prompt", help="Comma-separated prompts for open-vocab models."
+    ),
     auto_pull: bool = typer.Option(False, "--auto-pull", help="Download weights if missing."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
@@ -739,8 +862,12 @@ def predict(
         _die(str(exc), json_mode=json_, code="MODEL_NOT_FOUND")
         return
     except (DownloadError, ManualDownloadRequired) as exc:
-        _die(str(exc), json_mode=json_, code="DOWNLOAD_FAILED",
-             hint=f"see `visionservex info {model_id}`")
+        _die(
+            str(exc),
+            json_mode=json_,
+            code="DOWNLOAD_FAILED",
+            hint=f"see `visionservex info {model_id}`",
+        )
         return
     except Exception as exc:
         _die(str(exc), json_mode=json_, code="PREDICT_FAILED")
@@ -755,7 +882,9 @@ def predict(
         return
 
     console.print(f"[bold]{result.summary()}[/bold]")
-    console.print(f"  device: {result.device}  precision: {result.precision}  backend: {result.backend}")
+    console.print(
+        f"  device: {result.device}  precision: {result.precision}  backend: {result.backend}"
+    )
     if result.model_loaded_from:
         console.print(f"  model loaded from: {result.model_loaded_from}")
     if result.cache_path:
@@ -770,9 +899,15 @@ def predict(
 def benchmark(
     model_id: str,
     input_path: Path,
-    n: int = typer.Option(10, "--runs", "--n", min=1, max=1000, help="Number of warmup-excluded runs."),
-    warmup: int = typer.Option(2, "--warmup", min=0, max=20, help="Warmup runs before measurement."),
-    device: Optional[str] = typer.Option(None, "--device", help="Override device (cpu|cuda|mps|auto)."),
+    n: int = typer.Option(
+        10, "--runs", "--n", min=1, max=1000, help="Number of warmup-excluded runs."
+    ),
+    warmup: int = typer.Option(
+        2, "--warmup", min=0, max=20, help="Warmup runs before measurement."
+    ),
+    device: str | None = typer.Option(
+        None, "--device", help="Override device (cpu|cuda|mps|auto)."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Measure cold-load time, warm inference latency, and throughput.
@@ -784,6 +919,7 @@ def benchmark(
         _die(f"file not found: {input_path}", json_mode=json_, code="FILE_NOT_FOUND")
         return
     import time
+
     try:
         t_cold0 = time.perf_counter()
         model = VisionModel(model_id, **({"device": device} if device else {}))
@@ -813,7 +949,7 @@ def benchmark(
     console.print(f"  Warm p90:    {stats['p90_ms']:.1f} ms")
     console.print(f"  Warm p99:    {stats['p99_ms']:.1f} ms")
     console.print(f"  Throughput:  ~{1000 / stats['p50_ms']:.1f} req/s (single-thread estimate)")
-    console.print(f"[dim]GPU preferred when healthy; run `visionservex doctor` to verify.[/dim]")
+    console.print("[dim]GPU preferred when healthy; run `visionservex doctor` to verify.[/dim]")
 
 
 @app.command(help="Export a model to ONNX or another format (engine-dependent).")
@@ -834,6 +970,7 @@ def export(
 
 # ---------- examples ----------
 
+
 @app.command(help="List built-in beginner examples.")
 def examples(json_: bool = typer.Option(False, "--json")) -> None:
     items = _list_examples()
@@ -841,7 +978,9 @@ def examples(json_: bool = typer.Option(False, "--json")) -> None:
         _emit(items, json_mode=True)
         return
     table = Table(title="Beginner examples (in `examples/beginner/`)")
-    table.add_column("Name"); table.add_column("File"); table.add_column("Description")
+    table.add_column("Name")
+    table.add_column("File")
+    table.add_column("Description")
     for it in items:
         table.add_row(it["name"], it["file"], it["description"])
     console.print(table)
@@ -850,22 +989,46 @@ def examples(json_: bool = typer.Option(False, "--json")) -> None:
 
 def _list_examples() -> list[dict]:
     return [
-        {"name": "check-device", "file": "examples/beginner/01_check_device.py",
-         "description": "Print devices, recommended model, and next command."},
-        {"name": "list-models", "file": "examples/beginner/02_list_models.py",
-         "description": "List built-in models with status and license."},
-        {"name": "download", "file": "examples/beginner/03_download_first_model.py",
-         "description": "Download the recommended detection model."},
-        {"name": "detect", "file": "examples/beginner/04_detect_image.py",
-         "description": "Run detection on a sample image and save the annotated output."},
-        {"name": "segment", "file": "examples/beginner/05_segment_image.py",
-         "description": "Run segmentation on a sample image."},
-        {"name": "classify", "file": "examples/beginner/06_classify_image.py",
-         "description": "Run classification on a sample image."},
-        {"name": "open-vocab", "file": "examples/beginner/07_open_vocab_detect.py",
-         "description": "Run open-vocabulary detection with text prompts."},
-        {"name": "api", "file": "examples/beginner/08_start_api.py",
-         "description": "Start the local HTTP API server."},
+        {
+            "name": "check-device",
+            "file": "examples/beginner/01_check_device.py",
+            "description": "Print devices, recommended model, and next command.",
+        },
+        {
+            "name": "list-models",
+            "file": "examples/beginner/02_list_models.py",
+            "description": "List built-in models with status and license.",
+        },
+        {
+            "name": "download",
+            "file": "examples/beginner/03_download_first_model.py",
+            "description": "Download the recommended detection model.",
+        },
+        {
+            "name": "detect",
+            "file": "examples/beginner/04_detect_image.py",
+            "description": "Run detection on a sample image and save the annotated output.",
+        },
+        {
+            "name": "segment",
+            "file": "examples/beginner/05_segment_image.py",
+            "description": "Run segmentation on a sample image.",
+        },
+        {
+            "name": "classify",
+            "file": "examples/beginner/06_classify_image.py",
+            "description": "Run classification on a sample image.",
+        },
+        {
+            "name": "open-vocab",
+            "file": "examples/beginner/07_open_vocab_detect.py",
+            "description": "Run open-vocabulary detection with text prompts.",
+        },
+        {
+            "name": "api",
+            "file": "examples/beginner/08_start_api.py",
+            "description": "Start the local HTTP API server.",
+        },
     ]
 
 
@@ -926,6 +1089,7 @@ def _ensure_sample_image() -> Path:
 
 def _make_sample(path: Path) -> None:
     from PIL import Image, ImageDraw
+
     img = Image.new("RGB", (640, 480), color=(200, 220, 240))
     draw = ImageDraw.Draw(img)
     draw.rectangle([60, 80, 260, 280], outline=(20, 60, 120), width=4, fill=(80, 130, 200))
@@ -936,11 +1100,14 @@ def _make_sample(path: Path) -> None:
 
 # ---------- serve ----------
 
+
 @app.command(help="Start the local HTTP server.")
 def serve(
-    host: Optional[str] = typer.Option(None, "--host"),
-    port: Optional[int] = typer.Option(None, "--port"),
-    public: bool = typer.Option(False, "--public", help="Set public_mode=true (does not change bind address)."),
+    host: str | None = typer.Option(None, "--host"),
+    port: int | None = typer.Option(None, "--port"),
+    public: bool = typer.Option(
+        False, "--public", help="Set public_mode=true (does not change bind address)."
+    ),
     reload: bool = typer.Option(False, "--reload"),
 ) -> None:
     overrides: dict = {}
@@ -967,7 +1134,9 @@ def serve(
     for w in settings.public_safety_warnings():
         console.print(f"[yellow]warning:[/yellow] {w}")
     if settings.server.host == "0.0.0.0":
-        console.print("[yellow]warning:[/yellow] binding to 0.0.0.0; only do this behind a trusted network or proxy.")
+        console.print(
+            "[yellow]warning:[/yellow] binding to 0.0.0.0; only do this behind a trusted network or proxy."
+        )
     console.print(f"Starting VisionServeX on http://{settings.server.host}:{settings.server.port}")
     uvicorn.run(
         "visionservex.server.app:create_app",
@@ -980,9 +1149,11 @@ def serve(
 
 # ---------- config ----------
 
+
 @config_app.command("show", help="Print the effective configuration.")
 def config_show(json_: bool = typer.Option(False, "--json")) -> None:
     from visionservex.utils.logging import log_safe_dict
+
     settings = get_settings().model_dump()
     safe = log_safe_dict(settings)
     _emit(safe, json_mode=json_)

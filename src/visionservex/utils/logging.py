@@ -28,7 +28,7 @@ def redact(text: str) -> str:
 class RedactingFilter(logging.Filter):
     """Logging filter that runs ``redact`` over the rendered message."""
 
-    def filter(self, record: logging.LogRecord) -> bool:  # noqa: D401
+    def filter(self, record: logging.LogRecord) -> bool:
         try:
             record.msg = redact(str(record.getMessage()))
             record.args = ()
@@ -74,4 +74,4 @@ def log_safe_dict(data: dict[str, Any]) -> dict[str, Any]:
     return safe
 
 
-__all__ = ["redact", "RedactingFilter", "configure_logging", "get_logger", "log_safe_dict"]
+__all__ = ["RedactingFilter", "configure_logging", "get_logger", "log_safe_dict", "redact"]

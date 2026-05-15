@@ -24,7 +24,8 @@ Install:
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
 from PIL import Image
@@ -70,6 +71,7 @@ class SAM2HFEngine(StubEngine):
             self.entry.hf_repo_id = repo  # type: ignore[misc]
 
         from visionservex.runtime.downloads import download
+
         download(self.entry)
 
         import torch  # type: ignore
@@ -136,7 +138,9 @@ class SAM2HFEngine(StubEngine):
             proc_kwargs["input_labels"] = [[[int(lbl) for lbl in point_labels]]]
         if boxes is not None:
             # SAM2 box format: [image_level, box_level, coords] = 3 levels
-            proc_kwargs["input_boxes"] = [[[float(b[0]), float(b[1]), float(b[2]), float(b[3])] for b in boxes]]
+            proc_kwargs["input_boxes"] = [
+                [[float(b[0]), float(b[1]), float(b[2]), float(b[3])] for b in boxes]
+            ]
 
         inputs = self._processor(**proc_kwargs)
 
@@ -162,8 +166,8 @@ class SAM2HFEngine(StubEngine):
 
         segments: list[Segment] = []
         if masks_out and masks_out[0].shape[0] > 0:
-            batch_masks = masks_out[0][0]          # (num_masks, H, W)
-            batch_iou = iou_scores[0, 0]           # (num_masks,)
+            batch_masks = masks_out[0][0]  # (num_masks, H, W)
+            batch_iou = iou_scores[0, 0]  # (num_masks,)
             best_idx = int(batch_iou.argmax())
             mask_bool = batch_masks[best_idx].numpy()
             mask_uint8 = mask_bool.astype(np.uint8)

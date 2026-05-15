@@ -14,12 +14,12 @@ from __future__ import annotations
 import asyncio
 import threading
 import time
+from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from typing import Any, Awaitable, Callable
+from typing import Any
 
 from visionservex.config import get_settings
-from visionservex.runtime.cache import get_model_cache
 from visionservex.runtime.monitor import metrics
 from visionservex.utils.logging import get_logger
 
@@ -53,13 +53,9 @@ class RequestScheduler:
         request_timeout_s: float | None = None,
     ) -> None:
         settings = get_settings()
-        self.per_model_concurrency = (
-            per_model_concurrency or settings.runtime.per_model_concurrency
-        )
+        self.per_model_concurrency = per_model_concurrency or settings.runtime.per_model_concurrency
         self.queue_size = queue_size or settings.runtime.queue_size
-        self.request_timeout_s = (
-            request_timeout_s or settings.runtime.request_timeout_s
-        )
+        self.request_timeout_s = request_timeout_s or settings.runtime.request_timeout_s
         self._slots: dict[str, _ModelSlot] = {}
         self._lock = threading.Lock()
         self._total_inflight = 0
@@ -82,9 +78,7 @@ class RequestScheduler:
         with self._lock:
             slot = self._slots.get(model_id)
             if slot is None:
-                slot = _ModelSlot(
-                    semaphore=asyncio.Semaphore(self.per_model_concurrency)
-                )
+                slot = _ModelSlot(semaphore=asyncio.Semaphore(self.per_model_concurrency))
                 self._slots[model_id] = slot
             return slot
 
@@ -162,8 +156,8 @@ def get_scheduler() -> RequestScheduler:
 
 
 __all__ = [
-    "RequestScheduler",
     "BackpressureError",
+    "RequestScheduler",
     "RequestTimeoutError",
     "get_scheduler",
 ]

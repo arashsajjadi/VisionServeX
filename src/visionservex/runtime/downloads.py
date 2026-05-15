@@ -22,14 +22,16 @@ appear in a registry entry are fetched.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import shutil
 import threading
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import httpx
 
@@ -112,6 +114,7 @@ def _model_lock(model_id: str) -> threading.Lock:
 # Paths and manifest
 # =================================================================
 
+
 def model_dir(entry: ModelEntry) -> Path:
     settings = get_settings()
     return ensure_dir(Path(settings.cache.cache_dir) / "models" / entry.id)
@@ -170,9 +173,8 @@ def cached_path(entry: ModelEntry) -> Path | None:
     p = Path(saved_to)
     if not p.exists():
         return None
-    if entry.checkpoint_sha256:
-        if not verify_sha256(p, entry.checkpoint_sha256):
-            return None
+    if entry.checkpoint_sha256 and not verify_sha256(p, entry.checkpoint_sha256):
+        return None
     return p
 
 
@@ -183,6 +185,7 @@ def is_cached(entry: ModelEntry) -> bool:
 # =================================================================
 # Public API
 # =================================================================
+
 
 def download(
     entry: ModelEntry,
@@ -208,8 +211,12 @@ def download(
         )
 
     if entry.download_type == "synthetic":
-        return _emit_done(entry, progress, message="built-in mock model; no download required",
-                          path=model_dir(entry))
+        return _emit_done(
+            entry,
+            progress,
+            message="built-in mock model; no download required",
+            path=model_dir(entry),
+        )
 
     if entry.download_type == "package_managed":
         return _download_package_managed(entry, progress)
@@ -258,12 +265,15 @@ def download(
                     f"insufficient disk space: model {entry.id!r} needs ~{entry.size_bytes / 1e9:.2f} GB; "
                     f"only {free / 1e9:.2f} GB free at {model_dir(entry).parent}"
                 )
-        if max_size_gb is not None and entry.size_bytes is not None:
-            if entry.size_bytes / (1024**3) > max_size_gb:
-                raise DownloadError(
-                    f"model {entry.id!r} exceeds max_size_gb limit "
-                    f"({entry.size_bytes / (1024**3):.2f} > {max_size_gb})"
-                )
+        if (
+            max_size_gb is not None
+            and entry.size_bytes is not None
+            and entry.size_bytes / (1024**3) > max_size_gb
+        ):
+            raise DownloadError(
+                f"model {entry.id!r} exceeds max_size_gb limit "
+                f"({entry.size_bytes / (1024**3):.2f} > {max_size_gb})"
+            )
 
         # Dispatch by type
         if entry.download_type == "huggingface":
@@ -284,16 +294,25 @@ def _emit(progress: ProgressCallback | None, event: DownloadProgress) -> None:
             _log.debug("progress callback raised; ignoring", exc_info=True)
 
 
-def _emit_done(entry: ModelEntry, progress: ProgressCallback | None, *, message: str, path: Path) -> Path:
-    _emit(progress, DownloadProgress(
-        model_id=entry.id, phase="done", message=message, started_at=time.monotonic(),
-    ))
+def _emit_done(
+    entry: ModelEntry, progress: ProgressCallback | None, *, message: str, path: Path
+) -> Path:
+    _emit(
+        progress,
+        DownloadProgress(
+            model_id=entry.id,
+            phase="done",
+            message=message,
+            started_at=time.monotonic(),
+        ),
+    )
     return path
 
 
 # =================================================================
 # Direct URL / GitHub release
 # =================================================================
+
 
 def _download_direct(entry: ModelEntry, progress: ProgressCallback | None) -> Path:
     if not entry.checkpoint_url:
@@ -308,10 +327,16 @@ def _download_direct(entry: ModelEntry, progress: ProgressCallback | None) -> Pa
     existing_bytes = tmp.stat().st_size if tmp.exists() else 0
     chunk = settings.cache.download_chunk_bytes
     started = time.monotonic()
-    _emit(progress, DownloadProgress(
-        model_id=entry.id, phase="starting", message=f"GET {entry.checkpoint_url}",
-        started_at=started, total_bytes=entry.size_bytes,
-    ))
+    _emit(
+        progress,
+        DownloadProgress(
+            model_id=entry.id,
+            phase="starting",
+            message=f"GET {entry.checkpoint_url}",
+            started_at=started,
+            total_bytes=entry.size_bytes,
+        ),
+    )
 
     headers: dict[str, str] = {}
     if existing_bytes:
@@ -340,10 +365,8 @@ def _download_direct(entry: ModelEntry, progress: ProgressCallback | None) -> Pa
                 total = entry.size_bytes
                 cl = resp.headers.get("Content-Length")
                 if cl:
-                    try:
+                    with contextlib.suppress(ValueError):
                         total = int(cl) + (existing_bytes if resp.status_code == 206 else 0)
-                    except ValueError:
-                        pass
                 mode = "ab" if existing_bytes and resp.status_code == 206 else "wb"
                 downloaded = existing_bytes if mode == "ab" else 0
                 with tmp.open(mode) as fh:
@@ -352,44 +375,60 @@ def _download_direct(entry: ModelEntry, progress: ProgressCallback | None) -> Pa
                             continue
                         fh.write(piece)
                         downloaded += len(piece)
-                        _emit(progress, DownloadProgress(
-                            model_id=entry.id, phase="downloading",
-                            downloaded_bytes=downloaded, total_bytes=total,
-                            started_at=started,
-                        ))
+                        _emit(
+                            progress,
+                            DownloadProgress(
+                                model_id=entry.id,
+                                phase="downloading",
+                                downloaded_bytes=downloaded,
+                                total_bytes=total,
+                                started_at=started,
+                            ),
+                        )
             break
         except (httpx.HTTPError, DownloadError) as exc:
             last_exc = exc
             time.sleep(backoff)
             backoff = min(backoff * 2, 8.0)
             existing_bytes = tmp.stat().st_size if tmp.exists() else 0
-            headers["Range"] = f"bytes={existing_bytes}-" if existing_bytes else headers.pop("Range", None)
+            headers["Range"] = (
+                f"bytes={existing_bytes}-" if existing_bytes else headers.pop("Range", None)
+            )
     else:
         raise DownloadError(f"download failed after retries: {last_exc}")
 
     if entry.checkpoint_sha256:
-        _emit(progress, DownloadProgress(
-            model_id=entry.id, phase="verifying", message="checking SHA-256",
-            started_at=started,
-        ))
+        _emit(
+            progress,
+            DownloadProgress(
+                model_id=entry.id,
+                phase="verifying",
+                message="checking SHA-256",
+                started_at=started,
+            ),
+        )
         if not verify_sha256(tmp, entry.checkpoint_sha256):
             tmp.unlink(missing_ok=True)
             raise DownloadError(f"SHA-256 mismatch for {entry.id!r}; partial file removed")
 
     final.parent.mkdir(parents=True, exist_ok=True)
     shutil.move(str(tmp), str(final))
-    write_manifest(entry, {
-        "saved_to": str(final),
-        "size_bytes": final.stat().st_size,
-        "sha256": entry.checkpoint_sha256 or sha256_file(final),
-        "source_url": entry.checkpoint_url,
-    })
+    write_manifest(
+        entry,
+        {
+            "saved_to": str(final),
+            "size_bytes": final.stat().st_size,
+            "sha256": entry.checkpoint_sha256 or sha256_file(final),
+            "source_url": entry.checkpoint_url,
+        },
+    )
     return _emit_done(entry, progress, message="saved", path=final)
 
 
 # =================================================================
 # Hugging Face
 # =================================================================
+
 
 def _download_huggingface(entry: ModelEntry, progress: ProgressCallback | None) -> Path:
     """Use ``huggingface_hub.snapshot_download`` when available."""
@@ -405,14 +444,19 @@ def _download_huggingface(entry: ModelEntry, progress: ProgressCallback | None) 
             f"Install with: pip install 'visionservex[hf]'"
         ) from exc
 
-    settings = get_settings()
+    get_settings()
     target_dir = model_dir(entry)
     started = time.monotonic()
-    _emit(progress, DownloadProgress(
-        model_id=entry.id, phase="starting",
-        message=f"snapshot_download {entry.hf_repo_id}",
-        started_at=started, total_bytes=entry.size_bytes,
-    ))
+    _emit(
+        progress,
+        DownloadProgress(
+            model_id=entry.id,
+            phase="starting",
+            message=f"snapshot_download {entry.hf_repo_id}",
+            started_at=started,
+            total_bytes=entry.size_bytes,
+        ),
+    )
 
     token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
     kwargs: dict[str, Any] = {
@@ -451,20 +495,24 @@ def _download_huggingface(entry: ModelEntry, progress: ProgressCallback | None) 
         primary = local  # directory snapshot — engine resolves further.
 
     size = sum(p.stat().st_size for p in local.rglob("*") if p.is_file())
-    write_manifest(entry, {
-        "saved_to": str(primary),
-        "snapshot_dir": str(local),
-        "size_bytes": size,
-        "hf_repo_id": entry.hf_repo_id,
-        "hf_revision": entry.hf_revision,
-        "files": sorted(str(p.relative_to(local)) for p in local.rglob("*") if p.is_file()),
-    })
+    write_manifest(
+        entry,
+        {
+            "saved_to": str(primary),
+            "snapshot_dir": str(local),
+            "size_bytes": size,
+            "hf_repo_id": entry.hf_repo_id,
+            "hf_revision": entry.hf_revision,
+            "files": sorted(str(p.relative_to(local)) for p in local.rglob("*") if p.is_file()),
+        },
+    )
     return _emit_done(entry, progress, message="downloaded from Hugging Face", path=primary)
 
 
 # =================================================================
 # Package-managed download (e.g. rfdetr)
 # =================================================================
+
 
 def _download_package_managed(entry: ModelEntry, progress: ProgressCallback | None) -> Path:
     """Trigger a package-managed model download by instantiating its engine.
@@ -475,15 +523,20 @@ def _download_package_managed(entry: ModelEntry, progress: ProgressCallback | No
     own cache so ``is_cached`` returns True on subsequent calls.
     """
     started = time.monotonic()
-    _emit(progress, DownloadProgress(
-        model_id=entry.id, phase="starting",
-        message=f"package-managed download for {entry.id}",
-        started_at=started,
-    ))
+    _emit(
+        progress,
+        DownloadProgress(
+            model_id=entry.id,
+            phase="starting",
+            message=f"package-managed download for {entry.id}",
+            started_at=started,
+        ),
+    )
 
     # The engine module provides a ``_trigger_package_download`` helper.
     try:
         from visionservex.engines.rfdetr import trigger_package_download
+
         cache_path = trigger_package_download(entry)
     except ImportError as exc:
         raise DownloadError(
@@ -491,22 +544,30 @@ def _download_package_managed(entry: ModelEntry, progress: ProgressCallback | No
             f"Install with: pip install 'visionservex[{entry.install_extra or 'rfdetr'}]'"
         ) from exc
 
-    write_manifest(entry, {
-        "saved_to": str(cache_path),
-        "download_type": "package_managed",
-        "package": entry.install_extra or "unknown",
-    })
-    _emit(progress, DownloadProgress(
-        model_id=entry.id, phase="done",
-        message=f"weights in {cache_path}",
-        started_at=started,
-    ))
+    write_manifest(
+        entry,
+        {
+            "saved_to": str(cache_path),
+            "download_type": "package_managed",
+            "package": entry.install_extra or "unknown",
+        },
+    )
+    _emit(
+        progress,
+        DownloadProgress(
+            model_id=entry.id,
+            phase="done",
+            message=f"weights in {cache_path}",
+            started_at=started,
+        ),
+    )
     return cache_path
 
 
 # =================================================================
 # Cache management
 # =================================================================
+
 
 def cache_root() -> Path:
     return ensure_dir(Path(get_settings().cache.cache_dir) / "models")
@@ -528,12 +589,14 @@ def cache_listing() -> list[dict[str, Any]]:
                 manifest = json.loads(m.read_text(encoding="utf-8"))
             except Exception:
                 manifest = None
-        out.append({
-            "model_id": sub.name,
-            "path": str(sub),
-            "size_bytes": size,
-            "manifest": manifest,
-        })
+        out.append(
+            {
+                "model_id": sub.name,
+                "path": str(sub),
+                "size_bytes": size,
+                "manifest": manifest,
+            }
+        )
     return out
 
 
@@ -571,22 +634,28 @@ def cache_verify(model_id: str | None = None) -> list[dict[str, Any]]:
             continue
         ok = True
         reason = "ok"
-        if entry.checkpoint_sha256 and cached and cached.is_file():
-            if not verify_sha256(cached, entry.checkpoint_sha256):
-                ok = False
-                reason = "sha256 mismatch"
-        report.append({
-            "model_id": entry.id,
-            "ok": ok,
-            "reason": reason,
-            "path": str(cached) if cached else None,
-        })
+        if (
+            entry.checkpoint_sha256
+            and cached
+            and cached.is_file()
+            and not verify_sha256(cached, entry.checkpoint_sha256)
+        ):
+            ok = False
+            reason = "sha256 mismatch"
+        report.append(
+            {
+                "model_id": entry.id,
+                "ok": ok,
+                "reason": reason,
+                "path": str(cached) if cached else None,
+            }
+        )
     return report
 
 
 def cache_repair(model_id: str) -> bool:
     """Re-scan a model's cache directory and rebuild its manifest if possible."""
-    from visionservex.registry import default_registry, RegistryError
+    from visionservex.registry import RegistryError, default_registry
 
     try:
         entry = default_registry().get(model_id)
@@ -604,31 +673,34 @@ def cache_repair(model_id: str) -> bool:
     if not candidates:
         return False
     primary = max(candidates, key=lambda p: p.stat().st_size)
-    write_manifest(entry, {
-        "saved_to": str(primary),
-        "size_bytes": sum(p.stat().st_size for p in d.rglob("*") if p.is_file()),
-        "repaired": True,
-    })
+    write_manifest(
+        entry,
+        {
+            "saved_to": str(primary),
+            "size_bytes": sum(p.stat().st_size for p in d.rglob("*") if p.is_file()),
+            "repaired": True,
+        },
+    )
     return True
 
 
 __all__ = [
     "DownloadError",
-    "ManualDownloadRequired",
+    "DownloadProgress",
     "ExternalAPIModel",
     "InsufficientDiskSpace",
-    "DownloadProgress",
+    "ManualDownloadRequired",
     "ProgressCallback",
-    "download",
-    "model_dir",
-    "manifest_path",
-    "write_manifest",
-    "read_manifest",
-    "cached_path",
-    "is_cached",
-    "cache_root",
-    "cache_listing",
     "cache_clean",
-    "cache_verify",
+    "cache_listing",
     "cache_repair",
+    "cache_root",
+    "cache_verify",
+    "cached_path",
+    "download",
+    "is_cached",
+    "manifest_path",
+    "model_dir",
+    "read_manifest",
+    "write_manifest",
 ]

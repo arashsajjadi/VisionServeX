@@ -14,7 +14,8 @@ Honesty policy (Pass 2):
 from __future__ import annotations
 
 import importlib
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from visionservex.config import get_settings
 from visionservex.engines.base import BaseEngine, MissingDependencyError

@@ -22,8 +22,9 @@ import platform
 import shutil
 import subprocess
 import time
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Any, Iterable
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -36,7 +37,7 @@ class DeviceInfo:
     total_vram_gb: float | None = None
     free_vram_gb: float | None = None
     capability: str | None = None
-    sanity_ok: bool | None = None   # None = not yet checked; True/False = result
+    sanity_ok: bool | None = None  # None = not yet checked; True/False = result
     sanity_error: str | None = None
     extras: dict[str, Any] = field(default_factory=dict)
 
@@ -56,10 +57,12 @@ class DeviceInfo:
 
 # ------------------------------------------------------------------ sanity ---
 
+
 def _cuda_sanity(device_idx: int) -> tuple[bool, str]:
     """Try to allocate and multiply a tiny CUDA tensor."""
     try:
         import torch  # type: ignore
+
         x = torch.ones(3, 3, device=f"cuda:{device_idx}")
         _ = (x @ x).sum().item()
         return True, ""
@@ -71,6 +74,7 @@ def _cuda_sanity(device_idx: int) -> tuple[bool, str]:
 def _mps_sanity() -> tuple[bool, str]:
     try:
         import torch  # type: ignore
+
         x = torch.ones(3, 3, device="mps")
         _ = (x + x).sum().item()
         return True, ""
@@ -80,6 +84,7 @@ def _mps_sanity() -> tuple[bool, str]:
 
 # ------------------------------------------------------------------ probes ---
 
+
 def _all_cuda_devices() -> list[DeviceInfo]:
     """Return a DeviceInfo for every CUDA device, or one failure entry."""
     try:
@@ -87,20 +92,29 @@ def _all_cuda_devices() -> list[DeviceInfo]:
     except Exception:
         smi = _nvidia_smi_summary()
         if smi:
-            return [DeviceInfo(
-                name="cuda",
-                available=False,
-                detail=f"GPU present ({smi}) but torch not installed. "
-                       "Install: pip install 'visionservex[torch]'",
-            )]
+            return [
+                DeviceInfo(
+                    name="cuda",
+                    available=False,
+                    detail=f"GPU present ({smi}) but torch not installed. "
+                    "Install: pip install 'visionservex[torch]'",
+                )
+            ]
         return [DeviceInfo(name="cuda", available=False, detail="torch not installed")]
 
     try:
         if not torch.cuda.is_available():
-            return [DeviceInfo(name="cuda", available=False, detail="torch reports CUDA unavailable")]
+            return [
+                DeviceInfo(name="cuda", available=False, detail="torch reports CUDA unavailable")
+            ]
     except Exception as exc:
-        return [DeviceInfo(name="cuda", available=False,
-                           detail=f"torch.cuda.is_available() raised: {exc!s:.80}")]
+        return [
+            DeviceInfo(
+                name="cuda",
+                available=False,
+                detail=f"torch.cuda.is_available() raised: {exc!s:.80}",
+            )
+        ]
 
     count = torch.cuda.device_count()
     devices: list[DeviceInfo] = []
@@ -108,37 +122,42 @@ def _all_cuda_devices() -> list[DeviceInfo]:
         try:
             name = torch.cuda.get_device_name(idx)
             props = torch.cuda.get_device_properties(idx)
-            total = props.total_memory / (1024 ** 3)
+            total = props.total_memory / (1024**3)
             free = total
             try:
                 free_bytes, total_bytes = torch.cuda.mem_get_info(idx)
-                free = free_bytes / (1024 ** 3)
-                total = total_bytes / (1024 ** 3)
+                free = free_bytes / (1024**3)
+                total = total_bytes / (1024**3)
             except Exception:
                 pass
             cap = f"{props.major}.{props.minor}"
             sanity_ok, sanity_err = _cuda_sanity(idx)
             tag = f"cuda:{idx}" if count > 1 else "cuda"
-            devices.append(DeviceInfo(
-                name=tag,
-                available=sanity_ok,
-                detail=f"{name} (cap {cap})" + ("" if sanity_ok else f" [broken: {sanity_err[:60]}]"),
-                total_vram_gb=total,
-                free_vram_gb=free,
-                capability=cap,
-                sanity_ok=sanity_ok,
-                sanity_error=sanity_err or None,
-                extras={"index": idx, "count": count, "gpu_name": name},
-            ))
+            devices.append(
+                DeviceInfo(
+                    name=tag,
+                    available=sanity_ok,
+                    detail=f"{name} (cap {cap})"
+                    + ("" if sanity_ok else f" [broken: {sanity_err[:60]}]"),
+                    total_vram_gb=total,
+                    free_vram_gb=free,
+                    capability=cap,
+                    sanity_ok=sanity_ok,
+                    sanity_error=sanity_err or None,
+                    extras={"index": idx, "count": count, "gpu_name": name},
+                )
+            )
         except Exception as exc:
             short = str(exc).split("\n")[0][:120]
-            devices.append(DeviceInfo(
-                name=f"cuda:{idx}" if count > 1 else "cuda",
-                available=False,
-                detail=f"CUDA runtime error: {short}. Using CPU fallback.",
-                sanity_ok=False,
-                sanity_error=short,
-            ))
+            devices.append(
+                DeviceInfo(
+                    name=f"cuda:{idx}" if count > 1 else "cuda",
+                    available=False,
+                    detail=f"CUDA runtime error: {short}. Using CPU fallback.",
+                    sanity_ok=False,
+                    sanity_error=short,
+                )
+            )
     return devices
 
 
@@ -148,7 +167,10 @@ def _nvidia_smi_summary() -> str | None:
     try:
         out = subprocess.run(
             ["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader"],
-            check=False, capture_output=True, text=True, timeout=4,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=4,
         )
         lines = (out.stdout or "").strip().splitlines()
         return lines[0].strip() if lines else None
@@ -171,6 +193,7 @@ def _mps_info() -> DeviceInfo:
         return DeviceInfo(name="mps", available=False, detail="not macOS")
     try:
         import torch  # type: ignore
+
         if getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
             sanity_ok, sanity_err = _mps_sanity()
             return DeviceInfo(
@@ -190,6 +213,7 @@ def _rocm_info() -> DeviceInfo:
         return DeviceInfo(name="rocm", available=True, detail="ROCm forced via env")
     try:
         import torch  # type: ignore
+
         hip = getattr(torch.version, "hip", None)
         if hip:
             return DeviceInfo(name="rocm", available=True, detail=f"ROCm/HIP {hip}")
@@ -203,6 +227,7 @@ def _directml_info() -> DeviceInfo:
         return DeviceInfo(name="directml", available=False, detail="not Windows")
     try:
         import torch_directml  # type: ignore  # noqa: F401
+
         return DeviceInfo(name="directml", available=True, detail="torch_directml installed")
     except Exception:
         return DeviceInfo(name="directml", available=False, detail="torch_directml not installed")
@@ -218,6 +243,7 @@ def _cpu_info() -> DeviceInfo:
 
 
 # ----------------------------------------------------------------- public ----
+
 
 def available_devices() -> list[DeviceInfo]:
     """Return all devices, including per-GPU entries for multi-GPU systems."""
@@ -273,6 +299,7 @@ def device_benchmark(device_name: str, *, quick: bool = True) -> dict[str, Any]:
     results: dict[str, Any] = {"device": device_name, "ok": False}
     try:
         import torch  # type: ignore
+
         dev = torch.device(device_name)
         size = 256 if quick else 1024
         a = torch.randn(size, size, device=dev)
@@ -282,12 +309,14 @@ def device_benchmark(device_name: str, *, quick: bool = True) -> dict[str, Any]:
         for _ in range(n):
             _ = (a @ b).sum().item()
         elapsed = (time.perf_counter() - t0) / n
-        results.update({
-            "ok": True,
-            "matrix_size": size,
-            "avg_ms": round(elapsed * 1000, 2),
-            "throughput_gflops": round(2 * size ** 3 / elapsed / 1e9, 2),
-        })
+        results.update(
+            {
+                "ok": True,
+                "matrix_size": size,
+                "avg_ms": round(elapsed * 1000, 2),
+                "throughput_gflops": round(2 * size**3 / elapsed / 1e9, 2),
+            }
+        )
     except Exception as exc:
         results["error"] = str(exc)[:200]
     return results
@@ -320,6 +349,6 @@ __all__ = [
     "DeviceInfo",
     "available_devices",
     "best_device",
-    "resolve_device",
     "device_benchmark",
+    "resolve_device",
 ]

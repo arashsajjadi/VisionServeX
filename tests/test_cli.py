@@ -8,7 +8,6 @@ from typer.testing import CliRunner
 
 from visionservex.cli.main import app
 
-
 runner = CliRunner()
 
 
@@ -44,6 +43,7 @@ def test_cli_info_unknown_model():
 
 def test_cli_predict_smoke(tmp_path):
     from PIL import Image
+
     img_path = tmp_path / "x.jpg"
     Image.new("RGB", (64, 48), "red").save(img_path, "JPEG")
     out = tmp_path / "r.json"

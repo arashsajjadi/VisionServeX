@@ -19,6 +19,7 @@ def _img(size=(128, 128), color="gray") -> Image.Image:
 # Registry metadata — D-FINE
 # ============================================================
 
+
 def test_dfine_n_registry():
     e = default_registry().get("dfine-n")
     assert e.task == "detect"
@@ -48,6 +49,7 @@ def test_dfine_family_all_wired():
 # Registry metadata — SAM2 HF
 # ============================================================
 
+
 def test_sam2_hiera_tiny_registry():
     e = default_registry().get("sam2-hiera-tiny")
     assert e.task == "foundation_segment"
@@ -67,6 +69,7 @@ def test_sam2_all_wired():
 # ============================================================
 # Registry metadata — OneFormer
 # ============================================================
+
 
 def test_oneformer_swin_registry():
     e = default_registry().get("oneformer-swin-large")
@@ -88,10 +91,12 @@ def test_oneformer_all_wired():
 # D-FINE engine real inference
 # ============================================================
 
+
 @pytest.mark.real_model
 def test_dfine_n_real_inference():
     pytest.importorskip("transformers")
     from visionservex import VisionModel
+
     m = VisionModel("dfine-n", device="cpu")
     r = m.predict(_img(size=(640, 480)))
     assert r.kind == "detection"
@@ -109,6 +114,7 @@ def test_dfine_n_real_inference():
 def test_dfine_s_real_inference():
     pytest.importorskip("transformers")
     from visionservex import VisionModel
+
     m = VisionModel("dfine-s", device="cpu")
     r = m.predict(_img(size=(640, 480)))
     assert r.kind == "detection"
@@ -119,8 +125,10 @@ def test_dfine_s_real_inference():
 @pytest.mark.real_model
 def test_dfine_result_schema():
     pytest.importorskip("transformers")
-    from visionservex import VisionModel
     import json
+
+    from visionservex import VisionModel
+
     m = VisionModel("dfine-n", device="cpu")
     r = m.predict(_img(size=(320, 240)))
     d = r.to_dict()
@@ -136,10 +144,12 @@ def test_dfine_result_schema():
 # SAM2 HF engine real inference
 # ============================================================
 
+
 @pytest.mark.real_model
 def test_sam2_hiera_tiny_point_prompt():
     pytest.importorskip("transformers")
     from visionservex import VisionModel
+
     m = VisionModel("sam2-hiera-tiny", device="cpu")
     r = m.predict(_img(size=(256, 256)), points=[[128, 128]], point_labels=[1])
     assert r.kind == "segmentation"
@@ -156,6 +166,7 @@ def test_sam2_hiera_tiny_point_prompt():
 def test_sam2_hiera_tiny_box_prompt():
     pytest.importorskip("transformers")
     from visionservex import VisionModel
+
     m = VisionModel("sam2-hiera-tiny", device="cpu")
     r = m.predict(_img(size=(256, 256)), boxes=[[30, 30, 220, 220]])
     assert r.kind == "segmentation"
@@ -167,6 +178,7 @@ def test_sam2_hiera_tiny_box_prompt():
 def test_sam2_hiera_default_prompt():
     pytest.importorskip("transformers")
     from visionservex import VisionModel
+
     m = VisionModel("sam2-hiera-tiny", device="cpu")
     r = m.predict(_img(size=(128, 128)))
     assert len(r.segments) >= 1
@@ -177,10 +189,12 @@ def test_sam2_hiera_default_prompt():
 # OneFormer engine real inference
 # ============================================================
 
+
 @pytest.mark.real_model
 def test_oneformer_swin_semantic():
     pytest.importorskip("transformers")
     from visionservex import VisionModel
+
     m = VisionModel("oneformer-swin-large", device="cpu")
     r = m.predict(_img(size=(256, 256), color="blue"), task="semantic")
     assert r.kind == "segmentation"
@@ -196,6 +210,7 @@ def test_oneformer_swin_semantic():
 def test_oneformer_swin_panoptic():
     pytest.importorskip("transformers")
     from visionservex import VisionModel
+
     m = VisionModel("oneformer-swin-large", device="cpu")
     r = m.predict(_img(size=(256, 256)), task="panoptic")
     assert r.kind == "segmentation"
@@ -207,6 +222,7 @@ def test_oneformer_swin_panoptic():
 def test_oneformer_metadata_task_field():
     pytest.importorskip("transformers")
     from visionservex import VisionModel
+
     m = VisionModel("oneformer-swin-large", device="cpu")
     r = m.predict(_img(size=(128, 128)), task="semantic")
     assert r.metadata["oneformer_task"] == "semantic"

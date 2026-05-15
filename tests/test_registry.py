@@ -34,8 +34,13 @@ def test_registry_filter_by_task():
 def test_register_duplicate_raises():
     reg = ModelRegistry()
     entry = ModelEntry(
-        id="x", display_name="X", task="detect", family="f",
-        license="Apache-2.0", upstream_url="https://example.com", engine="mock",
+        id="x",
+        display_name="X",
+        task="detect",
+        family="f",
+        license="Apache-2.0",
+        upstream_url="https://example.com",
+        engine="mock",
     )
     reg.register(entry)
     with pytest.raises(RegistryError):
@@ -57,7 +62,9 @@ def test_invalid_id_rejected():
 
 
 def test_unknown_status_rejected():
-    with pytest.raises(Exception):
+    from pydantic import ValidationError
+
+    with pytest.raises((ValidationError, ValueError)):
         ModelEntry(
             id="x",
             display_name="X",

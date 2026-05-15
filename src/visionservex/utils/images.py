@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import io
 from pathlib import Path
-from typing import Tuple
 
 import numpy as np
 from PIL import Image, ImageFile, UnidentifiedImageError
@@ -85,15 +84,15 @@ def encode_png(image: Image.Image) -> bytes:
     return buf.getvalue()
 
 
-def image_size(image: Image.Image) -> Tuple[int, int]:
+def image_size(image: Image.Image) -> tuple[int, int]:
     return image.size
 
 
 __all__ = [
     "ImageValidationError",
-    "open_safe",
-    "to_numpy",
     "encode_jpeg",
     "encode_png",
     "image_size",
+    "open_safe",
+    "to_numpy",
 ]

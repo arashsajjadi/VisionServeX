@@ -19,7 +19,8 @@ to override: ``task='instance'`` or ``task='panoptic'``.
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
 from PIL import Image
@@ -65,10 +66,14 @@ class OneFormerEngine(StubEngine):
             self.entry.hf_repo_id = repo  # type: ignore[misc]
 
         from visionservex.runtime.downloads import download
+
         download(self.entry)
 
         import torch  # type: ignore
-        from transformers import OneFormerForUniversalSegmentation, OneFormerProcessor  # type: ignore
+        from transformers import (  # type: ignore
+            OneFormerForUniversalSegmentation,
+            OneFormerProcessor,
+        )
 
         torch_dtype = torch.float32
         if precision in ("fp16", "bf16") and device != "cpu":
@@ -140,9 +145,7 @@ class OneFormerEngine(StubEngine):
         segments: list[Segment] = []
 
         if task == "semantic":
-            result = self._processor.post_process_semantic_segmentation(
-                out, target_sizes=[(h, w)]
-            )
+            result = self._processor.post_process_semantic_segmentation(out, target_sizes=[(h, w)])
             seg_map = result[0].cpu().numpy().astype(np.int32)  # (H, W)
             unique_ids = np.unique(seg_map)
             for uid in unique_ids:
@@ -151,15 +154,18 @@ class OneFormerEngine(StubEngine):
                 ys, xs = np.where(mask)
                 box = Box(float(xs.min()), float(ys.min()), float(xs.max()), float(ys.max()))
                 area_frac = float(mask.sum()) / (h * w)
-                segments.append(Segment(
-                    box=box, score=area_frac, label=label,
-                    mask=mask, class_id=int(uid),
-                ))
+                segments.append(
+                    Segment(
+                        box=box,
+                        score=area_frac,
+                        label=label,
+                        mask=mask,
+                        class_id=int(uid),
+                    )
+                )
 
         elif task == "instance":
-            result = self._processor.post_process_instance_segmentation(
-                out, target_sizes=[(h, w)]
-            )
+            result = self._processor.post_process_instance_segmentation(out, target_sizes=[(h, w)])
             info = result[0]
             seg_map = info.get("segmentation")
             if seg_map is not None:
@@ -174,15 +180,18 @@ class OneFormerEngine(StubEngine):
                     if len(xs) == 0:
                         continue
                     box = Box(float(xs.min()), float(ys.min()), float(xs.max()), float(ys.max()))
-                    segments.append(Segment(
-                        box=box, score=float(score), label=label,
-                        mask=mask, class_id=int(label_id),
-                    ))
+                    segments.append(
+                        Segment(
+                            box=box,
+                            score=float(score),
+                            label=label,
+                            mask=mask,
+                            class_id=int(label_id),
+                        )
+                    )
 
         elif task == "panoptic":
-            result = self._processor.post_process_panoptic_segmentation(
-                out, target_sizes=[(h, w)]
-            )
+            result = self._processor.post_process_panoptic_segmentation(out, target_sizes=[(h, w)])
             info = result[0]
             seg_map = info.get("segmentation")
             if seg_map is not None:
@@ -197,10 +206,15 @@ class OneFormerEngine(StubEngine):
                     if len(xs) == 0:
                         continue
                     box = Box(float(xs.min()), float(ys.min()), float(xs.max()), float(ys.max()))
-                    segments.append(Segment(
-                        box=box, score=float(score), label=label,
-                        mask=mask, class_id=int(label_id),
-                    ))
+                    segments.append(
+                        Segment(
+                            box=box,
+                            score=float(score),
+                            label=label,
+                            mask=mask,
+                            class_id=int(label_id),
+                        )
+                    )
 
         return SegmentationResult(
             kind="segmentation",

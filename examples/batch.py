@@ -20,7 +20,7 @@ def main() -> int:
     paths = [Path(p) for p in sys.argv[2:]]
 
     model = VisionModel(model_id)
-    for path, result in zip(paths, model.batch_predict(paths)):
+    for path, result in zip(paths, model.batch_predict(paths), strict=False):
         print(path.name, result.summary())
     return 0
 

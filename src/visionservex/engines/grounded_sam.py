@@ -17,20 +17,20 @@ Model ID:
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
 from PIL import Image
 
 from visionservex.core.results import (
     BaseResult,
-    Box,
     Detection,
     Segment,
     SegmentationResult,
 )
 from visionservex.engines._stub import StubEngine
-from visionservex.engines.base import BaseEngine, MissingDependencyError
+from visionservex.engines.base import MissingDependencyError
 from visionservex.engines.registry import register_engine
 from visionservex.registry import ModelEntry, default_registry
 from visionservex.utils.logging import get_logger
@@ -137,22 +137,26 @@ class GroundedSAMEngine(StubEngine):
                     boxes=[[box.x1, box.y1, box.x2, box.y2]],
                 )
                 for seg in sam_result.segments:
-                    segments.append(Segment(
+                    segments.append(
+                        Segment(
+                            box=det.box,
+                            score=det.score,
+                            label=det.label,
+                            mask=seg.mask,
+                            class_id=det.class_id,
+                        )
+                    )
+            except Exception as exc:
+                _log.warning("SAM failed for box %s: %s", det.box, exc)
+                segments.append(
+                    Segment(
                         box=det.box,
                         score=det.score,
                         label=det.label,
-                        mask=seg.mask,
+                        mask=np.zeros((h, w), dtype=np.uint8),
                         class_id=det.class_id,
-                    ))
-            except Exception as exc:
-                _log.warning("SAM failed for box %s: %s", det.box, exc)
-                segments.append(Segment(
-                    box=det.box,
-                    score=det.score,
-                    label=det.label,
-                    mask=np.zeros((h, w), dtype=np.uint8),
-                    class_id=det.class_id,
-                ))
+                    )
+                )
 
         return SegmentationResult(
             kind="segmentation",

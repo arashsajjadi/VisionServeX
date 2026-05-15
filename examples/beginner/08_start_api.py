@@ -18,8 +18,10 @@ def main() -> None:
     app = create_app(settings)
     print(f"VisionServeX listening on http://{settings.server.host}:{settings.server.port}")
     print("Try:")
-    print(f"  curl -F 'image=@examples/images/street.jpg' -F 'model_id=mock-detect' "
-          f"http://{settings.server.host}:{settings.server.port}/detect")
+    print(
+        f"  curl -F 'image=@examples/images/street.jpg' -F 'model_id=mock-detect' "
+        f"http://{settings.server.host}:{settings.server.port}/detect"
+    )
     uvicorn.run(app, host=settings.server.host, port=settings.server.port)
 
 

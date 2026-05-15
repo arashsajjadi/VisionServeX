@@ -213,10 +213,10 @@ def probe_dependencies() -> dict[str, dict[str, Any]]:
 
 
 __all__ = [
-    "SystemInfo",
     "CPUInfo",
-    "MemoryInfo",
     "DiskInfo",
+    "MemoryInfo",
+    "SystemInfo",
     "collect",
     "probe_dependencies",
 ]

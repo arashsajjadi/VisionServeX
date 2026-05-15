@@ -10,7 +10,6 @@ from visionservex.runtime.cache import ModelCache
 from visionservex.runtime.scheduler import (
     BackpressureError,
     RequestScheduler,
-    RequestTimeoutError,
 )
 
 

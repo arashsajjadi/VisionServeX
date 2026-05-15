@@ -15,23 +15,20 @@ from pathlib import Path
 
 import pytest
 
-from visionservex.registry import ModelEntry, ModelRegistry, default_registry
+from visionservex.registry import ModelEntry, default_registry
 from visionservex.runtime.downloads import (
     DownloadError,
-    InsufficientDiskSpace,
     ManualDownloadRequired,
     cache_clean,
-    cache_repair,
     cache_verify,
-    cached_path,
     download,
     is_cached,
     model_dir,
 )
 from visionservex.utils.hashing import sha256_file
 
-
 # ---------- test server fixture ----------
+
 
 class _Server(http.server.ThreadingHTTPServer):
     daemon_threads = True
@@ -42,7 +39,7 @@ def _http_server(payload: bytes):
     """Run a tiny HTTP server that streams ``payload`` for any GET."""
 
     class _Handler(http.server.BaseHTTPRequestHandler):
-        def do_GET(self):  # noqa: N802
+        def do_GET(self):
             range_header = self.headers.get("Range")
             start = 0
             if range_header and range_header.startswith("bytes="):
@@ -53,7 +50,9 @@ def _http_server(payload: bytes):
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Content-Type", "application/octet-stream")
             if start > 0:
-                self.send_header("Content-Range", f"bytes {start}-{len(payload) - 1}/{len(payload)}")
+                self.send_header(
+                    "Content-Range", f"bytes {start}-{len(payload) - 1}/{len(payload)}"
+                )
             self.end_headers()
             self.wfile.write(body)
 
@@ -94,9 +93,11 @@ def _entry(url: str, *, sha: str | None = None, size: int | None = None) -> Mode
 
 # ---------- tests ----------
 
+
 def test_synthetic_models_need_no_download(monkeypatch, tmp_path):
     monkeypatch.setenv("VISIONSERVEX_CACHE__CACHE_DIR", str(tmp_path))
     from visionservex.config import reload_settings
+
     reload_settings()
     reg = default_registry()
     mock_entry = reg.get("mock-detect")
@@ -107,10 +108,12 @@ def test_synthetic_models_need_no_download(monkeypatch, tmp_path):
 def test_direct_download_succeeds(monkeypatch, tmp_path):
     monkeypatch.setenv("VISIONSERVEX_CACHE__CACHE_DIR", str(tmp_path))
     from visionservex.config import reload_settings
+
     reload_settings()
 
     payload = b"hello-vsx-weights" * 100
     import hashlib
+
     sha = hashlib.sha256(payload).hexdigest()
 
     with _http_server(payload) as url:
@@ -125,6 +128,7 @@ def test_direct_download_succeeds(monkeypatch, tmp_path):
 def test_direct_download_sha_mismatch_removes_file(monkeypatch, tmp_path):
     monkeypatch.setenv("VISIONSERVEX_CACHE__CACHE_DIR", str(tmp_path))
     from visionservex.config import reload_settings
+
     reload_settings()
 
     payload = b"abcdef" * 200
@@ -141,6 +145,7 @@ def test_direct_download_sha_mismatch_removes_file(monkeypatch, tmp_path):
 def test_resume_download(monkeypatch, tmp_path):
     monkeypatch.setenv("VISIONSERVEX_CACHE__CACHE_DIR", str(tmp_path))
     from visionservex.config import reload_settings
+
     reload_settings()
     payload = b"PYTHON-IS-FUN!" * 500
     with _http_server(payload) as url:
@@ -158,6 +163,7 @@ def test_offline_without_cache_fails(monkeypatch, tmp_path):
     monkeypatch.setenv("VISIONSERVEX_CACHE__CACHE_DIR", str(tmp_path))
     monkeypatch.setenv("VISIONSERVEX_CACHE__OFFLINE", "true")
     from visionservex.config import reload_settings
+
     reload_settings()
     entry = _entry("http://127.0.0.1:1/never", size=100)
     with pytest.raises(DownloadError, match="offline"):
@@ -181,14 +187,17 @@ def test_external_api_model_raises_friendly():
 def test_cache_verify_returns_report(monkeypatch, tmp_path):
     monkeypatch.setenv("VISIONSERVEX_CACHE__CACHE_DIR", str(tmp_path))
     from visionservex.config import reload_settings
+
     reload_settings()
     payload = b"verify-me" * 50
     import hashlib
+
     sha = hashlib.sha256(payload).hexdigest()
     with _http_server(payload) as url:
         entry = _entry(url, sha=sha, size=len(payload))
         # Manually register so cache_verify can find it
         from visionservex.registry import default_registry
+
         reg = default_registry()
         reg.register(entry, replace=True)
         download(entry)
@@ -199,6 +208,7 @@ def test_cache_verify_returns_report(monkeypatch, tmp_path):
 def test_cache_clean_frees_bytes(monkeypatch, tmp_path):
     monkeypatch.setenv("VISIONSERVEX_CACHE__CACHE_DIR", str(tmp_path))
     from visionservex.config import reload_settings
+
     reload_settings()
     payload = b"clean-me" * 1000
     with _http_server(payload) as url:
@@ -211,6 +221,7 @@ def test_cache_clean_frees_bytes(monkeypatch, tmp_path):
 def test_require_auto_download_blocks_non_auto(monkeypatch, tmp_path):
     monkeypatch.setenv("VISIONSERVEX_CACHE__CACHE_DIR", str(tmp_path))
     from visionservex.config import reload_settings
+
     reload_settings()
     payload = b"abc" * 10
     with _http_server(payload) as url:
@@ -224,9 +235,11 @@ def test_duplicate_download_shares_lock(monkeypatch, tmp_path):
     """Two concurrent downloads should not both write the same file."""
     monkeypatch.setenv("VISIONSERVEX_CACHE__CACHE_DIR", str(tmp_path))
     from visionservex.config import reload_settings
+
     reload_settings()
     payload = b"shared-lock-payload" * 200
     import hashlib
+
     sha = hashlib.sha256(payload).hexdigest()
     results = []
     with _http_server(payload) as url:
