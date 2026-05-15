@@ -24,6 +24,7 @@ from rich.table import Table
 from visionservex import __version__
 from visionservex.cli import (
     benchmark_commands,
+    colab_commands,
     downloads_commands,
     gateway_commands,
     gpu_commands,
@@ -84,6 +85,7 @@ app.add_typer(syntax_audit.app, name="syntax")
 app.add_typer(security_commands.app, name="security")
 app.add_typer(privacy_commands.app, name="privacy")
 app.add_typer(validation_commands.app, name="validation")
+app.add_typer(colab_commands.app, name="colab")
 
 console = Console()
 

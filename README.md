@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-1.0.0-informational.svg" alt="v1.0.0">
+  <img src="https://img.shields.io/badge/version-1.1.0-informational.svg" alt="v1.1.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -166,6 +166,23 @@ See [docs/gpu_safety.md](docs/gpu_safety.md) and [docs/parallel_safety.md](docs/
 
 ---
 
+## Temporary Colab GPU worker (optional)
+
+Run VisionServeX on a Google Colab GPU as a short-lived remote worker. Good for demos and benchmarks, **not** for production — Colab sessions can disconnect at any time.
+
+```bash
+# Inside a Colab notebook:
+!pip install -U 'visionservex[server,hf,rfdetr]'
+!visionservex colab doctor
+!visionservex gateway start --profile colab-gpu-worker
+```
+
+A copy-paste notebook lives at [`examples/colab/VisionServeX_Colab_GPU_Worker.ipynb`](examples/colab/VisionServeX_Colab_GPU_Worker.ipynb). Full guide: [docs/colab_gpu_worker.md](docs/colab_gpu_worker.md).
+
+Tunnel exposure requires auth (`visionservex colab token`) and the explicit `--i-understand-this-is-public` flag. The CLI refuses otherwise.
+
+---
+
 ## Installation
 
 ```bash
@@ -204,6 +221,7 @@ visionservex validation run release   # run full CI test suite
 | [Model downloads](docs/model_downloads.md) | Download system, auto-pull |
 | [GPU safety](docs/gpu_safety.md) | VRAM guard, cleanup, emergency recovery |
 | [Parallel safety](docs/parallel_safety.md) | Model concurrency policies, benchmarks |
+| [Colab GPU worker](docs/colab_gpu_worker.md) | Run VisionServeX on a Colab GPU for demos |
 | [OpenMMLab expert](docs/openmmlab_expert_models.md) | RTMPose, RTMDet-R, Co-DINO, InternImage |
 | [Cloudflare Tunnel](docs/cloudflare_tunnel.md) | Public mode safely |
 | [GPU validation](docs/gpu_validation.md) | CPU/CUDA/MPS status |

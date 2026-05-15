@@ -51,6 +51,23 @@ _PROFILES: dict[str, dict] = {
         "VISIONSERVEX_RUNTIME__QUEUE_SIZE": "16",
         "VISIONSERVEX_MODELS__AUTO_PULL": "false",
     },
+    # Colab GPU worker profile.
+    # Defaults are conservative: single model loaded, single concurrency,
+    # short queue. VRAM safety guard remains active. No public bind.
+    "colab-gpu-worker": {
+        "VISIONSERVEX_SERVER__HOST": "127.0.0.1",
+        "VISIONSERVEX_RUNTIME__MAX_LOADED_MODELS": "1",
+        "VISIONSERVEX_RUNTIME__PER_MODEL_CONCURRENCY": "1",
+        "VISIONSERVEX_RUNTIME__QUEUE_SIZE": "4",
+        "VISIONSERVEX_RUNTIME__MAX_VRAM_FRACTION": "0.85",
+        "VISIONSERVEX_RUNTIME__MIN_FREE_VRAM_GB": "1.5",
+        "VISIONSERVEX_RUNTIME__DESKTOP_GPU": "false",
+        "VISIONSERVEX_RUNTIME__RESERVE_GUI_VRAM": "false",
+        "VISIONSERVEX_MODELS__AUTO_PULL": "false",
+        "VISIONSERVEX_PRIVACY__SAVE_INPUTS": "false",
+        "VISIONSERVEX_PRIVACY__SAVE_OUTPUTS": "false",
+        "VISIONSERVEX_PRIVACY__RETENTION_MODE": "metadata_only",
+    },
 }
 
 
@@ -59,7 +76,9 @@ def start(
     host: str = typer.Option("127.0.0.1", "--host"),
     port: int = typer.Option(8080, "--port"),
     profile: str | None = typer.Option(
-        None, "--profile", help="Config profile: laptop|gpu-workstation|cpu-safe|public-tunnel-safe"
+        None,
+        "--profile",
+        help="Config profile: laptop|gpu-workstation|cpu-safe|public-tunnel-safe|colab-gpu-worker",
     ),
     preload: str | None = typer.Option(
         None, "--preload", help="Comma-separated model IDs to warm up on startup."

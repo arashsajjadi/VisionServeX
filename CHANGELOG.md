@@ -7,6 +7,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-05-15
+
+### Colab GPU worker mode
+
+VisionServeX can now run as a temporary remote GPU worker on Google Colab.
+Marked **optional** and **non-production**. The CLI refuses to expose a tunnel
+without auth and explicit user acknowledgement.
+
+### Added
+- **`visionservex colab` subgroup** with 10 commands:
+  - `colab doctor` — environment + GPU + Drive + auth + cloudflared diagnostic.
+    Returns `COLAB_NOT_DETECTED`, `COLAB_GPU_UNAVAILABLE`, or `ok` with safe
+    VRAM budget.
+  - `colab status` — single-line status.
+  - `colab gpu-check` — GPU health + recommended profile.
+  - `colab mount-drive` — print exact Drive-mount snippet (cannot mount on
+    user's behalf).
+  - `colab cache-path` — show recommended cache path (Drive if mounted,
+    `/content` otherwise with persistence warning).
+  - `colab setup-cache [--drive]` — print exact `VISIONSERVEX_CACHE_DIR`
+    env-var setup commands; refuses `--drive` if Drive not mounted.
+  - `colab cleanup` — remove Colab session-specific temp files only.
+  - `colab token` — generate a one-time API key (URL-safe 32 bytes).
+  - `colab tunnel-start --domain <D> --i-understand-this-is-public` —
+    refuses without auth, refuses without acknowledgement, refuses without
+    `cloudflared` installed. Structured errors: `AUTH_REQUIRED`,
+    `EXPOSURE_NOT_ACKNOWLEDGED`, `CLOUDFLARED_MISSING`.
+  - `colab tunnel-stop` — SIGTERM to any running cloudflared tunnel process.
+  - `colab test-remote <URL> [--api-key K]` — probe `/health` and `/models`
+    of a remote worker. Returns `ok`, `AUTH_REQUIRED`, `UNREACHABLE`, or
+    `ERROR` with hints.
+- **`colab-gpu-worker` gateway profile**:
+  - bind: `127.0.0.1`
+  - max loaded models: 1
+  - per-model concurrency: 1
+  - queue size: 4
+  - max VRAM fraction: 0.85
+  - min free VRAM: 1.5 GB
+  - desktop GUI reserve: off (Colab is headless)
+  - auto-pull: off
+  - retention: `metadata_only`, save_inputs/outputs: false
+- **`examples/colab/VisionServeX_Colab_GPU_Worker.ipynb`** — copy-paste Colab
+  notebook covering install → diagnose → optional Drive cache → pull suite →
+  start gateway → run inference → optional tunnel → cleanup.
+- **`examples/colab/colab_quickstart.py`** — Python script form of the
+  notebook for non-notebook use.
+- **`docs/colab_gpu_worker.md`** — full guide: when to use Colab, profile
+  defaults, CLI reference, Drive persistence, secure tunnel exposure rules,
+  structured error codes, privacy notes, known limitations.
+- **README**: short "Temporary Colab GPU worker" section and docs link.
+- **19 new tests in `tests/test_colab_commands.py`** with mocks for Colab
+  detection, GPU state, Drive mount, auth, and tunnel safety rules. No tests
+  require an actual Colab session.
+
+### Decisions
+- **OpenMMLab real inference**: not closed in v1.1.0. The current environment
+  has no `mmpose`/`mmdet`/`mmrotate` installed. Status remains
+  `docker_checkpoint_required`. `visionservex openmmlab pull <model_id>`
+  continues to return `CHECKPOINT_REQUIRED` with official instructions.
+- **MPS verification**: not closed. No Apple Silicon hardware available to
+  maintainers. Status remains `implemented_unverified`.
+- **TensorRT real engine**: not closed. `trtexec` is not on PATH and the
+  `tensorrt` Python package is not installed. Status remains
+  `experimental/dry-run`. ONNX export for SwinV2 still works as in v1.0.0.
+- **Cooperative in-flight cancellation**: not added in v1.1.0. Queued-job
+  cancellation continues to work; in-flight inference remains best-effort.
+
+### Known limitations
+- Colab support is intentionally minimal. The CLI exposes diagnostics and a
+  profile; the user is responsible for the notebook flow. Drive mount and
+  cloudflared install are operations the user must perform inside Colab.
+- The previous v1.0.0 limitations (OpenMMLab, MPS, TensorRT, in-flight
+  cancellation) are unchanged and still honestly documented.
+
 ## [1.0.0] - 2026-05-15
 
 ### First stable release
