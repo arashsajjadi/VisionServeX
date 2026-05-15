@@ -9,6 +9,7 @@ All `gateway` commands map to the same underlying FastAPI app.
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import typer
 from rich.console import Console
@@ -53,7 +54,7 @@ _PROFILES: dict[str, dict] = {
 }
 
 
-@app.command("start", help="Start the local model gateway (alias for `visionservex serve`).")
+@app.command("start", help="Start the local model gateway.")
 def start(
     host: str = typer.Option("127.0.0.1", "--host"),
     port: int = typer.Option(8080, "--port"),
@@ -62,6 +63,11 @@ def start(
     ),
     preload: str | None = typer.Option(
         None, "--preload", help="Comma-separated model IDs to warm up on startup."
+    ),
+    auto_pull: bool = typer.Option(False, "--auto-pull", help="Enable auto-pull on first request."),
+    auth: bool = typer.Option(False, "--auth", help="Enable API key authentication."),
+    config_file: Path | None = typer.Option(
+        None, "--config", help="Path to YAML gateway config file."
     ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
@@ -87,6 +93,15 @@ def start(
         console.print(
             f"[yellow]Unknown profile {profile!r}. Available: {', '.join(_PROFILES)}[/yellow]"
         )
+
+    # Apply config file if provided
+    if config_file and config_file.exists():
+        os.environ["VISIONSERVEX_CONFIG_FILE"] = str(config_file)
+    # Apply flags
+    if auto_pull:
+        os.environ.setdefault("VISIONSERVEX_MODELS__AUTO_PULL", "true")
+    if auth:
+        os.environ.setdefault("VISIONSERVEX_AUTH__ENABLED", "true")
 
     settings = reload_settings(**{"server": {"host": host, "port": port}})
 
@@ -298,6 +313,98 @@ def openapi(
         import webbrowser
 
         webbrowser.open(docs_url)
+
+
+@app.command("loaded-models", help="Show currently loaded models (requires running gateway).")
+def loaded_models(
+    url: str = typer.Option("http://127.0.0.1:8080", "--url"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    try:
+        import httpx
+
+        r = httpx.get(f"{url}/gateway/status", timeout=3.0)
+        data = r.json()
+        models = data.get("loaded_models", [])
+    except Exception as exc:
+        if json_:
+            typer.echo(json.dumps({"error": str(exc), "loaded_models": []}))
+        else:
+            console.print(f"[red]Cannot reach gateway at {url}[/red]: {exc}")
+        return
+    if json_:
+        typer.echo(json.dumps(models, indent=2, default=str))
+        return
+    if not models:
+        console.print("[dim]No models currently loaded.[/dim]")
+    else:
+        from rich.table import Table
+
+        table = Table(title="Loaded models")
+        for col in ("id", "task", "device", "engine"):
+            table.add_column(col)
+        for m in models:
+            table.add_row(
+                m.get("model_id", "?"),
+                m.get("task", "?"),
+                m.get("device", "?"),
+                m.get("engine", "?"),
+            )
+        console.print(table)
+
+
+@app.command("memory", help="Show GPU/CPU memory usage (requires running gateway or local probe).")
+def memory(
+    url: str = typer.Option("http://127.0.0.1:8080", "--url"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    from visionservex.runtime.device import available_devices
+
+    payload: dict = {"devices": []}
+    for d in available_devices():
+        if d.available and d.total_vram_gb:
+            payload["devices"].append(
+                {
+                    "name": d.name,
+                    "total_vram_gb": d.total_vram_gb,
+                    "free_vram_gb": d.free_vram_gb,
+                    "detail": d.detail,
+                }
+            )
+    # Also try to get loaded model info from gateway
+    try:
+        import httpx
+
+        r = httpx.get(f"{url}/gateway/status", timeout=2.0)
+        payload["loaded_models"] = r.json().get("loaded_models", [])
+    except Exception:
+        payload["loaded_models"] = []
+
+    if json_:
+        typer.echo(json.dumps(payload, indent=2, default=str))
+        return
+
+    for d in payload["devices"]:
+        console.print(f"{d['name']:8s}: {d['free_vram_gb']:.1f}/{d['total_vram_gb']:.1f} GB free")
+    if payload["loaded_models"]:
+        console.print(f"Loaded models: {len(payload['loaded_models'])}")
+
+
+@app.command("stop", help="Stop the gateway (send SIGTERM to the server process).")
+def stop(
+    url: str = typer.Option("http://127.0.0.1:8080", "--url"),
+) -> None:
+    """Graceful stop via /shutdown endpoint (if implemented) or inform user."""
+    try:
+        import httpx
+
+        httpx.post(f"{url}/shutdown", timeout=3.0)
+        console.print(f"Gateway stop signal sent to {url}")
+    except Exception:
+        console.print(
+            f"[yellow]Could not reach {url}.[/yellow]\n"
+            "The gateway runs in the foreground — press [bold]Ctrl+C[/bold] in the terminal where it is running."
+        )
 
 
 __all__ = ["app"]

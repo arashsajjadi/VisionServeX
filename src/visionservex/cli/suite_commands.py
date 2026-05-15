@@ -30,6 +30,20 @@ _SUITES: dict[str, list[str]] = {
     "detection": ["rfdetr-nano", "rfdetr-small", "dfine-n", "dfine-s", "grounding-dino-tiny"],
     "segmentation": ["rfdetr-seg-nano", "sam-vit-base", "sam2-hiera-tiny", "grounded-sam"],
     "classification": ["swinv2-tiny", "swinv2-small"],
+    "full-auto": [
+        "rfdetr-nano",
+        "rfdetr-seg-nano",
+        "dfine-n",
+        "dfine-s",
+        "swinv2-tiny",
+        "swinv2-small",
+        "sam-vit-base",
+        "sam2-hiera-tiny",
+        "grounding-dino-tiny",
+        "grounded-sam",
+        "grounded-sam2",
+        "oneformer-swin-large",
+    ],
 }
 
 # Model-aware scheduler concurrency policies
@@ -94,7 +108,7 @@ def suite_pull(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
-    from visionservex.cli.benchmark_commands import _pull_with_progress
+    from visionservex.cli.main import _pull_with_progress
     from visionservex.registry import RegistryError, default_registry
     from visionservex.runtime.downloads import (
         DownloadError,

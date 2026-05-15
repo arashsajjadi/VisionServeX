@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-05-15
+
+### Added — Syntax Contract + Developer Experience
+- **222-example syntax contract** (`docs/syntax_contract.md`) — every CLI/Python/API pattern documented and covered by tests.
+- **`VisionServeXError` typed exception hierarchy** — `ModelNotFoundError`, `InputNotFoundError`, `DeviceUnavailableError`, `ModelMissingWeightsError`, `SidecarNotRunningError`, `ExternalModelError`, `ManualModelError`, `EngineDependencyError`. All carry `code`, `message`, `hint`, `details`.
+- **`AsyncClient`** — full async HTTP client for the gateway with `detect/classify/segment/grounded_segment/predict/batch_detect`.
+- **`VisionModel.loaded`** property.
+- **`VisionModel.predict` convenience kwargs** — `prompt`, `box`, `labels`, `top_k`, `threshold`, `task` (so callers never need to know backend parameter names).
+- **`BaseResult.save_json` and `save_image`** convenience methods.
+- **`predict` CLI enriched** — `--device`, `--precision`, `--top-k`, `--point`, `--box`, `--task`, `--threshold`, `--save-json`, `--save-image`, `--auto-pull`, `--no-auto-pull`, `--timeout`, `--debug`.
+- **`batch-predict`** CLI command (directory input, `--save-dir`, `--save-json`).
+- **`gateway loaded-models`**, `gateway memory`, `gateway stop` commands.
+- **`gateway start --auto-pull`**, `--auth`, `--config` flags.
+- **`models-audit`** command.
+- **`onnx-validate`** and **`onnx-parity`** commands.
+- **`parallel-test-pair`** command.
+- **`cache clean --model` / `--all`** flags.
+- **`recommend --include-docker`**, `--vram` flags.
+- **`pull-recommended --task TASK`** flag.
+- **`pull-suite full-auto`** suite.
+- **`/obb`** and **`/segment/b64`** server endpoints.
+- **`Client.obb`, `Client.batch_detect`, `Client.job_events`, `Client.cancel_job`, `Client.job()`**.
+- 36 new tests in `tests/test_syntax_contract.py` (210 total passing).
+
 ## [0.8.0] - 2026-05-15
 
 ### Added — Local Model Gateway

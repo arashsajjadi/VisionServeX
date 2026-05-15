@@ -425,6 +425,49 @@ def _register_routes(app: FastAPI) -> None:
             wait_for_download=wait_for_download,
         )
 
+    @app.post("/segment/b64", response_model=PredictionResponse, tags=["inference"])
+    async def segment_b64(request: Request, body: PromptRequest) -> PredictionResponse:
+        """Segment with optional box/point prompts via base64 image body."""
+        await _require_auth(request)
+        pil, warns = await _read_json_image(request, body)
+        options = body.options or {}
+        # Parse box/point from options
+        kwargs: dict = {}
+        if "boxes" in options:
+            kwargs["boxes"] = options["boxes"]
+        if "points" in options:
+            kwargs["points"] = options["points"]
+        if "point_labels" in options:
+            kwargs["point_labels"] = options["point_labels"]
+
+        async def _do_seg():
+            from visionservex.runtime.cache import get_model_cache
+
+            cache = get_model_cache()
+            model = cache.get(body.model_id)
+            return model.predict(pil, **kwargs)
+
+        result = await asyncio.get_running_loop().run_in_executor(None, lambda: _do_seg())
+        if asyncio.iscoroutine(result):
+            result = await result
+        return _wire_response(request, result, warns)
+
+    @app.post("/obb", response_model=PredictionResponse, tags=["inference"])
+    async def obb(
+        request: Request,
+        image: UploadFile = File(...),
+        model_id: str = Form("mock-obb"),
+        wait_for_download: bool = Query(default=True),
+    ):
+        return await _predict_endpoint(
+            request,
+            image,
+            model_id,
+            None,
+            expected="obb",
+            wait_for_download=wait_for_download,
+        )
+
     @app.post("/pose", response_model=PredictionResponse, tags=["inference"])
     async def pose(
         request: Request,

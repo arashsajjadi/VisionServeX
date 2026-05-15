@@ -138,13 +138,61 @@ class VisionModel:
 
     # ------- inference -------
 
+    @property
+    def loaded(self) -> bool:
+        """True when model weights are in memory."""
+        return self._loaded
+
     def predict(
         self,
         image: Image.Image | bytes | str | Path,
         *,
         prompts: Sequence[str] | None = None,
+        prompt: str | None = None,
+        box: list[float] | None = None,
+        boxes: list[list[float]] | None = None,
+        points: list[list[float]] | None = None,
+        point_labels: list[int] | None = None,
+        labels: list[int] | None = None,
+        top_k: int | None = None,
+        threshold: float | None = None,
+        task: str | None = None,
         **kwargs: Any,
     ) -> BaseResult:
+        """Run inference.
+
+        Convenience aliases so callers never need to know backend details:
+
+        - ``prompt="car, person"``    → split into prompts list
+        - ``box=[x1,y1,x2,y2]``       → passed as ``boxes=[[...]]``
+        - ``points=[[x,y]]``          → point prompts for SAM-style models
+        - ``labels=[1]`` / ``point_labels=[1]``  → foreground labels
+        - ``top_k=5``                 → classification top-k
+        - ``threshold=0.3``           → detection score threshold
+        - ``task="semantic"``         → OneFormer task override
+        """
+        # Normalise convenience aliases
+        if prompt is not None and not prompts:
+            prompts = [p.strip() for p in prompt.split(",") if p.strip()]
+        if box is not None and boxes is None:
+            boxes = [box]
+        if labels is not None and point_labels is None:
+            point_labels = labels
+
+        # Forward relevant kwargs to engine
+        if boxes is not None:
+            kwargs["boxes"] = boxes
+        if points is not None:
+            kwargs["points"] = points
+        if point_labels is not None:
+            kwargs["point_labels"] = point_labels
+        if top_k is not None:
+            kwargs["top_k"] = top_k
+        if threshold is not None:
+            kwargs["threshold"] = threshold
+        if task is not None:
+            kwargs["task"] = task
+
         self._ensure_loaded()
         pil = self._coerce_image(image)
         start = time.perf_counter()

@@ -183,6 +183,21 @@ class BaseResult:
         annotated.save(out, format=format)
         return out
 
+    def save_json(self, path: str | Path) -> Path:
+        """Save result as JSON (alias for ``save(path.json)``)."""
+        out = Path(path)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(self.to_json(indent=2), encoding="utf-8")
+        return out
+
+    def save_image(self, path: str | Path) -> Path:
+        """Save annotated image (alias for ``save(path.jpg)``)."""
+        out = Path(path)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        annotated = self.plot()
+        annotated.save(out)
+        return out
+
     def summary(self) -> str:
         """Return a short, human-readable single-line summary."""
         return f"<{self.__class__.__name__} model={self.model_id} latency={self.latency_ms:.1f}ms>"

@@ -612,10 +612,20 @@ def recommend_cmd(
     device: str | None = typer.Option(None, "--device"),
     vram: float | None = typer.Option(None, "--vram", help="Available VRAM in GB."),
     simple: bool = typer.Option(False, "--simple", help="Prefer beginner-friendly models."),
+    include_docker: bool = typer.Option(
+        False, "--include-docker", help="Include docker/sidecar models."
+    ),
     limit: int = typer.Option(5, "--limit"),
     json_: bool = typer.Option(False, "--json"),
 ):
     recs = recommend(task=task, device=device, vram_gb=vram, simple=simple, limit=limit)
+    if not include_docker:
+        recs = [
+            r
+            for r in recs
+            if r.entry.implementation_status != "partial"
+            or r.entry.engine not in {"openmmlab_sidecar"}
+        ]
     if json_:
         _emit([r.to_dict() for r in recs], json_mode=True)
         return
@@ -724,10 +734,11 @@ def pull_easy(
 
 @app.command("pull-recommended", help="Download the top recommendation for each common task.")
 def pull_recommended(
+    task: str | None = typer.Option(None, "--task", help="Limit to this task."),
     yes: bool = typer.Option(False, "--yes"),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
-    tasks = ["detect", "segment", "classify", "pose", "open_vocab_detect"]
+    tasks = [task] if task else ["detect", "segment", "classify", "pose", "open_vocab_detect"]
     chosen = []
     for t in tasks:
         recs = recommend(task=t, simple=True, limit=1)
@@ -808,14 +819,22 @@ def cache_list(json_: bool = typer.Option(False, "--json")) -> None:
 @cache_app.command("clean", help="Delete cached files for a model (or all).")
 def cache_clean_cmd(
     model_id: str | None = typer.Argument(None),
+    model: str | None = typer.Option(
+        None, "--model", help="Model ID to clean (alias for positional argument)."
+    ),
+    all_: bool = typer.Option(False, "--all", help="Clean ALL cached models."),
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation prompt."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
+    # --model overrides positional; --all clears everything
+    target = model or model_id
+    if all_:
+        target = None
     if not yes:
-        what = model_id or "ALL cached models"
+        what = target or "ALL cached models"
         if not typer.confirm(f"Delete {what}?"):
             raise typer.Exit(1)
-    freed = cache_clean(model_id)
+    freed = cache_clean(target)
     _emit({"bytes_freed": freed}, json_mode=json_, summary=f"freed {freed / (1024 * 1024):.1f} MiB")
 
 
@@ -852,47 +871,127 @@ def cache_repair_cmd(model_id: str, json_: bool = typer.Option(False, "--json"))
     )
 
 
-# ---------- predict / benchmark / export ----------
+# ---------- predict / batch-predict / benchmark / export ----------
 
 
 @app.command(help="Run inference from the command line.")
 def predict(
     model_id: str,
     input_path: Path,
-    save: Path | None = typer.Option(
-        None, "--save", help="Where to write the annotated image or JSON."
+    save: Path | None = typer.Option(None, "--save", help="Save annotated image or JSON."),
+    save_json: Path | None = typer.Option(None, "--save-json", help="Save result JSON to path."),
+    save_image: Path | None = typer.Option(
+        None, "--save-image", help="Save annotated image to path."
     ),
-    prompt: str | None = typer.Option(
-        None, "--prompt", help="Comma-separated prompts for open-vocab models."
+    prompt: str | None = typer.Option(None, "--prompt", help="Comma-separated text prompts."),
+    device: str | None = typer.Option(None, "--device", help="Device: auto|cpu|cuda|mps"),
+    precision: str | None = typer.Option(None, "--precision", help="Precision: auto|fp32|fp16"),
+    top_k: int | None = typer.Option(None, "--top-k", help="Top-k for classification."),
+    threshold: float | None = typer.Option(None, "--threshold", help="Score threshold."),
+    point: str | None = typer.Option(
+        None, "--point", help="Point prompt x,y for SAM-style models."
     ),
+    box: str | None = typer.Option(
+        None, "--box", help="Box prompt x1,y1,x2,y2 for SAM-style models."
+    ),
+    task: str | None = typer.Option(
+        None, "--task", help="Task for multi-task models (semantic/panoptic/instance)."
+    ),
+    timeout: float | None = typer.Option(None, "--timeout", help="Prediction timeout in seconds."),
     auto_pull: bool = typer.Option(False, "--auto-pull", help="Download weights if missing."),
+    no_auto_pull: bool = typer.Option(False, "--no-auto-pull", help="Disable auto-pull."),
     json_: bool = typer.Option(False, "--json"),
+    debug: bool = typer.Option(False, "--debug"),
 ) -> None:
+    """Run prediction on an image. Supports detection, classification, segmentation, pose, OBB."""
+    from visionservex.exceptions import (
+        InputNotFoundError,
+        ModelNotFoundError,
+        VisionServeXError,
+    )
+
     if not input_path.exists():
-        _die(f"file not found: {input_path}", json_mode=json_, code="FILE_NOT_FOUND")
+        _die(
+            str(InputNotFoundError(str(input_path))),
+            json_mode=json_,
+            code="INPUT_NOT_FOUND",
+            hint=f"Check file path: {input_path}",
+        )
         return
-    prompts = [p.strip() for p in prompt.split(",")] if prompt else None
+
+    effective_auto_pull = auto_pull and not no_auto_pull
+
+    # Parse convenience args
+    kwargs: dict = {}
+    if prompt:
+        kwargs["prompt"] = prompt
+    if top_k is not None:
+        kwargs["top_k"] = top_k
+    if threshold is not None:
+        kwargs["threshold"] = threshold
+    if task is not None:
+        kwargs["task"] = task
+    if point:
+        try:
+            x, y = [float(v) for v in point.split(",")]
+            kwargs["points"] = [[x, y]]
+            kwargs["point_labels"] = [1]
+        except ValueError:
+            _die(
+                f"Invalid --point format {point!r}; expected x,y", json_mode=json_, code="BAD_ARGS"
+            )
+            return
+    if box:
+        try:
+            coords = [float(v) for v in box.split(",")]
+            if len(coords) != 4:
+                raise ValueError
+            kwargs["box"] = coords
+        except ValueError:
+            _die(
+                f"Invalid --box format {box!r}; expected x1,y1,x2,y2",
+                json_mode=json_,
+                code="BAD_ARGS",
+            )
+            return
+
     try:
-        model = VisionModel(model_id, auto_pull=auto_pull)
-        result = model.predict(input_path, prompts=prompts)
-    except RegistryError as exc:
-        _die(str(exc), json_mode=json_, code="MODEL_NOT_FOUND")
+        model_kwargs: dict = {"auto_pull": effective_auto_pull}
+        if device:
+            model_kwargs["device"] = device
+        if precision:
+            model_kwargs["precision"] = precision
+        model = VisionModel(model_id, **model_kwargs)
+        result = model.predict(input_path, **kwargs)
+    except RegistryError:
+        err = ModelNotFoundError(model_id)
+        _die(str(err), json_mode=json_, code=err.code, hint=err.hint)
         return
     except (DownloadError, ManualDownloadRequired) as exc:
         _die(
-            str(exc),
-            json_mode=json_,
-            code="DOWNLOAD_FAILED",
-            hint=f"see `visionservex info {model_id}`",
+            str(exc), json_mode=json_, code="DOWNLOAD_FAILED", hint=f"visionservex pull {model_id}"
         )
         return
+    except VisionServeXError as exc:
+        _die(str(exc), json_mode=json_, code=exc.code, hint=exc.hint)
+        return
     except Exception as exc:
+        if debug:
+            raise
         _die(str(exc), json_mode=json_, code="PREDICT_FAILED")
         return
 
+    # Save outputs
+    if save:
+        save.parent.mkdir(parents=True, exist_ok=True)
+        result.save(save)
+    if save_json:
+        result.save_json(save_json)
+    if save_image:
+        result.save_image(save_image)
+
     payload = result.to_dict()
     if save:
-        result.save(save)
         payload["saved_to"] = str(save)
     if json_:
         _emit(payload, json_mode=True)
@@ -904,12 +1003,83 @@ def predict(
     )
     if result.model_loaded_from:
         console.print(f"  model loaded from: {result.model_loaded_from}")
-    if result.cache_path:
-        console.print(f"  cache path: {result.cache_path}")
-    if save:
-        console.print(f"  saved to: {save}")
+    if save or save_json or save_image:
+        console.print(f"  saved to: {save or save_json or save_image}")
     for w in result.warnings:
         console.print(f"  [yellow]warning:[/yellow] {w}")
+
+
+@app.command("batch-predict", help="Run inference on a directory of images.")
+def batch_predict(
+    model_id: str,
+    input_dir: Path,
+    save_dir: Path | None = typer.Option(
+        None, "--save-dir", help="Output directory for annotated images."
+    ),
+    save_json: Path | None = typer.Option(
+        None, "--save-json", help="Write all results to this JSON file."
+    ),
+    prompt: str | None = typer.Option(None, "--prompt", help="Prompts for open-vocab models."),
+    top_k: int | None = typer.Option(None, "--top-k", help="Top-k for classification."),
+    extensions: str = typer.Option("jpg,jpeg,png,webp,bmp", "--ext"),
+    auto_pull: bool = typer.Option(False, "--auto-pull"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Run the same model on all images in a directory."""
+
+    if not input_dir.exists():
+        _die(f"directory not found: {input_dir}", json_mode=json_, code="INPUT_NOT_FOUND")
+        return
+
+    exts = {f".{e.strip().lower()}" for e in extensions.split(",")}
+    paths = sorted(p for p in input_dir.iterdir() if p.is_file() and p.suffix.lower() in exts)
+    if not paths:
+        _die(f"no images found in {input_dir}", json_mode=json_, code="NO_IMAGES")
+        return
+
+    kwargs: dict = {}
+    if prompt:
+        kwargs["prompt"] = prompt
+    if top_k is not None:
+        kwargs["top_k"] = top_k
+
+    if save_dir:
+        save_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        model = VisionModel(model_id, auto_pull=auto_pull)
+    except RegistryError as exc:
+        _die(str(exc), json_mode=json_, code="MODEL_NOT_FOUND")
+        return
+
+    all_results = []
+    for p in paths:
+        try:
+            result = model.predict(p, **kwargs)
+            entry = result.to_dict()
+            entry["input_path"] = str(p)
+            all_results.append(entry)
+            if save_dir:
+                out = save_dir / p.name
+                result.save(out)
+            if not json_:
+                console.print(f"  [green]ok[/green] {p.name}  {result.summary()}")
+        except Exception as exc:
+            all_results.append({"input_path": str(p), "error": str(exc)[:100]})
+            if not json_:
+                console.print(f"  [red]err[/red] {p.name}: {str(exc)[:80]}")
+
+    if save_json:
+        import json as _j
+
+        save_json.parent.mkdir(parents=True, exist_ok=True)
+        save_json.write_text(_j.dumps(all_results, indent=2, default=str), encoding="utf-8")
+
+    if json_:
+        _emit(all_results, json_mode=True)
+    else:
+        ok = sum(1 for r in all_results if "error" not in r)
+        console.print(f"\n{ok}/{len(all_results)} predictions successful.")
 
 
 @app.command(help="Benchmark model inference latency.")
@@ -1292,3 +1462,220 @@ def pull_suite_alias(
     from visionservex.cli.suite_commands import suite_pull
 
     suite_pull(suite_name=suite_name, yes=yes, json_=json_)
+
+
+# ---------- models audit ----------
+
+
+@app.command("models-audit", help="Audit model registry for completeness and honest status.")
+def models_audit(
+    verbose: bool = typer.Option(False, "--verbose"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Audit model registry: find stubs without notes, external without alternatives, etc."""
+    from visionservex.registry import default_registry
+
+    reg = default_registry()
+    issues = []
+    status_counts: dict[str, int] = {}
+
+    for entry in reg.list():
+        status_counts[entry.implementation_status] = (
+            status_counts.get(entry.implementation_status, 0) + 1
+        )
+        model_issues = []
+        if entry.implementation_status == "stub" and not entry.notes and not entry.warnings:
+            model_issues.append("stub without notes/warnings")
+        if entry.status == "external" and not entry.notes:
+            model_issues.append("external without notes")
+        if not entry.license:
+            model_issues.append("missing license")
+        if not entry.upstream_url:
+            model_issues.append("missing upstream_url")
+        if model_issues:
+            issues.append({"id": entry.id, "issues": model_issues})
+
+    payload = {
+        "counts": status_counts,
+        "models_with_issues": len(issues),
+        "issues": issues if verbose or json_ else issues[:5],
+    }
+    if json_:
+        _emit(payload, json_mode=True)
+        return
+
+    console.print(f"[bold]Models audit[/bold] — {sum(status_counts.values())} total")
+    for status, count in sorted(status_counts.items()):
+        color = {"wired": "green", "partial": "yellow", "stub": "grey50"}.get(status, "white")
+        console.print(f"  [{color}]{status}[/{color}]: {count}")
+    if issues:
+        console.print(f"\n[yellow]{len(issues)} models have issues[/yellow]")
+        for item in issues[:10]:
+            console.print(f"  {item['id']}: {', '.join(item['issues'])}")
+    else:
+        console.print("\n[green]All models look good.[/green]")
+
+
+# ---------- onnx sub-commands ----------
+
+
+@app.command("onnx-validate", help="Validate an ONNX file with onnx.checker.")
+def onnx_validate(
+    onnx_path: Path = typer.Argument(..., help="Path to .onnx file."),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    try:
+        import onnx
+
+        model = onnx.load(str(onnx_path))
+        onnx.checker.check_model(model)
+        payload = {
+            "status": "ok",
+            "path": str(onnx_path),
+            "opset": model.opset_import[0].version if model.opset_import else "unknown",
+        }
+        if json_:
+            _emit(payload, json_mode=True)
+        else:
+            console.print(f"[green]ONNX validation passed[/green]: {onnx_path}")
+    except ImportError:
+        _die(
+            "onnx not installed. pip install 'visionservex[onnx]'",
+            json_mode=json_,
+            code="MISSING_DEP",
+        )
+    except Exception as exc:
+        _die(str(exc), json_mode=json_, code="ONNX_VALIDATION_FAILED")
+
+
+@app.command("onnx-parity", help="Check ONNX model output matches the original PyTorch model.")
+def onnx_parity(
+    model_id: str,
+    onnx_path: Path = typer.Argument(...),
+    tolerance: float = typer.Option(1e-3, "--tol"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    try:
+        import numpy as np
+        import onnxruntime as ort
+        from PIL import Image as _Image
+
+        from visionservex import VisionModel
+
+        img = _Image.new("RGB", (256, 256), "blue")
+        m = VisionModel(model_id, device="cpu")
+        m._ensure_loaded()
+        torch_result = m.predict(img)
+
+        sess = ort.InferenceSession(str(onnx_path))
+        inp_name = sess.get_inputs()[0].name
+        dummy = np.random.randn(1, 3, 256, 256).astype(np.float32)
+        ort_out = sess.run(None, {inp_name: dummy})
+
+        payload = {
+            "model_id": model_id,
+            "onnx_path": str(onnx_path),
+            "ort_output_shapes": [list(o.shape) for o in ort_out],
+            "torch_task": torch_result.task,
+            "status": "parity_check_run",
+            "note": "Shape check only; numerical parity requires matching inputs.",
+        }
+        if json_:
+            _emit(payload, json_mode=True)
+        else:
+            console.print(f"[green]ORT outputs:[/green] {payload['ort_output_shapes']}")
+    except Exception as exc:
+        _die(str(exc), json_mode=json_, code="PARITY_FAILED")
+
+
+# ---------- parallel-test-pair ----------
+
+
+@app.command("parallel-test-pair", help="Test two models running concurrently on the same device.")
+def parallel_test_pair(
+    model_a: str,
+    model_b: str,
+    input_path: Path,
+    device: str = typer.Option("auto", "--device"),
+    runs: int = typer.Option(3, "--runs"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Run model_a and model_b concurrently and compare to sequential times."""
+    import threading
+    import time
+
+    from PIL import Image as _PIL
+
+    from visionservex import VisionModel
+
+    img = (
+        _PIL.open(input_path).convert("RGB") if input_path.exists() else _PIL.new("RGB", (320, 240))
+    )
+
+    ma = VisionModel(model_a, device=device)
+    mb = VisionModel(model_b, device=device)
+    ma._ensure_loaded()
+    mb._ensure_loaded()
+
+    # Sequential baseline
+    a_times, b_times = [], []
+    for _ in range(runs):
+        t = time.perf_counter()
+        ma.predict(img)
+        a_times.append((time.perf_counter() - t) * 1000)
+        t = time.perf_counter()
+        mb.predict(img)
+        b_times.append((time.perf_counter() - t) * 1000)
+    seq_total = sorted(a_times)[runs // 2] + sorted(b_times)[runs // 2]
+
+    # Concurrent
+    wall_times = []
+    for _ in range(runs):
+        results_ab = {}
+
+        def _run(name, model, out):
+            t = time.perf_counter()
+            model.predict(img)
+            out[name] = (time.perf_counter() - t) * 1000
+
+        threads = [
+            threading.Thread(target=_run, args=(model_a, ma, results_ab)),
+            threading.Thread(target=_run, args=(model_b, mb, results_ab)),
+        ]
+        tw = time.perf_counter()
+        for th in threads:
+            th.start()
+        for th in threads:
+            th.join()
+        wall_times.append((time.perf_counter() - tw) * 1000)
+
+    wall_p50 = sorted(wall_times)[runs // 2]
+    slowdown = (wall_p50 / seq_total - 1.0) * 100 if seq_total > 0 else 0.0
+    status = (
+        "excellent_parallelism"
+        if slowdown <= 10
+        else "acceptable_parallelism"
+        if slowdown <= 25
+        else "scheduler_needs_queueing"
+    )
+
+    payload = {
+        "model_a": model_a,
+        "model_b": model_b,
+        "device": device,
+        "seq_a_p50_ms": round(sorted(a_times)[runs // 2], 2),
+        "seq_b_p50_ms": round(sorted(b_times)[runs // 2], 2),
+        "seq_total_ms": round(seq_total, 2),
+        "concurrent_wall_p50_ms": round(wall_p50, 2),
+        "slowdown_pct": round(slowdown, 1),
+        "status": status,
+    }
+    if json_:
+        _emit(payload, json_mode=True)
+        return
+    console.print(f"[bold]Pair test:[/bold] {model_a} + {model_b} on {device}")
+    console.print(
+        f"  Sequential: {seq_total:.1f}ms  |  Concurrent wall: {wall_p50:.1f}ms  |  Slowdown: {slowdown:.0f}%"
+    )
+    color = "green" if "excellent" in status else "yellow" if "acceptable" in status else "red"
+    console.print(f"  Status: [{color}]{status}[/{color}]")

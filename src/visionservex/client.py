@@ -335,10 +335,32 @@ class Client:
         data = self._post_multipart("/pose", img_bytes, fname, {"model_id": model_id})
         return ClientResult(data)
 
+    def obb(self, model_id: str, image: Any) -> ClientResult:
+        """Oriented bounding box detection."""
+        img_bytes, fname = self._prepare_image(image)
+        data = self._post_multipart("/obb", img_bytes, fname, {"model_id": model_id})
+        return ClientResult(data)
+
+    def batch_detect(self, model_id: str, images: list[Any]) -> list[ClientResult]:
+        return [self.detect(model_id, img) for img in images]
+
     # ------ jobs ------
+
+    def job(self, job_id: str) -> dict[str, Any]:
+        return self._get(f"/jobs/{job_id}")
 
     def job_status(self, job_id: str) -> dict[str, Any]:
         return self._get(f"/jobs/{job_id}")
+
+    def job_events(self, job_id: str, *, poll_interval_s: float = 0.5):  # yields dict
+        """Poll job events until terminal state. Yields each status snapshot."""
+        terminal = {"completed", "failed", "cancelled"}
+        while True:
+            data = self.job_status(job_id)
+            yield data
+            if data.get("status") in terminal:
+                break
+            time.sleep(poll_interval_s)
 
     def poll_job(
         self, job_id: str, *, timeout_s: float = 600.0, interval_s: float = 1.0
@@ -353,5 +375,180 @@ class Client:
             time.sleep(interval_s)
         raise TimeoutError(f"Job {job_id} did not finish within {timeout_s}s")
 
+    def cancel_job(self, job_id: str) -> dict[str, Any]:
+        import httpx
 
-__all__ = ["Client", "ClientResult", "GatewayError"]
+        r = httpx.delete(
+            f"{self.base_url}/jobs/{job_id}",
+            headers=self._headers(),
+            timeout=self._timeout,
+        )
+        return self._raise_or_json(r)
+
+
+# ---------------------------------------------------------------------------
+# AsyncClient
+# ---------------------------------------------------------------------------
+
+
+class AsyncClient:
+    """Asynchronous HTTP client for VisionServeX gateway.
+
+    Requires ``httpx[asyncio]`` (already a dependency).
+
+    Example::
+
+        import asyncio
+        from visionservex import AsyncClient
+
+        async def main():
+            client = AsyncClient("http://127.0.0.1:8080")
+            result = await client.detect("dfine-n", "image.jpg")
+            print(result)
+
+        asyncio.run(main())
+    """
+
+    def __init__(
+        self,
+        base_url: str = "http://127.0.0.1:8080",
+        *,
+        api_key: str | None = None,
+        timeout: float = 60.0,
+        max_retries: int = 3,
+        retry_delay: float = 1.0,
+    ) -> None:
+        self.base_url = base_url.rstrip("/")
+        self._api_key = api_key
+        self._timeout = timeout
+        self._max_retries = max_retries
+        self._retry_delay = retry_delay
+
+    def _headers(self) -> dict[str, str]:
+        hdrs: dict[str, str] = {}
+        if self._api_key:
+            hdrs["Authorization"] = f"Bearer {self._api_key}"
+        return hdrs
+
+    @staticmethod
+    def _raise_or_json(response: Any) -> dict[str, Any]:
+        return Client._raise_or_json(response)
+
+    @staticmethod
+    def _prepare_image(image: Any) -> tuple[bytes, str]:
+        return Client._prepare_image(image)
+
+    async def _get(self, path: str) -> dict[str, Any]:
+
+        import httpx
+
+        async with httpx.AsyncClient(headers=self._headers(), timeout=self._timeout) as c:
+            r = await c.get(f"{self.base_url}{path}")
+            return self._raise_or_json(r)
+
+    async def _post_multipart(
+        self,
+        path: str,
+        image_bytes: bytes,
+        filename: str,
+        extra_fields: dict[str, str],
+    ) -> dict[str, Any]:
+        import asyncio
+
+        import httpx
+
+        attempt = 0
+        delay = self._retry_delay
+        async with httpx.AsyncClient(headers=self._headers(), timeout=self._timeout) as c:
+            while True:
+                r = await c.post(
+                    f"{self.base_url}{path}",
+                    files={"image": (filename, io.BytesIO(image_bytes), "image/jpeg")},
+                    data=extra_fields,
+                )
+                if r.status_code in _RETRY_STATUS and attempt < self._max_retries:
+                    attempt += 1
+                    await asyncio.sleep(delay)
+                    delay = min(delay * 2, 8.0)
+                    continue
+                return self._raise_or_json(r)
+
+    async def _post_json(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
+        import asyncio
+
+        import httpx
+
+        attempt = 0
+        delay = self._retry_delay
+        async with httpx.AsyncClient(headers=self._headers(), timeout=self._timeout) as c:
+            while True:
+                r = await c.post(f"{self.base_url}{path}", json=payload)
+                if r.status_code in _RETRY_STATUS and attempt < self._max_retries:
+                    attempt += 1
+                    await asyncio.sleep(delay)
+                    delay = min(delay * 2, 8.0)
+                    continue
+                return self._raise_or_json(r)
+
+    async def health(self) -> dict[str, Any]:
+        return await self._get("/health")
+
+    async def models(self) -> list[dict[str, Any]]:
+        return (await self._get("/models")).get("models", [])
+
+    async def detect(self, model_id: str, image: Any) -> ClientResult:
+        img_bytes, fname = self._prepare_image(image)
+        data = await self._post_multipart("/detect", img_bytes, fname, {"model_id": model_id})
+        return ClientResult(data)
+
+    async def classify(self, model_id: str, image: Any, *, top_k: int = 5) -> ClientResult:
+        img_bytes, fname = self._prepare_image(image)
+        data = await self._post_multipart(
+            "/classify", img_bytes, fname, {"model_id": model_id, "top_k": str(top_k)}
+        )
+        return ClientResult(data)
+
+    async def segment(
+        self,
+        model_id: str,
+        image: Any,
+        *,
+        box: list[float] | None = None,
+        points: list[list[float]] | None = None,
+        point_labels: list[int] | None = None,
+    ) -> ClientResult:
+        img_bytes, _ = self._prepare_image(image)
+        b64 = base64.b64encode(img_bytes).decode("ascii")
+        payload: dict[str, Any] = {"model_id": model_id, "image_b64": b64, "prompts": []}
+        if box:
+            payload["options"] = {"boxes": [box]}
+        data = await self._post_json("/segment/b64", payload)
+        return ClientResult(data)
+
+    async def grounded_segment(self, model_id: str, image: Any, prompt: str) -> ClientResult:
+        img_bytes, _ = self._prepare_image(image)
+        b64 = base64.b64encode(img_bytes).decode("ascii")
+        data = await self._post_json(
+            "/grounded-segment",
+            {
+                "model_id": model_id,
+                "image_b64": b64,
+                "prompts": [p.strip() for p in prompt.split(",") if p.strip()],
+            },
+        )
+        return ClientResult(data)
+
+    async def predict(self, model_id: str, image: Any, **kwargs: Any) -> ClientResult:
+        img_bytes, fname = self._prepare_image(image)
+        fields: dict[str, str] = {"model_id": model_id}
+        data = await self._post_multipart("/predict", img_bytes, fname, fields)
+        return ClientResult(data)
+
+    async def batch_detect(self, model_id: str, images: list[Any]) -> list[ClientResult]:
+        import asyncio
+
+        tasks = [self.detect(model_id, img) for img in images]
+        return list(await asyncio.gather(*tasks))
+
+
+__all__ = ["AsyncClient", "Client", "ClientResult", "GatewayError"]
