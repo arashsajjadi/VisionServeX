@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-1.0.0rc3-informational.svg" alt="v1.0.0rc3">
+  <img src="https://img.shields.io/badge/version-1.0.0-informational.svg" alt="v1.0.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -83,16 +83,25 @@ result = client.classify("swinv2-tiny", "image.jpg")
 | **Grounded SAM** | `grounded-sam` | grounded segment | beta | `[hf]` |
 | **Grounded-SAM2** | `grounded-sam2` | grounded segment | beta | `[hf]` |
 | **OneFormer** | `oneformer-swin-large/…` | semantic/panoptic | beta | `[hf]` |
-| **RTMPose** | `rtmpose-s/m/…` | pose | docker/manual | `openmmlab` |
-| **RTMDet-R/R2** | `rtmdet-r*/r2*` | OBB | docker/manual | `openmmlab` |
+| **RTMPose** | `rtmpose-s/m/…` | pose | docker_checkpoint_required | `openmmlab` |
+| **RTMDet-R/R2** | `rtmdet-r*/r2*` | OBB | docker_checkpoint_required | `openmmlab` |
 | **ONNX export** | SwinV2 | — | working | `[onnx]` |
-| **TensorRT** | — | — | dry-run only | — |
+| **TensorRT** | — | — | experimental/dry-run | — |
 
 **GPU:** CUDA verified on RTX 5080 for 6+ model families. Run `visionservex gpu smoke-test` on your hardware.  
-**MPS:** Implemented, unverified (no Apple Silicon test hardware).  
-**VRAM safety:** Desktop GPU guard reserves buffer for GUI/system stability. GPU tests run serially by default.
+**MPS (Apple Silicon):** Implemented, not maintainer-verified (no test hardware). See [docs/gpu_validation.md](docs/gpu_validation.md).  
+**VRAM safety:** Desktop GPU guard reserves 3 GB for GUI/system. GPU tests run serially by default. See [docs/gpu_safety.md](docs/gpu_safety.md).
 
-> **"beta" means:** CPU-verified, CUDA-verified when noted, CLI/Python/gateway tested. No known regressions. May have edge cases.
+> **"beta" means:** CPU-verified, CUDA-verified when applicable, CLI/Python/gateway tested. No known regressions. May have edge cases.
+
+---
+
+## Known limitations
+
+- **OpenMMLab** (RTMPose, RTMDet-R/R2, Co-DINO, InternImage): Requires the OpenMMLab toolchain and manually-obtained checkpoints. Returns `CHECKPOINT_REQUIRED` structured error — no fake output. See [docs/openmmlab_expert_models.md](docs/openmmlab_expert_models.md).
+- **TensorRT**: ONNX export works for SwinV2. TensorRT engine build requires `trtexec` and is not implemented inside VisionServeX. See [docs/tensorrt.md](docs/tensorrt.md).
+- **Apple MPS**: Implemented but not maintainer-verified. Users are encouraged to run `visionservex mps smoke-test --models swinv2-tiny,sam2-hiera-tiny` on Apple Silicon and report results.
+- **In-flight cancellation**: Queued jobs can be cancelled. In-flight inference may complete before cancellation takes effect.
 
 ---
 
@@ -139,6 +148,24 @@ visionservex tunnel run tunnel.yaml --i-understand-this-is-public
 
 ---
 
+## GPU Safety
+
+```bash
+# Check VRAM state and safety budget
+visionservex gpu guard-status
+
+# List GPU compute processes (GUI processes are protected)
+visionservex gpu processes
+
+# Safely clean up VisionServeX/pytest GPU processes
+visionservex gpu cleanup --dry-run
+visionservex gpu cleanup --yes
+```
+
+See [docs/gpu_safety.md](docs/gpu_safety.md) and [docs/parallel_safety.md](docs/parallel_safety.md).
+
+---
+
 ## Installation
 
 ```bash
@@ -173,11 +200,14 @@ visionservex validation run release   # run full CI test suite
 | [Security](docs/security.md) | Threat model, modes, configuration |
 | [Privacy](docs/privacy.md) | No E2E claim, retention policy, encryption |
 | [Threat model](docs/threat_model.md) | What we protect and what we don't |
-| [Model zoo](docs/model_zoo.md) | All 68 models with status table |
+| [Model zoo](docs/model_zoo.md) | All 68 models with current status |
 | [Model downloads](docs/model_downloads.md) | Download system, auto-pull |
+| [GPU safety](docs/gpu_safety.md) | VRAM guard, cleanup, emergency recovery |
+| [Parallel safety](docs/parallel_safety.md) | Model concurrency policies, benchmarks |
 | [OpenMMLab expert](docs/openmmlab_expert_models.md) | RTMPose, RTMDet-R, Co-DINO, InternImage |
 | [Cloudflare Tunnel](docs/cloudflare_tunnel.md) | Public mode safely |
 | [GPU validation](docs/gpu_validation.md) | CPU/CUDA/MPS status |
+| [TensorRT](docs/tensorrt.md) | ONNX export and TensorRT roadmap |
 | [Benchmarks](docs/benchmarks.md) | Latency numbers |
 | [Syntax contract](docs/syntax_contract.md) | 222 verified examples |
 | [Troubleshooting](docs/troubleshooting.md) | Common errors |
@@ -190,15 +220,6 @@ visionservex validation run release   # run full CI test suite
 Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
 > Each integrated model retains its own upstream license. Review model, checkpoint, and dataset licenses before commercial use. See [docs/model_licenses.md](docs/model_licenses.md).
-
----
-
-## What remains before v1.0.0 final
-
-- [ ] OpenMMLab checkpoint auto-download (currently `CHECKPOINT_REQUIRED` structured error)
-- [ ] RTMPose / RTMDet-R2 real end-to-end inference via sidecar (checkpoints needed)
-- [ ] MPS verification on Apple Silicon hardware
-- [ ] TensorRT real engine build (currently dry-run)
 
 ---
 

@@ -7,6 +7,92 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-05-15
+
+### First stable release
+
+**Scope of stable v1.0.0 core:**
+
+The following model families are part of the stable core: Mock (all tasks),
+RF-DETR, RF-DETR-Seg (nano/small/medium), D-FINE, Grounding DINO, SwinV2,
+SAM v1, SAM 2, Grounded SAM, Grounded-SAM2, and OneFormer. All are `beta`
+status or higher, wired via HF Transformers or the rfdetr package.
+
+The following are **explicitly outside the stable v1.0.0 core**:
+- OpenMMLab (RTMPose, RTMDet-R/R2, Co-DINO, InternImage): `docker_checkpoint_required`.
+  Returns `CHECKPOINT_REQUIRED` structured error — no fake output.
+  See `visionservex openmmlab pull <model_id>` for instructions.
+- TensorRT: dry-run/experimental. ONNX export works; engine build requires `trtexec`.
+- MPS (Apple Silicon): implemented, not maintainer-verified (no test hardware).
+
+### Summary of complete v1.0.0 implementation
+
+**Local gateway and API:**
+- Full local HTTP gateway (FastAPI, `visionservex serve`)
+- CLI predict, batch-predict, benchmark-matrix, parallel-test
+- Python `VisionModel` API — direct inference without gateway
+- `Client` and `AsyncClient` for gateway access
+- SSE job events, SQLite job store, cancellation for queued jobs
+
+**Supported model families (wired):**
+- Mock (8 tasks, stable, CPU-only, no download)
+- RF-DETR / RF-DETR-Seg (nano through medium, beta, rfdetr package)
+- D-FINE (n/s/m/l/x, beta, HF Transformers)
+- Grounding DINO (tiny/swin-t/swin-b, beta, HF Transformers)
+- SwinV2 (tiny/small/base/large, beta, HF Transformers)
+- SAM v1 (vit-base/large/huge, beta, HF Transformers)
+- SAM 2 (hiera-tiny/small/base-plus/large, beta, HF Transformers)
+- Grounded SAM (Grounding DINO + SAM v1, beta)
+- Grounded-SAM2 (Grounding DINO + SAM 2, beta)
+- OneFormer (swin-large/dinat-large/convnext-large, beta, HF Transformers)
+- ONNX export for SwinV2
+
+**Security and privacy:**
+- Local-only by default (`127.0.0.1`)
+- No E2E encryption claimed (server must see plaintext tensors)
+- `metadata_only` retention default — no image or prompt logging
+- Log redaction (API keys, HF_TOKEN, base64, CF secrets)
+- Optional encryption-at-rest for SQLite job store
+- Auth modes: `local_private` / `lan_private` / `cloudflare_private` / `production_multi_user`
+- SSRF protection, path traversal blocked, decompression bomb protection
+- `visionservex security audit --json` → score=100, e2e_encryption_claimed=false
+
+**GPU / VRAM safety:**
+- VRAM safety guard: 80% cap, 3 GB min free, 3 GB GUI reserve on desktop GPU
+- `visionservex gpu guard-status` / `gpu processes` / `gpu cleanup` / `gpu reset-advice`
+- GPU tests run serially by default
+- `GPU_MEMORY_GUARD` structured error instead of raw OOM
+- `SERVER_BUSY` with `Retry-After` when queue full
+
+**Scheduler:**
+- Model-aware concurrency policies (gpu_exclusive, queue_recommended, acceptable_parallelism)
+- `visionservex scheduler profile --json` — 12 models with benchmark-derived policies
+- `visionservex scheduler set-policy` / `scheduler benchmark-policy`
+
+**Syntax contract:**
+- 222 examples, failing=0, release_ready=true
+
+**OpenMMLab sidecar (not stable core):**
+- `visionservex openmmlab pull <model_id>` prepares cache + prints official instructions
+- `CHECKPOINT_REQUIRED` structured response — no fake output
+- Docker path documented
+
+**Docs updated:**
+- `docs/model_zoo.md` — regenerated from registry (was stale)
+- `docs/gpu_safety.md` — new, covers VRAM guard, cleanup, emergency recovery
+- `docs/parallel_safety.md` — new, covers policies, benchmark results, serial GPU tests
+- README — no "What remains" section; known limitations documented honestly
+
+### Validated
+- ruff clean, format clean
+- pytest: 261 passed, 24 skipped
+- build/twine: PASSED
+- security audit: score=100
+- syntax audit: failing=0
+- models audit: 0 issues
+- downloads audit --strict: 0 missing
+- artifact check: clean
+
 ## [1.0.0rc3] - 2026-05-15
 
 ### Release Audit and GPU Safety Pass
