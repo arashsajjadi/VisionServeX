@@ -200,9 +200,13 @@ def test_cache_verify_returns_report(monkeypatch, tmp_path):
 
         reg = default_registry()
         reg.register(entry, replace=True)
-        download(entry)
-        report = cache_verify(entry.id)
-        assert report and report[0]["ok"]
+        try:
+            download(entry)
+            report = cache_verify(entry.id)
+            assert report and report[0]["ok"]
+        finally:
+            # Clean up test entry so it doesn't corrupt the global registry for later tests
+            reg.unregister(entry.id)
 
 
 def test_cache_clean_frees_bytes(monkeypatch, tmp_path):

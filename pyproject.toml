@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "visionservex"
-version = "0.5.0"
+version = "0.7.0"
 description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -156,11 +156,16 @@ ignore = ["E501"]
 "tests/*" = ["B011"]
 # Typer/Click require function calls in argument defaults (B008) — this is
 # the standard pattern for the framework and cannot be refactored away.
-"src/visionservex/cli/*" = ["B008"]
+# B904: CLI raise-without-from is intentional when translating third-party
+# errors (ImportError, subprocess errors) into user-friendly typer exits.
+# SIM105: try/except/pass in CLI helpers is clearer than contextlib.suppress.
+"src/visionservex/cli/*" = ["B008", "B904", "SIM105"]
 # FastAPI/Starlette File() calls in endpoint signatures are also standard.
 # B904: the server deliberately does not chain HTTP-layer exceptions — raising
 # without `from` is intentional to hide internal details from HTTP clients.
 "src/visionservex/server/*" = ["B008", "B904"]
+# docker/ scripts run standalone inside the container, not part of the package.
+"docker/*" = ["B008", "B904", "F841", "E501"]
 
 [tool.mypy]
 python_version = "3.10"

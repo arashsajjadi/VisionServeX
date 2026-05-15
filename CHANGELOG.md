@@ -7,6 +7,82 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-05-15
+
+### Added
+- **CUDA runtime fix** — `_patch_nvrtc_ld_path()` in `device.py` automatically
+  adds `/usr/local/lib/ollama/mlx_cuda_v13` (and other known CUDA 13 dirs) to
+  `LD_LIBRARY_PATH` so `libnvrtc-builtins.so.13.0` is found by PyTorch CUDA 13
+  wheels without manual env setup.
+- **CUDA verification** — All 6 wired model families verified on CUDA (RTX 5080,
+  PyTorch 2.11.0+cu130): rfdetr-nano, dfine-n, swinv2-tiny, sam2-hiera-tiny,
+  grounding-dino-tiny, grounded-sam2.
+- **GPU benchmark matrix** — 12 benchmark runs (6 models × 2 devices): all
+  CUDA models pass with 5–20× GPU vs CPU speedup.  Saved to
+  `reports/v070_cuda_benchmark_matrix.json`.
+- **Real parallel tests on CUDA** — dfine-n and swinv2-tiny tested at
+  concurrency=2 on cuda; scheduler protects throughput via per-model semaphore.
+- **fp32 auto-precision policy** — `precision='auto'` now always defaults to
+  `fp32` instead of `fp16` to prevent embedding-table dtype mismatches in
+  models with text encoders (Grounding DINO, SAM2, etc.).
+- **OpenMMLab Docker sidecar engine** (`openmmlab_sidecar`) — new engine that
+  proxies requests to the OpenMMLab FastAPI sidecar container. RTMPose-s and
+  RTMDet-R2-s updated to `engine: openmmlab_sidecar, status: experimental`.
+- `docker/openmmlab/sidecar_app.py` — internal FastAPI sidecar service for
+  `/health`, `/models`, `/predict/pose|obb|segment|classify`.
+- 4 GPU tests in `tests/test_v070.py` marked `@pytest.mark.gpu`; pass with
+  `VISION_SERVEX_RUN_GPU_TESTS=1`.
+- 16 new unit/integration tests in `tests/test_v070.py` (156 total passing).
+
+### Fixed
+- Grounding DINO CUDA fp16 crash: `precision='auto'` now returns `fp32`
+  universally; explicit `precision='fp16'` still respected.
+- `test_cache_verify_returns_report` leaked a test-only registry entry causing
+  subsequent `downloads audit` tests to fail; added cleanup.
+- `test_sidecar_health_false_for_unreachable` was directly mutating env without
+  monkeypatch — fixed to use monkeypatch for clean state.
+
+## [0.6.0] - 2026-05-15
+
+### Added
+- **`visionservex gpu smoke-test`** — runs a real end-to-end prediction on
+  every listed model on the specified device; reports cold-load time, warm
+  inference latency, selected device, precision, backend.
+- **`visionservex gpu doctor`** — CUDA diagnostics with actionable fix
+  suggestions (driver mismatch, libnvrtc, LD_LIBRARY_PATH, Docker path).
+- **`visionservex benchmark-matrix`** — latency matrix over ≥1 model × ≥1
+  device combination; JSON output; table summary.
+- **`visionservex parallel-test`** — concurrency test with slowdown % and
+  status: `excellent_parallelism` / `acceptable_parallelism` /
+  `scheduler_needs_queueing` / `protected_throughput`.
+- **`visionservex benchmark benchmark-server`** — HTTP load test at multiple
+  concurrency levels against a running server.
+- **`visionservex downloads audit`** — scans all 68 registry entries and
+  reports missing required/recommended metadata.
+- **`visionservex openmmlab doctor/docker-build/docker-run/status/smoke-test/list`**.
+- **`visionservex tensorrt doctor/build/benchmark`** — TensorRT dry-run and
+  real build when `trtexec` is available.
+- **`/metrics/prometheus`** endpoint — standard Prometheus text-format
+  scrape endpoint with request counters, latency quantiles, gauge for loaded
+  models and active requests.
+- `device_helpers.py` — shared helpers: `select_dtype`, `move_inputs_to_device`
+  (never casts integer token tensors to fp16), `safe_model_to_device`,
+  `device_is_available`.
+- `exports/` and `reports/` added to `.gitignore`.
+- 15 new tests in `tests/test_v060.py`.
+
+### Changed
+- `pyproject.toml`: `project.urls.Homepage` etc. still placeholder; version 0.6.0.
+- CLI: `benchmark` sub-app wired as `visionservex benchmark`; top-level
+  `benchmark-matrix`, `parallel-test`, `mps`, `downloads-audit` aliases added.
+
+### Fixed
+- `gpu smoke-test --json` no longer prints "Best device:" text before the
+  JSON array.
+- `benchmark_server` closure-over-loop-variable fixed (B023).
+- All ruff lint errors resolved including B904 (per-file ignores for
+  `cli/*` and `server/*` with rationale comments).
+
 ## [0.5.1] - 2026-05-15
 
 ### Fixed (CI fix pass)

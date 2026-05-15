@@ -90,6 +90,8 @@ checkpoints/
 # Inference outputs — generated at runtime
 # =============================================================
 outputs/
+exports/
+reports/
 
 # =============================================================
 # Secrets — never commit

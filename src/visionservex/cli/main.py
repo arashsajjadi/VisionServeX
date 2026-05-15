@@ -22,6 +22,13 @@ from rich.progress import (
 from rich.table import Table
 
 from visionservex import __version__
+from visionservex.cli import (
+    benchmark_commands,
+    downloads_commands,
+    gpu_commands,
+    openmmlab_commands,
+    tensorrt_commands,
+)
 from visionservex.cli import tunnel as tunnel_cli
 from visionservex.config import get_settings, reload_settings
 from visionservex.core.model import VisionModel
@@ -59,6 +66,11 @@ app.add_typer(cache_app, name="cache")
 app.add_typer(config_app, name="config")
 app.add_typer(example_app, name="run-example")
 app.add_typer(tunnel_cli.app, name="tunnel")
+app.add_typer(gpu_commands.app, name="gpu")
+app.add_typer(benchmark_commands.app, name="benchmark", invoke_without_command=True)
+app.add_typer(downloads_commands.app, name="downloads")
+app.add_typer(openmmlab_commands.app, name="openmmlab")
+app.add_typer(tensorrt_commands.app, name="tensorrt")
 
 console = Console()
 
@@ -1187,3 +1199,76 @@ def main() -> None:
 
 if __name__ == "__main__":  # pragma: no cover
     main()
+
+
+# ---------- top-level convenience aliases ----------
+
+
+@app.command(
+    "benchmark-matrix", help="Benchmark models across devices (see also: benchmark sub-commands)."
+)
+def benchmark_matrix_alias(
+    models: str = typer.Option("mock-detect", "--models"),
+    devices: str = typer.Option("cpu", "--devices"),
+    runs: int = typer.Option(5, "--runs"),
+    warmup: int = typer.Option(2, "--warmup"),
+    input_path: Path = typer.Option(Path("examples/images/street.jpg"), "--input"),
+    out: Path = typer.Option(None, "--out"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Shortcut: runs `visionservex benchmark benchmark-matrix`."""
+    from visionservex.cli.benchmark_commands import benchmark_matrix
+
+    benchmark_matrix(
+        models=models,
+        devices=devices,
+        runs=runs,
+        warmup=warmup,
+        input_path=input_path,
+        out=out,
+        json_=json_,
+    )
+
+
+@app.command("parallel-test", help="Test concurrent inference throughput.")
+def parallel_test_alias(
+    model_id: str,
+    input_path: Path,
+    concurrency: int = typer.Option(2, "--concurrency"),
+    runs: int = typer.Option(5, "--runs"),
+    device: str = typer.Option("auto", "--device"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Shortcut: runs `visionservex benchmark parallel-test`."""
+    from visionservex.cli.benchmark_commands import parallel_test
+
+    parallel_test(
+        model_id=model_id,
+        input_path=input_path,
+        concurrency=concurrency,
+        runs=runs,
+        device=device,
+        json_=json_,
+    )
+
+
+@app.command("downloads-audit", help="Audit download metadata for all registry models.")
+def downloads_audit_alias(
+    verbose: bool = typer.Option(False, "--verbose", "-v"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Shortcut: runs `visionservex downloads audit`."""
+    from visionservex.cli.downloads_commands import audit
+
+    audit(verbose=verbose, json_=json_)
+
+
+@app.command("mps", help="Apple MPS smoke test.")
+def mps_smoke_test(
+    models: str = typer.Option("mock-detect", "--models"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Smoke-test models on Apple MPS (macOS only)."""
+    from visionservex.cli.gpu_commands import smoke_test
+
+    smoke_test(models=models, device="mps", json_=json_)

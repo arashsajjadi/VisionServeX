@@ -16,6 +16,7 @@ from visionservex.engines import mock as _mock
 from visionservex.engines import oneformer as _oneformer
 from visionservex.engines import onnx as _onnx
 from visionservex.engines import openmmlab as _mm
+from visionservex.engines import openmmlab_sidecar as _mm_sidecar
 from visionservex.engines import pytorch as _torch
 from visionservex.engines import rfdetr as _rfdetr
 from visionservex.engines import sam2 as _sam

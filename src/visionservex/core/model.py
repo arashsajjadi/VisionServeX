@@ -84,9 +84,11 @@ class VisionModel:
     def _resolve_precision(self, precision: str | None, device: str) -> str:
         pref = precision or self.settings.runtime.precision_preference
         if pref == "auto":
-            if device == "cpu":
-                return "fp32"
-            return "fp16" if "fp16" in self.entry.supported_precisions else "fp32"
+            # Default to fp32 everywhere — HF models that use text encoders
+            # (Grounding DINO, etc.) silently mix integer and float tensors which
+            # breaks if we force fp16 without also casting the model weights.
+            # Use fp32 for safety; advanced users can explicitly pass precision="fp16".
+            return "fp32"
         if pref in self.entry.supported_precisions:
             return pref
         return self.entry.supported_precisions[0]

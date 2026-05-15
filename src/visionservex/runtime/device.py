@@ -55,6 +55,39 @@ class DeviceInfo:
         }
 
 
+# ------------------------------------------------------------------ NVRTC fix --
+
+_NVRTC_BUILTINS_DIRS = [
+    "/usr/local/lib/ollama/mlx_cuda_v13",
+    "/usr/local/cuda/lib64",
+    "/usr/local/cuda-13/lib64",
+    "/usr/local/cuda-12/lib64",
+]
+
+
+def _patch_nvrtc_ld_path() -> None:
+    """Ensure libnvrtc-builtins.so is findable.
+
+    PyTorch CUDA 13 wheels need ``libnvrtc-builtins.so.13.0`` which is not
+    always on the system LD path. We probe a list of known locations and
+    prepend the first match to ``LD_LIBRARY_PATH``.  This must run before
+    any CUDA kernel is compiled; calling it at module import time is safe.
+    """
+    import os
+    from pathlib import Path
+
+    for d in _NVRTC_BUILTINS_DIRS:
+        if any(Path(d).glob("libnvrtc-builtins.so*")):
+            existing = os.environ.get("LD_LIBRARY_PATH", "")
+            parts = [p for p in existing.split(":") if p]
+            if d not in parts:
+                os.environ["LD_LIBRARY_PATH"] = ":".join([d, *parts])
+            break
+
+
+_patch_nvrtc_ld_path()
+
+
 # ------------------------------------------------------------------ sanity ---
 
 

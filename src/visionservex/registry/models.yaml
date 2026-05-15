@@ -724,26 +724,27 @@ models:
     status: manual
 
   - id: rtmpose-s
-    display_name: "RTMPose (Small) via MMPose"
+    display_name: "RTMPose (Small) — native MMPose or Docker sidecar"
     task: pose
     family: rtmpose
-    backend: openmmlab
-    engine: openmmlab
+    backend: openmmlab_sidecar
+    engine: openmmlab_sidecar
     license: Apache-2.0
     upstream_url: https://github.com/open-mmlab/mmpose
     download_type: manual
     auto_download: false
     requires_optional_extra: true
     install_extra: openmmlab
-    implementation_status: stub
+    implementation_notes: "Use `visionservex openmmlab docker-build && docker-run` then set VISIONSERVEX_OPENMMLAB_SIDECAR_URL. Native path: pip install openmim && mim install mmengine mmcv mmpose"
+    implementation_status: partial
     supported_devices: [cpu, cuda]
     supported_precisions: [fp32, fp16]
     minimum_vram_gb: 1.0
     recommended_vram_gb: 2.0
     difficulty: medium
     export_support: [onnx]
-    beginner_recommendation: true
-    status: manual
+    beginner_recommendation: false
+    status: experimental
 
   - id: rtmpose-m
     display_name: "RTMPose (Medium)"
@@ -941,8 +942,8 @@ models:
     display_name: "RTMDet-R2 (Small)"
     task: obb
     family: rtmdet
-    backend: openmmlab
-    engine: openmmlab
+    backend: openmmlab_sidecar
+    engine: openmmlab_sidecar
     license: Apache-2.0
     license_uncertain: true
     upstream_url: https://github.com/open-mmlab/mmrotate
@@ -950,13 +951,13 @@ models:
     auto_download: false
     requires_optional_extra: true
     install_extra: openmmlab
-    implementation_status: stub
+    implementation_status: partial
     supported_devices: [cuda]
     supported_precisions: [fp16]
     minimum_vram_gb: 2.0
     recommended_vram_gb: 4.0
     difficulty: hard
-    status: manual
+    status: experimental
 
   - id: rtmdet-r2-m
     display_name: "RTMDet-R2 (Medium)"

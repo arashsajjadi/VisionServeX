@@ -466,6 +466,59 @@ def _register_routes(app: FastAPI) -> None:
         snapshot["models_loaded"] = get_model_cache().info()
         return snapshot
 
+    @app.get("/metrics/prometheus", tags=["meta"], response_class=Response)
+    async def metrics_prometheus(request: Request) -> Response:
+        """Prometheus text-format metrics endpoint.
+
+        Exposes counters, gauges, and latency observations in the standard
+        Prometheus text exposition format for scraping by a Prometheus server.
+        """
+        settings: Settings = request.app.state.settings
+        if settings.server.public_mode and settings.auth.enabled:
+            await _require_auth(request)
+        snapshot = metrics.snapshot()
+        sched = get_scheduler().stats()
+
+        lines: list[str] = [
+            "# HELP visionservex_requests_total Total inference requests",
+            "# TYPE visionservex_requests_total counter",
+            f"visionservex_requests_total {snapshot.get('counters', {}).get('requests_total', 0)}",
+            "",
+            "# HELP visionservex_requests_rejected Total backpressure rejections",
+            "# TYPE visionservex_requests_rejected counter",
+            f"visionservex_requests_rejected {snapshot.get('counters', {}).get('requests_rejected_backpressure', 0)}",
+            "",
+            "# HELP visionservex_requests_timed_out Total timeout rejections",
+            "# TYPE visionservex_requests_timed_out counter",
+            f"visionservex_requests_timed_out {snapshot.get('counters', {}).get('requests_timed_out', 0)}",
+            "",
+            "# HELP visionservex_active_requests Currently inflight requests",
+            "# TYPE visionservex_active_requests gauge",
+            f"visionservex_active_requests {sched.get('total_inflight', 0)}",
+            "",
+            "# HELP visionservex_models_loaded Number of currently loaded models",
+            "# TYPE visionservex_models_loaded gauge",
+            f"visionservex_models_loaded {len(get_model_cache().info())}",
+            "",
+        ]
+        # Latency quantiles
+        obs = snapshot.get("observations", {})
+        if "latency_ms" in obs:
+            lat = obs["latency_ms"]
+            lines += [
+                "# HELP visionservex_latency_ms Inference latency in milliseconds",
+                "# TYPE visionservex_latency_ms summary",
+                f'visionservex_latency_ms{{quantile="0.5"}} {lat.get("p50", 0)}',
+                f'visionservex_latency_ms{{quantile="0.9"}} {lat.get("p90", 0)}',
+                f'visionservex_latency_ms{{quantile="0.99"}} {lat.get("p99", 0)}',
+                f"visionservex_latency_ms_count {lat.get('n', 0)}",
+                "",
+            ]
+        return Response(
+            content="\n".join(lines) + "\n",
+            media_type="text/plain; version=0.0.4; charset=utf-8",
+        )
+
 
 # ---------- predict helpers ----------
 

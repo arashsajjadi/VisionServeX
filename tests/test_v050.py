@@ -131,7 +131,7 @@ def test_retry_after_in_busy_error_details(monkeypatch, tmp_path):
     @asynccontextmanager
     async def _raise(*args, **kwargs):
         raise BackpressureError("test queue full")
-        yield  # noqa: unreachable — needed for async generator
+        yield  # type: ignore[misc]
 
     mock_sched.reserve = _raise
 
