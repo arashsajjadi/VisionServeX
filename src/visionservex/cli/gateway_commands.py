@@ -408,3 +408,69 @@ def stop(
 
 
 __all__ = ["app"]
+
+
+@app.command("health", help="Quick health check against a running gateway.")
+def health(
+    url: str = typer.Option("http://127.0.0.1:8080", "--url"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    try:
+        import httpx
+
+        r = httpx.get(f"{url}/health", timeout=3.0)
+        data = r.json()
+        if json_:
+            typer.echo(json.dumps(data, indent=2, default=str))
+        else:
+            status = data.get("status", "unknown")
+            color = "green" if status == "ok" else "red"
+            console.print(f"Gateway [{color}]{status}[/{color}] at {url}")
+    except Exception as exc:
+        if json_:
+            typer.echo(json.dumps({"error": str(exc), "running": False}))
+        else:
+            console.print(f"[red]Gateway not reachable at {url}[/red]")
+
+
+@app.command("logs", help="Tail gateway logs (runs in foreground — use stdout redirect).")
+def logs(lines: int = typer.Option(50, "--lines", "-n")) -> None:
+    console.print(
+        "[yellow]Note:[/yellow] VisionServeX logs to stdout by default.\n"
+        "Capture logs with: [cyan]visionservex gateway start 2>&1 | tee gateway.log[/cyan]"
+    )
+
+
+@app.command("config", help="Show active gateway configuration.")
+def show_config(json_: bool = typer.Option(False, "--json")) -> None:
+    from visionservex.config import get_settings
+    from visionservex.utils.logging import log_safe_dict
+
+    s = get_settings()
+    safe = log_safe_dict(s.model_dump())
+    if json_:
+        typer.echo(json.dumps(safe, indent=2, default=str))
+    else:
+        console.print("[bold]Active gateway configuration[/bold] (secrets redacted):")
+        for section, val in safe.items():
+            if isinstance(val, dict):
+                console.print(f"  [cyan]{section}[/cyan]: {val}")
+
+
+@app.command("profile-list", help="List available gateway profiles.")
+def profile_list(json_: bool = typer.Option(False, "--json")) -> None:
+    if json_:
+        typer.echo(json.dumps(list(_PROFILES.keys()), indent=2))
+    else:
+        for name in _PROFILES:
+            console.print(f"  [cyan]{name}[/cyan]")
+
+
+@app.command("token", help="Generate a local API key for development.")
+def token_create() -> None:
+    import secrets
+
+    key = secrets.token_urlsafe(48)
+    console.print(f"Generated API key: [bold]{key}[/bold]")
+    console.print("  [cyan]export VISIONSERVEX_AUTH__ENABLED=true[/cyan]")
+    console.print(f"  [cyan]export VISIONSERVEX_AUTH__API_KEY={key}[/cyan]")

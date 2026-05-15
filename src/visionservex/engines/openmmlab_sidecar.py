@@ -130,11 +130,23 @@ class OpenMMLabSidecarEngine(StubEngine):
                 data={"model_id": self.entry.id},
                 timeout=30.0,
             )
-            r.raise_for_status()
-            data = r.json()
         except Exception as exc:
             raise RuntimeError(f"Sidecar request failed for {self.entry.id!r}: {exc}") from exc
 
+        if r.status_code == 503:
+            err = r.json().get("detail", {})
+            code = err.get("code", "SIDECAR_ERROR")
+            msg = err.get("message", "Sidecar returned 503")
+            hint = err.get("hint", "visionservex openmmlab docker-run")
+            from visionservex.exceptions import SidecarNotRunningError, VisionServeXError
+
+            if code == "CHECKPOINT_REQUIRED":
+                raise VisionServeXError(msg, code=code, hint=hint, details=err)
+            raise SidecarNotRunningError(self.entry.id)
+        if r.status_code != 200:
+            raise RuntimeError(f"Sidecar returned HTTP {r.status_code}: {r.text[:200]}")
+
+        data = r.json()
         return self._parse_response(data, image)
 
     def _parse_response(self, data: dict, image: Image.Image) -> BaseResult:

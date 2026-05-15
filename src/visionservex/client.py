@@ -514,14 +514,31 @@ class AsyncClient:
         image: Any,
         *,
         box: list[float] | None = None,
+        boxes: list[list[float]] | None = None,
         points: list[list[float]] | None = None,
         point_labels: list[int] | None = None,
+        labels: list[int] | None = None,
     ) -> ClientResult:
+        """Segment with optional point or box prompts via /segment/b64.
+
+        Unlike the previous implementation this correctly forwards all prompt
+        arguments instead of silently dropping them.
+        """
         img_bytes, _ = self._prepare_image(image)
         b64 = base64.b64encode(img_bytes).decode("ascii")
         payload: dict[str, Any] = {"model_id": model_id, "image_b64": b64, "prompts": []}
-        if box:
-            payload["options"] = {"boxes": [box]}
+        # Normalise aliases
+        effective_boxes = boxes or ([box] if box else None)
+        effective_labels = labels if labels is not None else point_labels
+        options: dict[str, Any] = {}
+        if effective_boxes:
+            options["boxes"] = effective_boxes
+        if points:
+            options["points"] = points
+        if effective_labels is not None:
+            options["point_labels"] = effective_labels
+        if options:
+            payload["options"] = options
         data = await self._post_json("/segment/b64", payload)
         return ClientResult(data)
 

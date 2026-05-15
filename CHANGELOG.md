@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.0rc1] - 2026-05-15
+
+This is the first release candidate for v1.0.0. All 222 documented syntax
+examples are classified, tested, or produce structured actionable errors.
+
+### Fixed — API compatibility gaps (release blockers)
+- **AsyncClient.segment**: `box`, `boxes`, `points`, `point_labels`, `labels`
+  kwargs are now correctly forwarded to `/segment/b64`. Previous implementation
+  silently dropped all prompts.
+- **tunnel config --domain / --local-url**: the syntax contract specified
+  `--domain API_HOSTNAME` and `--local-url http://...` flags; both are now
+  supported in addition to the original positional `hostname` argument.
+
+### Added
+- **`visionservex syntax audit`** — classifies all 222 documented examples as
+  `working / structured_error / external / unverified`. Failing count must be 0
+  before v1.0.0.
+- **`visionservex validation run [release|local|gpu|syntax]`** — run the test
+  suite with a named profile. `release` profile matches CI; `gpu` enables GPU
+  tests.
+- **SQLite job store** (`VISIONSERVEX_JOBS__STORE=sqlite`) — optional persistent
+  job backend with TTL-based cleanup and cancellation support.
+- **`SQLiteJobStore`** — thread-safe, with `create/get/list/update/cancel/purge_old`.
+- **`visionservex gateway health/logs/config/profile-list/token`** — new gateway
+  diagnostics and dev tooling commands.
+- **OpenMMLab sidecar honesty** — sidecar now returns `CHECKPOINT_REQUIRED`
+  (HTTP 503 with structured error) instead of fake stub predictions when
+  checkpoint/config files are absent. Prediction routes now attempt real
+  MMPose/MMDet inference when the checkpoint IS present.
+
+### Docs
+- **`docs/gpu_validation.md`** updated to clearly distinguish:
+  CPU-verified, CUDA-verified (RTX 5080 in v0.7.0+), MPS-implemented-unverified.
+- TensorRT is `export_onnx_supported=true` (SwinV2) / `tensorrt_supported=false`
+  with `dry_run_supported=true`.
+
+### Tests
+- 23 new tests in `tests/test_v100rc1.py` (233 total passing).
+
 ## [0.9.0] - 2026-05-15
 
 ### Added — Syntax Contract + Developer Experience

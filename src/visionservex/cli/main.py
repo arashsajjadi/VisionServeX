@@ -29,7 +29,9 @@ from visionservex.cli import (
     gpu_commands,
     openmmlab_commands,
     suite_commands,
+    syntax_audit,
     tensorrt_commands,
+    validation_commands,
 )
 from visionservex.cli import tunnel as tunnel_cli
 from visionservex.config import get_settings, reload_settings
@@ -76,6 +78,8 @@ app.add_typer(tensorrt_commands.app, name="tensorrt")
 app.add_typer(gateway_commands.app, name="gateway")
 app.add_typer(suite_commands.suite_app, name="suite")
 app.add_typer(suite_commands.scheduler_app, name="scheduler")
+app.add_typer(syntax_audit.app, name="syntax")
+app.add_typer(validation_commands.app, name="validation")
 
 console = Console()
 

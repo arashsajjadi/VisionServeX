@@ -67,14 +67,41 @@ def route(tunnel_name: str, hostname: str) -> None:
 
 @app.command("config", help="Generate a safe ingress config for the local API.")
 def config(
-    hostname: str = typer.Argument(..., help="Public hostname, e.g. api.example.com"),
-    tunnel_name: str | None = typer.Option(None, "--tunnel-name"),
+    hostname: str | None = typer.Argument(
+        None, help="Public hostname positional arg (e.g. api.example.com). Superseded by --domain."
+    ),
+    domain: str | None = typer.Option(
+        None, "--domain", help="Public hostname/domain (syntax-contract alias for positional arg)."
+    ),
+    local_url: str | None = typer.Option(
+        None, "--local-url", help="Local service URL (overrides auto-detected port)."
+    ),
+    tunnel_name: str | None = typer.Option(None, "--tunnel-name", "--name"),
     output: Path | None = typer.Option(None, "--out"),
     print_only: bool = typer.Option(False, "--print"),
 ) -> None:
+    """Generate a cloudflared ingress YAML.
+
+    Supports both positional and flag styles::
+
+        visionservex tunnel config api.example.com --out tunnel.yaml
+        visionservex tunnel config --domain api.example.com --local-url http://127.0.0.1:8080 --out tunnel.yaml
+    """
     settings = get_settings()
+    effective_hostname = domain or hostname
+    if not effective_hostname:
+        console.print("[red]error:[/red] provide a hostname as positional arg or via --domain")
+        raise typer.Exit(1)
     tn = tunnel_name or settings.tunnel.tunnel_name
-    payload = generate_config(tunnel_name=tn, hostname=hostname)
+
+    # If --local-url is provided, temporarily patch the port in generate_config output
+    payload = generate_config(tunnel_name=tn, hostname=effective_hostname)
+    if local_url:
+        # Replace the auto-generated localhost URL with user-specified one
+        import re
+
+        payload = re.sub(r"http://127\.0\.0\.1:\d+", local_url, payload)
+
     if print_only or output is None:
         console.print(payload)
     if output:
