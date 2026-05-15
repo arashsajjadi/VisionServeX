@@ -87,13 +87,19 @@ class DFINEEngine(StubEngine):
         if precision in ("fp16", "bf16") and device != "cpu":
             torch_dtype = torch.float16 if precision == "fp16" else torch.bfloat16
 
+        # Use `dtype` (new API); fall back to `torch_dtype` for older transformers.
         kwargs: dict[str, Any] = {}
         if torch_dtype is not torch.float32:
-            kwargs["torch_dtype"] = torch_dtype
+            kwargs["dtype"] = torch_dtype   # new name in transformers ≥ 4.x
 
         _log.info("loading D-FINE %s from %s on %s", self.entry.id, repo, device)
         self._processor = AutoImageProcessor.from_pretrained(repo, use_fast=True)
-        self._model = AutoModelForObjectDetection.from_pretrained(repo, **kwargs)
+        try:
+            self._model = AutoModelForObjectDetection.from_pretrained(repo, **kwargs)
+        except TypeError:
+            # Older transformers expects `torch_dtype`
+            renamed = {("torch_dtype" if k == "dtype" else k): v for k, v in kwargs.items()}
+            self._model = AutoModelForObjectDetection.from_pretrained(repo, **renamed)
         self._model.to(device)
         self._model.eval()
         self._torch = torch

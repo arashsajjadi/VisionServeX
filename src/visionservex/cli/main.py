@@ -365,21 +365,52 @@ def _print_doctor_human(p: dict) -> None:
 
 # ---------- devices ----------
 
-@app.command(help="Show available compute devices.")
-def devices(json_: bool = typer.Option(False, "--json")) -> None:
+@app.command(help="Show available compute devices with sanity check status.")
+def devices(
+    json_: bool = typer.Option(False, "--json"),
+    benchmark_: bool = typer.Option(False, "--benchmark", help="Run a tiny synthetic benchmark on available devices."),
+    quick: bool = typer.Option(True, "--quick/--full", help="Quick benchmark (default) or full."),
+) -> None:
+    from visionservex.runtime.device import device_benchmark
     items = [d.to_dict() for d in available_devices()]
+    if benchmark_:
+        bm_results = {}
+        for d in items:
+            if d["available"] and d.get("sanity_ok") is not False:
+                bm = device_benchmark(d["name"], quick=quick)
+                bm_results[d["name"]] = bm
+        if json_:
+            _emit({"devices": items, "benchmark": bm_results}, json_mode=True)
+            return
+        table = Table(title="Device benchmark")
+        table.add_column("Device"); table.add_column("Available"); table.add_column("VRAM")
+        table.add_column("Sanity"); table.add_column("Avg ms"); table.add_column("GFLOPS"); table.add_column("Detail")
+        for d in items:
+            avail = "[green]yes[/green]" if d["available"] else "[grey50]no[/grey50]"
+            sanity = "[green]ok[/green]" if d.get("sanity_ok") else ("[red]FAIL[/red]" if d.get("sanity_ok") is False else "-")
+            vram = f"{d['total_vram_gb']}/{d.get('free_vram_gb') or '?'} GB" if d.get("total_vram_gb") else "-"
+            bm = bm_results.get(d["name"], {})
+            table.add_row(
+                d["name"], avail, vram, sanity,
+                f"{bm.get('avg_ms','?')} ms" if bm.get("ok") else "-",
+                f"{bm.get('throughput_gflops','?')}" if bm.get("ok") else "-",
+                d["detail"][:60],
+            )
+        console.print(table)
+        return
     if json_:
         _emit(items, json_mode=True)
         return
     table = Table(title="Compute devices")
-    table.add_column("Name"); table.add_column("Available")
+    table.add_column("Name"); table.add_column("Available"); table.add_column("Sanity")
     table.add_column("Detail"); table.add_column("VRAM (total/free)")
     for d in items:
         avail = "[green]yes[/green]" if d["available"] else "[grey50]no[/grey50]"
+        sanity = "[green]ok[/green]" if d.get("sanity_ok") else ("[red]FAIL[/red]" if d.get("sanity_ok") is False else "[grey50]-[/grey50]")
         vram = "-"
         if d.get("total_vram_gb"):
             vram = f"{d['total_vram_gb']} / {d.get('free_vram_gb') or '?'} GB"
-        table.add_row(d["name"], avail, d["detail"], vram)
+        table.add_row(d["name"], avail, sanity, d["detail"][:70], vram)
     console.print(table)
 
 
@@ -735,24 +766,54 @@ def predict(
         console.print(f"  [yellow]warning:[/yellow] {w}")
 
 
-@app.command(help="Run a quick latency benchmark on a model.")
+@app.command(help="Benchmark model inference latency.")
 def benchmark(
     model_id: str,
     input_path: Path,
-    n: int = typer.Option(10, "--n", min=1, max=1000),
+    n: int = typer.Option(10, "--runs", "--n", min=1, max=1000, help="Number of warmup-excluded runs."),
+    warmup: int = typer.Option(2, "--warmup", min=0, max=20, help="Warmup runs before measurement."),
+    device: Optional[str] = typer.Option(None, "--device", help="Override device (cpu|cuda|mps|auto)."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
+    """Measure cold-load time, warm inference latency, and throughput.
+
+    All CPU smoke tests; GPU is preferred when available. Run `visionservex
+    doctor` first to verify device health.
+    """
     if not input_path.exists():
         _die(f"file not found: {input_path}", json_mode=json_, code="FILE_NOT_FOUND")
         return
+    import time
     try:
-        model = VisionModel(model_id)
+        t_cold0 = time.perf_counter()
+        model = VisionModel(model_id, **({"device": device} if device else {}))
+        model._ensure_loaded()
+        cold_ms = (time.perf_counter() - t_cold0) * 1000
+
+        for _ in range(warmup):
+            model.predict(input_path)
+
         stats = model.benchmark(input_path, n=n)
+        stats["cold_load_ms"] = round(cold_ms, 1)
+        stats["warmup_runs"] = warmup
+        stats["device"] = model.device
+        stats["precision"] = model.precision
     except Exception as exc:
         _die(str(exc), json_mode=json_, code="BENCHMARK_FAILED")
         return
-    _emit(stats, json_mode=json_,
-          summary=f"p50={stats['p50_ms']:.1f}ms p90={stats['p90_ms']:.1f}ms p99={stats['p99_ms']:.1f}ms")
+
+    if json_:
+        _emit(stats, json_mode=True)
+        return
+
+    console.print(f"[bold]Benchmark:[/bold] {model_id}")
+    console.print(f"  Device:      {stats['device']}  Precision: {stats['precision']}")
+    console.print(f"  Cold load:   {stats['cold_load_ms']:.0f} ms")
+    console.print(f"  Warm p50:    {stats['p50_ms']:.1f} ms")
+    console.print(f"  Warm p90:    {stats['p90_ms']:.1f} ms")
+    console.print(f"  Warm p99:    {stats['p99_ms']:.1f} ms")
+    console.print(f"  Throughput:  ~{1000 / stats['p50_ms']:.1f} req/s (single-thread estimate)")
+    console.print(f"[dim]GPU preferred when healthy; run `visionservex doctor` to verify.[/dim]")
 
 
 @app.command(help="Export a model to ONNX or another format (engine-dependent).")

@@ -576,7 +576,15 @@ async def _do_predict(
             return await loop.run_in_executor(None, _call)
     except BackpressureError as exc:
         metrics.error("BUSY")
-        raise busy(str(exc), hint="retry with exponential backoff")
+        settings: Settings = request.app.state.settings
+        retry_after = settings.runtime.server_busy_retry_after_s
+        err = busy(
+            str(exc),
+            hint=f"Server is at capacity. Retry in ~{retry_after} seconds or reduce concurrency.",
+        )
+        # Attach Retry-After hint in the error so callers can respect it.
+        err.error_details["retry_after_seconds"] = retry_after
+        raise err
     except RequestTimeoutError as exc:
         metrics.error("TIMEOUT")
         raise unprocessable("TIMEOUT", str(exc), hint="raise request_timeout_s in config")
@@ -713,8 +721,14 @@ def _register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(ApiError)
     async def _api_error_handler(request: Request, exc: ApiError) -> JSONResponse:
         rid = getattr(request.state, "request_id", request_id())
+        headers: dict[str, str] = {}
+        # Add Retry-After header for busy responses so compliant clients back off.
+        retry_after = exc.error_details.get("retry_after_seconds")
+        if retry_after is not None:
+            headers["Retry-After"] = str(int(retry_after))
         return JSONResponse(
             status_code=exc.status_code,
+            headers=headers,
             content={
                 "request_id": rid,
                 "error": {

@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Arash Sajjadi
+#
+# VisionServeX OpenMMLab expert mode.
+# Requires NVIDIA GPU + nvidia-container-toolkit.
+#
+# Usage:
+#   docker compose -f docker/openmmlab/docker-compose.yml up
+#
+# Set VISIONSERVEX_API_KEY in .env before exposing publicly.
+
+services:
+  visionservex-openmmlab:
+    build:
+      context: ../..
+      dockerfile: docker/openmmlab/Dockerfile
+    image: visionservex-openmmlab:latest
+    container_name: visionservex-openmmlab
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      VISIONSERVEX_SERVER__HOST: 0.0.0.0
+      VISIONSERVEX_AUTH__ENABLED: "${VISIONSERVEX_AUTH_ENABLED:-false}"
+      VISIONSERVEX_AUTH__API_KEY: "${VISIONSERVEX_API_KEY:-}"
+      VISIONSERVEX_RUNTIME__DEVICE_PREFERENCE: cuda
+    volumes:
+      - openmmlab_cache:/cache/visionservex
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  openmmlab_cache:

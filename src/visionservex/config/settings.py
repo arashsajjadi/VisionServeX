@@ -81,9 +81,19 @@ class RuntimeConfig(BaseModel):
     precision_preference: Literal["auto", "fp32", "fp16", "bf16", "int8"] = "auto"
     max_loaded_models: int = Field(default=2, ge=1, le=64)
     per_model_concurrency: int = Field(default=2, ge=1, le=64)
+    max_global_concurrency: int = Field(default=8, ge=1, le=256)
     queue_size: int = Field(default=64, ge=1)
     request_timeout_s: float = Field(default=60.0, gt=0)
     model_idle_unload_s: float = Field(default=600.0, ge=0)
+    # Device selection
+    prefer_fastest_device: bool = True
+    allow_device_fallback: bool = True
+    require_gpu: bool = False
+    min_free_vram_gb: float = Field(default=0.0, ge=0)
+    gpu_sanity_check: bool = True
+    # Busy policy
+    server_busy_retry_after_s: int = Field(default=2, ge=1)
+    busy_status_code: int = Field(default=503, ge=400, le=599)
 
 
 class InputsConfig(BaseModel):

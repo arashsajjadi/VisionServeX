@@ -9,6 +9,7 @@ from visionservex.engines import (  # noqa: F401,E402
     dfine as _dfine,
     grounding_dino as _gd,
     grounded_sam as _grounded_sam,
+    grounded_sam2 as _grounded_sam2,
     huggingface as _hf,
     oneformer as _oneformer,
     onnx as _onnx,

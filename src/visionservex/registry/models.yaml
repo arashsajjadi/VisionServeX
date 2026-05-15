@@ -1414,28 +1414,29 @@ models:
     notes: "Composes Grounding DINO Tiny + SAM ViT-Base for text-prompted mask generation. Not claimed as a benchmark winner."
 
   - id: grounded-sam2
-    display_name: "Grounded SAM 2 (Grounding DINO + SAM 2 — requires sam2 pkg)"
+    display_name: "Grounded SAM 2 (Grounding DINO Tiny + SAM 2 Tiny via HF)"
     task: grounded_segment
     family: grounded-sam
-    backend: composed
-    engine: grounding_dino  # composes with sam2 at runtime
+    backend: composed_gd_sam2
+    engine: grounded_sam2
     license: Apache-2.0
     upstream_url: https://github.com/IDEA-Research/Grounded-SAM-2
-    download_type: manual
-    auto_download: false
+    download_type: huggingface
+    auto_download: true
     requires_optional_extra: true
-    install_extra: grounding
-    implementation_notes: "Requires sam2 package from GitHub. Use `grounded-sam` for the wired alternative."
-    implementation_status: stub
+    install_extra: hf
+    implementation_notes: "Composes Grounding DINO Tiny (HF) + SAM 2 Tiny (HF). Both via transformers — no CUDA extensions required."
+    implementation_status: wired
     supported_devices: [cuda, cpu]
     recommended_device: cuda
-    supported_precisions: [fp16, fp32]
-    minimum_vram_gb: 6.0
-    recommended_vram_gb: 12.0
-    difficulty: hard
-    status: experimental
-    warnings:
-      - "SAM 2 package not on PyPI as of this build. Use `grounded-sam` (SAM v1) instead."
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 3.0
+    recommended_vram_gb: 8.0
+    minimum_ram_gb: 8.0
+    difficulty: medium
+    beginner_recommendation: true
+    status: beta
+    best_for: ["text-prompted instance masks", "find-and-segment by text"]
     notes: "Capability-matched to prompt-based universal segmentation. Not advertised as a benchmark winner."
 
   - id: seem-focal-t

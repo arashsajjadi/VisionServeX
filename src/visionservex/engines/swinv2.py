@@ -150,6 +150,43 @@ class SwinV2Engine(StubEngine):
     def postprocess(self, raw: Any, *, image: Any, **kwargs: Any) -> BaseResult:
         return self._mock.postprocess(raw, image=image, **kwargs)
 
+    def export(self, format: str, output_path) -> "Path":
+        from pathlib import Path
+        out = Path(output_path)
+        if format.lower() not in {"onnx"}:
+            raise NotImplementedError(
+                f"{self.__class__.__name__} does not support export to {format!r}. "
+                "Only 'onnx' is supported for SwinV2."
+            )
+        if not self._real_ready:
+            raise RuntimeError(
+                "model must be loaded before export. Call load() first."
+            )
+        out.parent.mkdir(parents=True, exist_ok=True)
+        import torch  # type: ignore
+        from PIL import Image as _Image
+
+        proc = self._processor
+        dummy_img = _Image.new("RGB", (256, 256))
+        inputs = proc(images=dummy_img, return_tensors="pt")
+        dummy = inputs["pixel_values"]
+
+        self._model.cpu()
+        self._model.eval()
+        torch.onnx.export(
+            self._model.cpu(),
+            (dummy,),
+            str(out),
+            opset_version=17,
+            input_names=["pixel_values"],
+            output_names=["logits"],
+            dynamic_axes={"pixel_values": {0: "batch_size"}},
+        )
+        # Move model back if needed
+        if self.device != "cpu":
+            self._model.to(self.device)
+        return out
+
 
 def _factory(entry: ModelEntry) -> SwinV2Engine:
     return SwinV2Engine(entry)

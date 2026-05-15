@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-05-15
+
+### Added
+- **Grounded-SAM2 pipeline** (`grounded-sam2`) — composes Grounding DINO Tiny
+  + SAM2 Tiny (both via HF Transformers). Status: beta/wired. Auto-download: yes.
+- **Device sanity checks** — each CUDA device is now validated with a tiny
+  tensor allocation before being selected. Broken CUDA runtimes fall back to
+  CPU with an explicit `sanity_ok=False` flag and human-friendly error.
+- **Multi-GPU support** — among all CUDA GPUs, the one with the highest free
+  VRAM (passing sanity) is selected automatically.
+- **`visionservex devices --benchmark`** — runs a synthetic matrix-multiply
+  benchmark on all healthy devices and reports GFlops.
+- **SwinV2 ONNX export** — `visionservex export swinv2-tiny --format onnx`
+  produces a valid 2.8 MB ONNX file (opset 17, dynamic batch, checker passes).
+- **`Retry-After` header** on `503 SERVER_BUSY` responses; configurable via
+  `VISIONSERVEX_RUNTIME__SERVER_BUSY_RETRY_AFTER_S`.
+- **Enhanced benchmark command** — `--warmup`, `--runs`, `--device` flags;
+  shows cold-load time, warm p50/p90/p99, throughput estimate.
+- **OpenMMLab Docker expert path** — `docker/openmmlab/Dockerfile` and
+  `docker-compose.yml` for RTMPose, RTMDet-R/R2, Co-DINO-Inst, InternImage.
+- New docs: `docs/device_selection.md`, `docs/concurrency.md`,
+  `docs/export.md`, `docs/tensorrt.md`, `docs/openmmlab_expert_models.md`.
+- `RuntimeConfig` gains `max_global_concurrency`, `prefer_fastest_device`,
+  `allow_device_fallback`, `require_gpu`, `min_free_vram_gb`, `gpu_sanity_check`,
+  `server_busy_retry_after_s`, `busy_status_code`.
+- All placeholder repo URLs updated to `github.com/arashsajjadi/VisionServeX`.
+- Version bumped to 0.5.0; CITATION.cff updated.
+
+### Changed
+- `grounded-sam2` registry entry updated to `engine: grounded_sam2`,
+  `implementation_status: wired`, `status: beta`, `auto_download: true`.
+- Device selection in `device.py` now probes all CUDA devices and picks
+  the one with most free VRAM; CUDA sanity check runs automatically.
+
+### Fixed
+- Bench improvements: warmup runs excluded from latency measurements.
+- `Retry-After` HTTP header now included in all `503 BUSY` responses.
+
 ## [0.4.0] - 2026-05-15
 
 ### Added
