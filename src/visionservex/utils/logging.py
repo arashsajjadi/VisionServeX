@@ -14,6 +14,22 @@ _SECRET_PATTERNS = [
     re.compile(r"(api[_-]?key\s*[:=]\s*)['\"]?[A-Za-z0-9._\-]{8,}['\"]?", re.IGNORECASE),
     re.compile(r"(CF-Access-Client-(?:Id|Secret)\s*:\s*)\S+", re.IGNORECASE),
     re.compile(r"(?P<k>token\s*[:=]\s*)['\"]?[A-Za-z0-9._\-]{8,}['\"]?", re.IGNORECASE),
+    # HF token: hf_ prefix followed by alphanumeric chars
+    re.compile(r"(HF_TOKEN\s*[:=]\s*)[A-Za-z0-9_\-]{8,}", re.IGNORECASE),
+    re.compile(r"(hf_)[A-Za-z0-9]{16,}", re.IGNORECASE),
+    # Cloudflare service token secrets
+    re.compile(r"(CF-Access-Client-Secret\s*:\s*)\S+", re.IGNORECASE),
+    # Base64 image data in logs (long base64 strings prefixed by known patterns)
+    re.compile(r"(image_b64\s*[:=]\s*)[A-Za-z0-9+/=]{8,}", re.IGNORECASE),
+    re.compile(r"(\"image_b64\"\s*:\s*\")[A-Za-z0-9+/=]{8,}\"", re.IGNORECASE),
+]
+
+# Patterns where the entire match should be replaced (not just the suffix)
+_FULL_REPLACE_PATTERNS = [
+    # JPEG magic bytes in base64 (/9j/...)
+    re.compile(r"/9j/[A-Za-z0-9+/=]{8,}", re.IGNORECASE),
+    # PNG magic bytes in base64 (iVBORw0...)
+    re.compile(r"iVBORw0[A-Za-z0-9+/=]{8,}", re.IGNORECASE),
 ]
 
 
@@ -22,6 +38,8 @@ def redact(text: str) -> str:
     redacted = text
     for pattern in _SECRET_PATTERNS:
         redacted = pattern.sub(lambda m: m.group(1) + _REDACTED, redacted)
+    for pattern in _FULL_REPLACE_PATTERNS:
+        redacted = pattern.sub(_REDACTED, redacted)
     return redacted
 
 

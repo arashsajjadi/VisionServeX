@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.0rc2] - 2026-05-15
+
+### Security and Privacy Hardening Pass
+
+**Honest disclaimer:** VisionServeX does NOT provide end-to-end encryption.
+The inference server must see plaintext image tensors. This release provides
+local-first processing, no-retention defaults, encrypted transport, optional
+encryption-at-rest for job metadata, and auth for public mode.
+
+### Added
+- **Security modes**: `local_private` (default), `lan_private`, `cloudflare_private`,
+  `production_multi_user`. Configure with `visionservex security mode MODE`.
+- **`visionservex security audit --json`** — structured security posture report.
+  Always includes `e2e_encryption_claimed: false`.
+- **`visionservex security doctor`** — security health checks with actionable fixes.
+- **`visionservex security checklist`** — deployment checklist including no-E2E note.
+- **`visionservex security test-redaction`** — verify log redaction works.
+- **`visionservex security keygen`** — generate Fernet key for encryption-at-rest.
+- **`visionservex security check-key`** — verify key configuration.
+- **`visionservex security mode MODE`** — show/apply security mode env vars.
+- **`visionservex privacy cleanup --dry-run`** — list/delete vsx_* temp files.
+- **`visionservex privacy inspect-cache`** — show temp files without revealing content.
+- **`visionservex privacy retention [MODE]`** — show/explain retention mode.
+- **`PrivacyConfig`** — `retention_mode`, `save_inputs`, `save_outputs`, `save_prompts`,
+  `job_payload_retention`, `encrypt_job_store`, `encryption_key_file/env`, `temp_dir`.
+- **`SecurityModeConfig`** — `mode`, `require_cloudflare_access`, `trust_cf_headers`,
+  `sidecar_token`, `sidecar_url`, `tls_cert_file/key_file`.
+- **`FieldEncryptor`** / `generate_key` — Fernet-based field-level encryption for
+  SQLite job store metadata (requires `pip install cryptography`).
+- **Secure temp files** (`secure_temp_file` context manager) — 0600 permissions,
+  auto-deleted after use or on exception.
+- **Enhanced log redaction** — HF tokens, Cloudflare secrets, base64 JPEG/PNG magic,
+  `image_b64=` fields all scrubbed.
+- **`docs/privacy.md`** — comprehensive privacy guide with honest E2E disclaimer.
+- **`docs/threat_model.md`** — 4-mode threat model with what we protect and what we don't.
+- **README rewritten** — current-state, security-first, honest about E2E and status levels.
+- 28 new security/privacy tests in `tests/test_security_privacy.py`.
+
 ## [1.0.0rc1] - 2026-05-15
 
 This is the first release candidate for v1.0.0. All 222 documented syntax

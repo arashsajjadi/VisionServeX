@@ -28,6 +28,8 @@ from visionservex.cli import (
     gateway_commands,
     gpu_commands,
     openmmlab_commands,
+    privacy_commands,
+    security_commands,
     suite_commands,
     syntax_audit,
     tensorrt_commands,
@@ -79,6 +81,8 @@ app.add_typer(gateway_commands.app, name="gateway")
 app.add_typer(suite_commands.suite_app, name="suite")
 app.add_typer(suite_commands.scheduler_app, name="scheduler")
 app.add_typer(syntax_audit.app, name="syntax")
+app.add_typer(security_commands.app, name="security")
+app.add_typer(privacy_commands.app, name="privacy")
 app.add_typer(validation_commands.app, name="validation")
 
 console = Console()

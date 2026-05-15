@@ -124,6 +124,47 @@ class ModelsConfig(BaseModel):
     allow_mock_fallback: bool = False  # honest by default: never fake real engines
 
 
+class PrivacyConfig(BaseModel):
+    """Privacy and data-retention configuration.
+
+    Default: no-retention, strict redaction.
+    The server must see plaintext tensors for inference — no E2E encryption is claimed.
+    """
+
+    retention_mode: Literal["none", "metadata_only", "outputs", "full_debug"] = "metadata_only"
+    save_inputs: bool = False  # never save uploaded images to disk
+    save_outputs: bool = False  # never save annotated outputs
+    save_prompts: bool = False  # never log prompts
+    job_payload_retention: bool = False  # never persist image bytes in job store
+    redact_local_paths: bool = True  # redact filesystem paths from logs
+    # Encryption-at-rest for SQLite job store (requires cryptography package)
+    encrypt_job_store: bool = False
+    encryption_key_env: str = "VISIONSERVEX_ENCRYPTION_KEY"
+    encryption_key_file: str | None = None
+    # Temp file cleanup
+    cleanup_temp_files: bool = True
+    temp_dir: str | None = None  # None = system default
+
+
+class SecurityModeConfig(BaseModel):
+    """Security mode: one of the four documented operating modes."""
+
+    mode: Literal["local_private", "lan_private", "cloudflare_private", "production_multi_user"] = (
+        "local_private"
+    )
+    # Cloudflare Access
+    require_cloudflare_access: bool = False
+    allowed_cf_aud: list[str] = Field(default_factory=list)
+    trust_cf_headers: bool = False  # only True when behind verified Cloudflare edge
+    # Sidecar auth
+    sidecar_token: str | None = None
+    sidecar_url: str = "http://localhost:8090"
+    sidecar_public: bool = False
+    # TLS
+    tls_cert_file: str | None = None
+    tls_key_file: str | None = None
+
+
 class TunnelConfig(BaseModel):
     provider: Literal["cloudflare", "none"] = "cloudflare"
     tunnel_name: str = "visionservex"
@@ -162,6 +203,8 @@ class Settings(BaseSettings):
     inputs: InputsConfig = Field(default_factory=InputsConfig)
     models: ModelsConfig = Field(default_factory=ModelsConfig)
     tunnel: TunnelConfig = Field(default_factory=TunnelConfig)
+    privacy: PrivacyConfig = Field(default_factory=PrivacyConfig)
+    security_mode: SecurityModeConfig = Field(default_factory=SecurityModeConfig)
 
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
