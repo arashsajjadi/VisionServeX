@@ -1,0 +1,1415 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Arash Sajjadi
+#
+# VisionServeX bundled model registry.
+#
+# Honesty rules:
+#   * License values reflect each upstream project's commonly-published
+#     license at the time of writing. Always re-verify per-checkpoint and
+#     per-dataset license before commercial use. See docs/model_licenses.md.
+#   * `implementation_status` describes what THIS build does. `stub` means
+#     no real inference; `wired` means the real backend runs when its
+#     dependencies are installed; `partial` means rough edges remain.
+#   * We make no benchmark superiority claims. Pick a model by task,
+#     license, and resource footprint.
+
+models:
+  # =====================================================================
+  # Built-in mock models (always present, no download)
+  # =====================================================================
+  - id: mock-detect
+    display_name: "Mock Detection (synthetic, deterministic)"
+    task: detect
+    family: mock
+    backend: mock
+    engine: mock
+    license: Apache-2.0
+    license_notes: "Built into VisionServeX."
+    upstream_url: https://github.com/example/visionservex
+    download_type: synthetic
+    auto_download: true
+    supported_devices: [cpu]
+    supported_precisions: [fp32]
+    minimum_ram_gb: 0.25
+    difficulty: very_easy
+    best_for: ["smoke tests", "CI pipelines", "first prediction"]
+    beginner_recommendation: true
+    implementation_status: wired
+    status: stable
+    batch_support: true
+    notes: "Returns deterministic, image-derived fake detections. Use as a smoke test before downloading any real model."
+
+  - id: mock-classify
+    display_name: "Mock Classification (synthetic)"
+    task: classify
+    family: mock
+    backend: mock
+    engine: mock
+    license: Apache-2.0
+    upstream_url: https://github.com/example/visionservex
+    download_type: synthetic
+    auto_download: true
+    supported_devices: [cpu]
+    supported_precisions: [fp32]
+    minimum_ram_gb: 0.25
+    difficulty: very_easy
+    beginner_recommendation: true
+    implementation_status: wired
+    status: stable
+    batch_support: true
+
+  - id: mock-segment
+    display_name: "Mock Segmentation (synthetic)"
+    task: segment
+    family: mock
+    backend: mock
+    engine: mock
+    license: Apache-2.0
+    upstream_url: https://github.com/example/visionservex
+    download_type: synthetic
+    auto_download: true
+    supported_devices: [cpu]
+    supported_precisions: [fp32]
+    minimum_ram_gb: 0.25
+    difficulty: very_easy
+    beginner_recommendation: true
+    implementation_status: wired
+    status: stable
+
+  - id: mock-pose
+    display_name: "Mock Pose (synthetic)"
+    task: pose
+    family: mock
+    backend: mock
+    engine: mock
+    license: Apache-2.0
+    upstream_url: https://github.com/example/visionservex
+    download_type: synthetic
+    auto_download: true
+    supported_devices: [cpu]
+    supported_precisions: [fp32]
+    minimum_ram_gb: 0.25
+    difficulty: very_easy
+    implementation_status: wired
+    status: stable
+
+  - id: mock-obb
+    display_name: "Mock OBB (synthetic)"
+    task: obb
+    family: mock
+    backend: mock
+    engine: mock
+    license: Apache-2.0
+    upstream_url: https://github.com/example/visionservex
+    download_type: synthetic
+    auto_download: true
+    supported_devices: [cpu]
+    supported_precisions: [fp32]
+    minimum_ram_gb: 0.25
+    difficulty: very_easy
+    implementation_status: wired
+    status: stable
+
+  - id: mock-open-vocab
+    display_name: "Mock Open-Vocabulary Detection (synthetic)"
+    task: open_vocab_detect
+    family: mock
+    backend: mock
+    engine: mock
+    license: Apache-2.0
+    upstream_url: https://github.com/example/visionservex
+    download_type: synthetic
+    auto_download: true
+    supported_devices: [cpu]
+    supported_precisions: [fp32]
+    minimum_ram_gb: 0.25
+    difficulty: very_easy
+    implementation_status: wired
+    status: stable
+
+  - id: mock-grounded-segment
+    display_name: "Mock Grounded Segmentation (synthetic)"
+    task: grounded_segment
+    family: mock
+    backend: mock
+    engine: mock
+    license: Apache-2.0
+    upstream_url: https://github.com/example/visionservex
+    download_type: synthetic
+    auto_download: true
+    supported_devices: [cpu]
+    supported_precisions: [fp32]
+    minimum_ram_gb: 0.25
+    difficulty: very_easy
+    implementation_status: wired
+    status: stable
+
+  - id: mock-foundation-segment
+    display_name: "Mock Foundation Segmentation (synthetic)"
+    task: foundation_segment
+    family: mock
+    backend: mock
+    engine: mock
+    license: Apache-2.0
+    upstream_url: https://github.com/example/visionservex
+    download_type: synthetic
+    auto_download: true
+    supported_devices: [cpu]
+    supported_precisions: [fp32]
+    minimum_ram_gb: 0.25
+    difficulty: very_easy
+    implementation_status: wired
+    status: stable
+
+  # =====================================================================
+  # Open-vocabulary detection — Grounding DINO (HF Transformers)
+  # =====================================================================
+  - id: grounding-dino-tiny
+    display_name: "Grounding DINO (Tiny) via Hugging Face"
+    task: open_vocab_detect
+    family: grounding-dino
+    backend: huggingface
+    engine: grounding_dino
+    license: Apache-2.0
+    license_notes: "Apache-2.0 from IDEA-Research. Verify checkpoint license on HF."
+    upstream_url: https://github.com/IDEA-Research/GroundingDINO
+    download_type: huggingface
+    hf_repo_id: IDEA-Research/grounding-dino-tiny
+    auto_download: true
+    requires_optional_extra: true
+    install_extra: grounding
+    implementation_notes: "Uses transformers.AutoModelForZeroShotObjectDetection + AutoProcessor."
+    implementation_status: wired
+    supported_devices: [cpu, cuda]
+    recommended_device: cuda
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 2.0
+    recommended_vram_gb: 4.0
+    minimum_ram_gb: 4.0
+    batch_support: false
+    difficulty: easy
+    best_for: ["finding objects by text prompt", "open-set detection demos"]
+    not_good_for: ["closed-vocab high-throughput inference"]
+    status: beta
+    beginner_recommendation: true
+
+  - id: grounding-dino-swin-t
+    display_name: "Grounding DINO Swin-T"
+    task: open_vocab_detect
+    family: grounding-dino
+    backend: huggingface
+    engine: grounding_dino
+    license: Apache-2.0
+    upstream_url: https://github.com/IDEA-Research/GroundingDINO
+    download_type: huggingface
+    hf_repo_id: IDEA-Research/grounding-dino-tiny
+    auto_download: true
+    requires_optional_extra: true
+    install_extra: grounding
+    supported_devices: [cpu, cuda]
+    recommended_device: cuda
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 3.0
+    recommended_vram_gb: 6.0
+    difficulty: easy
+    implementation_status: wired
+    status: beta
+
+  - id: grounding-dino-swin-b
+    display_name: "Grounding DINO Swin-B (base)"
+    task: open_vocab_detect
+    family: grounding-dino
+    backend: huggingface
+    engine: grounding_dino
+    license: Apache-2.0
+    upstream_url: https://github.com/IDEA-Research/GroundingDINO
+    download_type: huggingface
+    hf_repo_id: IDEA-Research/grounding-dino-base
+    auto_download: true
+    requires_optional_extra: true
+    install_extra: grounding
+    supported_devices: [cuda]
+    recommended_device: cuda
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 8.0
+    recommended_vram_gb: 12.0
+    difficulty: medium
+    implementation_status: wired
+    status: beta
+
+  - id: grounding-dino-1.5
+    display_name: "Grounding DINO 1.5 (external/API)"
+    task: open_vocab_detect
+    family: grounding-dino
+    backend: external
+    engine: grounding_dino
+    license: Custom
+    license_uncertain: true
+    license_notes: "API-gated by IDEA-Research at time of writing; review upstream terms."
+    upstream_url: https://github.com/IDEA-Research/Grounding-DINO-1.5-API
+    download_type: external_api
+    auto_download: false
+    requires_auth: true
+    supported_devices: [cuda]
+    difficulty: expert
+    status: external
+    implementation_status: stub
+    warnings:
+      - "Weights are not openly downloadable at the time of writing."
+      - "VisionServeX does not call external APIs from your behalf without an admin-configured token."
+
+  - id: grounding-dino-1.6
+    display_name: "Grounding DINO 1.6 (external/API)"
+    task: open_vocab_detect
+    family: grounding-dino
+    backend: external
+    engine: grounding_dino
+    license: Custom
+    license_uncertain: true
+    upstream_url: https://github.com/IDEA-Research/Grounding-DINO-1.5-API
+    download_type: external_api
+    auto_download: false
+    requires_auth: true
+    supported_devices: [cuda]
+    difficulty: expert
+    status: external
+    implementation_status: stub
+
+  # =====================================================================
+  # Object detection — D-FINE
+  # =====================================================================
+  - id: dfine-n
+    display_name: "D-FINE (Nano)"
+    task: detect
+    family: dfine
+    backend: pytorch
+    engine: dfine
+    license: Apache-2.0
+    upstream_url: https://github.com/Peterande/D-FINE
+    download_type: github_release
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: dfine
+    implementation_notes: "Engine wiring is a stub in 0.2.x; mock fallback only on opt-in."
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    recommended_device: cpu
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 0.5
+    recommended_vram_gb: 1.0
+    minimum_ram_gb: 2.0
+    difficulty: very_easy
+    batch_support: true
+    export_support: [onnx]
+    best_for: ["very low-resource detection", "edge devices"]
+    beginner_recommendation: true
+    status: experimental
+    warnings:
+      - "Real D-FINE backend wiring is incomplete. Track upstream changes."
+
+  - id: dfine-s
+    display_name: "D-FINE (Small)"
+    task: detect
+    family: dfine
+    backend: pytorch
+    engine: dfine
+    license: Apache-2.0
+    upstream_url: https://github.com/Peterande/D-FINE
+    download_type: github_release
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: dfine
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    recommended_device: cpu
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 1.0
+    recommended_vram_gb: 2.0
+    minimum_ram_gb: 3.0
+    difficulty: easy
+    batch_support: true
+    export_support: [onnx]
+    status: experimental
+
+  - id: dfine-m
+    display_name: "D-FINE (Medium)"
+    task: detect
+    family: dfine
+    backend: pytorch
+    engine: dfine
+    license: Apache-2.0
+    upstream_url: https://github.com/Peterande/D-FINE
+    download_type: github_release
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: dfine
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 2.0
+    recommended_vram_gb: 4.0
+    difficulty: medium
+    batch_support: true
+    export_support: [onnx]
+    status: experimental
+
+  - id: dfine-l
+    display_name: "D-FINE (Large)"
+    task: detect
+    family: dfine
+    backend: pytorch
+    engine: dfine
+    license: Apache-2.0
+    upstream_url: https://github.com/Peterande/D-FINE
+    download_type: github_release
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: dfine
+    implementation_status: stub
+    supported_devices: [cuda]
+    recommended_device: cuda
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 4.0
+    recommended_vram_gb: 8.0
+    difficulty: medium
+    status: experimental
+
+  - id: dfine-x
+    display_name: "D-FINE (XLarge, Obj365+COCO)"
+    task: detect
+    family: dfine
+    backend: pytorch
+    engine: dfine
+    license: Apache-2.0
+    upstream_url: https://github.com/Peterande/D-FINE
+    download_type: github_release
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: dfine
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 8.0
+    recommended_vram_gb: 12.0
+    difficulty: hard
+    status: experimental
+
+  # =====================================================================
+  # Object detection — RF-DETR (Roboflow)
+  # =====================================================================
+  - id: rfdetr-nano
+    display_name: "RF-DETR (Nano)"
+    task: detect
+    family: rfdetr
+    backend: pytorch
+    engine: rfdetr
+    license: Apache-2.0
+    license_notes: "Apache-2.0 framework; verify per-checkpoint license on HF."
+    upstream_url: https://github.com/roboflow/rf-detr
+    download_type: huggingface
+    hf_repo_id: roboflow/rf-detr-nano
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: rfdetr
+    implementation_notes: "Real backend wiring pending; engine stubbed in 0.2.x."
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    recommended_device: cpu
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 0.5
+    recommended_vram_gb: 1.5
+    minimum_ram_gb: 2.0
+    difficulty: very_easy
+    batch_support: true
+    export_support: [onnx]
+    beginner_recommendation: true
+    status: experimental
+
+  - id: rfdetr-small
+    display_name: "RF-DETR (Small)"
+    task: detect
+    family: rfdetr
+    backend: pytorch
+    engine: rfdetr
+    license: Apache-2.0
+    upstream_url: https://github.com/roboflow/rf-detr
+    download_type: huggingface
+    hf_repo_id: roboflow/rf-detr-small
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: rfdetr
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    recommended_device: cuda
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 1.0
+    recommended_vram_gb: 3.0
+    minimum_ram_gb: 4.0
+    difficulty: easy
+    batch_support: true
+    export_support: [onnx]
+    beginner_recommendation: true
+    status: experimental
+
+  - id: rfdetr-medium
+    display_name: "RF-DETR (Medium)"
+    task: detect
+    family: rfdetr
+    backend: pytorch
+    engine: rfdetr
+    license: Apache-2.0
+    upstream_url: https://github.com/roboflow/rf-detr
+    download_type: huggingface
+    hf_repo_id: roboflow/rf-detr-medium
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: rfdetr
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 3.0
+    recommended_vram_gb: 6.0
+    difficulty: medium
+    status: experimental
+
+  - id: rfdetr-large
+    display_name: "RF-DETR (Large)"
+    task: detect
+    family: rfdetr
+    backend: pytorch
+    engine: rfdetr
+    license: Apache-2.0
+    upstream_url: https://github.com/roboflow/rf-detr
+    download_type: huggingface
+    hf_repo_id: roboflow/rf-detr-large
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: rfdetr
+    implementation_status: stub
+    supported_devices: [cuda]
+    recommended_device: cuda
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 6.0
+    recommended_vram_gb: 12.0
+    difficulty: medium
+    status: experimental
+
+  # =====================================================================
+  # Instance segmentation — RF-DETR-Seg
+  # =====================================================================
+  - id: rfdetr-seg-nano
+    display_name: "RF-DETR-Seg (Nano)"
+    task: segment
+    family: rfdetr
+    backend: pytorch
+    engine: rfdetr
+    license: Apache-2.0
+    upstream_url: https://github.com/roboflow/rf-detr
+    download_type: huggingface
+    hf_repo_id: roboflow/rf-detr-seg-nano
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: rfdetr
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    recommended_device: cuda
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 1.0
+    recommended_vram_gb: 2.0
+    difficulty: easy
+    status: experimental
+
+  - id: rfdetr-seg-small
+    display_name: "RF-DETR-Seg (Small)"
+    task: segment
+    family: rfdetr
+    backend: pytorch
+    engine: rfdetr
+    license: Apache-2.0
+    upstream_url: https://github.com/roboflow/rf-detr
+    download_type: huggingface
+    hf_repo_id: roboflow/rf-detr-seg-small
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: rfdetr
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    recommended_device: cuda
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 1.5
+    recommended_vram_gb: 3.0
+    difficulty: easy
+    beginner_recommendation: true
+    status: experimental
+
+  - id: rfdetr-seg-medium
+    display_name: "RF-DETR-Seg (Medium)"
+    task: segment
+    family: rfdetr
+    backend: pytorch
+    engine: rfdetr
+    license: Apache-2.0
+    upstream_url: https://github.com/roboflow/rf-detr
+    download_type: huggingface
+    hf_repo_id: roboflow/rf-detr-seg-medium
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: rfdetr
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 4.0
+    recommended_vram_gb: 8.0
+    difficulty: medium
+    status: experimental
+
+  - id: rfdetr-seg-large
+    display_name: "RF-DETR-Seg (Large)"
+    task: segment
+    family: rfdetr
+    backend: pytorch
+    engine: rfdetr
+    license: Apache-2.0
+    upstream_url: https://github.com/roboflow/rf-detr
+    download_type: huggingface
+    hf_repo_id: roboflow/rf-detr-seg-large
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: rfdetr
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 6.0
+    recommended_vram_gb: 10.0
+    difficulty: medium
+    status: experimental
+
+  - id: rfdetr-seg-xlarge
+    display_name: "RF-DETR-Seg (XLarge)"
+    task: segment
+    family: rfdetr
+    backend: pytorch
+    engine: rfdetr
+    license: Apache-2.0
+    upstream_url: https://github.com/roboflow/rf-detr
+    download_type: huggingface
+    hf_repo_id: roboflow/rf-detr-seg-xlarge
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: rfdetr
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 10.0
+    recommended_vram_gb: 16.0
+    difficulty: hard
+    status: experimental
+
+  - id: rfdetr-seg-2xlarge
+    display_name: "RF-DETR-Seg (2XLarge)"
+    task: segment
+    family: rfdetr
+    backend: pytorch
+    engine: rfdetr
+    license: Apache-2.0
+    upstream_url: https://github.com/roboflow/rf-detr
+    download_type: huggingface
+    hf_repo_id: roboflow/rf-detr-seg-2xlarge
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: rfdetr
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 16.0
+    recommended_vram_gb: 24.0
+    difficulty: expert
+    status: experimental
+
+  # =====================================================================
+  # Instance segmentation — Co-DINO / Co-DETR
+  # =====================================================================
+  - id: co-dino-inst-vit-l-coco
+    display_name: "Co-DINO-Inst ViT-L (COCO)"
+    task: segment
+    family: co-dino
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    license_uncertain: true
+    license_notes: "Some checkpoints are research-only; verify."
+    upstream_url: https://github.com/Sense-X/Co-DETR
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 16.0
+    recommended_vram_gb: 24.0
+    difficulty: expert
+    status: manual
+
+  - id: co-dino-inst-vit-l-lvis
+    display_name: "Co-DINO-Inst ViT-L (LVIS)"
+    task: segment
+    family: co-dino
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    license_uncertain: true
+    upstream_url: https://github.com/Sense-X/Co-DETR
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 16.0
+    recommended_vram_gb: 24.0
+    difficulty: expert
+    status: manual
+
+  # =====================================================================
+  # Pose — RTMPose (MMPose)
+  # =====================================================================
+  - id: rtmpose-t
+    display_name: "RTMPose (Tiny) via MMPose"
+    task: pose
+    family: rtmpose
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    upstream_url: https://github.com/open-mmlab/mmpose
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_notes: "Install with: pip install -U openmim && mim install mmengine mmcv mmpose"
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 0.5
+    recommended_vram_gb: 2.0
+    minimum_ram_gb: 3.0
+    difficulty: medium
+    export_support: [onnx]
+    status: manual
+
+  - id: rtmpose-s
+    display_name: "RTMPose (Small) via MMPose"
+    task: pose
+    family: rtmpose
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    upstream_url: https://github.com/open-mmlab/mmpose
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 1.0
+    recommended_vram_gb: 2.0
+    difficulty: medium
+    export_support: [onnx]
+    beginner_recommendation: true
+    status: manual
+
+  - id: rtmpose-m
+    display_name: "RTMPose (Medium)"
+    task: pose
+    family: rtmpose
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    upstream_url: https://github.com/open-mmlab/mmpose
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 1.5
+    recommended_vram_gb: 3.0
+    difficulty: medium
+    export_support: [onnx]
+    status: manual
+
+  - id: rtmpose-l
+    display_name: "RTMPose (Large)"
+    task: pose
+    family: rtmpose
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    upstream_url: https://github.com/open-mmlab/mmpose
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 2.0
+    recommended_vram_gb: 4.0
+    difficulty: medium
+    export_support: [onnx]
+    status: manual
+
+  - id: rtmpose-m-384x288
+    display_name: "RTMPose (Medium, 384x288 input)"
+    task: pose
+    family: rtmpose
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    upstream_url: https://github.com/open-mmlab/mmpose
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    supported_precisions: [fp16]
+    minimum_vram_gb: 2.0
+    recommended_vram_gb: 4.0
+    difficulty: medium
+    status: manual
+
+  - id: rtmpose-l-384x288
+    display_name: "RTMPose (Large, 384x288 input)"
+    task: pose
+    family: rtmpose
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    upstream_url: https://github.com/open-mmlab/mmpose
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16]
+    minimum_vram_gb: 3.0
+    recommended_vram_gb: 6.0
+    difficulty: medium
+    status: manual
+
+  # =====================================================================
+  # OBB — RTMDet-R and RTMDet-R2
+  # =====================================================================
+  - id: rtmdet-r-t
+    display_name: "RTMDet-R (Tiny)"
+    task: obb
+    family: rtmdet
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    license_uncertain: true
+    upstream_url: https://github.com/open-mmlab/mmrotate
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 1.0
+    recommended_vram_gb: 2.0
+    difficulty: hard
+    status: manual
+    warnings:
+      - "OBB integration is cautious. We make no benchmark superiority claims."
+
+  - id: rtmdet-r-s
+    display_name: "RTMDet-R (Small)"
+    task: obb
+    family: rtmdet
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    license_uncertain: true
+    upstream_url: https://github.com/open-mmlab/mmrotate
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16]
+    minimum_vram_gb: 2.0
+    recommended_vram_gb: 4.0
+    difficulty: hard
+    status: manual
+
+  - id: rtmdet-r-m
+    display_name: "RTMDet-R (Medium)"
+    task: obb
+    family: rtmdet
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    license_uncertain: true
+    upstream_url: https://github.com/open-mmlab/mmrotate
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16]
+    minimum_vram_gb: 3.0
+    recommended_vram_gb: 6.0
+    difficulty: hard
+    status: manual
+
+  - id: rtmdet-r-l
+    display_name: "RTMDet-R (Large)"
+    task: obb
+    family: rtmdet
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    license_uncertain: true
+    upstream_url: https://github.com/open-mmlab/mmrotate
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 4.0
+    recommended_vram_gb: 8.0
+    difficulty: hard
+    status: manual
+
+  - id: rtmdet-r2-t
+    display_name: "RTMDet-R2 (Tiny)"
+    task: obb
+    family: rtmdet
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    license_uncertain: true
+    upstream_url: https://github.com/open-mmlab/mmrotate
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 1.0
+    recommended_vram_gb: 2.0
+    difficulty: hard
+    status: manual
+
+  - id: rtmdet-r2-s
+    display_name: "RTMDet-R2 (Small)"
+    task: obb
+    family: rtmdet
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    license_uncertain: true
+    upstream_url: https://github.com/open-mmlab/mmrotate
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16]
+    minimum_vram_gb: 2.0
+    recommended_vram_gb: 4.0
+    difficulty: hard
+    status: manual
+
+  - id: rtmdet-r2-m
+    display_name: "RTMDet-R2 (Medium)"
+    task: obb
+    family: rtmdet
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    license_uncertain: true
+    upstream_url: https://github.com/open-mmlab/mmrotate
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16]
+    minimum_vram_gb: 3.0
+    recommended_vram_gb: 6.0
+    difficulty: hard
+    status: manual
+
+  - id: rtmdet-r2-l
+    display_name: "RTMDet-R2 (Large)"
+    task: obb
+    family: rtmdet
+    backend: openmmlab
+    engine: openmmlab
+    license: Apache-2.0
+    license_uncertain: true
+    upstream_url: https://github.com/open-mmlab/mmrotate
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 5.0
+    recommended_vram_gb: 10.0
+    difficulty: hard
+    status: manual
+
+  # =====================================================================
+  # Classification — Swin Transformer V2 (HF)
+  # =====================================================================
+  - id: swinv2-tiny
+    display_name: "Swin V2 (Tiny, ImageNet-1k)"
+    task: classify
+    family: swinv2
+    backend: huggingface
+    engine: huggingface
+    license: MIT
+    upstream_url: https://github.com/microsoft/Swin-Transformer
+    download_type: huggingface
+    hf_repo_id: microsoft/swinv2-tiny-patch4-window8-256
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: hf
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    recommended_device: cpu
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 0.5
+    recommended_vram_gb: 1.0
+    minimum_ram_gb: 2.0
+    difficulty: very_easy
+    batch_support: true
+    beginner_recommendation: true
+    status: experimental
+
+  - id: swinv2-small
+    display_name: "Swin V2 (Small)"
+    task: classify
+    family: swinv2
+    backend: huggingface
+    engine: huggingface
+    license: MIT
+    upstream_url: https://github.com/microsoft/Swin-Transformer
+    download_type: huggingface
+    hf_repo_id: microsoft/swinv2-small-patch4-window8-256
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: hf
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 1.0
+    recommended_vram_gb: 2.0
+    difficulty: easy
+    batch_support: true
+    beginner_recommendation: true
+    status: experimental
+
+  - id: swinv2-base
+    display_name: "Swin V2 (Base)"
+    task: classify
+    family: swinv2
+    backend: huggingface
+    engine: huggingface
+    license: MIT
+    upstream_url: https://github.com/microsoft/Swin-Transformer
+    download_type: huggingface
+    hf_repo_id: microsoft/swinv2-base-patch4-window8-256
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: hf
+    implementation_status: stub
+    supported_devices: [cpu, cuda]
+    supported_precisions: [fp32, fp16]
+    minimum_vram_gb: 1.5
+    recommended_vram_gb: 3.0
+    difficulty: easy
+    batch_support: true
+    status: experimental
+
+  - id: swinv2-large
+    display_name: "Swin V2 (Large)"
+    task: classify
+    family: swinv2
+    backend: huggingface
+    engine: huggingface
+    license: MIT
+    upstream_url: https://github.com/microsoft/Swin-Transformer
+    download_type: huggingface
+    hf_repo_id: microsoft/swinv2-large-patch4-window12-192-22k
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: hf
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 3.0
+    recommended_vram_gb: 6.0
+    difficulty: medium
+    status: experimental
+
+  # =====================================================================
+  # Classification — InternImage (OpenMMLab)
+  # =====================================================================
+  - id: internimage-t
+    display_name: "InternImage (Tiny)"
+    task: classify
+    family: internimage
+    backend: openmmlab
+    engine: openmmlab
+    license: MIT
+    license_uncertain: true
+    upstream_url: https://github.com/OpenGVLab/InternImage
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    requires_custom_code: true
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16]
+    minimum_vram_gb: 2.0
+    recommended_vram_gb: 4.0
+    difficulty: hard
+    known_issues: ["Requires custom CUDA ops; may not build on every platform."]
+    status: manual
+
+  - id: internimage-s
+    display_name: "InternImage (Small)"
+    task: classify
+    family: internimage
+    backend: openmmlab
+    engine: openmmlab
+    license: MIT
+    license_uncertain: true
+    upstream_url: https://github.com/OpenGVLab/InternImage
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    requires_custom_code: true
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16]
+    minimum_vram_gb: 3.0
+    recommended_vram_gb: 6.0
+    difficulty: hard
+    status: manual
+
+  - id: internimage-b
+    display_name: "InternImage (Base)"
+    task: classify
+    family: internimage
+    backend: openmmlab
+    engine: openmmlab
+    license: MIT
+    license_uncertain: true
+    upstream_url: https://github.com/OpenGVLab/InternImage
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    requires_custom_code: true
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16]
+    minimum_vram_gb: 4.0
+    recommended_vram_gb: 8.0
+    difficulty: hard
+    status: manual
+
+  - id: internimage-l
+    display_name: "InternImage (Large)"
+    task: classify
+    family: internimage
+    backend: openmmlab
+    engine: openmmlab
+    license: MIT
+    license_uncertain: true
+    upstream_url: https://github.com/OpenGVLab/InternImage
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    requires_custom_code: true
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 8.0
+    recommended_vram_gb: 14.0
+    difficulty: expert
+    status: manual
+
+  - id: internimage-h
+    display_name: "InternImage (Huge)"
+    task: classify
+    family: internimage
+    backend: openmmlab
+    engine: openmmlab
+    license: MIT
+    license_uncertain: true
+    upstream_url: https://github.com/OpenGVLab/InternImage
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: openmmlab
+    requires_custom_code: true
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 16.0
+    recommended_vram_gb: 24.0
+    difficulty: expert
+    status: manual
+
+  # =====================================================================
+  # Foundation segmentation — SAM 2 / SAM 2.1
+  # =====================================================================
+  - id: sam2-hiera-tiny
+    display_name: "SAM 2.1 (Hiera Tiny)"
+    task: foundation_segment
+    family: sam2
+    backend: sam2
+    engine: sam2
+    license: Apache-2.0
+    upstream_url: https://github.com/facebookresearch/sam2
+    download_type: huggingface
+    hf_repo_id: facebook/sam2.1-hiera-tiny
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: sam2
+    requires_custom_code: true
+    implementation_notes: "Requires upstream `sam2` package installed from GitHub."
+    implementation_status: stub
+    supported_devices: [cpu, cuda, mps]
+    recommended_device: cuda
+    supported_precisions: [fp32, fp16, bf16]
+    minimum_vram_gb: 1.5
+    recommended_vram_gb: 4.0
+    minimum_ram_gb: 4.0
+    difficulty: medium
+    beginner_recommendation: true
+    status: experimental
+    warnings:
+      - "Build/install issues are common; run `visionservex doctor` after install."
+
+  - id: sam2-hiera-small
+    display_name: "SAM 2.1 (Hiera Small)"
+    task: foundation_segment
+    family: sam2
+    backend: sam2
+    engine: sam2
+    license: Apache-2.0
+    upstream_url: https://github.com/facebookresearch/sam2
+    download_type: huggingface
+    hf_repo_id: facebook/sam2.1-hiera-small
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: sam2
+    requires_custom_code: true
+    implementation_status: stub
+    supported_devices: [cuda, mps, cpu]
+    recommended_device: cuda
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 2.0
+    recommended_vram_gb: 6.0
+    difficulty: medium
+    status: experimental
+
+  - id: sam2-hiera-base-plus
+    display_name: "SAM 2.1 (Hiera Base+)"
+    task: foundation_segment
+    family: sam2
+    backend: sam2
+    engine: sam2
+    license: Apache-2.0
+    upstream_url: https://github.com/facebookresearch/sam2
+    download_type: huggingface
+    hf_repo_id: facebook/sam2.1-hiera-base-plus
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: sam2
+    requires_custom_code: true
+    implementation_status: stub
+    supported_devices: [cuda, mps]
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 4.0
+    recommended_vram_gb: 8.0
+    difficulty: medium
+    status: experimental
+
+  - id: sam2-hiera-large
+    display_name: "SAM 2.1 (Hiera Large)"
+    task: foundation_segment
+    family: sam2
+    backend: sam2
+    engine: sam2
+    license: Apache-2.0
+    upstream_url: https://github.com/facebookresearch/sam2
+    download_type: huggingface
+    hf_repo_id: facebook/sam2.1-hiera-large
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: sam2
+    requires_custom_code: true
+    implementation_status: stub
+    supported_devices: [cuda]
+    recommended_device: cuda
+    supported_precisions: [fp16, bf16]
+    minimum_vram_gb: 8.0
+    recommended_vram_gb: 12.0
+    difficulty: hard
+    status: experimental
+
+  # =====================================================================
+  # Grounded / universal segmentation
+  # =====================================================================
+  - id: grounded-sam2
+    display_name: "Grounded SAM 2 (Grounding DINO + SAM 2)"
+    task: grounded_segment
+    family: grounded-sam
+    backend: composed
+    engine: grounding_dino  # composes with sam2 at runtime
+    license: Apache-2.0
+    upstream_url: https://github.com/IDEA-Research/Grounded-SAM-2
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: grounding
+    implementation_notes: "Composes Grounding DINO + SAM 2 at runtime. Both backends required."
+    implementation_status: stub
+    supported_devices: [cuda, cpu]
+    recommended_device: cuda
+    supported_precisions: [fp16, fp32]
+    minimum_vram_gb: 6.0
+    recommended_vram_gb: 12.0
+    difficulty: hard
+    status: experimental
+    notes: "Capability-matched to prompt-based universal segmentation. Not advertised as a benchmark winner."
+
+  - id: seem-focal-t
+    display_name: "SEEM (Focal-T)"
+    task: grounded_segment
+    family: seem
+    backend: pytorch
+    engine: huggingface
+    license: Apache-2.0
+    license_uncertain: true
+    upstream_url: https://github.com/UX-Decoder/Segment-Everything-Everywhere-All-At-Once
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: hf
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16]
+    minimum_vram_gb: 6.0
+    recommended_vram_gb: 10.0
+    difficulty: expert
+    status: manual
+
+  - id: seem-davit-d3
+    display_name: "SEEM (DaViT-D3)"
+    task: grounded_segment
+    family: seem
+    backend: pytorch
+    engine: huggingface
+    license: Apache-2.0
+    license_uncertain: true
+    upstream_url: https://github.com/UX-Decoder/Segment-Everything-Everywhere-All-At-Once
+    download_type: manual
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: hf
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16]
+    minimum_vram_gb: 10.0
+    recommended_vram_gb: 16.0
+    difficulty: expert
+    status: manual
+
+  - id: oneformer-swin-large
+    display_name: "OneFormer (Swin-Large, COCO)"
+    task: segment
+    family: oneformer
+    backend: huggingface
+    engine: huggingface
+    license: MIT
+    upstream_url: https://github.com/SHI-Labs/OneFormer
+    download_type: huggingface
+    hf_repo_id: shi-labs/oneformer_coco_swin_large
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: hf
+    implementation_status: stub
+    supported_devices: [cuda, cpu]
+    recommended_device: cuda
+    supported_precisions: [fp16, fp32]
+    minimum_vram_gb: 6.0
+    recommended_vram_gb: 12.0
+    difficulty: hard
+    status: experimental
+
+  - id: oneformer-dinat-large
+    display_name: "OneFormer (DiNAT-Large)"
+    task: segment
+    family: oneformer
+    backend: huggingface
+    engine: huggingface
+    license: MIT
+    upstream_url: https://github.com/SHI-Labs/OneFormer
+    download_type: huggingface
+    hf_repo_id: shi-labs/oneformer_coco_dinat_large
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: hf
+    implementation_status: stub
+    supported_devices: [cuda]
+    supported_precisions: [fp16]
+    minimum_vram_gb: 8.0
+    recommended_vram_gb: 14.0
+    difficulty: hard
+    status: experimental
+
+  - id: oneformer-convnext-large
+    display_name: "OneFormer (ConvNeXt-Large)"
+    task: segment
+    family: oneformer
+    backend: huggingface
+    engine: huggingface
+    license: MIT
+    upstream_url: https://github.com/SHI-Labs/OneFormer
+    download_type: huggingface
+    hf_repo_id: shi-labs/oneformer_ade20k_convnext_large
+    auto_download: false
+    requires_optional_extra: true
+    install_extra: hf
+    implementation_status: stub
+    supported_devices: [cuda, cpu]
+    supported_precisions: [fp16, fp32]
+    minimum_vram_gb: 6.0
+    recommended_vram_gb: 12.0
+    difficulty: hard
+    status: experimental

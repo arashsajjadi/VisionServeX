@@ -1,0 +1,53 @@
+# VisionServeX docker-compose example.
+#
+# Provides:
+#   * the API service bound only to localhost on the host;
+#   * a model cache volume;
+#   * an optional cloudflared sidecar (commented out by default — review the
+#     security checklist in docs/cloudflare_tunnel.md before enabling).
+#
+# Never commit a real TUNNEL_TOKEN or API_KEY to source control.
+
+services:
+  visionservex:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: visionservex:cpu
+    container_name: visionservex
+    restart: unless-stopped
+    ports:
+      # Bind to loopback on the host so the API is not exposed on the LAN.
+      - "127.0.0.1:8080:8080"
+    environment:
+      VISIONSERVEX_SERVER__HOST: 0.0.0.0
+      VISIONSERVEX_SERVER__PORT: "8080"
+      # Strongly recommended: enable auth and set a strong API key.
+      VISIONSERVEX_AUTH__ENABLED: "${VISIONSERVEX_AUTH_ENABLED:-false}"
+      VISIONSERVEX_AUTH__API_KEY: "${VISIONSERVEX_API_KEY:-}"
+      VISIONSERVEX_LIMITS__MAX_UPLOAD_BYTES: "20971520"
+    volumes:
+      - vsx_cache:/cache/visionservex
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys;sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/health').status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Uncomment to expose VisionServeX publicly via Cloudflare Tunnel.
+  # Read docs/cloudflare_tunnel.md first. Generate the tunnel token in the
+  # Cloudflare Zero Trust dashboard and pass it via a .env file (never commit).
+  #
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   container_name: visionservex-cloudflared
+  #   restart: unless-stopped
+  #   command: ["tunnel", "--no-autoupdate", "run", "--token", "${CLOUDFLARE_TUNNEL_TOKEN}"]
+  #   environment:
+  #     TUNNEL_METRICS: "0.0.0.0:2000"
+  #   depends_on:
+  #     visionservex:
+  #       condition: service_healthy
+
+volumes:
+  vsx_cache:

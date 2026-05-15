@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Arash Sajjadi
+cff-version: 1.2.0
+message: "If you use VisionServeX in academic work, please cite the project as follows."
+title: "VisionServeX: A permissive-license-aware framework for local computer vision model serving"
+authors:
+  - family-names: "Sajjadi"
+    given-names: "Arash"
+    affiliation: "University of Saskatchewan, Department of Computer Science"
+    email: "arash.sajjadi@usask.ca"
+date-released: "2026-05-15"
+version: "0.2.0"
+license: "Apache-2.0"
+repository-code: "https://github.com/example/visionservex"
+url: "https://github.com/example/visionservex"
+keywords:
+  - "computer vision"
+  - "object detection"
+  - "segmentation"
+  - "inference"
+  - "fastapi"
+  - "cloudflare tunnel"
+abstract: >-
+  VisionServeX is a Python framework for serving modern, permissively-licensed
+  computer vision models on local machines, workstations, and small servers.
+  It targets a beginner-friendly developer experience, predictable JSON
+  contracts for LLM agents, and secure-by-default operation, with first-class
+  support for Cloudflare Tunnel-based public exposure.
+preferred-citation:
+  type: software
+  title: "VisionServeX"
+  authors:
+    - family-names: "Sajjadi"
+      given-names: "Arash"
+  year: 2026
+  notes: >-
+    Developed under the supervision of Prof. Mark Eramian, Department of
+    Computer Science, University of Saskatchewan, Computer Vision Lab.

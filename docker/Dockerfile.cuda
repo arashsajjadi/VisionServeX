@@ -1,0 +1,45 @@
+# VisionServeX CUDA image.
+#
+# Starts from the NVIDIA CUDA runtime image, installs Python, then layers
+# VisionServeX with the torch extra. You will still need to bring your own
+# torch wheel matching your CUDA version. By default we install the latest
+# stable torch from PyPI which uses the bundled CUDA libs.
+#
+# This image is intentionally not built in CI; build it locally when needed.
+
+FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    DEBIAN_FRONTEND=noninteractive \
+    VISION_SERVEX_CACHE_DIR=/cache/visionservex \
+    VISIONSERVEX_SERVER__HOST=0.0.0.0 \
+    VISIONSERVEX_SERVER__PORT=8080
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      python3.11 python3.11-venv python3-pip \
+      ca-certificates libjpeg-turbo8 libpng16-16 libwebp7 libtiff5 \
+ && rm -rf /var/lib/apt/lists/* \
+ && ln -sf /usr/bin/python3.11 /usr/local/bin/python
+
+WORKDIR /app
+
+COPY pyproject.toml README.md LICENSE ./
+COPY src ./src
+COPY docs ./docs
+
+RUN python -m pip install --upgrade pip \
+ && python -m pip install ".[server,torch,onnx,grounding]"
+
+RUN useradd --create-home --shell /bin/bash visionservex \
+ && mkdir -p /cache/visionservex \
+ && chown -R visionservex:visionservex /cache /app
+
+USER visionservex
+
+EXPOSE 8080
+
+CMD ["visionservex", "serve"]

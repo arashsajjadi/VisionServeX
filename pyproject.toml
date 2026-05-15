@@ -1,0 +1,166 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "visionservex"
+version = "0.2.0"
+description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Arash Sajjadi", email = "arash.sajjadi@usask.ca" },
+]
+maintainers = [
+    { name = "Arash Sajjadi", email = "arash.sajjadi@usask.ca" },
+]
+keywords = [
+    "computer-vision",
+    "object-detection",
+    "segmentation",
+    "fastapi",
+    "cloudflare-tunnel",
+    "inference",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+
+dependencies = [
+    "pydantic>=2.5",
+    "pydantic-settings>=2.1",
+    "typer>=0.12",
+    "rich>=13.7",
+    "PyYAML>=6.0",
+    "platformdirs>=4.2",
+    "httpx>=0.27",
+    "Pillow>=10.0",
+    "numpy>=1.24",
+    "psutil>=5.9",
+]
+
+[project.optional-dependencies]
+server = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "python-multipart>=0.0.9",
+    "slowapi>=0.1.9",
+]
+cloudflare = [
+    "PyYAML>=6.0",
+]
+torch = [
+    "torch>=2.1",
+    "torchvision>=0.16",
+]
+hf = [
+    "huggingface_hub>=0.24",
+    "transformers>=4.40",
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "safetensors>=0.4",
+]
+rfdetr = [
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "huggingface_hub>=0.24",
+]
+dfine = [
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "huggingface_hub>=0.24",
+]
+onnx = [
+    "onnxruntime>=1.17",
+]
+tensorrt = [
+    # The TensorRT Python wheel must be installed manually per NVIDIA's docs.
+    "onnx>=1.15",
+]
+openmmlab = [
+    # Installed via openmim per upstream docs; listed as a marker only.
+]
+sam2 = [
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "opencv-python-headless>=4.8",
+    "huggingface_hub>=0.24",
+]
+grounding = [
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "transformers>=4.40",
+    "huggingface_hub>=0.24",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+    "ruff>=0.4",
+    "mypy>=1.10",
+    "types-PyYAML>=6.0",
+    "pre-commit>=3.7",
+]
+all = [
+    "visionservex[server,cloudflare,onnx,hf]",
+]
+
+[project.scripts]
+visionservex = "visionservex.cli.main:app"
+
+[project.urls]
+Homepage = "https://github.com/example/visionservex"
+Documentation = "https://github.com/example/visionservex/tree/main/docs"
+Issues = "https://github.com/example/visionservex/issues"
+Author = "https://cs.usask.ca/"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/visionservex"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/visionservex",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+    "SECURITY.md",
+    "CHANGELOG.md",
+    "CITATION.cff",
+    "pyproject.toml",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "RUF", "SIM", "C4"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]
+
+[tool.mypy]
+python_version = "3.10"
+strict_optional = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+no_implicit_optional = true
+show_error_codes = true
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers"
+testpaths = ["tests"]
+asyncio_mode = "auto"

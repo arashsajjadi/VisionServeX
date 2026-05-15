@@ -1,0 +1,19 @@
+VisionServeX
+Copyright (c) 2026 Arash Sajjadi
+
+This product includes software developed by Arash Sajjadi
+(arash.sajjadi@usask.ca, PhD Candidate, Department of Computer Science,
+University of Saskatchewan).
+
+Developed under the supervision of Prof. Mark Eramian, Department of
+Computer Science, University of Saskatchewan, Computer Vision Lab.
+This work is not an official product of the University of Saskatchewan
+and is not endorsed by the University unless stated otherwise in writing.
+
+----
+
+This project integrates and references third-party computer vision models.
+Each integrated upstream project retains its own copyright and license.
+Refer to docs/model_licenses.md for per-model upstream license information.
+Users are responsible for reviewing upstream model, dataset, and checkpoint
+licenses before commercial deployment.
