@@ -183,6 +183,51 @@ def _register_routes(app: FastAPI) -> None:
             platform=platform.platform(),
         )
 
+    @app.get("/gateway/status", tags=["meta"])
+    async def gateway_status(request: Request) -> dict[str, Any]:
+        """Local model gateway status — loaded models, device, queue, jobs."""
+        settings: Settings = request.app.state.settings
+        cache = get_model_cache()
+        sched = get_scheduler()
+        jobs = get_job_store().list()
+        from visionservex.runtime.device import best_device
+
+        best = best_device()
+        return {
+            "version": __version__,
+            "bind": f"{settings.server.host}:{settings.server.port}",
+            "public_mode": settings.server.public_mode,
+            "auth_enabled": settings.auth.enabled,
+            "auto_pull": settings.models.auto_pull,
+            "auto_pull_policy": settings.models.auto_pull_policy,
+            "best_device": best.to_dict(),
+            "loaded_models": cache.info(),
+            "scheduler": sched.stats(),
+            "active_jobs": len(
+                [j for j in jobs if j.status not in {"completed", "failed", "cancelled"}]
+            ),
+        }
+
+    @app.post("/gateway/warmup", tags=["meta"])
+    async def gateway_warmup(
+        request: Request,
+        model_ids: list[str] | None = None,
+    ) -> dict[str, Any]:
+        """Preload a list of model IDs into the cache."""
+        await _require_auth(request)
+        if not model_ids:
+            return {"warmed_up": []}
+        cache = get_model_cache()
+        ok = []
+        errors = []
+        for mid in model_ids:
+            try:
+                cache.get(mid)
+                ok.append(mid)
+            except Exception as exc:
+                errors.append({"model_id": mid, "error": str(exc)[:100]})
+        return {"warmed_up": ok, "errors": errors}
+
     @app.get("/devices", tags=["meta"])
     async def devices_endpoint() -> dict[str, Any]:
         return {"devices": [d.to_dict() for d in available_devices()]}
@@ -289,13 +334,42 @@ def _register_routes(app: FastAPI) -> None:
         return JobResponse(**job.to_dict())
 
     @app.get("/jobs/{job_id}/events", tags=["jobs"])
-    async def job_events(job_id: str, request: Request) -> dict[str, Any]:
-        """Poll-friendly snapshot. (Server-Sent-Events kept out for simplicity.)"""
+    async def job_events(
+        job_id: str,
+        request: Request,
+        sse: bool = Query(default=False, description="Stream as Server-Sent Events"),
+    ) -> Any:
+        """Job progress — returns a snapshot or streams SSE when ``?sse=true``."""
         await _require_auth(request)
         job = get_job_store().get(job_id)
         if job is None:
             raise not_found("JOB_NOT_FOUND", f"job {job_id!r} does not exist")
-        return job.to_dict()
+
+        if not sse:
+            return job.to_dict()
+
+        # Real SSE stream — polls until terminal state or client disconnect
+        import asyncio
+
+        async def _event_stream():
+            terminal = {"completed", "failed", "cancelled"}
+            while True:
+                if await request.is_disconnected():
+                    break
+                j = get_job_store().get(job_id)
+                if j is None:
+                    break
+                import json as _json_mod
+
+                data_line = _json_mod.dumps(j.to_dict(), default=str).replace("\n", " ")
+                yield f"data: {data_line}\n\n"
+                if j.status in terminal:
+                    break
+                await asyncio.sleep(0.5)
+
+        from fastapi.responses import StreamingResponse as _SSEResp
+
+        return _SSEResp(_event_stream(), media_type="text/event-stream")
 
     @app.delete("/jobs/{job_id}", tags=["jobs"])
     async def job_cancel(job_id: str, request: Request) -> dict[str, Any]:

@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-05-15
+
+### Added — Local Model Gateway
+- **`visionservex gateway start/status/doctor/profile/preload/client-example/openapi`** —
+  new `gateway` CLI sub-app for local model gateway management.
+- **`visionservex suite pull/list`** — pull curated model suites (beginner, gpu-demo,
+  server-demo, detection, segmentation, classification).
+- **`visionservex pull-suite SUITE`** — top-level alias for quick suite downloads.
+- **`visionservex scheduler profile/recommend`** — model-aware concurrency policy
+  inspection. dfine-n → queue_recommended (max_concurrency=1); swinv2-tiny →
+  acceptable_parallelism (max_concurrency=2); all GPU-exclusive models documented.
+- **`visionservex.Client`** — synchronous Python HTTP client for the local gateway
+  with `detect`, `classify`, `segment`, `open_vocab_detect`, `grounded_segment`,
+  `pose`, `pull`, `load`, `unload`, `warmup`, `job_status`, `poll_job` methods.
+  Retries on 503 SERVER_BUSY.
+- **`/gateway/status`** — server endpoint reporting loaded models, device, queue, jobs.
+- **`/gateway/warmup`** — batch model preload endpoint.
+- **SSE job events** — `/jobs/{id}/events?sse=true` now streams Server-Sent Events
+  polling until the job reaches a terminal state.
+- **Gateway profiles** — `laptop`, `gpu-workstation`, `cpu-safe`, `public-tunnel-safe`
+  with per-profile env var sets.
+- `docs/local_gateway.md` — full gateway usage guide.
+- `examples/client/local_gateway_quickstart.py` and `curl_gateway.sh`.
+- 18 new tests in `tests/test_v080.py` (174 total passing).
+- `Client`, `ClientResult`, `GatewayError` exported from `visionservex` top-level.
+
 ## [0.7.0] - 2026-05-15
 
 ### Added

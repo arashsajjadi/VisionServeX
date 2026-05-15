@@ -25,8 +25,10 @@ from visionservex import __version__
 from visionservex.cli import (
     benchmark_commands,
     downloads_commands,
+    gateway_commands,
     gpu_commands,
     openmmlab_commands,
+    suite_commands,
     tensorrt_commands,
 )
 from visionservex.cli import tunnel as tunnel_cli
@@ -71,6 +73,9 @@ app.add_typer(benchmark_commands.app, name="benchmark", invoke_without_command=T
 app.add_typer(downloads_commands.app, name="downloads")
 app.add_typer(openmmlab_commands.app, name="openmmlab")
 app.add_typer(tensorrt_commands.app, name="tensorrt")
+app.add_typer(gateway_commands.app, name="gateway")
+app.add_typer(suite_commands.suite_app, name="suite")
+app.add_typer(suite_commands.scheduler_app, name="scheduler")
 
 console = Console()
 
@@ -1272,3 +1277,18 @@ def mps_smoke_test(
     from visionservex.cli.gpu_commands import smoke_test
 
     smoke_test(models=models, device="mps", json_=json_)
+
+
+@app.command(
+    "pull-suite",
+    help="Download a curated set of models (beginner|gpu-demo|server-demo|detection|segmentation|classification).",
+)
+def pull_suite_alias(
+    suite_name: str = typer.Argument(..., help="Suite name."),
+    yes: bool = typer.Option(False, "--yes"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Download all models in a named suite. Shortcut for `visionservex suite pull`."""
+    from visionservex.cli.suite_commands import suite_pull
+
+    suite_pull(suite_name=suite_name, yes=yes, json_=json_)
