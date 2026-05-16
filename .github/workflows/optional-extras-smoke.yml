@@ -1,0 +1,139 @@
+name: Optional Extras Smoke
+
+# Heavy optional dependencies (anomalib, bytetracker, ocsort, torchreid) are
+# kept out of the default CI to keep wall-time below 10 minutes. This
+# workflow exercises them on demand or weekly and is allowed to fail without
+# blocking merges.
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekly on Sundays at 04:17 UTC.
+    - cron: "17 4 * * 0"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: optional-extras-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tracking-smoke:
+    name: ByteTrack + OC-SORT real smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install runtime + tracker packages
+        run: |
+          python -m pip install -U pip "setuptools<82" wheel
+          python -m pip install -e .
+          # Each upstream tracker has a vendored old-style setup.py that
+          # imports pkg_resources at metadata time. Install lap, scipy and
+          # filterpy first, then add the trackers with --no-build-isolation
+          # so they pick up the already-installed wheels.
+          python -m pip install lap scipy filterpy torch torchvision
+          python -m pip install --no-build-isolation --no-deps bytetracker
+          python -m pip install --no-build-isolation --no-deps ocsort
+      - name: Tracker smoke
+        run: |
+          visionservex video-search tracker-smoke --tracker bytetrack --json
+          visionservex video-search tracker-smoke --tracker ocsort --json
+      - name: Targeted tests
+        env:
+          VISIONSERVEX_ALLOW_CONCURRENT_PYTEST: "1"
+        run: |
+          python -m pytest tests/test_v270.py -q --tb=short --no-header
+
+  reid-smoke:
+    name: Torchreid OSNet real smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install torchreid + deps
+        run: |
+          python -m pip install -U pip "setuptools<82" wheel
+          python -m pip install -e .
+          python -m pip install torch torchvision opencv-python-headless \
+            gdown tensorboard "numpy<2"
+          python -m pip install torchreid
+      - name: Fetch OSNet checkpoint (HF mirror)
+        run: |
+          python -m pip install huggingface_hub
+          python - <<'PY'
+          from huggingface_hub import hf_hub_download
+          p = hf_hub_download(
+              repo_id="kaiyangzhou/osnet",
+              filename="osnet_x1_0_imagenet.pth",
+              cache_dir="/tmp/osnet-cache",
+          )
+          print("OSNET_CKPT=" + p)
+          PY
+      - name: ReID smoke (no checkpoint required path)
+        run: |
+          # ReID adapter should at least report TORCHREID_REQUIRED-style status
+          # without raising. The real per-image smoke needs a checkpoint, so
+          # exercise the install-help path here.
+          visionservex video-search install-help --reid osnet --json
+
+  anomaly-smoke:
+    name: Anomalib PatchCore tiny train + predict
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install anomalib + visionservex
+        run: |
+          python -m pip install -U pip "setuptools<82" wheel
+          python -m pip install -e .
+          python -m pip install anomalib
+      - name: PatchCore smoke (tiny synthetic fixture)
+        run: |
+          python - <<'PY'
+          from visionservex.integrations.anomalib_adapter import PatchCoreAdapter
+          adapter = PatchCoreAdapter()
+          train = adapter.train(
+              data_dir="tests/fixtures/anomaly/normal",
+              out_dir="/tmp/vsx_patchcore_ci",
+              max_epochs=1,
+          )
+          print("TRAIN", train)
+          predict = adapter.predict(
+              model_dir="/tmp/vsx_patchcore_ci",
+              image_path="tests/fixtures/anomaly/test.jpg",
+          )
+          print("PREDICT", predict)
+          assert train["status"] == "trained"
+          assert predict["status"] == "predicted"
+          PY
+
+  openmmlab-rtmpose-smoke:
+    name: OpenMMLab RTMPose-m (Python 3.10 sidecar)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: "3.10"
+      - name: Run RTMPose smoke sidecar
+        shell: bash -el {0}
+        run: |
+          bash scripts/run_openmmlab_rtmpose_smoke.sh \
+            vsx-openmmlab-ci examples/images/person.jpg examples/images/street.jpg

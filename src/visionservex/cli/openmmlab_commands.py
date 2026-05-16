@@ -22,6 +22,7 @@ _OPENMMLAB_MODELS = [
     "rtmpose-m",
     "rtmpose-l",
     "rtmdet-l-coco",
+    "rtmdet-tiny-coco",
     "rtmdet-r-t",
     "rtmdet-r-s",
     "rtmdet-r-m",
@@ -250,43 +251,73 @@ def status(json_: bool = typer.Option(False, "--json")) -> None:
 def smoke_test(
     model_id: str = typer.Argument("rtmpose-s"),
     image: str = typer.Option("", "--image", help="Optional input image path."),
+    device: str = typer.Option("cpu", "--device", help="cpu or cuda."),
+    out: str = typer.Option("", "--out", help="JSON output path."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
-    """Validate dependencies and (when present) run a real Inferencer call."""
-    info = _validate_openmmlab_model(model_id)
-    if info.get("status") != "ok":
-        if json_:
-            typer.echo(json.dumps(info, indent=2))
-            return
-        code = info.get("structured_error_code", "ERROR")
-        console.print(f"[yellow]{code}[/yellow] — {info.get('message', '')}")
-        if info.get("fix"):
-            console.print(f"  fix: {info['fix']}")
-        return
+    """Validate dependencies and (when present) run a real Inferencer call.
 
-    meta = _PULL_METADATA[model_id]
+    When mmpose/mmdet's Inferencer alias supports automatic checkpoint pull
+    (e.g. ``MMPoseInferencer(pose2d='human')``), the manifest checkpoint
+    file does not need to be pre-cached. ``--device cpu`` keeps the run
+    portable on hosts whose GPU compute capability is too new for the
+    installed torch wheel.
+    """
+    import time
+
+    meta = _PULL_METADATA.get(model_id, {})
     task = meta.get("task", "")
     inferencer = None
+    construction_error = None
+    inferencer_alias = None
     try:
         if task == "pose":
             from mmpose.apis import MMPoseInferencer  # type: ignore
 
-            inferencer = MMPoseInferencer(meta.get("config_name", "rtmpose-m"))
+            # Prefer the upstream alias `pose2d='human'` which auto-downloads
+            # the RTMPose-m checkpoint and the matching RTMDet person detector.
+            try:
+                inferencer = MMPoseInferencer(pose2d="human", device=device)
+                inferencer_alias = "pose2d=human"
+            except Exception:
+                inferencer = MMPoseInferencer(
+                    meta.get("config_name", "rtmpose-m"),
+                    device=device,
+                )
+                inferencer_alias = meta.get("config_name", "rtmpose-m")
         elif task == "detect":
             from mmdet.apis import DetInferencer  # type: ignore
 
-            inferencer = DetInferencer(meta.get("config_name", "rtmdet_l_8xb32-300e_coco"))
+            config = meta.get("config_name", "rtmdet_tiny_8xb32-300e_coco")
+            inferencer = DetInferencer(config, device=device)
+            inferencer_alias = config
         elif task == "obb":
-            # mmrotate does not (yet) ship a Inferencer; report sidecar.
+            # mmrotate does not currently expose a high-level Inferencer that
+            # is compatible with the mmcv 2.x stack (its 0.3.4 release pulls
+            # mmdet 2.x / mmcv-full 1.x and breaks the rest of the env).
             payload = {
                 "model_id": model_id,
                 "status": "sidecar",
                 "structured_error_code": "OBB_INFERENCER_UNAVAILABLE",
                 "message": (
-                    "mmrotate does not expose a high-level Inferencer. "
-                    "Load config + checkpoint manually via mmrotate.apis."
+                    "mmrotate has no high-level Inferencer on the mmcv 2.x stack. "
+                    "Installing mmrotate 0.3.4 downgrades mmdet/mmcv to 1.x and "
+                    "breaks the rest of the OpenMMLab environment."
                 ),
-                "checkpoint": info["checkpoint_path"],
+                "fix": (
+                    "Use the mmrotate 0.x stack in an isolated env (Python 3.10 + "
+                    "torch 1.13 + mmcv-full 1.7) — see scripts/run_openmmlab_smoke.sh."
+                ),
+                "obb_schema": {
+                    "x_center": "float",
+                    "y_center": "float",
+                    "width": "float",
+                    "height": "float",
+                    "theta": "float (radians)",
+                    "score": "float",
+                    "label": "str",
+                    "model_id": "str",
+                },
             }
             if json_:
                 typer.echo(json.dumps(payload, indent=2))
@@ -295,12 +326,15 @@ def smoke_test(
                 console.print(f"  {payload['message']}")
             return
     except Exception as exc:  # pragma: no cover - real env-specific
+        construction_error = exc
+
+    if construction_error is not None:
         payload = {
             "model_id": model_id,
             "status": "error",
             "structured_error_code": "OPENMMLAB_API_UNSUPPORTED",
-            "message": str(exc)[:300],
-            "fix": meta.get("install", ""),
+            "message": str(construction_error)[:300],
+            "fix": meta.get("install", "pip install openmim && mim install mmengine mmcv mmdet"),
         }
         if json_:
             typer.echo(json.dumps(payload, indent=2))
@@ -309,7 +343,11 @@ def smoke_test(
         raise typer.Exit(4)
 
     if inferencer is None:
-        payload = {"model_id": model_id, "status": "skipped", "reason": "unknown task"}
+        payload = {
+            "model_id": model_id,
+            "status": "skipped",
+            "reason": "unknown task or unknown model id",
+        }
         if json_:
             typer.echo(json.dumps(payload, indent=2))
         return
@@ -317,6 +355,7 @@ def smoke_test(
         payload = {
             "model_id": model_id,
             "status": "dry_run",
+            "inferencer_alias": inferencer_alias,
             "message": "Inferencer constructed. Pass --image PATH to run inference.",
         }
         if json_:
@@ -326,7 +365,25 @@ def smoke_test(
         return
 
     try:
-        result = inferencer(image)
+        t0 = time.time()
+        if task == "pose":
+            gen = inferencer(image, show=False, return_vis=False, vis_out_dir=None)
+            result = next(gen)
+        elif task == "detect":
+            import tempfile
+
+            with tempfile.TemporaryDirectory() as td:
+                result = inferencer(
+                    image,
+                    show=False,
+                    return_vis=False,
+                    out_dir=td,
+                    no_save_pred=True,
+                    no_save_vis=True,
+                )
+        else:
+            result = inferencer(image)
+        runtime_ms = round((time.time() - t0) * 1000.0, 2)
     except Exception as exc:  # pragma: no cover - real env-specific
         payload = {
             "model_id": model_id,
@@ -340,16 +397,95 @@ def smoke_test(
             console.print(f"[red]{payload['structured_error_code']}[/red]: {payload['message']}")
         raise typer.Exit(5) from exc
 
-    payload = {
+    payload: dict = {
         "model_id": model_id,
         "status": "ok",
         "image": image,
+        "device": device,
+        "runtime_ms": runtime_ms,
+        "inferencer_alias": inferencer_alias,
         "result_type": type(result).__name__,
     }
+
+    # Normalize the predictions into VisionServeX schemas.
+    preds = result.get("predictions", []) if isinstance(result, dict) else []
+
+    def _to_py(value):
+        """Convert numpy scalars/arrays/torch tensors into JSON-serializable Python."""
+        try:
+            import numpy as _np
+
+            if isinstance(value, _np.ndarray):
+                return [_to_py(v) for v in value.tolist()]
+            if isinstance(value, _np.generic):
+                return value.item()
+        except ImportError:
+            pass
+        if isinstance(value, (list, tuple)):
+            return [_to_py(v) for v in value]
+        if isinstance(value, dict):
+            return {k: _to_py(v) for k, v in value.items()}
+        return value
+
+    if task == "pose":
+        instances: list[dict] = []
+        for frame_preds in preds:
+            frame_list = frame_preds if isinstance(frame_preds, list) else [frame_preds]
+            for inst in frame_list:
+                if not isinstance(inst, dict):
+                    continue
+                kps = _to_py(inst.get("keypoints") or [])
+                scs = _to_py(inst.get("keypoint_scores") or [])
+                bbox = _to_py(inst.get("bbox"))
+                instances.append(
+                    {
+                        "keypoints": kps,
+                        "keypoint_scores": scs,
+                        "bbox": bbox,
+                        "bbox_score": _to_py(inst.get("bbox_score")),
+                        "n_keypoints": len(kps),
+                    }
+                )
+        payload["task"] = "pose"
+        payload["n_instances"] = len(instances)
+        payload["instances"] = instances
+    elif task == "detect":
+        boxes_out: list[dict] = []
+        for frame_preds in preds:
+            frame = frame_preds if isinstance(frame_preds, dict) else None
+            if frame is None:
+                continue
+            bboxes = _to_py(frame.get("bboxes", []))
+            scores = _to_py(frame.get("scores", []))
+            labels = _to_py(frame.get("labels", []))
+            for box, score, label in zip(bboxes, scores, labels, strict=False):
+                boxes_out.append(
+                    {
+                        "box": list(box) if box is not None else None,
+                        "score": float(score) if score is not None else 0.0,
+                        "label": int(label) if isinstance(label, (int, float)) else label,
+                    }
+                )
+        payload["task"] = "detect"
+        payload["n_boxes"] = len(boxes_out)
+        payload["high_conf_boxes"] = sum(1 for b in boxes_out if b["score"] > 0.3)
+        # Keep payload light — only first 50 boxes.
+        payload["boxes"] = boxes_out[:50]
+    if out:
+        from pathlib import Path
+
+        out_path = Path(out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(payload, indent=2))
+        payload["out"] = out
+
     if json_:
         typer.echo(json.dumps(payload, indent=2))
     else:
-        console.print(f"[green]OK[/green] {model_id} on {image}: {payload['result_type']}")
+        console.print(
+            f"[green]OK[/green] {model_id} on {image} ({runtime_ms} ms, {device}): "
+            f"{payload['result_type']}"
+        )
 
 
 @app.command("list", help="List all available OpenMMLab models.")
@@ -424,6 +560,24 @@ _PULL_METADATA: dict[str, dict] = {
         "cache_subdir": "rtmdet-r2-t",
         "checkpoint_filename": "rtmdet-r2-t.pth",
         "download_url": None,
+    },
+    "rtmdet-tiny-coco": {
+        "display": "RTMDet (Tiny, COCO)",
+        "config_repo": "https://github.com/open-mmlab/mmdetection/tree/main/configs/rtmdet",
+        "model_zoo": "https://github.com/open-mmlab/mmdetection/blob/main/configs/rtmdet/README.md",
+        "checkpoint_page": "https://github.com/open-mmlab/mmdetection/tree/main/configs/rtmdet",
+        "install": "pip install openmim && mim install mmengine mmcv mmdet",
+        "cache_subdir": "rtmdet-tiny-coco",
+        "checkpoint_filename": "rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth",
+        "download_url": (
+            "https://download.openmmlab.com/mmdetection/v3.0/rtmdet/"
+            "rtmdet_tiny_8xb32-300e_coco/"
+            "rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth"
+        ),
+        "license": "Apache-2.0",
+        "task": "detect",
+        "inferencer": "mmdet.apis.DetInferencer",
+        "config_name": "rtmdet_tiny_8xb32-300e_coco",
     },
     "rtmdet-l-coco": {
         "display": "RTMDet (Large, COCO)",

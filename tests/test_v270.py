@@ -293,7 +293,8 @@ def test_dinov2_real_embed():
 
 
 @pytest.mark.fast
-def test_version_is_270():
+def test_version_is_at_least_270():
     import visionservex
 
-    assert visionservex.__version__ == "2.7.0"
+    parts = tuple(int(p) for p in visionservex.__version__.split(".")[:3])
+    assert parts >= (2, 7, 0), f"version {visionservex.__version__} < 2.7.0"

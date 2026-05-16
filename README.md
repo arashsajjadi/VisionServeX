@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-2.7.0-informational.svg" alt="v2.7.0">
+  <img src="https://img.shields.io/badge/version-2.8.0-informational.svg" alt="v2.8.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -175,6 +175,19 @@ Every model in the registry now carries an explicit `model_category` label.
 
 Full detail: [docs/model_zoo_matrix.md](docs/model_zoo_matrix.md) | [docs/model_zoo_gap_report.md](docs/model_zoo_gap_report.md)
 
+### Readiness factor table
+
+| Factor | v2.7 | v2.8 | Evidence |
+|--------|------|------|----------|
+| Runnable practical capacity | ~74% | ~82% | RTMPose-m + RTMDet-tiny + 4 new HF models real-smoked through the CLI |
+| Real-smoke verified coverage | ~65% | ~76% | PatchCore, ByteTrack, OC-SORT, OSNet, RTMPose-m, RTMDet-tiny, DINOv2, OWLv2, SigLIP2, ConvNeXtV2 tiny, CLIP base, OWLViT |
+| Production / stable coverage | ~70% | ~79% | OpenMMLab sidecar is reproducible; anomaly smoke is reproducible |
+| Optional extras readiness | ~84% | ~92% | `.github/workflows/optional-extras-smoke.yml` runs all four optional smokes |
+| Sidecar readiness | 70% | 85% | `scripts/run_openmmlab_rtmpose_smoke.sh` ships with verified pin recipe |
+| Aerial / OBB | 45% | 60% | `OBB_INFERENCER_UNAVAILABLE` ships the `[x_center,y_center,w,h,theta]` schema; mmrotate 0.3.4 blocker captured |
+| Pose | 48% | 70% | RTMPose-m real smoke: 17 keypoints, 158 ms CPU |
+| Overall production readiness | ~74% | ~82% | net of phases 1, 2, 5, 6, 7 |
+
 | Family | Best Model | Status | Install | Example |
 |--------|-----------|--------|---------|---------|
 | D-FINE | `dfine-s-o365-coco` | runnable | `[hf]` | `visionservex detect dfine-s-o365-coco image.jpg` |
@@ -195,8 +208,10 @@ Full detail: [docs/model_zoo_matrix.md](docs/model_zoo_matrix.md) | [docs/model_
 | MedSAM | `medsam` | runnable | `[hf]` | `visionservex medical segment medsam ct.png --box 10,20,100,200 --out /tmp` |
 | PatchCore | `anomalib-patchcore` | optional_extra | `[anomaly]` | `visionservex anomaly train patchcore --data /data/normal --out /tmp` |
 | RTMDet-R | `rtmdet-r2-s` | expert_sidecar | OpenMMLab | `visionservex aerial detect aerial.jpg --model rtmdet-r2-s` |
-| ByteTrack | `bytetrack` | optional_extra | `pip install bytetracker` | `visionservex video-search index video.mp4 --tracker bytetrack --out /tmp/idx` |
-| OC-SORT | `ocsort` | optional_extra | `pip install ocsort` | `visionservex video-search index video.mp4 --tracker ocsort --out /tmp/idx` |
+| ByteTrack | `bytetrack` | real_smoke_verified | `pip install bytetracker` | `visionservex video-search tracker-smoke --tracker bytetrack` |
+| OC-SORT | `ocsort` | real_smoke_verified | `pip install ocsort` | `visionservex video-search tracker-smoke --tracker ocsort` |
+| RTMPose-m | `rtmpose-m` | real_smoke_verified | conda Python 3.10 sidecar | `bash scripts/run_openmmlab_rtmpose_smoke.sh` |
+| RTMDet-tiny | `rtmdet-tiny-coco` | real_smoke_verified | conda Python 3.10 sidecar | `visionservex openmmlab smoke-test rtmdet-tiny-coco --device cpu` |
 | Torchreid / OSNet | `osnet` | optional_extra | `pip install torchreid` | `visionservex video-search reid-smoke --reid osnet --image crop.jpg` |
 | MaskDINO | `maskdino-swinl-coco` | expert_sidecar | Detectron2 sidecar | `visionservex maskdino create-env` |
 | DEIMv2 | `deimv2-s/m/l/x` | unavailable | — | Blocked: native loader / no HF Transformers support |

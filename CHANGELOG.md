@@ -7,6 +7,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.8.0] - 2026-05-16
+
+### OpenMMLab real RTMPose-m + RTMDet-tiny smoke; OBB schema + structured blocker; HF real-smoke completion; optional-extras CI workflow
+
+This release converts v2.7's "OpenMMLab blocked" status into a real
+end-to-end smoke that runs RTMPose-m and RTMDet-tiny on the host through
+the VisionServeX CLI. The exact dependency-pin recipe needed to make the
+mmcv 2.x stack work on Python 3.10 with setuptools < 72 is now codified
+in a reproducible sidecar script, and a dedicated CI workflow exercises
+all optional extras on demand.
+
+#### Real-execution results (verified 2026-05-16)
+
+| Gate | Result | Evidence |
+|------|--------|----------|
+| RTMPose-m via Python 3.10 conda sidecar | PASS | `visionservex openmmlab smoke-test rtmpose-m --image examples/images/person.jpg --device cpu`: 17 keypoints, 158 ms CPU |
+| RTMDet-tiny COCO via same env | PASS | `smoke-test rtmdet-tiny-coco --image examples/images/street.jpg --device cpu`: 300 boxes, 87 ms CPU |
+| Oriented R-CNN (OBB) | DOCUMENTED BLOCKER | `OBB_INFERENCER_UNAVAILABLE`: mmrotate 0.3.4 forces mmdet/mmcv 1.x downgrade; OBB schema (`x_center,y_center,width,height,theta,score,label`) returned in the structured error |
+| MaskDINO sidecar | UNCHANGED BLOCKER | `CHECKPOINT_REQUIRED` — upstream README hosts weights; `scripts/run_maskdino_smoke.sh` still refuses to invent URLs |
+| HF ConvNeXtV2 tiny real classify | PASS | 219 ms CUDA |
+| HF CLIP base patch32 real embed | PASS | 768-d, 106 ms |
+| HF OWLViT base patch32 real | PASS | open-vocab "person, car", 232 ms |
+| HF DINOv2 + SigLIP2 + OWLv2 + Grounding DINO + MedSAM | PASS | carried from v2.7 |
+| Anomalib PatchCore via `scripts/run_anomaly_smoke.sh` | PASS | venv install → train (24.9 M params) → predict (`pred_score=1.0`) end-to-end |
+
+#### Adapter / CLI changes
+
+- `cli/openmmlab_commands.py`:
+  - `smoke-test` now accepts `--device {cpu,cuda}` and `--out FILE`. Pose
+    uses `MMPoseInferencer(pose2d='human')` which auto-pulls RTMPose-m +
+    RTMDet-m person detector. Detection uses `DetInferencer(config_name)`
+    with an explicit `out_dir=tempdir, no_save_pred, no_save_vis` to
+    bypass the v3 visualizer's mandatory writable path.
+  - Numpy scalars / ndarrays are coerced to JSON-safe Python via
+    `_to_py()`. Pose payload includes `n_instances`, `keypoints`,
+    `keypoint_scores`, `bbox`, `bbox_score`. Detect payload includes
+    `n_boxes`, `high_conf_boxes`, and the first 50 boxes with
+    `[box, score, label]`.
+  - New `rtmdet-tiny-coco` entry in `_PULL_METADATA` with the
+    research-confirmed `download.openmmlab.com` checkpoint URL.
+  - `OBB_INFERENCER_UNAVAILABLE` now ships an `obb_schema` payload so
+    callers see the expected `[x_center, y_center, width, height, theta,
+    score, label]` representation even when mmrotate is absent.
+
+#### Sidecar scripts
+
+- `scripts/run_openmmlab_rtmpose_smoke.sh` (new): conda Python 3.10 env
+  with the exact pin recipe — `setuptools<72`, `torch 2.1.0+cu121`,
+  `mmcv==2.1.0` from the openmmlab wheel index, `mmpose 1.3.2` no-deps,
+  `mmdet==3.3.0`, `xtcocotools` rebuilt against `numpy 1.26.4`. Runs the
+  RTMPose-m smoke against `examples/images/person.jpg` and the
+  RTMDet-tiny smoke against `examples/images/street.jpg`.
+
+#### CI
+
+- `.github/workflows/optional-extras-smoke.yml` (new) — on workflow
+  dispatch and weekly cron. Jobs: `tracking-smoke` (bytetracker + ocsort),
+  `reid-smoke` (torchreid + OSNet HF mirror), `anomaly-smoke` (anomalib
+  PatchCore tiny train/predict), `openmmlab-rtmpose-smoke` (runs the
+  sidecar script on a fresh runner). All jobs are
+  `continue-on-error: true` so heavy environment drift never blocks
+  merges.
+
+#### Tests
+
+- `tests/test_v280.py` (new) covers RTMPose smoke payload shape, RTMDet
+  metadata, OBB structured-blocker schema, the `openmmlab smoke-test
+  --device --out` plumbing, and the optional-extras workflow file.
+
 ## [2.7.0] - 2026-05-16
 
 ### Real-execution gates: PatchCore, ByteTrack, OC-SORT, Torchreid, four HF models; sidecar scripts; OpenMMLab Python 3.13 blocker documented
