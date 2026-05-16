@@ -7,6 +7,128 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-05-16
+
+### Resource guard, dev safety commands, fast test strategy, model health report
+
+Adds a central resource guard that prevents RAM/VRAM/disk exhaustion during
+testing and development; new `visionservex dev *` and `visionservex models
+health` CLI subcommands; opt-in real_model/gpu/benchmark smoke test modes; a
+pytest lockfile that blocks concurrent test runs; and a split CI workflow
+(fast on every push, full only on tag/dispatch).
+
+#### Motivation
+A prior development session ran multiple concurrent background pytest
+processes without resource checks. RAM and VRAM were saturated, the SSD
+was hit hard, and the desktop GUI froze. This release makes that class of
+incident structurally impossible by design rather than by discipline.
+
+#### Resource guard (new — `src/visionservex/runtime/resource_guard.py`)
+- Reads system RAM/swap, GPU VRAM, disk free, CPU usage, and the running
+  process tree via `psutil` (already a runtime dep).
+- `assert_safe_to_start_test()` / `_model_load()` / `_benchmark()` refuse to
+  start when thresholds are violated, with explicit fix suggestions.
+- Pytest lockfile at `/tmp/visionservex_pytest.lock`: contains PID + command +
+  start time; stale locks (dead PID) are auto-cleaned; `pytest_sessionstart`
+  acquires, `pytest_sessionfinish` releases.
+- Default budgets (env-overridable): 8 GB free RAM, 2 GB free VRAM (desktop
+  reserve), 10 GB free disk, RAM usage ≤ 80%.
+- `cleanup_after_test()` performs the full GC + CUDA cache flush + IPC
+  collect + peak-stats reset sequence after every heavy test.
+- **Production CLI is untouched.** `visionservex predict/embed/similarity`
+  never call the resource guard; only `dev *` subcommands and pytest do.
+
+#### Developer commands (new — `visionservex dev *`)
+- `dev test quick` — quick safe tests (target < 60 s).
+- `dev test targeted PATH` — single file/keyword with resource pre-check.
+- `dev test full-release` — full suite with pre-check + cleanup.
+- `dev test real-smoke [--allow-download] [--model KEYWORD]` — opt-in real
+  model smoke tests; sets `VISIONSERVEX_RUN_REAL_MODEL_TESTS=1` internally.
+- `dev test gpu-smoke --allow-gpu` — opt-in GPU smoke tests; refuses if
+  free VRAM < 1 GB + 2 GB reserve.
+- `dev test benchmark-smoke [--out DIR]` — process-isolated benchmarks,
+  max 3 images, output goes to tmp dir by default.
+- `dev resources` — full resource report.
+- `dev kill-tests` — kill pytest processes inside this repo only.
+- `dev clean-temp` / `clean-reports` / `clean-cache` / `disk-report`.
+
+#### Model health (new — `visionservex models *`)
+- `models health [--runnable-only] [--model KEYWORD]` — per-model report:
+  checkpoint cached, can-run-CPU/CUDA, VRAM/RAM requirements, smoke test
+  status (passed/failed/not_run/skipped_resource_guard/...), suggested
+  next command. Renders as a rich table or `--json`.
+- `models health-json` — JSON variant for tooling.
+
+#### Test markers (new — full set)
+- Added markers in `pyproject.toml` and `tests/conftest.py`:
+  `fast`, `integration`, `slow`, `real_model`, `gpu`, `network`, `sidecar`,
+  `release`, `benchmark`, `memory`, `disk_heavy`, `download`, `smoke`.
+- All heavy markers are opt-in via `VISIONSERVEX_RUN_*_TESTS=1` env vars.
+- Backward-compat: old `VISION_SERVEX_RUN_REAL_MODEL_TESTS=1` /
+  `VISION_SERVEX_RUN_GPU_TESTS=1` are still accepted.
+
+#### New smoke test files
+- `tests/test_real_model_smoke.py` — D-FINE-S, RF-DETR-small, DINOv2-small,
+  SAM2-tiny, D-FINE-S-GPU. All 64×64 synthetic images, all resource-guarded,
+  all skip cleanly when checkpoint missing.
+- `tests/test_benchmark_smoke.py` — mock-detect/segment benchmarks +
+  optional real-model benchmark; max 3 iterations; output ≤ 10 KB.
+- `tests/test_resource_guard.py` — 17 tests, all mocked (no real memory
+  consumed).
+- `tests/test_dev_safety.py` — marker skip behavior, dev command structure,
+  cleanup repo-scoping, marker registration in pyproject.toml.
+
+#### Standalone scripts
+- `scripts/test_quick_safe.py` — quick safe runner.
+- `scripts/test_targeted_safe.py` — targeted runner.
+- `scripts/test_release_safe.py` — full release runner with pre-check.
+- `scripts/kill_visionservex_tests.py` — repo-scoped pytest killer.
+- `scripts/diagnose_resources.py` — full diagnostic with warning list.
+
+#### CI split (`.github/workflows/ci.yml`)
+- **Fast CI** (push/PR): ubuntu-latest only, Python 3.12 only. Runs lint,
+  format, type-check, security scan, quick pytest (~30 s on GH runners),
+  build, twine check, docker build. Timeout 10–20 min per job.
+- **Full CI** (release tag `v*` or `workflow_dispatch`): 3 OS × 3 Python
+  matrix, full pytest. Timeout 30 min.
+- Concurrency cancellation: new pushes on the same branch auto-cancel
+  in-progress runs. Old "still running for previous version" CI runs no
+  longer block release publishes.
+
+#### Documentation
+- New: `AGENT_RULES.md` (concise rule set for AI agents — "Follow this
+  strictly" reference).
+- New: `docs/agent_safety.md` (full incident context, safety rationale,
+  system design).
+- README: new "Resource Safety & Developer Commands" section.
+
+#### Manifest accuracy fix
+- `florence-2-base/large` and `owlv2-base-patch16/large-patch14` were
+  marked `runnable_in_visionservex=True` in the source manifest but are
+  `implementation_status="stub"` in the registry (no engine wired). The
+  manifest now honestly reports `runnable_in_visionservex=False` with
+  explicit `known_blockers` listing what's missing: no engine module,
+  prompt-token builder, output parser, etc. **No engine was fake-wired.**
+
+#### Validation
+- Quick suite: 572 passed, 37 deselected — **~31 s** (target < 60 s).
+- Targeted safety: 26 passed, 5 skipped (heavy markers) — 1.2 s.
+- Ruff lint: clean. Ruff format: clean (154 files).
+- Artifact hygiene: no `.pt/.onnx/.parquet/...` or `outputs/reports/indexes/`
+  contents tracked in git.
+
+#### What did NOT land in this release (honest)
+- Florence-2 engine: still stub. Needs HF AutoModelForCausalLM wiring with
+  trust_remote_code, task-specific prompt tokens (`<OD>`, `<CAPTION>`,
+  `<DENSE_REGION_CAPTION>`, ...), and a generated-string parser.
+- OWLv2 engine: still stub. Needs `Owlv2Processor` +
+  `Owlv2ForObjectDetection.post_process_object_detection()` wiring + result
+  normalization.
+- SAM3 / SAM3.1: still gated/external. No auth-aware wrapper yet.
+- Surveillance-search pipeline: not implemented in this release.
+- Anomalib, RTMDet-R/R2, MedSAM2, TotalSegmentator, Prithvi, AgriCLIP:
+  remain audit-only or expert-sidecar per the manifest.
+
 ## [1.6.0] - 2026-05-16
 
 ### Source-grounded model zoo, DINOv2 feature intelligence, domain-zoo recommender

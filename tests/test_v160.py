@@ -458,10 +458,16 @@ def test_owlv2_in_registry():
 # ============================================================
 
 
-def test_version_is_160():
+def test_version_is_at_least_160():
     from visionservex import __version__
 
-    assert __version__ == "1.6.0"
+    # Version may bump in later releases; this test guards that 1.6.0 features
+    # remain available. Accept 1.6.x and any 1.>=7 / 2.x.
+    parts = __version__.split(".")
+    assert int(parts[0]) >= 1
+    assert int(parts[0]) > 1 or int(parts[1]) >= 6, (
+        f"v1.6.0 features require >= 1.6.0; got {__version__}"
+    )
 
 
 # ============================================================

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "visionservex"
-version = "1.6.0"
+version = "1.7.0"
 description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -183,7 +183,19 @@ addopts = "-ra --strict-markers"
 testpaths = ["tests"]
 asyncio_mode = "auto"
 markers = [
-    "real_model: test requires real model weights and optional dependencies (slow)",
-    "gpu: test requires a GPU device",
-    "slow: test is slow (typically >10s)",
+    # Fast development markers
+    "fast: unit test, no model load, no network, no GPU, no sidecar (runs in quick mode)",
+    "integration: CLI/registry/manifest integration without heavy resources",
+    # Resource markers — ALL excluded from quick mode by default
+    "slow: test takes more than ~2s; opt in: VISIONSERVEX_RUN_REAL_MODEL_TESTS=1",
+    "real_model: requires real model weights; opt in: VISIONSERVEX_RUN_REAL_MODEL_TESTS=1",
+    "gpu: requires a GPU device; opt in: VISIONSERVEX_RUN_GPU_TESTS=1",
+    "network: requires live network; opt in: VISIONSERVEX_RUN_NETWORK_TESTS=1",
+    "sidecar: requires heavy sidecar (Docker, OpenMMLab, Detectron2); opt in: VISIONSERVEX_RUN_SIDECAR_TESTS=1",
+    "release: only run as part of release validation",
+    "benchmark: benchmark test; opt in: VISIONSERVEX_RUN_BENCHMARK_TESTS=1",
+    "memory: memory-intensive test; opt in: VISIONSERVEX_RUN_DISK_HEAVY_TESTS=1",
+    "disk_heavy: disk-intensive test; opt in: VISIONSERVEX_RUN_DISK_HEAVY_TESTS=1",
+    "download: downloads large assets; opt in: VISIONSERVEX_RUN_DOWNLOAD_TESTS=1",
+    "smoke: small smoke-only variant of real_model or gpu test; always paired with real_model or gpu marker",
 ]

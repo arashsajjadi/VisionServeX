@@ -483,7 +483,7 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         recommended_action="audit_only",
     ),
     # =====================================================================
-    # Florence-2 — VLM (HF, runnable)
+    # Florence-2 — VLM (HF, NOT yet wired — registry stub)
     # =====================================================================
     "florence-2-base": ModelSource(
         model_id="florence-2-base",
@@ -496,13 +496,18 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         license="MIT",
         install_command="pip install 'visionservex[hf]'",
         hf_class="AutoModelForCausalLM",
-        runnable_in_visionservex=True,
+        runnable_in_visionservex=False,
         access_status="open",
         domain="open_vocab",
         recommended_action="add_now",
+        known_blockers=[
+            "No Florence-2 engine in src/visionservex/engines/ yet",
+            "Florence-2 uses task-specific prompt tokens (<OD>, <CAPTION>, ...) — needs custom prompt builder",
+            "Generated string output needs parsing to structured VisionServeX result types",
+        ],
         notes=(
             "Tasks: caption, dense_caption, object_detection, phrase_grounding, "
-            "region_ocr. Trust remote code required."
+            "region_ocr. Trust remote code required. Use HF directly until engine is wired."
         ),
     ),
     "florence-2-large": ModelSource(
@@ -515,13 +520,16 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         license="MIT",
         install_command="pip install 'visionservex[hf]'",
         hf_class="AutoModelForCausalLM",
-        runnable_in_visionservex=True,
+        runnable_in_visionservex=False,
         access_status="open",
         domain="open_vocab",
         recommended_action="add_now",
+        known_blockers=[
+            "Same as florence-2-base: engine wiring + prompt-token builder + output parser",
+        ],
     ),
     # =====================================================================
-    # OWLv2 — open-vocabulary detection (HF, runnable)
+    # OWLv2 — open-vocabulary detection (HF, NOT yet wired — registry stub)
     # =====================================================================
     "owlv2-base-patch16": ModelSource(
         model_id="owlv2-base-patch16",
@@ -534,10 +542,16 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         license="Apache-2.0",
         install_command="pip install 'visionservex[hf]'",
         hf_class="Owlv2ForObjectDetection",
-        runnable_in_visionservex=True,
+        runnable_in_visionservex=False,
         access_status="open",
         domain="open_vocab",
         recommended_action="add_now",
+        known_blockers=[
+            "No OWLv2 engine in src/visionservex/engines/ yet",
+            "Needs Owlv2Processor + Owlv2ForObjectDetection wiring + post_process_object_detection",
+            "Output normalization to VisionServeX DetectionResult required",
+        ],
+        notes="Use Grounding DINO for open-vocab detection until OWLv2 engine is wired.",
     ),
     "owlv2-large-patch14": ModelSource(
         model_id="owlv2-large-patch14",
@@ -549,10 +563,11 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         license="Apache-2.0",
         install_command="pip install 'visionservex[hf]'",
         hf_class="Owlv2ForObjectDetection",
-        runnable_in_visionservex=True,
+        runnable_in_visionservex=False,
         access_status="open",
         domain="open_vocab",
         recommended_action="add_now",
+        known_blockers=["Same as owlv2-base-patch16"],
     ),
     # =====================================================================
     # SigLIP2 — text-image retrieval (HF, runnable)

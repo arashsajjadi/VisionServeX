@@ -26,12 +26,14 @@ from visionservex.cli import (
     benchmark_commands,
     capabilities_commands,
     colab_commands,
+    dev_commands,
     domain_zoo_commands,
     downloads_commands,
     embedding_commands,
     gateway_commands,
     gpu_commands,
     model_card_commands,
+    model_health_commands,
     model_lifecycle_commands,
     model_zoo_commands,
     openmmlab_commands,
@@ -104,6 +106,8 @@ app.add_typer(training_commands.video_app, name="video")
 app.add_typer(model_zoo_commands.app, name="model-zoo")
 app.add_typer(domain_zoo_commands.app, name="domain-zoo")
 app.add_typer(embedding_commands.app, name="feature")
+app.add_typer(dev_commands.app, name="dev")
+app.add_typer(model_health_commands.app, name="models")
 
 # Top-level embedding aliases for Ultralytics-style ergonomics
 embedding_alias_app = embedding_commands.app
@@ -1025,7 +1029,10 @@ def predict(
         return
     except (DownloadError, ManualDownloadRequired) as exc:
         _die(
-            str(exc), json_mode=json_, code="DOWNLOAD_FAILED", hint=f"visionservex pull {model_id}"
+            str(exc),
+            json_mode=json_,
+            code="DOWNLOAD_FAILED",
+            hint=f"visionservex model pull {model_id}  (or pass --auto-pull to download automatically)",
         )
         return
     except VisionServeXError as exc:

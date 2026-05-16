@@ -141,7 +141,18 @@ class VisionModel:
             self._model_loaded_from = "cache"
             return
         if not self.auto_pull:
-            return  # engine.load() will surface a clearer error if it needs weights
+            # Engine.load() will surface an error; we pre-attach a helpful hint here
+            # so the user sees the pull command without digging through tracebacks.
+            if not is_cached(self.entry):
+                import warnings
+
+                warnings.warn(
+                    f"Checkpoint for '{self.entry.id}' is not cached. "
+                    f"Run: visionservex model pull {self.entry.id}  "
+                    "(or pass auto_pull=True / --auto-pull)",
+                    stacklevel=4,
+                )
+            return
         try:
             path = download(self.entry)
             self._cache_path = str(path)

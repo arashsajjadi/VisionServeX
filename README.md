@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-1.6.0-informational.svg" alt="v1.6.0">
+  <img src="https://img.shields.io/badge/version-1.7.0-informational.svg" alt="v1.7.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -325,6 +325,44 @@ visionservex recommend --task detect --device cuda --vram 8
 ```
 
 For `--goal accuracy --task detect`, the recommender surfaces `dfine-s/m-o365-coco` and `rfdetr-small/medium`, not nano variants.
+
+---
+
+## Resource Safety & Developer Commands
+
+VisionServeX includes a resource guard that prevents RAM/VRAM/disk exhaustion during testing and development. **Production CLI commands (`predict`, `embed`, `similarity`) are unaffected** — the guard only runs when you explicitly invoke a `dev` subcommand or pytest.
+
+```bash
+# Show current resources (RAM, VRAM, CPU, disk, processes)
+visionservex dev resources
+
+# Run quick tests (no real model, no GPU, no download) — < 60 s
+visionservex dev test quick
+
+# Targeted test on a single file
+visionservex dev test targeted tests/test_my_feature.py
+
+# Real model smoke tests (opt-in, uses smallest models, resource-checked)
+visionservex dev test real-smoke
+
+# GPU smoke tests (opt-in, VRAM-checked first)
+visionservex dev test gpu-smoke --allow-gpu
+
+# Benchmark smoke (process-isolated, max 3 images)
+visionservex dev test benchmark-smoke
+
+# Kill stray pytest processes (repo-scoped only)
+visionservex dev kill-tests
+
+# Clean test artifacts
+visionservex dev clean-temp
+visionservex dev clean-reports
+
+# Model health: which models can run, checkpoint status, smoke results
+visionservex models health --runnable-only
+```
+
+A pytest lockfile at `/tmp/visionservex_pytest.lock` prevents concurrent test runs. Default budgets: 8 GB free RAM, 2 GB free VRAM, 10 GB free disk. See [AGENT_RULES.md](AGENT_RULES.md) and [docs/agent_safety.md](docs/agent_safety.md).
 
 ---
 
