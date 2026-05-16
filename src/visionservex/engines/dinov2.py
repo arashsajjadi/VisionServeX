@@ -111,7 +111,15 @@ class DINOv2Engine(StubEngine):
             inputs_dev[k] = v
 
         with self._torch.no_grad():
-            out = self._model(**inputs_dev)
+            # SigLIP / SigLIP2: the full SiglipModel requires both pixel_values AND
+            # input_ids (text tokens). For image-only embedding we route through the
+            # vision sub-model directly, which accepts only pixel_values.
+            _vision_submodel = getattr(self._model, "vision_model", None)
+            _pixel_only = {"pixel_values"} >= set(inputs_dev.keys())
+            if _vision_submodel is not None and _pixel_only:
+                out = _vision_submodel(pixel_values=inputs_dev.get("pixel_values"))
+            else:
+                out = self._model(**inputs_dev)
 
         # DINOv2 / SigLIP2 expose pooler_output or last_hidden_state.
         embedding = None

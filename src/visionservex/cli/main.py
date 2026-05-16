@@ -23,6 +23,8 @@ from rich.table import Table
 
 from visionservex import __version__
 from visionservex.cli import (
+    aerial_commands,
+    agriculture_commands,
     anomaly_commands,
     benchmark_commands,
     benchmark_open_vocab,
@@ -120,6 +122,8 @@ app.add_typer(anomaly_commands.app, name="anomaly")
 app.add_typer(medical_commands.app, name="medical")
 app.add_typer(video_search_commands.app, name="video-search")
 app.add_typer(benchmark_open_vocab.app, name="benchmark-open-vocab", invoke_without_command=True)
+app.add_typer(agriculture_commands.app, name="agriculture")
+app.add_typer(aerial_commands.app, name="aerial")
 
 # Top-level embedding aliases for Ultralytics-style ergonomics
 embedding_alias_app = embedding_commands.app

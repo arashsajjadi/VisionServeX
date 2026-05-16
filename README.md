@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-1.9.0-informational.svg" alt="v1.9.0">
+  <img src="https://img.shields.io/badge/version-2.0.0-informational.svg" alt="v2.0.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -396,6 +396,24 @@ visionservex medical segment medsam image.png --box 10,20,200,200 --out output/
 ```
 
 No diagnostic claims. Optional extras: `pip install 'visionservex[medical]'` for nibabel/NIfTI I/O.
+
+## Agriculture and Aerial Domain Commands
+
+```bash
+# Agriculture
+visionservex agriculture recommend --goal weed-detection
+visionservex agriculture prompt-detect field.jpg --prompt "weed" --detector owlv2-base-patch16
+visionservex agriculture export-training-template --model rfdetr-small --out data_template/
+
+# Aerial / drone
+visionservex aerial recommend --goal oriented-detection
+visionservex aerial dataset validate-dota --path /path/to/DOTA
+visionservex aerial dataset validate-visdrone --path /path/to/VisDrone
+```
+
+OBB models (RTMDet-R/R2 via MMRotate) report **rotated IoU mAP50**, not axis-aligned AP. Do not compare them using box detection metrics.
+
+---
 
 ## Gated Models & Expert Sidecars
 

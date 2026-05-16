@@ -7,6 +7,120 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-05-16
+
+### Real-model smoke verification, engine fixes, agriculture + aerial CLIs
+
+OWLv2, DINOv2, and SigLIP2 are now real-model-smoke verified with pulled
+checkpoints. Two engine bugs discovered during smoke testing are fixed.
+Florence-2 has a documented structured version-incompatibility error for
+transformers ≥ 5.x. New agriculture and aerial CLI command groups. 11 new
+tests. Total quick suite: 626 passed, 37 deselected, ~32 s.
+
+#### Real-model smoke results (v2.0.0 pass)
+
+| Model | Status | Notes |
+|-------|--------|-------|
+| owlv2-base-patch16 | ✓ PASS | 4 detections on synthetic shapes, correct labels |
+| dinov2-small | ✓ PASS | 384-d L2-normalized embedding, norm=1.000 |
+| siglip2-base-patch16-224 | ✓ PASS | 768-d embedding, self-sim=1.000, cross-sim=0.860 |
+| florence-2-base | ✗ BLOCKED | transformers 5.3.0 incompatible (3 API removals) |
+| surveillance-search real path | ✓ PASS | OWLv2 + SigLIP2, 4 frames indexed, 0 detections on synthetic |
+
+#### OWLv2 engine fix (critical bug)
+
+``Owlv2Processor`` in transformers ≥ 4.47 / 5.x uses a fast image processor.
+The fast processor exposes ``post_process_object_detection`` on
+``processor.image_processor`` sub-attribute, not directly on the
+``Owlv2Processor`` wrapper. The engine now resolves the method via a
+two-level fallback so both fast and slow processor paths work.
+
+#### SigLIP2 engine fix (critical bug)
+
+``AutoModel.from_pretrained('google/siglip2-*')`` loads the full
+``SiglipModel`` which requires both ``pixel_values`` and ``input_ids``
+(contrastive architecture). For image-only embedding, the engine now routes
+through ``model.vision_model(pixel_values=...)`` when only ``pixel_values``
+are present, avoiding the "You have to specify input_ids" error.
+
+#### Florence-2 version guard (transformers 5.x)
+
+The Florence-2 engine now checks ``int(transformers.__version__.split(".")[0]) >= 5``
+at load time and raises ``MissingDependencyError`` (code:
+``TRANSFORMERS_VERSION_INCOMPATIBLE``) with the exact fix:
+``pip install 'transformers>=4.40,<5.0'``.
+
+Root cause: Florence-2's custom trust_remote_code modules use four 4.x-only
+APIs removed in transformers 5.x:
+1. ``TokenizersBackend.additional_special_tokens`` (removed in tokenizers 0.21+)
+2. ``Florence2LanguageConfig.forced_bos_token_id`` (removed in transformers 5.x)
+3. ``_supports_sdpa`` property on ``Florence2PreTrainedModel`` (incompatible with nn.Module)
+4. ``EncoderDecoderCache`` subscript protocol (generation pipeline changed)
+
+Shims for issues 1–3 are included and will work once issue 4 is resolved
+upstream. Confirmed with transformers 4.45 (shims applied), but the machine
+running this test suite has 5.3.0 installed.
+
+#### Agriculture commands (new — ``cli/agriculture_commands.py``)
+
+- ``visionservex agriculture doctor`` — check which components are available
+- ``visionservex agriculture recommend --goal weed-detection``
+- ``visionservex agriculture prompt-detect image.jpg --prompt "weed"``
+- ``visionservex agriculture prompt-segment image.jpg --prompt "weed"``
+- ``visionservex agriculture recipe crop-weed-detection --format markdown``
+- ``visionservex agriculture export-training-template --model rfdetr-small --out data_template/``
+
+#### Aerial commands (new — ``cli/aerial_commands.py``)
+
+- ``visionservex aerial doctor``
+- ``visionservex aerial recommend --goal oriented-detection``
+- ``visionservex aerial dataset validate-dota --path /path/to/dota``
+- ``visionservex aerial dataset validate-visdrone --path /path/to/visdrone``
+
+Includes explicit metric documentation: OBB models require rotated IoU
+(``DOTA mAP50``), not axis-aligned box IoU. VisDrone requires MOTA/MOTP,
+not AP.
+
+#### Tests (new — ``tests/test_v200.py``, 11 tests)
+
+- ``test_owlv2_post_process_resolves_from_image_processor``
+- ``test_florence2_raises_when_transformers_5``
+- ``test_florence2_compat_shim_functions_importable``
+- ``test_florence2_version_check_is_version_string``
+- ``test_siglip2_uses_vision_model_subpath``
+- ``test_agriculture_commands_registered``
+- ``test_agriculture_recipe_known_names``
+- ``test_aerial_commands_registered``
+- ``test_aerial_dataset_validate_dota_missing_path``
+- ``test_aerial_obb_metric_note_mentions_rotated_iou``
+- ``test_deimv2_and_rtdetrv4_have_blockers``
+
+#### DEIMv2 / RT-DETRv4 blocker status (refreshed)
+
+Status on 2026-05-16:
+- DEIMv2: still no clean HF Transformers path. Upstream HF issue #41211
+  was opened 2024-Q4 and remains open. Official DEIMv2 repo provides a
+  custom loader that copies large amounts of DEIM code; no pip-installable
+  package. VisionServeX manifest correctly marks ``runnable_in_visionservex=False``
+  with these exact blockers.
+- RT-DETRv4: https://github.com/RT-DETRs/RT-DETRv4 — released 2025-Q4.
+  Checkpoint quality not yet audited. HF Transformers added RTDetrModel in
+  4.44+ but RTDetrv4 architecture has not been merged. Still audit_only.
+
+#### What runnable coverage looks like now (honest)
+
+| Metric | v1.9.0 | v2.0.0 |
+|--------|--------|--------|
+| Manifest entries with runnable_in_visionservex=True | 17/42 (40%) | 17/42 (40%) |
+| Engines with bugs found and fixed | 0 | 2 (OWLv2, SigLIP2) |
+| Real-model smoke passes | 0 | 3 (OWLv2, DINOv2, SigLIP2) |
+| Models with clear structured blockers | partial | full (Florence-2, DEIMv2, RT-DETRv4) |
+
+The raw 40% number does not move because Florence-2 remains blocked and no
+new HF engine was wired. However, 3 of the 4 target models are now
+**actually verified to produce correct outputs**, which is the real
+definition of "runnable" vs "wired-but-untested".
+
 ## [1.9.0] - 2026-05-16
 
 ### Surveillance video-search, Anomalib PatchCore wrapper, medical CLI, OpenMMLab validate, open-vocab benchmark

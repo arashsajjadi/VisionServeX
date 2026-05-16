@@ -143,7 +143,25 @@ class OWLv2Engine(StubEngine):
             outputs = self._model(**inputs_on_device)
 
         target_sizes = self._torch.tensor([image.size[::-1]])  # (H, W)
-        results = self._processor.post_process_object_detection(
+        # The fast Owlv2Processor routes post-processing through its image_processor
+        # sub-component (post_process_object_detection lives there, not on the wrapper).
+        # We also accept the legacy path where the processor exposes it directly.
+        _post_proc = getattr(
+            self._processor,
+            "post_process_object_detection",
+            None,
+        ) or getattr(
+            getattr(self._processor, "image_processor", None),
+            "post_process_object_detection",
+            None,
+        )
+        if _post_proc is None:
+            raise AttributeError(
+                "Could not locate post_process_object_detection on "
+                f"{type(self._processor).__name__}. "
+                "This may indicate an unsupported transformers version."
+            )
+        results = _post_proc(
             outputs=outputs,
             target_sizes=target_sizes,
             threshold=threshold,
