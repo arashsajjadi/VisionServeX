@@ -241,6 +241,8 @@ def test_anomaly_install_help_json():
 @pytest.mark.fast
 def test_medsam_multi_box_produces_multiple_masks(tmp_path):
     """Multi-box MedSAM should attempt multiple prompts."""
+    pytest.importorskip("transformers")  # fast-CI skips if [hf] not installed
+
     import numpy as np
     from typer.testing import CliRunner
 
@@ -302,6 +304,8 @@ def test_medsam_multi_box_produces_multiple_masks(tmp_path):
 @pytest.mark.fast
 def test_medsam_invalid_box_index_reported(tmp_path):
     """Invalid box at specific index shows which index failed."""
+    pytest.importorskip("transformers")  # fast-CI skips if [hf] not installed
+
     from typer.testing import CliRunner
 
     from visionservex.cli.medical_commands import app

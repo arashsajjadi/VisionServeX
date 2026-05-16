@@ -118,6 +118,8 @@ def test_anomalib_unsupported_version_error():
 @pytest.mark.fast
 def test_medsam_segment_produces_mask(tmp_path):
     """MedSAM segment must write mask PNG + metadata JSON when model works."""
+    pytest.importorskip("transformers")  # fast-CI skips if [hf] not installed
+
     from typer.testing import CliRunner
 
     from visionservex.cli.medical_commands import app
@@ -173,6 +175,8 @@ def test_medsam_segment_produces_mask(tmp_path):
 @pytest.mark.fast
 def test_medsam_segment_invalid_box(tmp_path):
     """Invalid box format returns INPUT_SCHEMA_ERROR."""
+    pytest.importorskip("transformers")  # fast-CI skips if [hf] not installed
+
     from typer.testing import CliRunner
 
     from visionservex.cli.medical_commands import app
@@ -195,6 +199,8 @@ def test_medsam_segment_invalid_box(tmp_path):
 @pytest.mark.fast
 def test_medsam_segment_missing_checkpoint(tmp_path):
     """Missing checkpoint returns CHECKPOINT_REQUIRED."""
+    pytest.importorskip("transformers")  # fast-CI skips if [hf] not installed
+
     from typer.testing import CliRunner
 
     from visionservex.cli.medical_commands import app

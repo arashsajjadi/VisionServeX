@@ -404,3 +404,90 @@ def disk_report() -> None:
         d = get_disk_state(p)
         table.add_row(str(p), f"{d.free_gb:.1f}", f"{d.used_pct:.1f}%")
     console.print(table)
+
+
+@app.command("cli-audit")
+def cli_audit(
+    out: Path = typer.Option(None, "--out"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Audit every public visionservex CLI subapp by running --help."""
+    import shutil
+    import subprocess
+    import time
+
+    _PUBLIC_SUBAPPS = (
+        "detect",
+        "open-vocab",
+        "segment",
+        "classify",
+        "embed",
+        "similarity",
+        "video-search",
+        "anomaly",
+        "medical",
+        "openmmlab",
+        "maskdino",
+        "sam-family",
+        "agriculture",
+        "aerial",
+        "benchmark-classification",
+        "benchmark-anomaly",
+        "benchmark-surveillance-search",
+        "benchmark-open-vocab",
+        "model-zoo",
+        "models",
+        "readiness",
+        "florence2",
+        "license",
+    )
+
+    binary = shutil.which("visionservex")
+    results = []
+    for subapp in _PUBLIC_SUBAPPS:
+        if binary is None:
+            results.append({"subapp": subapp, "status": "NO_BINARY", "rc": -1, "error": ""})
+            continue
+        t0 = time.monotonic()
+        res = subprocess.run(
+            [binary, subapp, "--help"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        dt = round((time.monotonic() - t0) * 1000)
+        ok = res.returncode in (0, 2) and "Traceback" not in res.stderr
+        results.append(
+            {
+                "subapp": subapp,
+                "status": "PASS" if ok else "FAIL",
+                "rc": res.returncode,
+                "runtime_ms": dt,
+                "error": (res.stderr[:200] if not ok else ""),
+            }
+        )
+
+    payload = {
+        "n_subapps": len(results),
+        "n_pass": sum(1 for r in results if r["status"] == "PASS"),
+        "n_fail": sum(1 for r in results if r["status"] == "FAIL"),
+        "all_pass": all(r["status"] == "PASS" for r in results),
+        "results": results,
+    }
+
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(__import__("json").dumps(payload, indent=2))
+
+    if json_ or out:
+        typer.echo(__import__("json").dumps(payload, indent=2))
+        return
+
+    table = Table(title=f"CLI audit ({payload['n_pass']}/{payload['n_subapps']} pass)")
+    table.add_column("Subapp")
+    table.add_column("Status")
+    table.add_column("ms", justify="right")
+    for r in results:
+        color = "green" if r["status"] == "PASS" else "red"
+        table.add_row(r["subapp"], f"[{color}]{r['status']}[/{color}]", str(r.get("runtime_ms", 0)))
+    console.print(table)

@@ -7,14 +7,14 @@
 #
 # Usage:
 #   bash scripts/run_openmmlab_sidecar_smoke.sh
-#   IMAGE_TAG=visionservex-openmmlab:v2.9.0 \
+#   IMAGE_TAG=visionservex-openmmlab:v3.0.0 \
 #     POSE_IMAGE=examples/images/person.jpg \
 #     DET_IMAGE=examples/images/street.jpg \
 #     bash scripts/run_openmmlab_sidecar_smoke.sh
 
 set -euo pipefail
 
-IMAGE_TAG="${IMAGE_TAG:-visionservex-openmmlab:v2.9.0}"
+IMAGE_TAG="${IMAGE_TAG:-visionservex-openmmlab:v3.0.0}"
 POSE_IMAGE="${POSE_IMAGE:-examples/images/person.jpg}"
 DET_IMAGE="${DET_IMAGE:-examples/images/street.jpg}"
 OUT_DIR="${OUT_DIR:-/tmp/vsx-openmmlab-sidecar}"

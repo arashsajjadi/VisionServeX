@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2026 Arash Sajjadi
 #
-# VisionServeX — OpenMMLab expert integration image (v2.9.0).
+# VisionServeX — OpenMMLab expert integration image (v3.0.0).
 #
 # Pinned to the recipe that was real-smoke verified on the v2.8 release
 # host (RTMPose-m + RTMDet-tiny). The mmcv 2.x ecosystem refuses to
@@ -21,9 +21,9 @@
 #   numpy       1.26.4
 #
 # Usage:
-#   docker build -t visionservex-openmmlab:v2.9.0 -f docker/openmmlab/Dockerfile .
+#   docker build -t visionservex-openmmlab:v3.0.0 -f docker/openmmlab/Dockerfile .
 #   docker run --gpus all --rm -v ~/.cache/visionservex:/cache/visionservex \
-#     visionservex-openmmlab:v2.9.0 \
+#     visionservex-openmmlab:v3.0.0 \
 #     visionservex openmmlab smoke-test rtmpose-m --image examples/images/person.jpg --device cpu --out /tmp/out.json
 
 FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime

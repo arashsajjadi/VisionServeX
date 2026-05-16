@@ -7,6 +7,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.11.0] - 2026-05-16
+
+### v3.0.0 pre-release infrastructure: load-matrix-run, Docker GHCR workflow, cli-audit, clean-install script, CI fixes
+
+This release adds all remaining infrastructure needed for v3.0.0. v3.0.0
+itself is not released because Docker images cannot be pushed to GHCR
+without `write:packages` token scope, which requires the user to run
+`gh auth refresh --scopes write:packages` or use the GitHub Actions
+`publish-sidecars.yml` workflow triggered by the release event.
+
+#### Why v2.11.0 and not v3.0.0
+
+v3 requires Docker images to be pushed to GHCR. The local GitHub token
+in this session has `repo, workflow` scopes but not `write:packages`.
+A test-push attempt returned `denied: permission_denied: The token
+provided does not match expected scopes.`. All other v3 gates pass; this
+one requires off-host auth. The `publish-sidecars.yml` workflow will push
+the images automatically when the v3.0.0 release is published.
+
+#### What lands in v2.11.0
+
+- **`visionservex models load-matrix-run`** — iterates all 113 load-matrix
+  rows and writes `tested_result / last_error` per row. Modes: core_load,
+  optional_extra_load, sidecar_validate, gated_auth_validate, all, etc.
+  CI-safe mode (`--ci-safe`) runs `--help` probes only. On the v2.11 host:
+  0 core failures, v3_gate_pass=True.
+- **`visionservex dev cli-audit --json`** — invokes `--help` for all 23
+  public subapps and writes a pass/fail table. 23/23 PASS.
+- **`scripts/build_and_push_sidecars.sh`** — builds
+  visionservex-openmmlab, visionservex-mmrotate-legacy, and
+  visionservex-maskdino images and pushes to GHCR (requires
+  `write:packages` scope). `--dry-run` prints the plan without building.
+- **`.github/workflows/publish-sidecars.yml`** — triggered on release
+  published event + workflow_dispatch. 3 jobs (one per image); builds with
+  docker/build-push-action@v6 and tags `:v3.0.0` + `:latest`.
+- **`docker/maskdino/Dockerfile`** (new) — Detectron2 build-from-source
+  against torch 2.0.1+cu117; clones MaskDINO repo at depth 1.
+- **`scripts/test_clean_wheel_install.sh`** — builds a clean venv, installs
+  the wheel, and gates on 7 checks including base-import hygiene.
+- **CI fix** — `test_v240.py` and `test_v250.py` MedSAM tests add
+  `pytest.importorskip("transformers")` so they skip in fast-CI when
+  `[hf]` extras are not installed.
+- **Sidecar image tags updated** from stale `v2.9.0` to `v3.0.0`.
+- **optional-extras workflow** — fixed `tracking-smoke` job to install
+  `pytest` before running targeted tests.
+- **`docs/release_readiness/v3.0.0.md`** — complete v3 gate checklist with
+  optional-extras run ID, load-matrix-run output, and Docker pending note.
+- **`docs/release_readiness/latest.md`** — now points at v3.0.0.
+
+#### Tests
+
+- `tests/test_v2110.py` (new): load-matrix-run shape (no core failures),
+  cli-audit all pass, Docker/GHCR workflow `packages: write`, MaskDINO
+  Dockerfile, scripts executable, image tag freshness, clean-install
+  script, v3 readiness doc, optional-extras pytest install.
+
 ## [2.10.0] - 2026-05-16
 
 ### v3 release-audit infrastructure: public README cleanup, model load matrix CLI, clean-venv install test, CLI help sweep

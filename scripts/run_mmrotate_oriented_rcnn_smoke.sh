@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-IMAGE_TAG="${IMAGE_TAG:-visionservex-mmrotate-legacy:v2.9.0}"
+IMAGE_TAG="${IMAGE_TAG:-visionservex-mmrotate-legacy:v3.0.0}"
 IMAGE_INPUT="${1:-examples/images/aerial.jpg}"
 OUT_FILE="${2:-/tmp/vsx_oriented_rcnn.json}"
 

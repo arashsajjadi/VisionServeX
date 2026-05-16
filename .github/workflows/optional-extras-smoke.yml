@@ -32,7 +32,8 @@ jobs:
       - name: Install runtime + tracker packages
         run: |
           python -m pip install -U pip "setuptools<82" wheel
-          python -m pip install -e .
+          python -m pip install -e ".[dev]" || python -m pip install -e .
+          python -m pip install pytest  # ensure pytest available for targeted tests
           # Each upstream tracker has a vendored old-style setup.py that
           # imports pkg_resources at metadata time. Install lap, scipy and
           # filterpy first, then add the trackers with --no-build-isolation

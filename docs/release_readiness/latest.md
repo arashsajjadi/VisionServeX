@@ -1,5 +1,9 @@
 # Latest release readiness
 
-See [v2.9.0 readiness](v2.9.0.md) for the current factor table.
+See [v3.0.0 readiness](v3.0.0.md) for the current gate checklist and
+sidecar publication evidence.
 
-This file always points at the most recent release-readiness audit.
+For the factor table history, see [v2.9.0 readiness](v2.9.0.md).
+
+Run `visionservex readiness verdict --json` to re-check the current
+factor readiness from a live install.

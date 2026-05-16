@@ -19,10 +19,10 @@
 #   mmrotate    0.3.4
 #
 # Usage:
-#   docker build -t visionservex-mmrotate-legacy:v2.9.0 \
+#   docker build -t visionservex-mmrotate-legacy:v3.0.0 \
 #     -f docker/mmrotate-legacy/Dockerfile .
 #   docker run --gpus all --rm \
-#     visionservex-mmrotate-legacy:v2.9.0 \
+#     visionservex-mmrotate-legacy:v3.0.0 \
 #     openmmlab smoke-test oriented-rcnn \
 #       --image examples/images/aerial.jpg --device cpu --out /tmp/out.json
 
