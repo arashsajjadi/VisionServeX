@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "visionservex"
-version = "1.8.1"
+version = "1.9.0"
 description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -105,6 +105,19 @@ grounding = [
     "torchvision>=0.16",
     "transformers>=4.40",
     "huggingface_hub>=0.24",
+]
+anomaly = [
+    # Anomalib pulls heavy deps (torch, lightning, kornia). Optional extra so
+    # baseline VisionServeX install stays light.
+    "anomalib>=1.0",
+]
+video = [
+    # Optional video-search support: cv2 for video-file ingestion.
+    "opencv-python-headless>=4.8",
+]
+medical = [
+    # Optional medical I/O — NIfTI volume parsing for TotalSegmentator/nnU-Net.
+    "nibabel>=5.0",
 ]
 dev = [
     "pytest>=8.0",

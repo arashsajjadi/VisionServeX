@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-1.8.1-informational.svg" alt="v1.8.1">
+  <img src="https://img.shields.io/badge/version-1.9.0-informational.svg" alt="v1.9.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -352,6 +352,50 @@ visionservex open-vocab owlv2-base-patch16 image.jpg --prompt "person, car"
 visionservex model pull florence-2-base
 visionservex predict florence-2-base image.jpg --task caption
 ```
+
+## Surveillance Video-Search (local-only)
+
+Index a folder of frames (or a video file) with a detector + tracker + embedder, then search by free-form text. **Appearance-based retrieval only — no face recognition, no biometric identity.**
+
+```bash
+visionservex video-search index ./frames/ \
+  --detector owlv2-base-patch16 \
+  --embedder siglip2-base-patch16-224 \
+  --prompt "person" \
+  --sample-fps 1 \
+  --out indexes/camera01
+
+visionservex video-search query indexes/camera01 \
+  --text "person wearing a red shirt" \
+  --top-k 20 \
+  --out reports/red_shirt.html
+
+visionservex video-search inspect indexes/camera01
+visionservex video-search cleanup indexes/camera01 --yes
+```
+
+## Industrial Anomaly Detection
+
+```bash
+pip install 'visionservex[anomaly]'        # pulls anomalib
+visionservex anomaly list
+visionservex anomaly doctor
+visionservex anomaly train patchcore --data normal_images/ --out runs/patchcore --dry-run
+visionservex anomaly predict runs/patchcore test.jpg
+```
+
+PatchCore / PaDiM / FastFlow / EfficientAD / WinCLIP / DRAEM / Reverse-Distillation supported; missing dep returns `ANOMALIB_REQUIRED` with the exact install command.
+
+## Medical Imaging (research only)
+
+```bash
+visionservex medical list
+visionservex medical validate totalsegmentator
+visionservex medical recommend --goal ct-segmentation
+visionservex medical segment medsam image.png --box 10,20,200,200 --out output/
+```
+
+No diagnostic claims. Optional extras: `pip install 'visionservex[medical]'` for nibabel/NIfTI I/O.
 
 ## Gated Models & Expert Sidecars
 

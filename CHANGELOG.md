@@ -7,6 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-05-16
+
+### Surveillance video-search, Anomalib PatchCore wrapper, medical CLI, OpenMMLab validate, open-vocab benchmark
+
+Major capability expansion: four new top-level CLI command groups that turn the previous documentation-only roadmap items into actionable workflows. No model was fake-wired; every missing optional dependency returns a structured error with the exact install recipe.
+
+#### Surveillance video-search (new — `runtime/video_search.py`, `runtime/simple_tracker.py`, `cli/video_search_commands.py`)
+- `visionservex video-search index <SOURCE> --detector OWLv2|GroundingDINO --embedder SigLIP2|DINOv2 --prompt "person" --out indexes/cam01`
+- `visionservex video-search query indexes/cam01 --text "person wearing a red shirt" --top-k 20 --out report.html`
+- `visionservex video-search inspect indexes/cam01`
+- `visionservex video-search cleanup indexes/cam01 --yes`
+- `SimpleIoUTracker` — minimal multi-object tracker with greedy IoU association, configurable threshold and lost-frame pruning.
+- `iter_frames()` accepts a folder of images (no extra deps) or a video file (lazy-imports `cv2`).
+- Local index format: `manifest.json` + `embeddings.npy` + `README.md` with privacy notice.
+- `query_index()` does cosine similarity with optional per-track aggregation; returns ranked `VideoSearchHit` list.
+- `render_timeline_html()` builds a self-contained HTML report — no external resources, no `<script>` tags.
+- **Privacy defaults are hard-coded:** appearance-based retrieval only; no face recognition; no biometric identity. The privacy notice appears in CLI, HTML report, and README of every index directory.
+- New `[video]` optional extra: `opencv-python-headless>=4.8`.
+- 7 tests covering tracker behavior, frame iteration, end-to-end mocked index/query, HTML output, save/load round-trip, privacy notice.
+
+#### Anomalib / industrial anomaly (new — `cli/anomaly_commands.py`)
+- `visionservex anomaly list / doctor / train <algo> / predict / benchmark`
+- Supports: patchcore, padim, fastflow, efficientad, winclip, draem, reverse_distillation.
+- New `[anomaly]` optional extra pulls `anomalib>=1.0`.
+- Missing dep returns structured `ANOMALIB_REQUIRED` with exact install command; empty/missing dataset returns `DATASET_REQUIRED`; missing trained model dir returns `MODEL_REQUIRED`.
+- `train` writes a scaffold manifest and delegates to anomalib's own `Engine` (we never start multi-hour training inside a CLI command).
+- `benchmark` returns structured `BENCHMARK_NOT_IMPLEMENTED` with the complete expected MVTec data layout and metric list for v2.0.
+- 4 tests covering algo registration, structured-error returns, dataset validation.
+
+#### Medical CLI (new — `cli/medical_commands.py`)
+- `visionservex medical list / doctor / validate <model> / recommend --goal / segment <model> <input>`
+- Covers: TotalSegmentator, MedSAM, MedSAM2, SAM-Med2D, nnU-Net v2, MONAI bundles, Auto3DSeg.
+- Honest delegation: when deps are present and input exists, the command prints the exact upstream invocation (e.g. `TotalSegmentator -i input.nii.gz -o output/`). VisionServeX does not duplicate medical segmentation engines.
+- Strict disclaimer printed on every command: **research and education only, no diagnostic claims**.
+- Structured errors: `MEDICAL_EXTRA_REQUIRED`, `NIFTI_IO_REQUIRED`, `INPUT_NOT_FOUND`.
+- New `[medical]` optional extra: `nibabel>=5.0`.
+- 3 tests covering model list, disclaimer strictness, goal-to-model routing.
+
+#### OpenMMLab `validate` (extended — `cli/openmmlab_commands.py`)
+- New `visionservex openmmlab validate <model_id>` — verifies required mm-modules (mmcv/mmengine/mmpose/mmdet/mmrotate), checkpoint cache presence, config repo URL. No model is loaded into memory.
+- Structured codes: `OPENMMLAB_REQUIRED`, `CHECKPOINT_REQUIRED`, `CONFIG_REQUIRED`.
+- 2 tests covering unknown-model and missing-modules paths.
+
+#### Open-vocab benchmark (new — `cli/benchmark_open_vocab.py`)
+- `visionservex benchmark-open-vocab <images_dir> --prompts "person, car, dog" --models owlv2-base-patch16,...`
+- Reports retrieval-style metrics: hits/images, mean detections, mean top-1 score, p50/p95 latency — per (model, prompt) cell.
+- Honest about scope: no mAP unless GT path is provided (note in JSON output points the user at `benchmark-competitiveness`).
+- 2 tests covering quantile helper and dataclass shape.
+
+#### CLI registration
+- Four new top-level groups registered in `cli/main.py`: `anomaly`, `medical`, `video-search`, `benchmark-open-vocab`.
+
+#### Tests
+- `tests/test_v190.py`: 23 new tests, all `@pytest.mark.fast`, all mocked. Total quick suite: **615 passed, 37 deselected — ~32 s** (was 592 in v1.8.1).
+
+#### What did NOT land (honest)
+- **OWLv2/Florence-2 real-model end-to-end smoke**: not executed in this session — would require ~5 GB of downloads (`owlv2-base-patch16` ≈ 600 MB, `florence-2-base` ≈ 470 MB plus deps) and ~10 min of GPU/CPU time per model. The engines are tested with mocked outputs in v1.8.0+. To run real smoke now:  
+  `VISIONSERVEX_RUN_REAL_MODEL_TESTS=1 visionservex dev test real-smoke --model owlv2`
+- **OpenMMLab/Detectron2 real inference**: still requires the user to install heavy frameworks themselves. `validate` and `expert install --dry-run` now make the gap explicit.
+- **SAM3 inference engine**: still external — auth wrapper only.
+- **Surveillance-search ByteTrack / OSNet integration**: simple-IoU only in v1.9. ByteTrack/OSNet remain opt-in via the manifest.
+- **Anomalib real `Engine` training inside the CLI**: deliberately not implemented. `anomaly train` writes a scaffold and prints the upstream `anomalib train` invocation.
+
 ## [1.8.1] - 2026-05-16
 
 ### Patch — fast-CI compatibility for v1.8.0 OWLv2/Florence-2 mocked tests

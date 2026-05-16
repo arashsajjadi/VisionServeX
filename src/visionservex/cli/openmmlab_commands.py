@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+from pathlib import Path
 
 import typer
 from rich.console import Console
@@ -485,6 +486,106 @@ def pull(
             console.print(f"[red]Download failed:[/red] {exc}")
             console.print(f"  Place the checkpoint manually at: [cyan]{checkpoint_path}[/cyan]")
         raise typer.Exit(1)
+
+
+# ---------------------------------------------------------------------------
+# validate — config + checkpoint dependency check (v1.9.0)
+# ---------------------------------------------------------------------------
+
+
+def _validate_openmmlab_model(model_id: str) -> dict:
+    """Inspect dependencies, config, and checkpoint for an OpenMMLab model."""
+    meta = _PULL_METADATA.get(model_id)
+    if meta is None:
+        return {
+            "model_id": model_id,
+            "status": "error",
+            "structured_error_code": "CONFIG_REQUIRED",
+            "message": f"No pull metadata for {model_id!r}",
+            "fix": "Add a _PULL_METADATA entry in cli/openmmlab_commands.py",
+        }
+
+    import importlib
+
+    modules_needed = ["mmcv", "mmengine"]
+    if model_id.startswith("rtmpose"):
+        modules_needed.append("mmpose")
+    elif model_id.startswith("rtmdet"):
+        modules_needed.extend(["mmdet", "mmrotate"])
+    elif model_id.startswith("co-dino") or model_id.startswith("co-detr"):
+        modules_needed.append("mmdet")
+
+    missing = []
+    for mod in modules_needed:
+        try:
+            importlib.import_module(mod)
+        except ImportError:
+            missing.append(mod)
+
+    import os
+
+    cache_dir = os.environ.get("VISIONSERVEX_CACHE_DIR") or os.path.expanduser(
+        "~/.cache/visionservex/openmmlab"
+    )
+    cache_path = Path(cache_dir) / meta["cache_subdir"]
+    ckpt_path = cache_path / meta["checkpoint_filename"]
+    has_ckpt = ckpt_path.exists()
+
+    payload: dict = {
+        "model_id": model_id,
+        "required_modules": modules_needed,
+        "missing_modules": missing,
+        "checkpoint_path": str(ckpt_path),
+        "checkpoint_present": has_ckpt,
+        "config_repo": meta.get("config_repo"),
+        "model_zoo": meta.get("model_zoo"),
+    }
+    if missing:
+        payload["status"] = "error"
+        payload["structured_error_code"] = "OPENMMLAB_REQUIRED"
+        payload["message"] = f"Required modules missing: {missing}"
+        payload["fix"] = meta["install"]
+    elif not has_ckpt:
+        payload["status"] = "error"
+        payload["structured_error_code"] = "CHECKPOINT_REQUIRED"
+        payload["message"] = f"Checkpoint not in cache: {ckpt_path}"
+        payload["fix"] = f"visionservex openmmlab pull {model_id} --from-url <URL>"
+    else:
+        payload["status"] = "ok"
+        payload["message"] = "Dependencies and checkpoint are present."
+    return payload
+
+
+@app.command(
+    "validate",
+    help="Validate OpenMMLab dependencies and checkpoint for a model (no inference run).",
+)
+def validate_cmd(
+    model_id: str = typer.Argument(
+        ..., help="Model ID, e.g. rtmpose-s, rtmdet-r2-s, co-dino-inst-vit-l-coco"
+    ),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Validate that the required modules are installed and the checkpoint is cached.
+
+    Does NOT load the model into memory.
+    """
+    from pathlib import Path  # noqa: F401  (Path used in inner helper)
+
+    payload = _validate_openmmlab_model(model_id)
+    if json_:
+        typer.echo(json.dumps(payload, indent=2))
+        return
+
+    color = "green" if payload["status"] == "ok" else "yellow"
+    code = payload.get("structured_error_code", "OK")
+    console.print(f"[{color}]{code}[/{color}] — {payload.get('message', '')}")
+    if payload["status"] != "ok":
+        fix = payload.get("fix", "")
+        if isinstance(fix, str):
+            console.print(f"  fix: {fix}")
+    else:
+        console.print(f"  checkpoint: {payload['checkpoint_path']}")
 
 
 __all__ = ["app"]

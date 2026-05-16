@@ -23,7 +23,9 @@ from rich.table import Table
 
 from visionservex import __version__
 from visionservex.cli import (
+    anomaly_commands,
     benchmark_commands,
+    benchmark_open_vocab,
     capabilities_commands,
     colab_commands,
     dev_commands,
@@ -33,6 +35,7 @@ from visionservex.cli import (
     expert_commands,
     gateway_commands,
     gpu_commands,
+    medical_commands,
     model_card_commands,
     model_health_commands,
     model_lifecycle_commands,
@@ -47,6 +50,7 @@ from visionservex.cli import (
     tensorrt_commands,
     training_commands,
     validation_commands,
+    video_search_commands,
 )
 from visionservex.cli import tunnel as tunnel_cli
 from visionservex.config import get_settings, reload_settings
@@ -112,6 +116,10 @@ app.add_typer(dev_commands.app, name="dev")
 app.add_typer(model_health_commands.app, name="models")
 app.add_typer(sam3_commands.app, name="sam3")
 app.add_typer(expert_commands.app, name="expert")
+app.add_typer(anomaly_commands.app, name="anomaly")
+app.add_typer(medical_commands.app, name="medical")
+app.add_typer(video_search_commands.app, name="video-search")
+app.add_typer(benchmark_open_vocab.app, name="benchmark-open-vocab", invoke_without_command=True)
 
 # Top-level embedding aliases for Ultralytics-style ergonomics
 embedding_alias_app = embedding_commands.app
