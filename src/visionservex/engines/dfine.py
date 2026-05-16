@@ -5,12 +5,22 @@
 Uses ``AutoModelForObjectDetection`` and ``AutoImageProcessor`` from the
 ``ustc-community`` D-FINE checkpoints on Hugging Face.
 
-Supported model IDs → HF repo mapping:
-    dfine-n  → ustc-community/dfine-nano-coco
-    dfine-s  → ustc-community/dfine-small-obj2coco  (default)
-    dfine-m  → ustc-community/dfine-medium-obj2coco
-    dfine-l  → ustc-community/dfine-large-obj2coco-e25
-    dfine-x  → ustc-community/dfine-xlarge-obj2coco
+Supported model IDs (v1.2.0):
+    Legacy short IDs (backward compat):
+        dfine-n  → ustc-community/dfine-nano-coco           [demo_fast]
+        dfine-s  → ustc-community/dfine-small-obj2coco      [accuracy_grade]
+        dfine-m  → ustc-community/dfine-medium-obj2coco     [accuracy_grade]
+        dfine-l  → ustc-community/dfine-large-obj2coco-e25  [accuracy_grade]
+        dfine-x  → ustc-community/dfine-xlarge-obj2coco     [accuracy_grade]
+
+    Explicit COCO-only (verify repo availability before use):
+        dfine-n-coco, dfine-s-coco, dfine-m-coco, dfine-l-coco, dfine-x-coco
+
+    Explicit Objects365+COCO (recommended for accuracy benchmarks):
+        dfine-s-o365-coco  → ustc-community/dfine-small-obj2coco   [accuracy_grade]
+        dfine-m-o365-coco  → ustc-community/dfine-medium-obj2coco  [accuracy_grade]
+        dfine-l-o365-coco  → ustc-community/dfine-large-obj2coco-e25 [accuracy_grade]
+        dfine-x-o365-coco  → ustc-community/dfine-xlarge-obj2coco  [accuracy_grade]
 
 Install:
     pip install 'visionservex[dfine]'   (or [hf])
@@ -34,11 +44,23 @@ _log = get_logger(__name__)
 
 # Maps VisionServeX model id → HF repo id
 _HF_REPOS: dict[str, str] = {
+    # Legacy short IDs (backward compat)
     "dfine-n": "ustc-community/dfine-nano-coco",
     "dfine-s": "ustc-community/dfine-small-obj2coco",
     "dfine-m": "ustc-community/dfine-medium-obj2coco",
     "dfine-l": "ustc-community/dfine-large-obj2coco-e25",
     "dfine-x": "ustc-community/dfine-xlarge-obj2coco",
+    # Explicit COCO-only variants (v1.2.0 — verify repo availability before use)
+    "dfine-n-coco": "ustc-community/dfine-nano-coco",
+    "dfine-s-coco": "ustc-community/dfine-small-coco",
+    "dfine-m-coco": "ustc-community/dfine-medium-coco",
+    "dfine-l-coco": "ustc-community/dfine-large-coco",
+    "dfine-x-coco": "ustc-community/dfine-xlarge-coco",
+    # Explicit Objects365+COCO variants (v1.2.0 — verified wired, accuracy_grade)
+    "dfine-s-o365-coco": "ustc-community/dfine-small-obj2coco",
+    "dfine-m-o365-coco": "ustc-community/dfine-medium-obj2coco",
+    "dfine-l-o365-coco": "ustc-community/dfine-large-obj2coco-e25",
+    "dfine-x-o365-coco": "ustc-community/dfine-xlarge-obj2coco",
 }
 
 

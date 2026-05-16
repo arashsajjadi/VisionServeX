@@ -618,17 +618,27 @@ def info(model_id: str, json_: bool = typer.Option(False, "--json")) -> None:
 
 @app.command(help="Recommend a model for the current device + task.")
 def recommend_cmd(
-    task: str | None = typer.Option(None, "--task"),
+    task: str | None = typer.Option(
+        None, "--task", help="Task: detect|segment|classify|pose|obb|open_vocab_detect"
+    ),
     device: str | None = typer.Option(None, "--device"),
     vram: float | None = typer.Option(None, "--vram", help="Available VRAM in GB."),
     simple: bool = typer.Option(False, "--simple", help="Prefer beginner-friendly models."),
+    goal: str | None = typer.Option(
+        None,
+        "--goal",
+        help=(
+            "Recommendation goal: accuracy|fastest_demo|best_open_license|"
+            "best_colab|best_gpu|best_cpu|best_segmentation|best_open_vocab"
+        ),
+    ),
     include_docker: bool = typer.Option(
         False, "--include-docker", help="Include docker/sidecar models."
     ),
     limit: int = typer.Option(5, "--limit"),
     json_: bool = typer.Option(False, "--json"),
 ):
-    recs = recommend(task=task, device=device, vram_gb=vram, simple=simple, limit=limit)
+    recs = recommend(task=task, device=device, vram_gb=vram, simple=simple, goal=goal, limit=limit)
     if not include_docker:
         recs = [
             r
@@ -642,14 +652,29 @@ def recommend_cmd(
     if not recs:
         console.print("[yellow]No recommendations found for the given filters.[/yellow]")
         return
-    table = Table(title="Recommendations")
-    for col in ("id", "task", "status", "impl", "score", "device", "license"):
+    title = "Recommendations"
+    if goal:
+        title += f" (goal={goal})"
+    table = Table(title=title)
+    for col in ("id", "task", "category", "status", "impl", "score", "device", "license"):
         table.add_column(col)
     for r in recs:
         e = r.entry
+        cat = e.model_category or "-"
+        cat_color = {
+            "accuracy_grade": "green",
+            "production_recommended": "cyan",
+            "demo_fast": "yellow",
+            "experimental_sota": "magenta",
+            "expert_sidecar": "grey50",
+            "external_api": "grey50",
+            "unavailable_with_reason": "red",
+            "utility": "grey50",
+        }.get(cat, "white")
         table.add_row(
             e.id,
             e.task,
+            f"[{cat_color}]{cat}[/{cat_color}]",
             e.status,
             e.implementation_status,
             f"{r.score:.1f}",
@@ -1475,6 +1500,181 @@ def parallel_test_alias(
         device=device,
         json_=json_,
     )
+
+
+@app.command(
+    "debug-output",
+    help="Print raw output diagnostics for a model — use to audit postprocessing before blaming the checkpoint.",
+)
+def debug_output(
+    model_id: str,
+    input_path: Path,
+    threshold: float = typer.Option(
+        0.01, "--threshold", help="Low threshold to see all detections."
+    ),
+    device: str | None = typer.Option(None, "--device"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Diagnostic tool: print raw output keys, normalized detections, score/label histograms,
+    invalid boxes, and preprocessing config. Run this before declaring a checkpoint weak."""
+
+    from visionservex.core.results import DetectionResult
+
+    if not input_path.exists():
+        _die(f"file not found: {input_path}", json_mode=json_, code="FILE_NOT_FOUND")
+        return
+
+    try:
+        from PIL import Image as _PIL
+
+        img = _PIL.open(input_path).convert("RGB")
+        w, h = img.size
+    except Exception as exc:
+        _die(str(exc), json_mode=json_, code="IMAGE_LOAD_FAILED")
+        return
+
+    try:
+        kwargs: dict = {}
+        if device:
+            kwargs["device"] = device
+        model = VisionModel(model_id, **kwargs)
+        model._ensure_loaded()
+        result = model.predict(img, threshold=threshold)
+    except Exception as exc:
+        _die(str(exc), json_mode=json_, code="PREDICT_FAILED")
+        return
+
+    diag: dict = {
+        "model_id": model_id,
+        "device": result.device,
+        "precision": result.precision,
+        "backend": result.backend,
+        "task": result.task,
+        "kind": result.kind,
+        "image_size_wh": [w, h],
+        "threshold_used": threshold,
+    }
+
+    if isinstance(result, DetectionResult):
+        dets = result.detections
+        diag["total_detections"] = len(dets)
+        diag["first_10_boxes"] = [
+            {
+                "label": d.label,
+                "class_id": d.class_id,
+                "score": round(d.score, 4),
+                "x1": round(d.box.x1, 2),
+                "y1": round(d.box.y1, 2),
+                "x2": round(d.box.x2, 2),
+                "y2": round(d.box.y2, 2),
+            }
+            for d in dets[:10]
+        ]
+
+        # Score histogram (5 bins)
+        scores = [d.score for d in dets]
+        bins = [0, 0.1, 0.3, 0.5, 0.7, 1.01]
+        bin_labels = ["0.0-0.1", "0.1-0.3", "0.3-0.5", "0.5-0.7", "0.7-1.0"]
+        score_hist = dict.fromkeys(bin_labels, 0)
+        for s in scores:
+            for i, b in enumerate(bins[:-1]):
+                if b <= s < bins[i + 1]:
+                    score_hist[bin_labels[i]] += 1
+                    break
+        diag["score_histogram"] = score_hist
+
+        # Label histogram
+        label_counts: dict = {}
+        for d in dets:
+            label_counts[d.label] = label_counts.get(d.label, 0) + 1
+        top_labels = sorted(label_counts.items(), key=lambda x: -x[1])[:10]
+        diag["label_histogram_top10"] = dict(top_labels)
+
+        # Invalid boxes
+        invalid = []
+        for d in dets:
+            b = d.box
+            reasons = []
+            if b.x1 < 0:
+                reasons.append("x1<0")
+            if b.y1 < 0:
+                reasons.append("y1<0")
+            if b.x2 > w:
+                reasons.append(f"x2>{w}")
+            if b.y2 > h:
+                reasons.append(f"y2>{h}")
+            if b.x1 >= b.x2:
+                reasons.append("x1>=x2")
+            if b.y1 >= b.y2:
+                reasons.append("y1>=y2")
+            if reasons:
+                invalid.append({"label": d.label, "score": round(d.score, 4), "reasons": reasons})
+        diag["invalid_boxes"] = len(invalid)
+        diag["invalid_box_details"] = invalid[:5]
+
+        # Unmapped labels
+        unmapped = [d.label for d in dets if d.label.startswith("class_")]
+        diag["unmapped_labels_count"] = len(unmapped)
+        diag["unmapped_label_samples"] = list(set(unmapped))[:5]
+
+        # Preprocessing advice
+        diag["preprocessing_notes"] = (
+            f"If scores are very low or all boxes are invalid, check: "
+            f"(1) image normalization (RGB order?), "
+            f"(2) resize/letterbox match model expectation, "
+            f"(3) threshold — this run used threshold={threshold:.2f}. "
+            f"Use --threshold 0.0 to see all raw outputs."
+        )
+    else:
+        diag["raw_kind"] = result.kind
+        diag["note"] = f"Full debug-output is implemented for detect task. Got task={result.task}."
+
+    if json_:
+        _emit(diag, json_mode=True)
+        return
+
+    from rich.panel import Panel as _Panel
+
+    console.print(_Panel.fit(f"[bold]debug-output:[/bold] {model_id}", border_style="yellow"))
+    console.print(
+        f"  Device: {diag['device']}  Precision: {diag['precision']}  Backend: {diag['backend']}"
+    )
+    console.print(f"  Image: {w}x{h}  Threshold: {threshold}")
+    console.print(f"  Total detections: {diag.get('total_detections', '-')}")
+
+    if "score_histogram" in diag:
+        console.print("\n  [bold]Score histogram:[/bold]")
+        for bin_label, count in diag["score_histogram"].items():
+            bar = "█" * min(count, 40)
+            console.print(f"    {bin_label}: {bar} ({count})")
+
+    if "label_histogram_top10" in diag:
+        console.print("\n  [bold]Top labels:[/bold]")
+        for label, count in diag["label_histogram_top10"].items():
+            console.print(f"    {label}: {count}")
+
+    if diag.get("invalid_boxes", 0) > 0:
+        console.print(f"\n  [red]Invalid boxes: {diag['invalid_boxes']}[/red]")
+        for iv in diag.get("invalid_box_details", []):
+            console.print(f"    {iv}")
+    else:
+        console.print("\n  [green]No invalid boxes.[/green]")
+
+    if diag.get("unmapped_labels_count", 0) > 0:
+        console.print(
+            f"\n  [yellow]Unmapped labels (class_N): {diag['unmapped_labels_count']}[/yellow]"
+        )
+        console.print(f"    Samples: {diag.get('unmapped_label_samples', [])}")
+
+    if diag.get("first_10_boxes"):
+        console.print("\n  [bold]First 10 boxes:[/bold]")
+        for b in diag["first_10_boxes"]:
+            console.print(
+                f"    [{b['score']:.2f}] {b['label']} (id={b['class_id']}) "
+                f"[{b['x1']:.0f},{b['y1']:.0f},{b['x2']:.0f},{b['y2']:.0f}]"
+            )
+
+    console.print(f"\n  [dim]{diag.get('preprocessing_notes', '')}[/dim]")
 
 
 @app.command("downloads-audit", help="Audit download metadata for all registry models.")

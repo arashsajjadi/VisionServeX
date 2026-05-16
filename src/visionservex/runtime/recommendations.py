@@ -98,30 +98,83 @@ def _device_score(
     return score, reasons
 
 
+_GOAL_CATEGORY_BOOST: dict[str, dict[str, float]] = {
+    "accuracy": {
+        "accuracy_grade": 6.0,
+        "production_recommended": 3.0,
+        "experimental_sota": 1.0,
+        "demo_fast": -4.0,
+        "utility": -5.0,
+        "expert_sidecar": -2.0,
+    },
+    "fastest_demo": {
+        "demo_fast": 6.0,
+        "production_recommended": 1.0,
+        "accuracy_grade": -2.0,
+        "utility": -5.0,
+        "expert_sidecar": -3.0,
+    },
+    "best_open_license": {},
+    "best_colab": {
+        "demo_fast": 4.0,
+        "production_recommended": 2.0,
+        "accuracy_grade": 0.0,
+        "expert_sidecar": -4.0,
+    },
+    "best_gpu": {
+        "accuracy_grade": 4.0,
+        "production_recommended": 2.0,
+        "expert_sidecar": -2.0,
+    },
+    "best_cpu": {},
+    "best_segmentation": {},
+    "best_open_vocab": {},
+}
+
+
 def recommend(
     *,
     task: Task | str | None = None,
     device: str | None = None,
     vram_gb: float | None = None,
     simple: bool = False,
+    goal: str | None = None,
     limit: int = 5,
     candidates: Iterable[ModelEntry] | None = None,
 ) -> list[Recommendation]:
-    """Return up to ``limit`` recommendations."""
+    """Return up to ``limit`` recommendations.
+
+    Args:
+        goal: Optional recommendation goal. Values:
+            accuracy, fastest_demo, best_open_license, best_colab,
+            best_gpu, best_cpu, best_segmentation, best_open_vocab
+    """
     entries = list(candidates) if candidates is not None else list(default_registry().list())
+
+    # Goal-driven task remapping
+    if goal == "best_segmentation" and task is None:
+        task = "segment"
+    elif goal == "best_open_vocab" and task is None:
+        task = "open_vocab_detect"
+
     if task:
         entries = [e for e in entries if e.task == task]
 
     devices = available_devices()
     if device and device != "auto":
-        # Honor user-pinned device by filtering candidates that support it.
         entries = [e for e in entries if device.lower() in {d.lower() for d in e.supported_devices}]
+
+    # Goal-driven CPU filter
+    if goal == "best_cpu":
+        entries = [e for e in entries if "cpu" in {d.lower() for d in e.supported_devices}]
 
     # Use user-provided VRAM hint, or derive from probe.
     effective_vram = vram_gb
     if effective_vram is None:
         best = best_device()
         effective_vram = best.total_vram_gb if best.total_vram_gb else None
+
+    goal_boosts = _GOAL_CATEGORY_BOOST.get(goal or "", {})
 
     results: list[Recommendation] = []
     for entry in entries:
@@ -160,6 +213,25 @@ def recommend(
             if entry.implementation_status == "stub":
                 score -= 2.0
                 reasons.append("penalty: simple mode penalizes stubs (-2.0)")
+
+        # Goal-based category boost/penalty
+        if goal and entry.model_category:
+            boost = goal_boosts.get(entry.model_category, 0.0)
+            if boost != 0.0:
+                score += boost
+                reasons.append(
+                    f"goal={goal!r} category={entry.model_category} ({'+' if boost > 0 else ''}{boost})"
+                )
+
+        # Always penalize unavailable_with_reason for normal recommendations
+        if entry.model_category == "unavailable_with_reason":
+            score -= 8.0
+            reasons.append("penalty: unavailable_with_reason (-8.0)")
+
+        # Penalize experimental_sota unless specifically requested
+        if entry.model_category == "experimental_sota" and goal not in ("accuracy",):
+            score -= 4.0
+            reasons.append("penalty: experimental_sota requires goal=accuracy to surface (-4.0)")
 
         results.append(Recommendation(entry=entry, score=score, reasons=reasons))
 

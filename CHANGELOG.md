@@ -7,6 +7,114 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-05-15
+
+### Accuracy-aware model gateway upgrade
+
+VisionServeX is upgraded from a demo-friendly multi-backend gateway into an
+**accuracy-aware model gateway**. The registry now carries model taxonomy,
+explicit Objects365+COCO model IDs, experimental SOTA candidates with honest
+status labels, and competitiveness/debug tooling.
+
+#### Model taxonomy (Phase 1)
+- Added `model_category` field to `ModelEntry` with values:
+  `demo_fast`, `production_recommended`, `accuracy_grade`,
+  `experimental_sota`, `expert_sidecar`, `external_api`,
+  `unavailable_with_reason`, `utility`.
+- All 87 registry entries carry an explicit `model_category`.
+- `dfine-n` / `rfdetr-nano` / `grounding-dino-tiny` / `rfdetr-seg-nano` →
+  `demo_fast`. Do not use these as accuracy-grade claims.
+- `dfine-s/m/l/x`, `rfdetr-small/medium/large` → `accuracy_grade`.
+- `swinv2-base/large`, `sam2-hiera-large`, `oneformer-swin-large` →
+  `accuracy_grade` for their respective tasks.
+
+#### D-FINE official checkpoint upgrade (Phase 2)
+- Added 9 new model IDs with explicit COCO / Objects365+COCO naming:
+  - `dfine-n-coco` — COCO-only Nano, `demo_fast`, same as `dfine-n`.
+  - `dfine-s-coco` / `dfine-m-coco` / `dfine-l-coco` / `dfine-x-coco` —
+    COCO-only S/M/L/X. Repo availability note added; use o365 variants if
+    uncertain.
+  - `dfine-s-o365-coco` / `dfine-m-o365-coco` / `dfine-l-o365-coco` /
+    `dfine-x-o365-coco` — Objects365+COCO, `accuracy_grade`, wired via
+    existing ustc-community HF checkpoints. Recommended for competitiveness
+    benchmarks.
+- `dfine.py` updated with all new ID → HF repo mappings.
+
+#### RF-DETR model categorisation (Phase 3)
+- `rfdetr-nano` / `rfdetr-seg-nano` → `demo_fast` with explicit
+  `not_good_for` notes.
+- `rfdetr-small` / `rfdetr-seg-small` → `production_recommended`.
+- `rfdetr-base/medium/large` / `rfdetr-seg-medium` → `accuracy_grade`.
+- `rfdetr-seg-large/xlarge/2xlarge` → `unavailable_with_reason` with honest
+  blocker message.
+
+#### Experimental SOTA candidates (Phase 4)
+- Added `deim-s`, `deim-m`, `deimv2-s`, `deimv2-m` as `experimental_sota` /
+  `stub`. Blockers: no HF path, custom loader required, license pending
+  verification.
+- Added `rtdetrv4-s/m/l/x` as `experimental_sota` / `stub`. Blockers: no
+  verified release numbering, no HF checkpoint confirmed.
+- All experimental entries include `unavailable_reason` explaining exact
+  blockage.
+
+#### Segmentation upgrade (Phase 5)
+- Added `maskdino-r50-coco` and `maskdino-r50-panoptic` as
+  `experimental_sota` / `stub` with honest blocker (detectron2 required).
+- Co-DINO-Inst → `expert_sidecar`.
+- `rfdetr-seg-small` elevated to `production_recommended`.
+
+#### Open-vocabulary upgrade (Phase 6)
+- `grounding-dino-swin-b` → `accuracy_grade` with note on stronger accuracy.
+- `grounding-dino-1.5` / `grounding-dino-1.6` → `external_api`.
+
+#### Classification taxonomy (Phase 7)
+- `swinv2-tiny/small` → `production_recommended`.
+- `swinv2-base/large` → `accuracy_grade`.
+- InternImage → `expert_sidecar` (DCNv3 custom ops, not pip-installable).
+
+#### Competitiveness benchmark harness (Phase 8)
+- Added `visionservex benchmark benchmark-competitiveness` CLI command.
+  Compares detection models on latency, detection counts, and output schema
+  validity. Supports Ultralytics baseline via `ultralytics:yoloXXX` prefix.
+- Generates honest conclusion that reports if YOLO wins.
+- Note: AP50/mAP require ground-truth annotations; this tool reports latency
+  and detection health, not accuracy.
+
+#### Postprocessing debug tool (Phase 9)
+- Added `visionservex debug-output MODEL_ID IMAGE` command.
+  Prints: raw keys, normalized detections, score histogram, label histogram,
+  first 10 boxes, invalid boxes, unmapped labels, image size, preprocessing
+  notes. Diagnose parser/postprocess bugs before blaming the checkpoint.
+
+#### Model recommender update (Phase 10)
+- Added `--goal` flag to `visionservex recommend`:
+  `accuracy`, `fastest_demo`, `best_open_license`, `best_colab`,
+  `best_gpu`, `best_cpu`, `best_segmentation`, `best_open_vocab`.
+- For `--goal accuracy --task detect`: surfaces `dfine-s/m-o365-coco` and
+  `rfdetr-small/medium`, not nano variants.
+- `recommend` UI shows `model_category` column with colour coding.
+- `unavailable_with_reason` and `experimental_sota` entries are penalised
+  unless `--goal accuracy` explicitly requests them.
+
+### Decisions
+- **Real AP50/mAP benchmark**: not implemented. AP requires ground-truth
+  COCO annotations. The `benchmark-competitiveness` command reports latency
+  and detection health only. Full AP evaluation is out of scope for v1.2.0.
+- **DEIM/DEIMv2 real inference**: not wired. Blockers: no HF or pip path
+  verified, license and checkpoint availability unclear.
+- **RT-DETRv4 real inference**: not wired. RT-DETRv4 is not an officially
+  released version number; blocked on checkpoint source and loader.
+- **MaskDINO**: not wired. detectron2 environment required; no HF path.
+
+### Known limitations
+- D-FINE COCO-only variants (`dfine-s-coco` etc.) point to HF repos that
+  may not exist (ustc-community/dfine-small-coco). Use o365 variants for
+  guaranteed availability.
+- Competitiveness benchmark uses synthetic images; results are latency proxies
+  only, not accuracy indicators.
+- VisionServeX does not claim to beat Ultralytics globally. The
+  `benchmark-competitiveness` tool is designed to reveal the honest truth.
+
 ## [1.1.0] - 2026-05-15
 
 ### Colab GPU worker mode

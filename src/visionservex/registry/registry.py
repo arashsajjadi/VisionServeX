@@ -46,6 +46,16 @@ Task = Literal[
 Status = Literal["stable", "beta", "experimental", "manual", "external", "stub", "optional"]
 ImplementationStatus = Literal["wired", "partial", "stub"]
 Difficulty = Literal["very_easy", "easy", "medium", "hard", "expert"]
+ModelCategory = Literal[
+    "demo_fast",
+    "production_recommended",
+    "accuracy_grade",
+    "experimental_sota",
+    "expert_sidecar",
+    "external_api",
+    "unavailable_with_reason",
+    "utility",
+]
 DownloadType = Literal[
     "huggingface",
     "github_release",
@@ -136,6 +146,10 @@ class ModelEntry(BaseModel):
     status: Status = "stub"
     warnings: list[str] = Field(default_factory=list)
     notes: str | None = None
+
+    # Accuracy taxonomy
+    model_category: ModelCategory | None = None
+    unavailable_reason: str | None = None
 
     # Back-compat alias
     @property
@@ -285,6 +299,7 @@ __all__ = [
     "Difficulty",
     "DownloadType",
     "ImplementationStatus",
+    "ModelCategory",
     "ModelEntry",
     "ModelRegistry",
     "RegistryError",

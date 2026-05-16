@@ -337,4 +337,364 @@ def benchmark_server(
         typer.echo(json.dumps(all_results, indent=2, default=str))
 
 
+@app.command(
+    "benchmark-competitiveness",
+    help="Compare detection models head-to-head. Reports latency, detection counts, and schema validity.",
+)
+def benchmark_competitiveness(
+    models: str = typer.Option(
+        "dfine-s-o365-coco,rfdetr-small",
+        "--models",
+        help="Comma-separated model IDs (must be detect task). Add 'ultralytics:yolo11n' for YOLO baseline.",
+    ),
+    max_images: int = typer.Option(
+        20, "--max-images", min=1, max=500, help="Number of test images."
+    ),
+    threshold: float = typer.Option(0.3, "--threshold", min=0.01, max=1.0),
+    device: str = typer.Option("auto", "--device"),
+    out: Path | None = typer.Option(None, "--out", help="Write JSON results here."),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Competitiveness benchmark: latency, detection statistics, schema validation.
+
+    For AP50/mAP computation, use `visionservex debug-output` with ground-truth annotations.
+    This command focuses on latency and output health diagnostics across models.
+
+    Honest by design: if YOLO beats VisionServeX models, this command will show it.
+    """
+
+    from visionservex.registry import default_registry
+
+    model_ids = [m.strip() for m in models.split(",") if m.strip()]
+    reg = default_registry()
+
+    # Validate all model IDs before running
+    validated: list[str] = []
+    for mid in model_ids:
+        if mid.startswith("ultralytics:"):
+            validated.append(mid)
+            continue
+        try:
+            entry = reg.get(mid)
+            if entry.task != "detect":
+                if not json_:
+                    console.print(f"[yellow]skip[/yellow] {mid}: task={entry.task} (not detect)")
+                continue
+        except Exception as exc:
+            if not json_:
+                console.print(f"[yellow]skip[/yellow] {mid}: {exc}")
+            continue
+        validated.append(mid)
+
+    if not validated:
+        if not json_:
+            console.print("[red]No valid detection models to benchmark.[/red]")
+        raise typer.Exit(1)
+
+    # Generate synthetic test images
+    test_images = _make_test_images(max_images)
+
+    all_results = []
+    for mid in validated:
+        if not json_:
+            console.print(f"  benchmarking [cyan]{mid}[/cyan] ...", end=" ")
+
+        result = _run_competitiveness_model(mid, test_images, threshold=threshold, device=device)
+        all_results.append(result)
+
+        if not json_:
+            st = result.get("status", "?")
+            if st == "ok":
+                console.print(
+                    f"[green]ok[/green] "
+                    f"p50={result.get('latency_p50_ms')}ms "
+                    f"avg_detections={result.get('avg_detections'):.1f} "
+                    f"zero_det_rate={result.get('zero_detection_rate'):.0%}"
+                )
+            else:
+                console.print(
+                    f"[red]{st}[/red] {result.get('error', result.get('skip_reason', ''))[:80]}"
+                )
+
+    # Add honest conclusion
+    ok_results = [r for r in all_results if r.get("status") == "ok"]
+    conclusion = _generate_conclusion(ok_results)
+    payload = {
+        "benchmark_type": "competitiveness_latency_and_detection_health",
+        "note": "AP50/mAP require ground-truth annotations (not computed here). Results show latency and detection statistics only.",
+        "images_tested": max_images,
+        "threshold": threshold,
+        "device": device,
+        "models": all_results,
+        "conclusion": conclusion,
+    }
+
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        import json
+
+        out.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
+        if not json_:
+            console.print(f"\nResults written to {out}")
+
+    if json_:
+        import json
+
+        typer.echo(json.dumps(payload, indent=2, default=str))
+        return
+
+    if ok_results:
+        table = Table(title="Competitiveness Benchmark (latency + detection health)")
+        for col in (
+            "Model",
+            "Category",
+            "P50 ms",
+            "P95 ms",
+            "Avg Dets",
+            "Zero-Det%",
+            "Invalid%",
+            "Status",
+        ):
+            table.add_column(col)
+        for r in all_results:
+            st = r.get("status", "?")
+            if st == "ok":
+                category = r.get("model_category", "-") or "-"
+                zero_pct = f"{r.get('zero_detection_rate', 0):.0%}"
+                inv_pct = f"{r.get('invalid_box_rate', 0):.0%}"
+                table.add_row(
+                    r["model_id"],
+                    category,
+                    str(r.get("latency_p50_ms", "?")),
+                    str(r.get("latency_p95_ms", "?")),
+                    f"{r.get('avg_detections', 0):.1f}",
+                    zero_pct,
+                    inv_pct,
+                    "[green]ok[/green]",
+                )
+            else:
+                table.add_row(r["model_id"], "-", "-", "-", "-", "-", "-", f"[red]{st}[/red]")
+        console.print(table)
+
+    console.print(f"\n[bold]Conclusion:[/bold] {conclusion}")
+    console.print(
+        "\n[dim]Note: This benchmark measures latency and output health, not AP50/mAP. "
+        "Do not use these results alone to judge model accuracy. "
+        "If YOLO wins on latency or detection count, that is an honest result.[/dim]"
+    )
+
+
+def _make_test_images(n: int) -> list:
+    """Generate diverse synthetic test images."""
+    from PIL import Image, ImageDraw
+
+    images = []
+    colors = [
+        (200, 100, 80),
+        (80, 150, 200),
+        (120, 200, 80),
+        (200, 200, 60),
+        (180, 80, 180),
+        (60, 180, 180),
+        (220, 160, 80),
+        (80, 80, 200),
+    ]
+    sizes = [(640, 480), (800, 600), (1280, 720), (480, 360), (640, 640)]
+    for i in range(n):
+        size = sizes[i % len(sizes)]
+        img = Image.new("RGB", size, color=(200, 210, 220))
+        draw = ImageDraw.Draw(img)
+        c = colors[i % len(colors)]
+        x1, y1 = size[0] // 8, size[1] // 8
+        x2, y2 = size[0] * 3 // 4, size[1] * 3 // 4
+        draw.rectangle([x1, y1, x2, y2], outline=c, width=3, fill=c)
+        if i % 3 == 0:
+            draw.ellipse(
+                [x2 // 4, y2 // 4, x2 * 3 // 4, y2 * 3 // 4],
+                outline=(200, 50, 50),
+                width=2,
+                fill=(220, 100, 100),
+            )
+        images.append(img)
+    return images
+
+
+def _run_competitiveness_model(
+    model_id: str,
+    images: list,
+    *,
+    threshold: float,
+    device: str,
+) -> dict:
+    """Run a single model on all test images and collect statistics."""
+    import statistics
+    import time
+
+    from visionservex import VisionModel
+    from visionservex.core.results import DetectionResult
+    from visionservex.engines.base import MissingDependencyError
+    from visionservex.registry import default_registry
+    from visionservex.runtime.downloads import DownloadError, ManualDownloadRequired
+
+    result: dict = {"model_id": model_id}
+
+    # Handle ultralytics: prefix
+    if model_id.startswith("ultralytics:"):
+        return _run_ultralytics_model(model_id, images, threshold=threshold, device=device)
+
+    try:
+        entry = default_registry().get(model_id)
+        result["model_category"] = entry.model_category
+        result["implementation_status"] = entry.implementation_status
+    except Exception:
+        pass
+
+    try:
+        model = VisionModel(model_id, device=device)
+        model._ensure_loaded()
+
+        latencies = []
+        all_det_counts = []
+        invalid_boxes = 0
+        total_boxes = 0
+
+        for img in images:
+            t0 = time.perf_counter()
+            pred = model.predict(img, threshold=threshold)
+            latencies.append((time.perf_counter() - t0) * 1000)
+
+            if isinstance(pred, DetectionResult):
+                n = len(pred.detections)
+                all_det_counts.append(n)
+                for det in pred.detections:
+                    total_boxes += 1
+                    b = det.box
+                    w, h = img.size
+                    if b.x1 < 0 or b.y1 < 0 or b.x2 > w or b.y2 > h or b.x1 >= b.x2 or b.y1 >= b.y2:
+                        invalid_boxes += 1
+            else:
+                all_det_counts.append(0)
+
+        sorted_lat = sorted(latencies)
+        p50 = sorted_lat[len(sorted_lat) // 2]
+        p95 = sorted_lat[min(len(sorted_lat) - 1, int(len(sorted_lat) * 0.95))]
+        zero_rate = sum(1 for c in all_det_counts if c == 0) / max(len(all_det_counts), 1)
+        invalid_rate = invalid_boxes / max(total_boxes, 1)
+
+        result.update(
+            {
+                "status": "ok",
+                "images_tested": len(images),
+                "latency_p50_ms": round(p50, 2),
+                "latency_p95_ms": round(p95, 2),
+                "avg_detections": round(statistics.mean(all_det_counts), 2),
+                "min_detections": min(all_det_counts),
+                "max_detections": max(all_det_counts),
+                "zero_detection_rate": round(zero_rate, 4),
+                "invalid_box_rate": round(invalid_rate, 4),
+                "total_boxes": total_boxes,
+                "invalid_boxes": invalid_boxes,
+            }
+        )
+    except (MissingDependencyError, ManualDownloadRequired, DownloadError) as exc:
+        result["status"] = "skip"
+        result["skip_reason"] = str(exc)[:160]
+    except Exception as exc:
+        result["status"] = "error"
+        result["error"] = str(exc)[:200]
+    return result
+
+
+def _run_ultralytics_model(
+    model_id: str,
+    images: list,
+    *,
+    threshold: float,
+    device: str,
+) -> dict:
+    """Run ultralytics model for baseline comparison."""
+    import statistics
+    import time
+
+    parts = model_id.split(":", 1)
+    yolo_name = parts[1] if len(parts) > 1 else "yolo11n"
+    result: dict = {"model_id": model_id, "model_category": "baseline_yolo"}
+
+    try:
+        from ultralytics import YOLO  # type: ignore
+
+        yolo = YOLO(yolo_name)
+        latencies = []
+        det_counts = []
+
+        for img in images:
+            t0 = time.perf_counter()
+            preds = yolo(
+                img, conf=threshold, verbose=False, device=device if device != "auto" else None
+            )
+            latencies.append((time.perf_counter() - t0) * 1000)
+            if preds and hasattr(preds[0], "boxes"):
+                det_counts.append(len(preds[0].boxes))
+            else:
+                det_counts.append(0)
+
+        sorted_lat = sorted(latencies)
+        p50 = sorted_lat[len(sorted_lat) // 2]
+        p95 = sorted_lat[min(len(sorted_lat) - 1, int(len(sorted_lat) * 0.95))]
+        zero_rate = sum(1 for c in det_counts if c == 0) / max(len(det_counts), 1)
+        result.update(
+            {
+                "status": "ok",
+                "images_tested": len(images),
+                "latency_p50_ms": round(p50, 2),
+                "latency_p95_ms": round(p95, 2),
+                "avg_detections": round(statistics.mean(det_counts), 2),
+                "zero_detection_rate": round(zero_rate, 4),
+                "invalid_box_rate": 0.0,
+                "total_boxes": sum(det_counts),
+                "invalid_boxes": 0,
+                "implementation_status": "ultralytics_package",
+            }
+        )
+    except ImportError:
+        result["status"] = "skip"
+        result["skip_reason"] = "ultralytics not installed; pip install ultralytics"
+    except Exception as exc:
+        result["status"] = "error"
+        result["error"] = str(exc)[:200]
+    return result
+
+
+def _generate_conclusion(results: list[dict]) -> str:
+    if not results:
+        return "No models ran successfully. Check dependencies with `visionservex doctor`."
+    ok = [r for r in results if r.get("status") == "ok"]
+    if not ok:
+        return "No successful runs. Check model availability and dependencies."
+    fastest = min(ok, key=lambda r: r.get("latency_p50_ms", 99999))
+    most_dets = max(ok, key=lambda r: r.get("avg_detections", 0))
+    parts = [
+        f"Fastest model (P50 latency): {fastest['model_id']} at {fastest.get('latency_p50_ms')} ms.",
+    ]
+    if most_dets["model_id"] != fastest["model_id"]:
+        parts.append(
+            f"Most detections per image: {most_dets['model_id']} "
+            f"(avg {most_dets.get('avg_detections'):.1f} boxes — higher may mean better recall on real images, "
+            f"or more false positives on synthetics)."
+        )
+    zero_det = [r for r in ok if r.get("zero_detection_rate", 0) > 0.5]
+    if zero_det:
+        ids = ", ".join(r["model_id"] for r in zero_det)
+        parts.append(
+            f"WARNING: {ids} returned zero detections on >50% of synthetic images. "
+            "This may indicate a postprocessing issue, low threshold, or that the model "
+            "correctly finds nothing in synthetic images. Run debug-output to diagnose."
+        )
+    parts.append(
+        "NOTE: synthetic images are not real photos. These results show latency and output "
+        "health only, not accuracy. Run on real COCO images for AP50/mAP comparison."
+    )
+    return " ".join(parts)
+
+
 __all__ = ["app"]
