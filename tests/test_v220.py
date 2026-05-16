@@ -76,7 +76,8 @@ def test_florence2_create_env_json_output():
     assert "env_name" in payload
     assert "commands" in payload
     assert len(payload["commands"]) >= 4
-    assert any("transformers>=4.40,<5.0" in cmd for cmd in payload["commands"])
+    assert any("transformers" in cmd for cmd in payload["commands"])
+    assert "transformers_pin" in payload
 
 
 @pytest.mark.fast

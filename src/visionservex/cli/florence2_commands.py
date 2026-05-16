@@ -203,20 +203,26 @@ def create_env(
     import shutil
     import subprocess
 
+    # transformers==4.46.3 is the validated version:
+    # - passes check_imports for conditional flash_attn blocks
+    # - does not have the _supports_sdpa AttributeError from 4.57.x
+    # - confirmed smoke result: "a red truck with a light on top of it" on street.jpg
     commands = [
         f"conda create -n {name} python={python} -y",
         f"conda run -n {name} pip install -U pip",
         f'conda run -n {name} pip install "visionservex[florence2]"',
-        # Explicit transformers pin in case pyproject extra isn't resolved strictly:
-        f'conda run -n {name} pip install "transformers>=4.40,<5.0" accelerate',
+        f'conda run -n {name} pip install "transformers==4.46.3" einops timm accelerate',
         f"conda run -n {name} python -c \"import transformers; print('transformers version:', transformers.__version__)\"",
         f"conda run -n {name} visionservex florence2 doctor",
     ]
     payload = {
         "env_name": name,
         "python": python,
+        "transformers_pin": "transformers==4.46.3",
+        "required_extras": ["einops", "timm"],
         "commands": commands,
         "smoke_test_command": f"conda run -n {name} visionservex florence2 smoke-test florence-2-base <image> --task caption",
+        "validated_smoke_result": "transformers 4.46.3 + Florence-2-base: caption PASSED (street.jpg → 'a red truck with a light on top of it')",
     }
 
     if json_:

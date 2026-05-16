@@ -239,3 +239,196 @@ def cleanup_cmd(
         raise typer.Exit(1)
     shutil.rmtree(index_dir, ignore_errors=True)
     console.print(f"[green]Removed[/green] {index_dir}")
+
+
+# ---------------------------------------------------------------------------
+# trackers — list available tracker backends
+# ---------------------------------------------------------------------------
+
+_TRACKER_REGISTRY = {
+    "simple-iou": {
+        "installed": True,
+        "description": "SimpleIoU: built-in tracker (IoU-based, no extra install).",
+        "install": None,
+    },
+    "bytetrack": {
+        "installed": False,
+        "description": "ByteTrack: multi-object tracker (BYTE algorithm). Apache-2.0.",
+        "install": "pip install bytetracker  # or: git clone https://github.com/ifzhang/ByteTrack",
+        "blocker": "BYTETRACK_REQUIRED",
+    },
+    "bot-sort": {
+        "installed": False,
+        "description": "BoT-SORT: robust multi-object tracker. Apache-2.0.",
+        "install": "git clone https://github.com/NirAharon/BoT-SORT && pip install -e .",
+        "blocker": "BOTSORT_REQUIRED",
+    },
+    "ocsort": {
+        "installed": False,
+        "description": "OC-SORT: observation-centric SORT. MIT.",
+        "install": "pip install ocsort",
+        "blocker": "OCSORT_REQUIRED",
+    },
+}
+
+_REID_REGISTRY = {
+    "cosine-siglip2": {
+        "installed": True,
+        "description": "Built-in: cosine similarity on SigLIP2 embeddings.",
+        "install": None,
+    },
+    "osnet": {
+        "installed": False,
+        "description": "OSNet (Torchreid): lightweight person ReID backbone. MIT.",
+        "install": "pip install torchreid  # or: pip install git+https://github.com/KaiyangZhou/deep-person-reid",
+        "blocker": "TORCHREID_REQUIRED",
+    },
+    "fastreid": {
+        "installed": False,
+        "description": "FastReID: strong baseline for person ReID. Apache-2.0.",
+        "install": "git clone https://github.com/JDAI-CV/fast-reid && pip install -e .",
+        "blocker": "FASTREID_REQUIRED",
+    },
+}
+
+
+def _probe_tracker(name: str) -> bool:
+    """Return True if the tracker package can be imported."""
+    pkg_map = {"bytetrack": "bytetracker", "bot-sort": "botsort", "ocsort": "ocsort"}
+    pkg = pkg_map.get(name)
+    if not pkg:
+        return False
+    try:
+        __import__(pkg)
+        return True
+    except ImportError:
+        return False
+
+
+def _probe_reid(name: str) -> bool:
+    pkg_map = {"osnet": "torchreid", "fastreid": "fastreid"}
+    pkg = pkg_map.get(name)
+    if not pkg:
+        return False
+    try:
+        __import__(pkg)
+        return True
+    except ImportError:
+        return False
+
+
+@app.command("trackers")
+def list_trackers(json_: bool = typer.Option(False, "--json")) -> None:
+    """List available tracker backends and their install status."""
+    results = {}
+    for name, info in _TRACKER_REGISTRY.items():
+        installed = info["installed"] or _probe_tracker(name)
+        results[name] = {**info, "installed": installed}
+
+    if json_:
+        print(json.dumps(results, indent=2))
+        return
+
+    table = Table(show_header=True)
+    table.add_column("Tracker")
+    table.add_column("Installed")
+    table.add_column("Description")
+    for name, info in results.items():
+        status = "[green]yes[/green]" if info["installed"] else "[red]no[/red]"
+        table.add_row(name, status, info["description"])
+    console.print(table)
+
+
+@app.command("reid-models")
+def list_reid(json_: bool = typer.Option(False, "--json")) -> None:
+    """List available ReID model backends and their install status."""
+    results = {}
+    for name, info in _REID_REGISTRY.items():
+        installed = info["installed"] or _probe_reid(name)
+        results[name] = {**info, "installed": installed}
+
+    if json_:
+        print(json.dumps(results, indent=2))
+        return
+
+    table = Table(show_header=True)
+    table.add_column("ReID Backend")
+    table.add_column("Installed")
+    table.add_column("Description")
+    for name, info in results.items():
+        status = "[green]yes[/green]" if info["installed"] else "[red]no[/red]"
+        table.add_row(name, status, info["description"])
+    console.print(table)
+
+
+@app.command("doctor")
+def doctor_cmd(
+    tracker: str = typer.Option(
+        "", "--tracker", help="Check tracker: bytetrack, bot-sort, ocsort."
+    ),
+    reid: str = typer.Option("", "--reid", help="Check ReID backend: osnet, fastreid."),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Check tracker/ReID backend availability and print install command if missing."""
+    results: dict = {}
+
+    if tracker:
+        info = _TRACKER_REGISTRY.get(tracker)
+        if not info:
+            available = list(_TRACKER_REGISTRY)
+            payload = {"code": "TRACKER_UNKNOWN", "tracker": tracker, "available": available}
+            print(json.dumps(payload, indent=2)) if json_ else console.print(
+                f"[red]Unknown tracker:[/red] {tracker}"
+            )
+            raise typer.Exit(2)
+        installed = info["installed"] or _probe_tracker(tracker)
+        entry = {
+            "tracker": tracker,
+            "installed": installed,
+            "description": info["description"],
+        }
+        if not installed:
+            entry["code"] = info.get("blocker", "TRACKER_REQUIRED")
+            entry["install"] = info.get("install", "")
+        results["tracker"] = entry
+
+    if reid:
+        info = _REID_REGISTRY.get(reid)
+        if not info:
+            available = list(_REID_REGISTRY)
+            payload = {"code": "REID_UNKNOWN", "reid": reid, "available": available}
+            print(json.dumps(payload, indent=2)) if json_ else console.print(
+                f"[red]Unknown ReID:[/red] {reid}"
+            )
+            raise typer.Exit(2)
+        installed = info["installed"] or _probe_reid(reid)
+        entry = {
+            "reid": reid,
+            "installed": installed,
+            "description": info["description"],
+        }
+        if not installed:
+            entry["code"] = info.get("blocker", "REID_REQUIRED")
+            entry["install"] = info.get("install", "")
+        results["reid"] = entry
+
+    if not tracker and not reid:
+        results["message"] = (
+            "Specify --tracker or --reid. Use 'visionservex video-search trackers' to list options."
+        )
+
+    if json_:
+        print(json.dumps(results, indent=2))
+        return
+
+    for key, val in results.items():
+        if isinstance(val, dict):
+            label = val.get("tracker") or val.get("reid") or key
+            status = (
+                "[green]installed[/green]" if val.get("installed") else "[red]not installed[/red]"
+            )
+            console.print(f"  {label}: {status}")
+            if not val.get("installed") and "install" in val:
+                console.print(f"  install: [cyan]{val['install']}[/cyan]")
+        else:
+            console.print(val)

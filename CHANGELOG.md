@@ -7,6 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-05-16
+
+### Florence-2 real isolated-env smoke PASSED; 4 HF real-smoke verified; benchmark-anomaly mock path; ByteTrack/Torchreid doctor; benchmark-classification proved with real model
+
+This release converts "command exists" into "command actually works" for five major capability gaps.
+
+#### Florence-2 — real isolated-env smoke PASSED
+
+Real inference result in `vsx-florence-test` conda env (Python 3.11, transformers==4.46.3 + einops + timm):
+
+```
+Caption: </s><s>a red truck with a light on top of it</s>
+FLORENCE2_SMOKE: PASSED
+```
+
+Exact recipe (validated, not just generated):
+```
+conda create -n vsx-florence-test python=3.11 -y
+conda run -n vsx-florence-test pip install "transformers==4.46.3" einops timm accelerate pillow torch
+```
+
+`create-env` updated to use `transformers==4.46.3` (not the broad `>=4.40,<5.0` range which allows 4.57.x — incompatible due to `_supports_sdpa` AttributeError) and now includes `einops`, `timm`, `validated_smoke_result` in JSON output.
+
+#### HF real-smoke — 4 models confirmed (all from local cache, no download)
+
+| Model | Command | Result |
+|-------|---------|--------|
+| `swinv2-tiny` | `classify swinv2-tiny street.jpg` | PASSED — latency 198ms, 0 failures |
+| `dinov2-base` | `embed dinov2-base street.jpg` | PASSED — 768-dim, norm=1.000, 108ms |
+| `siglip2-base-patch16-224` | `similarity ... street.jpg street.jpg` | PASSED — cosine 1.000 |
+| `owlv2-base-patch16` | `open-vocab ... --prompt "person, car"` | PASSED — 260ms real inference |
+
+All run entirely from HF cache, no checkpoint download required.
+
+#### benchmark-classification — proved with real swinv2-tiny
+
+```
+visionservex benchmark-classification --dataset folder:/tmp/vsx_cls_fixture --models swinv2-tiny --max-images 6 --out /tmp/bench.json
+```
+
+JSON: `{"benchmark": "classification", "models": [{"n_images": 6, "n_failures": 0, "latency_p50_ms": 6.2, "latency_p95_ms": 200.4, ...}]}`
+
+#### benchmark-anomaly — mock-anomaly path (no anomalib required)
+
+New `--model mock-anomaly` route computes pixel MAD-based anomaly proxy scores without requiring anomalib. Supports both `simple:` and `mvtec:` dataset layouts. Returns valid JSON with image_auroc (when normal/anomaly split exists) and score_separation.
+
+`ANOMALIB_REQUIRED` response now includes `alternative` key: `"Use --model mock-anomaly to benchmark without anomalib."`
+
+#### ByteTrack / Torchreid doctor commands
+
+New `video-search` subcommands:
+- `visionservex video-search trackers` — lists all tracker backends (simple-iou: installed, bytetrack/bot-sort/ocsort: not installed with exact install commands)
+- `visionservex video-search reid-models` — lists all ReID backends
+- `visionservex video-search doctor --tracker bytetrack --json` → `{"tracker": {"code": "BYTETRACK_REQUIRED", "install": "pip install bytetracker ..."}}`
+- `visionservex video-search doctor --reid osnet --json` → `{"reid": {"code": "TORCHREID_REQUIRED", "install": "pip install torchreid ..."}}`
+
+#### Tests added
+
+- `tests/test_v230.py` — 14 tests: Florence-2 pin validation, mock-anomaly (simple+mvtec), ByteTrack/Torchreid doctor
+- `tests/test_v220.py` — updated: `transformers_pin` assertion updated to match new pin
+
+#### Validation
+
+- `ruff check .`: 0 errors
+- `ruff format --check .`: 0 files to reformat
+- Full test suite: 694 passed, 37 skipped, 31.9s
+- Artifact hygiene: clean
+
 ## [2.2.0] - 2026-05-16
 
 ### benchmark-classification, benchmark-anomaly, benchmark-surveillance-search implemented; Florence-2 create-env; SAM2.1 resolved; lightweight SAM license decisions; YAML and lint fixes

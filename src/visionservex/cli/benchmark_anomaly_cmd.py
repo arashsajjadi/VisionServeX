@@ -86,6 +86,37 @@ def _compute_auroc(normal_scores: list[float], anomaly_scores: list[float]) -> f
     return n_correct / max(n_pos * n_neg, 1)
 
 
+_MOCK_MODELS = {"mock-anomaly", "mock"}
+_ANOMALIB_MODELS = {
+    "patchcore",
+    "padim",
+    "fastflow",
+    "efficientad",
+    "winclip",
+    "draem",
+    "reverse_distillation",
+}
+
+
+def _pixel_anomaly_score(img_path: Path) -> float:
+    """Cheap proxy anomaly score: mean abs deviation from mid-gray (128/255).
+
+    Normal images from synthetic fixtures cluster around a specific brightness.
+    Anomalous images are offset. This gives plausible relative scores for smoke
+    testing without requiring any trained model.
+    """
+    try:
+        from PIL import Image
+
+        img = Image.open(img_path).convert("L").resize((64, 64))
+        pixels = list(img.getdata())
+        mean = sum(pixels) / max(len(pixels), 1)
+        mad = sum(abs(p - mean) for p in pixels) / max(len(pixels), 1)
+        return round(mad / 128.0, 4)
+    except Exception:
+        return 0.5
+
+
 @app.callback(invoke_without_command=True)
 def benchmark_anomaly(
     dataset: str = typer.Option(..., "--dataset", help="Dataset spec: mvtec:/path or simple:/path"),
@@ -94,28 +125,34 @@ def benchmark_anomaly(
     out: Path = typer.Option(None, "--out"),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
-    """Benchmark anomaly detection. Requires [anomaly] extra for PatchCore."""
+    """Benchmark anomaly detection. Use --model mock-anomaly to run without [anomaly] installed."""
     import importlib
+    import time
 
-    try:
-        importlib.import_module("anomalib")
-        anomalib_available = True
-    except ImportError:
-        anomalib_available = False
+    is_mock = model in _MOCK_MODELS
 
-    if not anomalib_available:
-        payload = {
-            "code": "ANOMALIB_REQUIRED",
-            "model": model,
-            "dataset": dataset,
-            "fix": "pip install 'visionservex[anomaly]'",
-        }
-        if json_:
-            print(json.dumps(payload, indent=2))
-        else:
-            console.print(f"[red]{payload['code']}[/red]: anomalib not installed")
-            console.print(f"  fix: {payload['fix']}")
-        raise typer.Exit(3)
+    if not is_mock:
+        try:
+            importlib.import_module("anomalib")
+            anomalib_available = True
+        except ImportError:
+            anomalib_available = False
+
+        if not anomalib_available:
+            payload = {
+                "code": "ANOMALIB_REQUIRED",
+                "model": model,
+                "dataset": dataset,
+                "fix": "pip install 'visionservex[anomaly]'",
+                "alternative": "Use --model mock-anomaly to benchmark without anomalib.",
+            }
+            if json_:
+                print(json.dumps(payload, indent=2))
+            else:
+                console.print(f"[red]{payload['code']}[/red]: anomalib not installed")
+                console.print(f"  fix: {payload['fix']}")
+                console.print(f"  tip: {payload['alternative']}")
+            raise typer.Exit(3)
 
     # Parse dataset
     root = Path(dataset.split(":", 1)[1])
@@ -157,63 +194,19 @@ def benchmark_anomaly(
         if test_dir.exists():
             test_anomaly = _iter_images(test_dir)[:max_images]
 
-    if not train_good:
-        console.print("[yellow]No training images found. Scores will be random-ish.[/yellow]")
+    if not train_good and not json_:
+        console.print("[yellow]No training images found. Scores are unsupervised proxies.[/yellow]")
 
-    # Run anomalib PatchCore via Python API
-    import time
-
-    try:
-        import shutil
-        import tempfile
-
-        from anomalib.data import Folder  # type: ignore
-        from anomalib.engine import Engine  # type: ignore
-        from anomalib.models import Patchcore  # type: ignore
-
-        tmp = tempfile.mkdtemp(prefix="vsx_anomaly_bench_")
-        try:
-            # Build minimal folder structure for anomalib
-            normal_dest = Path(tmp) / "dataset" / "train" / "good"
-            test_normal_dest = Path(tmp) / "dataset" / "test" / "good"
-            test_anomaly_dest = Path(tmp) / "dataset" / "test" / "anomaly"
-            for d in [normal_dest, test_normal_dest, test_anomaly_dest]:
-                d.mkdir(parents=True)
-
-            for i, p in enumerate(train_good[:20]):
-                shutil.copy(p, normal_dest / f"train_{i:03d}{p.suffix}")
-            for i, p in enumerate(test_normal[:10]):
-                shutil.copy(p, test_normal_dest / f"tn_{i:03d}{p.suffix}")
-            for i, p in enumerate(test_anomaly[:10]):
-                shutil.copy(p, test_anomaly_dest / f"ta_{i:03d}{p.suffix}")
-
-            pc_model = Patchcore()
-            dm = Folder(root=str(Path(tmp) / "dataset"), normal_dir="train/good")
-            engine = Engine(max_epochs=1, default_root_dir=tmp)
-            engine.fit(model=pc_model, datamodule=dm)
-
-            # Score test images
-            normal_scores: list[float] = []
-            anomaly_scores: list[float] = []
-            latencies: list[float] = []
-            heatmaps = 0
-
-            for _img_path in list(test_normal_dest.iterdir())[:5]:
-                t0 = time.perf_counter()
-                pred = engine.predict(model=pc_model, dataloaders=[dm])
-                latencies.append((time.perf_counter() - t0) * 1000)
-                if pred and hasattr(pred[0], "pred_score"):
-                    normal_scores.append(float(pred[0].pred_score))
-
-            for _img_path in list(test_anomaly_dest.iterdir())[:5]:
-                t0 = time.perf_counter()
-                pred = engine.predict(model=pc_model, dataloaders=[dm])
-                latencies.append((time.perf_counter() - t0) * 1000)
-                if pred and hasattr(pred[0], "pred_score"):
-                    anomaly_scores.append(float(pred[0].pred_score))
-        finally:
-            shutil.rmtree(tmp, ignore_errors=True)
-
+    # --- Mock path (no anomalib required) ------------------------------------
+    if is_mock:
+        t0_all = time.perf_counter()
+        normal_scores: list[float] = [
+            _pixel_anomaly_score(p) for p in (train_good + test_normal)[:max_images]
+        ]
+        anomaly_scores: list[float] = [_pixel_anomaly_score(p) for p in test_anomaly[:max_images]]
+        total_ms = (time.perf_counter() - t0_all) * 1000.0
+        n_scored = len(normal_scores) + len(anomaly_scores)
+        lat = total_ms / max(n_scored, 1)
         auroc = _compute_auroc(normal_scores, anomaly_scores)
         result = AnomalyBenchmarkResult(
             model=model,
@@ -228,29 +221,99 @@ def benchmark_anomaly(
                 (sum(anomaly_scores) / max(len(anomaly_scores), 1))
                 - (sum(normal_scores) / max(len(normal_scores), 1))
             ),
-            latency_p50_ms=_quantile(latencies, 0.5),
-            latency_p95_ms=_quantile(latencies, 0.95),
-            heatmaps_saved=heatmaps,
-            notes="PatchCore via anomalib Engine. max_epochs=1 (smoke validation only).",
-        )
-
-    except Exception as exc:
-        result = AnomalyBenchmarkResult(
-            model=model,
-            dataset=dataset,
-            n_normal_train=len(train_good),
-            n_normal_test=len(test_normal),
-            n_anomaly_test=len(test_anomaly),
-            image_auroc=None,
-            anomaly_score_mean_normal=0.0,
-            anomaly_score_mean_anomaly=0.0,
-            score_separation=0.0,
-            latency_p50_ms=0.0,
-            latency_p95_ms=0.0,
+            latency_p50_ms=lat,
+            latency_p95_ms=lat,
             heatmaps_saved=0,
-            notes="anomalib Engine API invocation failed — see error field.",
-            error=str(exc)[:300],
+            notes=(
+                "mock-anomaly: pixel MAD proxy scores. No trained model. "
+                "Use --model patchcore with [anomaly] for real metrics."
+            ),
         )
+    else:
+        # --- Anomalib PatchCore path -----------------------------------------
+        import shutil
+        import tempfile
+
+        try:
+            from anomalib.data import Folder  # type: ignore
+            from anomalib.engine import Engine  # type: ignore
+            from anomalib.models import Patchcore  # type: ignore
+
+            tmp = tempfile.mkdtemp(prefix="vsx_anomaly_bench_")
+            try:
+                normal_dest = Path(tmp) / "dataset" / "train" / "good"
+                test_normal_dest = Path(tmp) / "dataset" / "test" / "good"
+                test_anomaly_dest = Path(tmp) / "dataset" / "test" / "anomaly"
+                for d in [normal_dest, test_normal_dest, test_anomaly_dest]:
+                    d.mkdir(parents=True)
+                for i, p in enumerate(train_good[:20]):
+                    shutil.copy(p, normal_dest / f"train_{i:03d}{p.suffix}")
+                for i, p in enumerate(test_normal[:10]):
+                    shutil.copy(p, test_normal_dest / f"tn_{i:03d}{p.suffix}")
+                for i, p in enumerate(test_anomaly[:10]):
+                    shutil.copy(p, test_anomaly_dest / f"ta_{i:03d}{p.suffix}")
+
+                pc_model = Patchcore()
+                dm = Folder(root=str(Path(tmp) / "dataset"), normal_dir="train/good")
+                engine = Engine(max_epochs=1, default_root_dir=tmp)
+                engine.fit(model=pc_model, datamodule=dm)
+
+                an_normal: list[float] = []
+                an_anomaly: list[float] = []
+                latencies: list[float] = []
+
+                for _img_path in list(test_normal_dest.iterdir())[:5]:
+                    t0 = time.perf_counter()
+                    pred = engine.predict(model=pc_model, dataloaders=[dm])
+                    latencies.append((time.perf_counter() - t0) * 1000)
+                    if pred and hasattr(pred[0], "pred_score"):
+                        an_normal.append(float(pred[0].pred_score))
+
+                for _img_path in list(test_anomaly_dest.iterdir())[:5]:
+                    t0 = time.perf_counter()
+                    pred = engine.predict(model=pc_model, dataloaders=[dm])
+                    latencies.append((time.perf_counter() - t0) * 1000)
+                    if pred and hasattr(pred[0], "pred_score"):
+                        an_anomaly.append(float(pred[0].pred_score))
+            finally:
+                shutil.rmtree(tmp, ignore_errors=True)
+
+            auroc = _compute_auroc(an_normal, an_anomaly)
+            result = AnomalyBenchmarkResult(
+                model=model,
+                dataset=dataset,
+                n_normal_train=len(train_good),
+                n_normal_test=len(test_normal),
+                n_anomaly_test=len(test_anomaly),
+                image_auroc=auroc,
+                anomaly_score_mean_normal=sum(an_normal) / max(len(an_normal), 1),
+                anomaly_score_mean_anomaly=sum(an_anomaly) / max(len(an_anomaly), 1),
+                score_separation=(
+                    sum(an_anomaly) / max(len(an_anomaly), 1)
+                    - sum(an_normal) / max(len(an_normal), 1)
+                ),
+                latency_p50_ms=_quantile(latencies, 0.5),
+                latency_p95_ms=_quantile(latencies, 0.95),
+                heatmaps_saved=0,
+                notes="PatchCore via anomalib Engine. max_epochs=1 (smoke validation only).",
+            )
+        except Exception as exc:
+            result = AnomalyBenchmarkResult(
+                model=model,
+                dataset=dataset,
+                n_normal_train=len(train_good),
+                n_normal_test=len(test_normal),
+                n_anomaly_test=len(test_anomaly),
+                image_auroc=None,
+                anomaly_score_mean_normal=0.0,
+                anomaly_score_mean_anomaly=0.0,
+                score_separation=0.0,
+                latency_p50_ms=0.0,
+                latency_p95_ms=0.0,
+                heatmaps_saved=0,
+                notes="anomalib Engine API invocation failed — see error field.",
+                error=str(exc)[:300],
+            )
 
     payload = {
         "benchmark": "anomaly",

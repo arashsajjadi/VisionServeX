@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-2.2.0-informational.svg" alt="v2.2.0">
+  <img src="https://img.shields.io/badge/version-2.3.0-informational.svg" alt="v2.3.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -357,19 +357,20 @@ For `--goal accuracy --task detect`, the recommender surfaces `dfine-s/m-o365-co
 ## Classification, Embedding & Open-Vocabulary Detection
 
 ```bash
-# Classification (ConvNeXtV2, MaxViT, etc.)
-visionservex model pull convnextv2-tiny
-visionservex classify convnextv2-tiny image.jpg --top-k 5
+# Classification (SwinV2 — real-smoke verified from local cache)
+visionservex classify swinv2-tiny image.jpg --top-k 5
 
-# Embeddings (DINOv2, SigLIP2, SigLIP, CLIP)
-visionservex model pull clip-vit-base-patch32
-visionservex embed clip-vit-base-patch32 image.jpg --out /tmp/clip.npy
+# Embeddings (DINOv2 — real-smoke verified; SigLIP2 — self-similarity verified)
+visionservex embed dinov2-base image.jpg --out /tmp/dinov2.npy
+visionservex similarity siglip2-base-patch16-224 a.jpg b.jpg
 
-# Florence-2 (requires isolated env with transformers < 5.0)
-visionservex florence2 create-env --name vsx-florence --python 3.11  # generate conda recipe
+# Florence-2 (requires isolated env — REAL SMOKE PASSED: transformers==4.46.3 + einops + timm)
+visionservex florence2 create-env --name vsx-florence --python 3.11  # generates validated recipe
 visionservex florence2 doctor        # check compatibility
 visionservex florence2 smoke-test florence-2-base image.jpg --task caption
 ```
+
+Florence-2 real smoke result: `"a red truck with a light on top of it"` (street.jpg, transformers==4.46.3, CPU).
 
 ## Open-Vocabulary Detection & Multi-Task VLM
 
@@ -401,6 +402,12 @@ visionservex predict florence-2-base image.jpg --task caption
 Index a folder of frames (or a video file) with a detector + tracker + embedder, then search by free-form text. **Appearance-based retrieval only — no face recognition, no biometric identity.**
 
 ```bash
+# Check tracker and ReID backend availability
+visionservex video-search trackers          # lists simple-iou (built-in), bytetrack, bot-sort, ocsort
+visionservex video-search reid-models       # lists cosine-siglip2 (built-in), osnet, fastreid
+visionservex video-search doctor --tracker bytetrack  # BYTETRACK_REQUIRED + exact install
+visionservex video-search doctor --reid osnet         # TORCHREID_REQUIRED + exact install
+
 visionservex video-search index ./frames/ \
   --detector owlv2-base-patch16 \
   --embedder siglip2-base-patch16-224 \
@@ -427,7 +434,7 @@ visionservex anomaly train patchcore --data normal_images/ --out runs/patchcore 
 visionservex anomaly predict runs/patchcore test.jpg
 ```
 
-PatchCore / PaDiM / FastFlow / EfficientAD / WinCLIP / DRAEM / Reverse-Distillation supported; missing dep returns `ANOMALIB_REQUIRED` with the exact install command.
+PatchCore / PaDiM / FastFlow / EfficientAD / WinCLIP / DRAEM / Reverse-Distillation supported; missing dep returns `ANOMALIB_REQUIRED` with the exact install command and a fallback tip: use `--model mock-anomaly` to benchmark dataset statistics without anomalib.
 
 ## Medical Imaging (research only)
 
@@ -706,8 +713,8 @@ OpenMMLab (RTMPose, RTMDet-R, Co-DINO, InternImage): Docker sidecar or `pip inst
 - **D-FINE COCO-only variants** (`dfine-s-coco` etc.): Point to HF repos that may not exist yet. Use `dfine-s-o365-coco` (Objects365+COCO) for guaranteed availability.
 - **DEIM / RT-DETRv4**: Registered as `experimental_sota` but not wired. Blockers documented per-model in the registry.
 - **AP50/mAP benchmark**: The `benchmark-competitiveness` tool reports latency and detection health only. Full AP evaluation requires ground-truth COCO annotations not bundled with VisionServeX.
-- **benchmark-anomaly**: Fully functional for structured error reporting and MVTec-like dataset loading. PatchCore training requires `pip install 'visionservex[anomaly]'`; the API changes between anomalib versions and may require version-specific handling.
-- **Florence-2**: Real smoke in the current environment is blocked by transformers≥5.0. Use `visionservex florence2 create-env` to generate the exact conda/pip recipe for an isolated transformers<5.0 environment.
+- **benchmark-anomaly**: Functional — `--model mock-anomaly` computes pixel-stats proxy scores without anomalib on any dataset. PatchCore training requires `pip install 'visionservex[anomaly]'`; anomalib Engine API varies by version.
+- **Florence-2**: Real smoke **PASSED** in isolated env: `conda create -n vsx-florence python=3.11 -y && conda run -n vsx-florence pip install "transformers==4.46.3" einops timm accelerate`. The current environment (transformers 5.x) is incompatible — use `visionservex florence2 create-env` to generate the exact validated recipe.
 - **SAM2.1**: Runtime registry wired (`facebook/sam2.1-hiera-*`); inference requires `pip install 'visionservex[hf]'` and a GPU. Lighter alternatives (MobileSAM, EfficientSAM, HQ-SAM, EdgeSAM) are available as expert sidecars with Apache-2.0 licenses but require GitHub install. FastSAM is excluded (AGPL-3.0).
 - **OpenMMLab** (RTMPose, RTMDet-R/R2, Co-DINO, InternImage): Requires the OpenMMLab toolchain and manually-obtained checkpoints. Returns `CHECKPOINT_REQUIRED` structured error — no fake output.
 - **TensorRT**: ONNX export works for SwinV2. TensorRT engine build requires `trtexec`.
