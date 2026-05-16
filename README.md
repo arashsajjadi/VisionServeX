@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-2.5.0-informational.svg" alt="v2.5.0">
+  <img src="https://img.shields.io/badge/version-2.6.0-informational.svg" alt="v2.6.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -196,8 +196,14 @@ Full detail: [docs/model_zoo_matrix.md](docs/model_zoo_matrix.md) | [docs/model_
 | PatchCore | `anomalib-patchcore` | optional_extra | `[anomaly]` | `visionservex anomaly train patchcore --data /data/normal --out /tmp` |
 | RTMDet-R | `rtmdet-r2-s` | expert_sidecar | OpenMMLab | `visionservex aerial detect aerial.jpg --model rtmdet-r2-s` |
 | ByteTrack | `bytetrack` | optional_extra | `pip install bytetracker` | `visionservex video-search index video.mp4 --tracker bytetrack --out /tmp/idx` |
-| DEIMv2 | `deimv2-s/m/l/x` | unavailable | — | Blocked: no HF Transformers support |
+| OC-SORT | `ocsort` | optional_extra | `pip install ocsort` | `visionservex video-search index video.mp4 --tracker ocsort --out /tmp/idx` |
+| Torchreid / OSNet | `osnet` | optional_extra | `pip install torchreid` | `visionservex video-search reid-smoke --reid osnet --image crop.jpg` |
+| MaskDINO | `maskdino-swinl-coco` | expert_sidecar | Detectron2 sidecar | `visionservex maskdino create-env` |
+| DEIMv2 | `deimv2-s/m/l/x` | unavailable | — | Blocked: native loader / no HF Transformers support |
 | FastSAM | `fastsam-s/x` | do_not_add | — | AGPL-3.0 license; use SAM v1/2 instead |
+| DeepSORT | — | do_not_add | — | GPL-3.0; not routed through permissive core |
+| RF-DETR Plus/XL/2XL | — | non_core_license_optional | `pip install rfdetr[plus]` | PML 1.0 license — manual install only |
+| SAM 3 / SAM 3.1 | `sam3.1` | external_api / gated | HF auth | `visionservex sam-family login-help sam3.1` |
 
 ### Status Legend
 
@@ -208,8 +214,13 @@ Full detail: [docs/model_zoo_matrix.md](docs/model_zoo_matrix.md) | [docs/model_
 | `optional_extra` | Needs an extra pip package; clean install path exists |
 | `expert_sidecar` | Needs isolated env (OpenMMLab, Detectron2, etc.) |
 | `external_api` | API-gated; not self-hostable |
-| `do_not_add` | Excluded (license or policy reason) |
-| `unavailable` | Blocked by a known technical issue |
+| `gated` | License/auth required; not auto-pulled |
+| `non_core_license_optional` | Permissive core excludes it; manual opt-in only |
+| `do_not_add` | Excluded (GPL/AGPL or non-commercial) |
+| `unavailable_with_reason` | Blocked by a known technical/source issue |
+
+See [docs/license_risk_table.md](docs/license_risk_table.md) for the
+authoritative license-tier map.
 
 ### What works today (runnable models)
 

@@ -61,6 +61,16 @@ def index_cmd(
         "--tracker",
         help="Tracker backend: simple-iou (default), bytetrack, bot-sort, ocsort.",
     ),
+    reid: str = typer.Option(
+        "",
+        "--reid",
+        help="Optional ReID backend for crops: osnet (Torchreid). Empty disables.",
+    ),
+    reid_model_path: str = typer.Option(
+        "",
+        "--reid-model-path",
+        help="Path to ReID checkpoint (e.g. osnet_x1_0_imagenet.pth).",
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Index a video or frame folder for later text retrieval."""
@@ -89,6 +99,25 @@ def index_cmd(
             console.print(f"[red]{exc.code}[/red]: {exc.name} not installed")
             console.print(f"  install: {exc.install}")
         raise typer.Exit(3)
+
+    # Build optional ReID extractor.
+    reid_adapter = None
+    if reid:
+        from visionservex.runtime.reid import ReIDUnavailableError, build_reid_extractor
+
+        try:
+            reid_adapter = build_reid_extractor(
+                reid,
+                model_path=reid_model_path or None,
+            )
+        except ReIDUnavailableError as exc:
+            payload = exc.to_dict()
+            if json_:
+                print(json.dumps(payload, indent=2))
+            else:
+                console.print(f"[red]{exc.code}[/red]: {exc.name}")
+                console.print(f"  install: {exc.install}")
+            raise typer.Exit(3)
 
     # Build detector + embedder via VisionModel.
     det_model = VisionModel(detector, auto_pull=auto_pull)
@@ -122,12 +151,16 @@ def index_cmd(
         "detector": detector,
         "embedder": embedder,
         "tracker": tracker,
+        "reid": reid or None,
+        "reid_active": reid_adapter is not None,
     }
     if json_:
         print(json.dumps(summary, indent=2))
         return
     console.print(f"[green]Index written to[/green] {out_path}")
     console.print(f"  tracker: {tracker}")
+    if reid:
+        console.print(f"  reid: {reid}")
 
 
 # ---------------------------------------------------------------------------
@@ -552,3 +585,76 @@ def doctor_cmd(
                 console.print(f"  install: [cyan]{val['install']}[/cyan]")
         else:
             console.print(val)
+
+
+# ---------------------------------------------------------------------------
+# reid-smoke — extract a single crop embedding via the optional ReID adapter
+# ---------------------------------------------------------------------------
+
+
+@app.command("reid-smoke")
+def reid_smoke(
+    image: Path = typer.Option(..., "--image", help="Image path (one crop)."),
+    reid: str = typer.Option("osnet", "--reid", help="ReID backend."),
+    model_path: str = typer.Option(
+        "",
+        "--model-path",
+        help="Path to ReID checkpoint (e.g. osnet_x1_0_imagenet.pth).",
+    ),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Quick smoke-test for a ReID backend: extract one embedding."""
+    from visionservex.runtime.reid import ReIDUnavailableError, build_reid_extractor
+
+    if not image.exists():
+        payload = {
+            "code": "INPUT_NOT_FOUND",
+            "message": f"Image not found: {image}",
+            "fix": f"Check path: {image}",
+        }
+        if json_:
+            print(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[red]{payload['code']}[/red]: {payload['message']}")
+        raise typer.Exit(2)
+
+    try:
+        extractor = build_reid_extractor(reid, model_path=model_path or None)
+    except ReIDUnavailableError as exc:
+        payload = exc.to_dict()
+        if json_:
+            print(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[red]{exc.code}[/red]: {exc.name}")
+            console.print(f"  install: {exc.install}")
+        raise typer.Exit(3)
+
+    if extractor is None:
+        payload = {
+            "code": "REID_UNAVAILABLE",
+            "message": f"{reid!r} is built-in cosine; nothing to smoke-test.",
+        }
+        if json_:
+            print(json.dumps(payload, indent=2))
+        else:
+            console.print(payload["message"])
+        return
+
+    try:
+        from PIL import Image as _Image
+    except ImportError as exc:  # pragma: no cover - PIL is a hard dep
+        raise typer.Exit(4) from exc
+
+    img = _Image.open(str(image)).convert("RGB")
+    feats = extractor.extract([img])
+    payload = {
+        "code": "OK",
+        "reid": reid,
+        "image": str(image),
+        "embedding_shape": list(getattr(feats, "shape", [len(feats)])),
+        "first_dims": [float(x) for x in list(getattr(feats, "reshape", lambda *_: feats)(-1))[:5]],
+    }
+    if json_:
+        print(json.dumps(payload, indent=2))
+        return
+    console.print(f"[green]OK[/green] {reid}: shape={payload['embedding_shape']}")

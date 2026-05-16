@@ -21,6 +21,7 @@ _OPENMMLAB_MODELS = [
     "rtmpose-s",
     "rtmpose-m",
     "rtmpose-l",
+    "rtmdet-l-coco",
     "rtmdet-r-t",
     "rtmdet-r-s",
     "rtmdet-r-m",
@@ -29,6 +30,7 @@ _OPENMMLAB_MODELS = [
     "rtmdet-r2-s",
     "rtmdet-r2-m",
     "rtmdet-r2-l",
+    "oriented-rcnn",
     "co-dino-inst-vit-l-coco",
     "co-dino-inst-vit-l-lvis",
     "internimage-t",
@@ -247,36 +249,107 @@ def status(json_: bool = typer.Option(False, "--json")) -> None:
 )
 def smoke_test(
     model_id: str = typer.Argument("rtmpose-s"),
+    image: str = typer.Option("", "--image", help="Optional input image path."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
+    """Validate dependencies and (when present) run a real Inferencer call."""
+    info = _validate_openmmlab_model(model_id)
+    if info.get("status") != "ok":
+        if json_:
+            typer.echo(json.dumps(info, indent=2))
+            return
+        code = info.get("structured_error_code", "ERROR")
+        console.print(f"[yellow]{code}[/yellow] — {info.get('message', '')}")
+        if info.get("fix"):
+            console.print(f"  fix: {info['fix']}")
+        return
+
+    meta = _PULL_METADATA[model_id]
+    task = meta.get("task", "")
+    inferencer = None
+    try:
+        if task == "pose":
+            from mmpose.apis import MMPoseInferencer  # type: ignore
+
+            inferencer = MMPoseInferencer(meta.get("config_name", "rtmpose-m"))
+        elif task == "detect":
+            from mmdet.apis import DetInferencer  # type: ignore
+
+            inferencer = DetInferencer(meta.get("config_name", "rtmdet_l_8xb32-300e_coco"))
+        elif task == "obb":
+            # mmrotate does not (yet) ship a Inferencer; report sidecar.
+            payload = {
+                "model_id": model_id,
+                "status": "sidecar",
+                "structured_error_code": "OBB_INFERENCER_UNAVAILABLE",
+                "message": (
+                    "mmrotate does not expose a high-level Inferencer. "
+                    "Load config + checkpoint manually via mmrotate.apis."
+                ),
+                "checkpoint": info["checkpoint_path"],
+            }
+            if json_:
+                typer.echo(json.dumps(payload, indent=2))
+            else:
+                console.print(f"[yellow]{payload['structured_error_code']}[/yellow]")
+                console.print(f"  {payload['message']}")
+            return
+    except Exception as exc:  # pragma: no cover - real env-specific
+        payload = {
+            "model_id": model_id,
+            "status": "error",
+            "structured_error_code": "OPENMMLAB_API_UNSUPPORTED",
+            "message": str(exc)[:300],
+            "fix": meta.get("install", ""),
+        }
+        if json_:
+            typer.echo(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[red]{payload['structured_error_code']}[/red]: {payload['message']}")
+        raise typer.Exit(4)
+
+    if inferencer is None:
+        payload = {"model_id": model_id, "status": "skipped", "reason": "unknown task"}
+        if json_:
+            typer.echo(json.dumps(payload, indent=2))
+        return
+    if not image:
+        payload = {
+            "model_id": model_id,
+            "status": "dry_run",
+            "message": "Inferencer constructed. Pass --image PATH to run inference.",
+        }
+        if json_:
+            typer.echo(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[green]{payload['status']}[/green]: {payload['message']}")
+        return
 
     try:
-        import mmpose  # noqa: F401
-
-        has_mm = True
-    except ImportError:
-        has_mm = False
-
-    if not has_mm:
-        console.print("[yellow]OpenMMLab not installed.[/yellow]")
-        console.print("Run: [cyan]pip install openmim && mim install mmengine mmcv mmpose[/cyan]")
-        console.print(
-            "Or:  [cyan]visionservex openmmlab docker-build && visionservex openmmlab docker-run[/cyan]"
-        )
+        result = inferencer(image)
+    except Exception as exc:  # pragma: no cover - real env-specific
+        payload = {
+            "model_id": model_id,
+            "status": "error",
+            "structured_error_code": "OPENMMLAB_INFERENCE_FAILED",
+            "message": str(exc)[:300],
+        }
         if json_:
-            typer.echo(
-                json.dumps(
-                    {"model_id": model_id, "status": "skip", "reason": "mmpose not installed"}
-                )
-            )
-        raise typer.Exit(0)
+            typer.echo(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[red]{payload['structured_error_code']}[/red]: {payload['message']}")
+        raise typer.Exit(5) from exc
 
-    console.print(f"Testing {model_id} (OpenMMLab native path)...")
-    console.print("[yellow]OpenMMLab native integration is currently manual/expert.[/yellow]")
-    console.print(
-        "Download and configure the model config/checkpoint manually, then use MMPose API directly."
-    )
-    console.print("See: docs/openmmlab_expert_models.md")
+    payload = {
+        "model_id": model_id,
+        "status": "ok",
+        "image": image,
+        "result_type": type(result).__name__,
+    }
+    if json_:
+        typer.echo(json.dumps(payload, indent=2))
+    else:
+        console.print(f"[green]OK[/green] {model_id} on {image}: {payload['result_type']}")
 
 
 @app.command("list", help="List all available OpenMMLab models.")
@@ -351,6 +424,68 @@ _PULL_METADATA: dict[str, dict] = {
         "cache_subdir": "rtmdet-r2-t",
         "checkpoint_filename": "rtmdet-r2-t.pth",
         "download_url": None,
+    },
+    "rtmdet-l-coco": {
+        "display": "RTMDet (Large, COCO)",
+        "config_repo": "https://github.com/open-mmlab/mmdetection/tree/main/configs/rtmdet",
+        "model_zoo": "https://github.com/open-mmlab/mmdetection/blob/main/configs/rtmdet/README.md",
+        "checkpoint_page": "https://github.com/open-mmlab/mmdetection/tree/main/configs/rtmdet",
+        "install": "pip install openmim && mim install mmengine mmcv mmdet",
+        "cache_subdir": "rtmdet-l-coco",
+        "checkpoint_filename": "rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth",
+        "download_url": (
+            "https://download.openmmlab.com/mmdetection/v3.0/rtmdet/"
+            "rtmdet_l_8xb32-300e_coco/"
+            "rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth"
+        ),
+        "license": "Apache-2.0",
+        "task": "detect",
+        "inferencer": "mmdet.apis.DetInferencer",
+        "config_name": "rtmdet_l_8xb32-300e_coco",
+    },
+    "rtmpose-m": {
+        "display": "RTMPose (Medium, Halpe26)",
+        "config_repo": "https://github.com/open-mmlab/mmpose/tree/main/configs/body_2d_keypoint/rtmpose",
+        "model_zoo": (
+            "https://mmpose.readthedocs.io/en/latest/model_zoo_papers/algorithms.html#rtmpose"
+        ),
+        "checkpoint_page": (
+            "https://github.com/open-mmlab/mmpose/tree/main/configs/body_2d_keypoint/rtmpose"
+        ),
+        "install": "pip install openmim && mim install mmengine mmcv mmpose",
+        "cache_subdir": "rtmpose-m",
+        "checkpoint_filename": (
+            "rtmpose-m_simcc-body7_pt-body7-halpe26_700e-256x192-4d3e73dd_20230605.pth"
+        ),
+        "download_url": (
+            "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/"
+            "rtmpose-m_simcc-body7_pt-body7-halpe26_700e-256x192-4d3e73dd_20230605.pth"
+        ),
+        "license": "Apache-2.0",
+        "task": "pose",
+        "inferencer": "mmpose.apis.MMPoseInferencer",
+        "config_name": "rtmpose-m",
+    },
+    "oriented-rcnn": {
+        "display": "Oriented R-CNN (OBB)",
+        "config_repo": ("https://github.com/open-mmlab/mmrotate/tree/main/configs/oriented_rcnn"),
+        "model_zoo": (
+            "https://github.com/open-mmlab/mmrotate/blob/main/configs/oriented_rcnn/README.md"
+        ),
+        "checkpoint_page": (
+            "https://github.com/open-mmlab/mmrotate/tree/main/configs/oriented_rcnn"
+        ),
+        "install": "pip install openmim && mim install mmengine mmcv mmdet mmrotate",
+        "cache_subdir": "oriented-rcnn",
+        "checkpoint_filename": "oriented_rcnn_r50_fpn_1x_dota_le90.pth",
+        "download_url": None,  # mmrotate hosts model zoo; URL varies per version
+        "license": "Apache-2.0",
+        "task": "obb",
+        "inferencer": "mmrotate (config + checkpoint loader)",
+        "config_name": "oriented_rcnn_r50_fpn_1x_dota_le90",
+        "note": (
+            "OBB output is [x_center, y_center, width, height, theta]. Do NOT flatten to xyxy."
+        ),
     },
 }
 
@@ -562,7 +697,9 @@ def _validate_openmmlab_model(model_id: str) -> dict:
     modules_needed = ["mmcv", "mmengine"]
     if model_id.startswith("rtmpose"):
         modules_needed.append("mmpose")
-    elif model_id.startswith("rtmdet"):
+    elif model_id == "rtmdet-l-coco":
+        modules_needed.append("mmdet")
+    elif model_id.startswith("rtmdet") or model_id == "oriented-rcnn":
         modules_needed.extend(["mmdet", "mmrotate"])
     elif model_id.startswith("co-dino") or model_id.startswith("co-detr"):
         modules_needed.append("mmdet")
@@ -638,6 +775,51 @@ def validate_cmd(
             console.print(f"  fix: {fix}")
     else:
         console.print(f"  checkpoint: {payload['checkpoint_path']}")
+
+
+@app.command(
+    "model-card",
+    help="Show structured pull metadata for an OpenMMLab model (URL, license, inferencer).",
+)
+def model_card_cmd(
+    model_id: str = typer.Argument(..., help="Model ID, e.g. rtmdet-l-coco, rtmpose-m"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    meta = _PULL_METADATA.get(model_id)
+    if meta is None:
+        payload = {
+            "model_id": model_id,
+            "code": "CONFIG_REQUIRED",
+            "message": f"No pull metadata for {model_id!r}",
+            "available": sorted(_PULL_METADATA),
+        }
+        if json_:
+            typer.echo(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[red]CONFIG_REQUIRED[/red]: {payload['message']}")
+            console.print(f"  available: {', '.join(payload['available'])}")
+        raise typer.Exit(2)
+
+    payload = {"model_id": model_id, **meta}
+    if json_:
+        typer.echo(json.dumps(payload, indent=2))
+        return
+    console.print(f"[bold]{model_id}[/bold]  —  {meta.get('display', '')}")
+    for key in (
+        "license",
+        "task",
+        "inferencer",
+        "config_name",
+        "config_repo",
+        "model_zoo",
+        "checkpoint_filename",
+        "download_url",
+        "install",
+        "note",
+    ):
+        val = meta.get(key)
+        if val:
+            console.print(f"  [cyan]{key}[/cyan]: {val}")
 
 
 __all__ = ["app"]

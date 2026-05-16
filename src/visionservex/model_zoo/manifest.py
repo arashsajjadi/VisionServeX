@@ -207,16 +207,21 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         official_repo="https://github.com/roboflow/rf-detr",
         official_docs="https://rfdetr.roboflow.com/develop/reference/seg_large/",
         checkpoint_source="package_managed",
-        license="Apache-2.0",
-        license_risk="check",
+        license="PML 1.0 (Plus/XL/2XL); core sizes Apache-2.0",
+        license_risk="restricted",
         runnable_in_visionservex=False,
         access_status="open",
         domain="general",
         known_blockers=[
-            "HF checkpoint roboflow/rf-detr-seg-large not yet published at last audit.",
-            "Verify via rfdetr.utils or roboflow docs before enabling.",
+            "Plus / XL / 2XL variants use the Roboflow PML 1.0 license — restrictive.",
+            "Must remain non_core_license_optional; do not auto-pull by default.",
+            "Date checked: 2026-05-16.",
         ],
-        recommended_action="audit_only",
+        recommended_action="non_core_license_optional",
+        notes=(
+            "Install via pip install rfdetr[plus]; users must accept PML 1.0 terms. Core"
+            " Apache-2.0 sizes (small/base/large) remain runnable through other entries."
+        ),
     ),
     # =====================================================================
     # DEIMv2 — experimental, not yet wired
@@ -280,15 +285,22 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         family="rtdetrv4",
         task="detect",
         official_repo="https://github.com/RT-DETRs/RT-DETRv4",
+        paper_url="https://arxiv.org/abs/2510.25257",
         license="Apache-2.0",
-        license_risk="check",
+        license_risk="none",
         runnable_in_visionservex=False,
         access_status="open",
         known_blockers=[
-            "RT-DETRv4 release/checkpoint URLs not officially numbered.",
-            "Known TensorRT/RTX 5080 issues reported.",
+            "RT-DETRv4 native loader requires repo-internal config/checkpoint mapping.",
+            "No clean HF/native pip loader — install via git clone + requirements.txt.",
+            "Known TensorRT/RTX 5080 issues reported in upstream issues.",
+            "Date checked: 2026-05-16.",
         ],
-        recommended_action="audit_only",
+        recommended_action="expert_sidecar",
+        notes=(
+            "Run upstream tools/inference/torch_inf.py with config + checkpoint from the official"
+            " release. Apache-2.0; license_risk lowered to none after re-verification."
+        ),
     ),
     # =====================================================================
     # Co-DINO / Co-DETR — expert sidecar

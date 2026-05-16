@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-05-16
+
+### OC-SORT adapter; OSNet/Torchreid ReID; OpenMMLab model-card + real-checkpoint metadata; MaskDINO sidecar; medical license tiers; SAM3 login-help
+
+This release converts several v2.5 “wired/mocked” paths into real optional
+extras and expert sidecars, and adds source-grounded license/checkpoint
+metadata.
+
+#### New CLI commands
+
+| Command | Description |
+|---------|-------------|
+| `visionservex video-search reid-smoke --reid osnet --image FILE` | Torchreid OSNet feature-extractor smoke test |
+| `visionservex video-search index ... --reid osnet --reid-model-path PATH` | Optional OSNet ReID inside video-search index pipeline |
+| `visionservex openmmlab model-card MODEL_ID` | Structured model card with checkpoint URL, license, inferencer |
+| `visionservex maskdino create-env / install-help / doctor / list / validate / smoke-test` | Detectron2-based MaskDINO expert sidecar |
+| `visionservex medical install-help [MODEL]` | License-tier-aware install help |
+| `visionservex medical monai list-bundles` | MONAI bundle listing (requires `pip install monai`) |
+| `visionservex medical autoseg doctor` | MONAI Auto3DSeg probe |
+| `visionservex sam-family login-help [MODEL]` | Print HF auth steps for gated SAM 3 / SAM 3.1 |
+| `visionservex sam-family validate MODEL_ID` | Structured SAM-family validation (license/gated/runnable) |
+
+#### Runtime changes
+
+- `src/visionservex/runtime/trackers.py` now routes both `bytetrack` and `ocsort` to real adapters with a uniform `update(detections, frame_idx, timestamp_s, img_size)` API and structured `BYTETRACK_API_UNSUPPORTED` / `OCSORT_API_UNSUPPORTED` errors when the upstream API drifts.
+- `src/visionservex/runtime/reid.py` (new) — Torchreid `FeatureExtractor` adapter with `TORCHREID_REQUIRED` / `REID_CHECKPOINT_REQUIRED` blockers; FastReID stays expert-sidecar.
+- `_PULL_METADATA` in `cli/openmmlab_commands.py` now carries research-confirmed checkpoint URLs for `rtmdet-l-coco` and `rtmpose-m`, plus an `oriented-rcnn` OBB entry that records the `[x,y,w,h,theta]` schema and refuses to flatten it to xyxy.
+
+#### Manifest / docs
+
+- `docs/license_risk_table.md` (new) — single authoritative license tier map.
+- README v2.6.0 family table adds OC-SORT, OSNet, MaskDINO, DeepSORT, RF-DETR Plus and SAM 3.x rows.
+- Manifest: `rtdetrv4-s` and `rfdetr-seg-large` refreshed with paper URL and explicit license/blocker text.
+- `cli/medical_commands.py` adds `totalsegmentator-tissue` row (`non_core_license_optional`, requires `totalseg_set_license`), tightens MedSAM2 to `MEDSAM2_CHECKPOINT_UNVERIFIED`, and nnU-Net to `NNUNET_REQUIRED` / expert sidecar.
+
+#### Tests
+
+- `tests/test_v260.py` (new) covers the tracker registry shape, OC-SORT routing, OSNet `TORCHREID_REQUIRED`, OpenMMLab model-card metadata, MaskDINO blockers, MONAI/Auto3DSeg blockers, SAM 3 login-help, and that DeepSORT/FastSAM never enter the permissive core.
+
 ## [2.5.0] - 2026-05-16
 
 ### Model zoo matrix/gap-report CLI; SAM-family commands; anomaly create-env; MedSAM multi-box; video-search install-help; 6 real-smoke verified models; comprehensive domain docs

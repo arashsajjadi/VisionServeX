@@ -41,6 +41,7 @@ from visionservex.cli import (
     florence2_commands,
     gateway_commands,
     gpu_commands,
+    maskdino_commands,
     medical_commands,
     model_card_commands,
     model_health_commands,
@@ -123,6 +124,7 @@ app.add_typer(dev_commands.app, name="dev")
 app.add_typer(model_health_commands.app, name="models")
 app.add_typer(sam3_commands.app, name="sam3")
 app.add_typer(expert_commands.app, name="expert")
+app.add_typer(maskdino_commands.app, name="maskdino")
 app.add_typer(anomaly_commands.app, name="anomaly")
 app.add_typer(medical_commands.app, name="medical")
 app.add_typer(video_search_commands.app, name="video-search")

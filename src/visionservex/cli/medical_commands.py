@@ -63,6 +63,10 @@ class MedicalModelInfo:
     required_modules: tuple[str, ...]
     structured_error_code: str
     license_note: str
+    license_tier: str = "optional_extra"
+    runtime_status: str = "optional_extra"
+    checkpoint_status: str = "verified"
+    checkpoint_url: str | None = None
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -71,18 +75,35 @@ class MedicalModelInfo:
 MEDICAL_MODELS: dict[str, MedicalModelInfo] = {
     "totalsegmentator": MedicalModelInfo(
         model_id="totalsegmentator",
-        description="TotalSegmentator — multi-organ CT/MR segmentation (104+ classes).",
+        description="TotalSegmentator core total — multi-organ CT/MR segmentation (Apache).",
         upstream="https://github.com/wasserth/TotalSegmentator",
         install=(
             "pip install TotalSegmentator",
             "# requires nibabel + nnunetv2 + torch; GPU strongly recommended",
         ),
         required_modules=("totalsegmentator",),
-        structured_error_code="MEDICAL_EXTRA_REQUIRED",
-        license_note=(
-            "Apache-2.0 code, but model weights have separate non-commercial / "
-            "research-only conditions. Check upstream README before commercial use."
+        structured_error_code="TOTALSEGMENTATOR_REQUIRED",
+        license_note=("Apache-2.0 core total model. Re-verify license before public install path."),
+        license_tier="optional_extra",
+        runtime_status="optional_extra",
+    ),
+    "totalsegmentator-tissue": MedicalModelInfo(
+        model_id="totalsegmentator-tissue",
+        description=(
+            "TotalSegmentator tissue / body-stats — proprietary commercial-license subtask."
         ),
+        upstream="https://github.com/wasserth/TotalSegmentator",
+        install=(
+            "pip install TotalSegmentator",
+            "# Requires a commercial license key — totalseg_set_license <KEY>",
+        ),
+        required_modules=("totalsegmentator",),
+        structured_error_code="TOTALSEGMENTATOR_LICENSE_REQUIRED",
+        license_note=(
+            "Non-commercial / proprietary. Requires explicit license key — NOT auto-runnable."
+        ),
+        license_tier="non_core_license_optional",
+        runtime_status="non_core_license_optional",
     ),
     "medsam": MedicalModelInfo(
         model_id="medsam",
@@ -105,8 +126,11 @@ MEDICAL_MODELS: dict[str, MedicalModelInfo] = {
             "cd MedSAM2 && pip install -e .",
         ),
         required_modules=("medsam2",),
-        structured_error_code="MEDICAL_EXTRA_REQUIRED",
-        license_note="Apache-2.0. Research-grade; not validated for clinical decisions.",
+        structured_error_code="MEDSAM2_CHECKPOINT_UNVERIFIED",
+        license_note=("Apache-2.0. Checkpoint packaging not verified — treat as expert sidecar."),
+        license_tier="expert_sidecar",
+        runtime_status="expert_sidecar",
+        checkpoint_status="unverified",
     ),
     "sam-med2d": MedicalModelInfo(
         model_id="sam-med2d",
@@ -126,8 +150,13 @@ MEDICAL_MODELS: dict[str, MedicalModelInfo] = {
         upstream="https://github.com/MIC-DKFZ/nnUNet",
         install=("pip install nnunetv2",),
         required_modules=("nnunetv2",),
-        structured_error_code="MEDICAL_EXTRA_REQUIRED",
-        license_note="Apache-2.0 code; framework-only, no shipped weights.",
+        structured_error_code="NNUNET_REQUIRED",
+        license_note=(
+            "Apache-2.0 framework. Generic universal pretrained weights are NOT guaranteed."
+        ),
+        license_tier="expert_sidecar",
+        runtime_status="expert_sidecar",
+        checkpoint_status="dataset_specific",
     ),
     "monai-bundles": MedicalModelInfo(
         model_id="monai-bundles",
@@ -503,6 +532,109 @@ def _segment_medsam(
     console.print(f"  metadata: {meta_path}")
     for m in masks_saved:
         console.print(f"  mask: {m['mask_path']} (IoU={m['iou_score']:.3f})")
+
+
+@app.command("install-help")
+def install_help_cmd(
+    model_id: str = typer.Argument("", help="Medical model id (optional)."),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Print install commands for medical models with license tier."""
+    if model_id and model_id not in MEDICAL_MODELS:
+        payload = {
+            "code": "UNKNOWN_MODEL",
+            "message": f"Unknown medical model {model_id!r}.",
+            "available": list(MEDICAL_MODELS),
+        }
+        print(json.dumps(payload, indent=2)) if json_ else console.print(
+            f"[red]Unknown model:[/red] {model_id}"
+        )
+        raise typer.Exit(2)
+
+    targets = [model_id] if model_id else list(MEDICAL_MODELS)
+    payload = {}
+    for mid in targets:
+        info = MEDICAL_MODELS[mid]
+        payload[mid] = {
+            "install": list(info.install),
+            "license_tier": info.license_tier,
+            "runtime_status": info.runtime_status,
+            "checkpoint_status": info.checkpoint_status,
+            "license_note": info.license_note,
+            "structured_error_code": info.structured_error_code,
+        }
+    if json_:
+        print(json.dumps(payload, indent=2))
+        return
+    for mid, entry in payload.items():
+        console.print(f"\n[bold]{mid}[/bold]  [{entry['license_tier']}]")
+        for cmd in entry["install"]:
+            console.print(f"  [cyan]{cmd}[/cyan]")
+        console.print(f"  license: {entry['license_note']}")
+
+
+monai_app = typer.Typer(help="MONAI medical framework helpers.", no_args_is_help=True)
+
+
+@monai_app.command("list-bundles")
+def monai_list_bundles(json_: bool = typer.Option(False, "--json")) -> None:
+    """List installed MONAI Model Zoo bundles (requires `pip install monai`)."""
+    if not _module_present("monai"):
+        payload = {
+            "code": "MONAI_REQUIRED",
+            "message": "monai is not installed.",
+            "fix": "pip install monai",
+        }
+        print(json.dumps(payload, indent=2)) if json_ else console.print(
+            f"[yellow]{payload['code']}[/yellow] — {payload['fix']}"
+        )
+        raise typer.Exit(3)
+    try:
+        from monai.bundle import get_all_bundles_list  # type: ignore
+
+        bundles = get_all_bundles_list()
+    except Exception as exc:  # pragma: no cover - real env
+        payload = {
+            "code": "MONAI_API_ERROR",
+            "message": str(exc)[:200],
+        }
+        print(json.dumps(payload, indent=2)) if json_ else console.print(
+            f"[red]{payload['code']}[/red] — {payload['message']}"
+        )
+        raise typer.Exit(4) from exc
+    if json_:
+        print(json.dumps(bundles, indent=2))
+        return
+    for b in bundles:
+        console.print(f"  - {b}")
+
+
+autoseg_app = typer.Typer(help="MONAI Auto3DSeg helpers.", no_args_is_help=True)
+
+
+@autoseg_app.command("doctor")
+def autoseg_doctor(json_: bool = typer.Option(False, "--json")) -> None:
+    """Probe Auto3DSeg (MONAI) availability."""
+    monai_ok = _module_present("monai")
+    payload = {"monai_installed": monai_ok}
+    if not monai_ok:
+        payload.update(
+            {
+                "code": "AUTO3DSEG_REQUIRED",
+                "fix": "pip install monai",
+            }
+        )
+    if json_:
+        print(json.dumps(payload, indent=2))
+        return
+    if monai_ok:
+        console.print("[green]monai installed[/green]")
+    else:
+        console.print(f"[yellow]{payload['code']}[/yellow] — {payload['fix']}")
+
+
+app.add_typer(monai_app, name="monai")
+app.add_typer(autoseg_app, name="autoseg")
 
 
 def _emit_err(err: MedicalError, json_: bool) -> None:

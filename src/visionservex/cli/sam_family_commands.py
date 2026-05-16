@@ -257,6 +257,93 @@ def model_card_cmd(
         console.print(f"  Notes:      {src.notes}")
 
 
+@app.command("login-help")
+def login_help_cmd(
+    model_id: str = typer.Argument("sam3.1", help="SAM3/SAM3.1 model ID."),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Print Hugging Face authentication steps for gated SAM3 / SAM3.1 weights.
+
+    SAM3 / SAM3.1 weights are gated on Hugging Face. VisionServeX must NOT
+    auto-pull them. This command prints the exact user-side commands.
+    """
+    payload = {
+        "model_id": model_id,
+        "code": "GATED_HF_AUTH_REQUIRED",
+        "license": "Apache-2.0 (code), gated HF access (weights)",
+        "official_repo": "https://github.com/facebookresearch/sam3",
+        "paper": "https://arxiv.org/abs/2511.16719",
+        "steps": [
+            "1. Visit the HF model page and request access (e.g. facebook/sam3.1-hiera-base).",
+            "2. pip install -U 'huggingface_hub[cli]'",
+            "3. huggingface-cli login   # paste your HF token (read access).",
+            "4. visionservex sam-family validate sam3.1",
+            "5. Once approved, visionservex sam-family smoke-test sam3.1 IMAGE --box x1,y1,x2,y2",
+        ],
+        "warning": (
+            "SAM3 / SAM3.1 are gated. VisionServeX will not bypass HF auth — "
+            "do not attempt unauthenticated downloads."
+        ),
+    }
+    if json_:
+        print(json.dumps(payload, indent=2))
+        return
+    console.print(f"[bold]{model_id}[/bold] requires HF authentication.")
+    for step in payload["steps"]:
+        console.print(f"  {step}")
+    console.print(f"\n[dim]Source: {payload['official_repo']}[/dim]")
+    console.print(f"[yellow]{payload['warning']}[/yellow]")
+
+
+@app.command("validate")
+def validate_cmd(
+    model_id: str = typer.Argument(...),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Structured validation of a SAM-family model's dependencies / gated status."""
+    from visionservex.model_zoo import get_model_source
+
+    src = get_model_source(model_id)
+    if src is None:
+        payload = {
+            "code": "MODEL_NOT_FOUND",
+            "message": f"Model {model_id!r} not in SOURCE_MANIFEST.",
+        }
+        if json_:
+            print(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[red]MODEL_NOT_FOUND[/red]: {payload['message']}")
+        raise typer.Exit(2)
+
+    payload = {
+        "model_id": model_id,
+        "family": src.family,
+        "license": src.license,
+        "license_risk": src.license_risk,
+        "runnable": src.runnable_in_visionservex,
+        "recommended_action": src.recommended_action,
+        "known_blockers": list(src.known_blockers or []),
+        "install_command": src.install_command,
+        "official_repo": src.official_repo,
+        "hf_repo": src.hf_repo,
+    }
+    if src.family in {"sam3"} or "sam3" in model_id:
+        payload["code"] = "GATED_HF_AUTH_REQUIRED"
+        payload["fix"] = "visionservex sam-family login-help sam3.1"
+    elif not src.runnable_in_visionservex:
+        payload["code"] = "MODEL_NOT_RUNNABLE"
+    else:
+        payload["code"] = "OK"
+    if json_:
+        print(json.dumps(payload, indent=2))
+        return
+    console.print(f"[bold]{model_id}[/bold] — {payload['code']}")
+    for key in ("license", "license_risk", "recommended_action"):
+        console.print(f"  {key}: {payload[key]}")
+    for b in payload["known_blockers"]:
+        console.print(f"  blocker: {b}")
+
+
 @app.command("smoke-test")
 def smoke_test_cmd(
     model_id: str = typer.Argument(..., help="SAM model ID to test."),
