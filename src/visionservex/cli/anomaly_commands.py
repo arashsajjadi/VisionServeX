@@ -235,12 +235,44 @@ def train(
     # Real training path — guarded by anomalib import.
     out.mkdir(parents=True, exist_ok=True)
     try:
+        # Try anomalib >= 1.0 Engine API first.
+        try:
+            from anomalib.data import Folder  # type: ignore
+            from anomalib.engine import Engine  # type: ignore
+            from anomalib.models import Patchcore  # type: ignore
+
+            _algo_class_map = {
+                "patchcore": Patchcore,
+            }
+            # Only call real Engine for patchcore in v2.1 — other algorithms
+            # delegate via CLI because their Engine API varies more.
+            if algo == "patchcore":
+                model_instance = Patchcore()
+                datamodule = Folder(root=str(data), normal_dir=str(data))
+                engine = Engine(
+                    max_epochs=1,  # smoke/scaffold: one epoch max
+                    default_root_dir=str(out),
+                )
+                engine.fit(model=model_instance, datamodule=datamodule)
+                manifest = {
+                    **plan,
+                    "status": "trained",
+                    "engine": "anomalib.Engine",
+                    "note": "Trained with max_epochs=1 for smoke validation.",
+                }
+                (out / "manifest.json").write_text(json.dumps(manifest, indent=2))
+                if json_:
+                    print(json.dumps(manifest, indent=2))
+                    return
+                console.print(f"[green]Trained {algo} → {out}[/green]")
+                console.print("[dim]1 epoch only. Increase max_epochs for production.[/dim]")
+                return
+        except (ImportError, Exception) as _engine_exc:
+            # Engine API not available or changed — fall through to delegation.
+            pass
+
         anomalib_models = importlib.import_module("anomalib.models")
         cls = getattr(anomalib_models, SUPPORTED_ALGOS[algo]["anomalib_class"])
-        # We DO NOT auto-train heavyweight models here. We initialize the model
-        # and write a manifest so the user can complete training via anomalib
-        # CLI / engine. This keeps the command honest: it does not silently
-        # spin a multi-hour job.
         model = cls()
         _ = model  # not invoked
         manifest = {

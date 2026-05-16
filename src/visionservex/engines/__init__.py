@@ -11,6 +11,7 @@ from visionservex.engines import florence2 as _florence2
 from visionservex.engines import grounded_sam as _grounded_sam
 from visionservex.engines import grounded_sam2 as _grounded_sam2
 from visionservex.engines import grounding_dino as _gd
+from visionservex.engines import hf_classify as _hf_classify
 from visionservex.engines import huggingface as _hf
 
 # Order matters: mock must be first because the stub engines fall back to MockEngine.

@@ -35,6 +35,7 @@ from visionservex.cli import (
     downloads_commands,
     embedding_commands,
     expert_commands,
+    florence2_commands,
     gateway_commands,
     gpu_commands,
     medical_commands,
@@ -124,6 +125,7 @@ app.add_typer(video_search_commands.app, name="video-search")
 app.add_typer(benchmark_open_vocab.app, name="benchmark-open-vocab", invoke_without_command=True)
 app.add_typer(agriculture_commands.app, name="agriculture")
 app.add_typer(aerial_commands.app, name="aerial")
+app.add_typer(florence2_commands.app, name="florence2")
 
 # Top-level embedding aliases for Ultralytics-style ergonomics
 embedding_alias_app = embedding_commands.app

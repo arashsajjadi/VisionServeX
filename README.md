@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-2.0.1-informational.svg" alt="v2.0.1">
+  <img src="https://img.shields.io/badge/version-2.1.0-informational.svg" alt="v2.1.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -327,6 +327,22 @@ visionservex recommend --task detect --device cuda --vram 8
 For `--goal accuracy --task detect`, the recommender surfaces `dfine-s/m-o365-coco` and `rfdetr-small/medium`, not nano variants.
 
 ---
+
+## Classification, Embedding & Open-Vocabulary Detection
+
+```bash
+# Classification (ConvNeXtV2, MaxViT, etc.)
+visionservex model pull convnextv2-tiny
+visionservex classify convnextv2-tiny image.jpg --top-k 5
+
+# Embeddings (DINOv2, SigLIP2, SigLIP, CLIP)
+visionservex model pull clip-vit-base-patch32
+visionservex embed clip-vit-base-patch32 image.jpg --out /tmp/clip.npy
+
+# Florence-2 (requires isolated env with transformers < 5.0)
+visionservex florence2 doctor        # check compatibility
+visionservex florence2 smoke-test florence-2-base image.jpg --task caption
+```
 
 ## Open-Vocabulary Detection & Multi-Task VLM
 

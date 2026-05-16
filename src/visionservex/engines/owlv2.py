@@ -67,7 +67,6 @@ class OWLv2Engine(StubEngine):
         download(self.entry)
 
         import torch  # type: ignore
-        from transformers import Owlv2ForObjectDetection, Owlv2Processor  # type: ignore
 
         torch_dtype = torch.float32
         if precision == "fp16" and device != "cpu":
@@ -79,8 +78,18 @@ class OWLv2Engine(StubEngine):
         if torch_dtype is not torch.float32:
             kwargs["torch_dtype"] = torch_dtype
 
-        self._processor = Owlv2Processor.from_pretrained(self.entry.hf_repo_id)
-        self._model = Owlv2ForObjectDetection.from_pretrained(self.entry.hf_repo_id, **kwargs)
+        # OWL-ViT and OWLv2 use different HF classes; detect from family.
+        _is_owlvit = self.entry.family.lower() in {"owlvit", "owl-vit", "owl_vit"}
+        if _is_owlvit:
+            from transformers import OwlViTForObjectDetection, OwlViTProcessor  # type: ignore
+
+            self._processor = OwlViTProcessor.from_pretrained(self.entry.hf_repo_id)
+            self._model = OwlViTForObjectDetection.from_pretrained(self.entry.hf_repo_id, **kwargs)
+        else:
+            from transformers import Owlv2ForObjectDetection, Owlv2Processor  # type: ignore
+
+            self._processor = Owlv2Processor.from_pretrained(self.entry.hf_repo_id)
+            self._model = Owlv2ForObjectDetection.from_pretrained(self.entry.hf_repo_id, **kwargs)
         self._model.to(device)
         self._model.eval()
         self._torch = torch
@@ -208,5 +217,6 @@ def _factory(entry: ModelEntry) -> OWLv2Engine:
 
 
 register_engine("owlv2", _factory)
+register_engine("owlvit", _factory)  # OWL-ViT v1 uses same engine; family determines HF class
 
 __all__ = ["OWLv2Engine"]

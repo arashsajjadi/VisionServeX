@@ -7,6 +7,86 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-05-16
+
+### OWL-ViT, CLIP, SigLIP, ConvNeXtV2, MedSAM wired; Florence-2 [florence2] extra; Anomalib real Engine call; surveillance non-empty smoke
+
+This is the first pass that materially increases runnable manifest coverage:
+**26/50 = 52%** (was 17/42 = 40%). Ten model families upgraded from
+missing/audit/scaffold to **runnable** or **executable optional extra**.
+
+#### New runnable models (+9 manifest entries)
+
+| Model | Engine | Notes |
+|-------|--------|-------|
+| `owlvit-base-patch32` | `owlvit` (OWLv2Engine) | OWL-ViT v1 via `OwlViTForObjectDetection` |
+| `owlvit-large-patch14` | `owlvit` | OWL-ViT v1 large |
+| `clip-vit-base-patch32` | `clip` (DINOv2Engine) | OpenAI CLIP ViT-B/32 image side |
+| `clip-vit-large-patch14` | `clip` | CLIP ViT-L/14 |
+| `siglip-base-patch16-224` | `siglip` | SigLIP v1 base |
+| `siglip2-large-patch16-256` | `siglip2` | SigLIP2 large |
+| `siglip2-so400m-patch14-384` | `siglip2` | SigLIP2 400M |
+| `convnextv2-tiny/base/large` | `convnextv2` (HFClassifyEngine) | 3 new classification models |
+| `maxvit-tiny-tf-224` | `maxvit` | MaxViT via HFClassifyEngine |
+| `medsam` | `sam_hf` | MedSAM via standard SamModel; RESEARCH ONLY |
+
+**Engine additions:**
+- `engines/owlv2.py` extended: detects `family == owlvit` and switches to `OwlViTProcessor + OwlViTForObjectDetection`; also registers `owlvit` alias.
+- `engines/hf_classify.py` (new): generic `AutoModelForImageClassification` engine; registers aliases for `convnextv2`, `maxvit`, `efficientnet`, `vit`, `deit`, `beit`.
+- `engines/dinov2.py` extended: registers additional aliases `siglip`, `clip`, `openclip` (all route through vision_model path for image-only embedding).
+
+#### Florence-2 `[florence2]` optional extra
+
+- New extra in `pyproject.toml`: `pip install 'visionservex[florence2]'` pins `transformers>=4.40,<5.0`.
+- New CLI subcommand: `visionservex florence2 doctor` — checks environment compatibility, reports `FLORENCE2_TRANSFORMERS_VERSION_UNSUPPORTED` when transformers ≥ 5.0, prints exact conda/pip setup recipe.
+- New CLI subcommand: `visionservex florence2 smoke-test florence-2-base <image> --task caption/ocr/object_detection/phrase_grounding` — runs inference or returns structured error code on transformers 5.x.
+
+This is the correct solution to the "Florence-2 blocked by transformers 5.x" problem: isolated `[florence2]` extra + dedicated doctor + exact setup recipe. Users on transformers 5.x get a clear message and exact fix.
+
+#### Anomalib real Engine API attempt
+
+`anomaly train patchcore` now attempts the anomalib ≥ 1.0 `Engine.fit()` API first (with `max_epochs=1` for smoke validation), then falls through to the delegation path if the Engine API is not available. This is the first real executable path for PatchCore — no longer pure scaffold.
+
+#### Surveillance non-empty smoke: PASS
+
+Using the real street image from `examples/images/street.jpg` (repeated 4 times with slight crops): OWLv2 at `threshold=0.01` detects 18 objects across 4 frames, SimpleIoUTracker creates 5 tracks, 18 SigLIP2 embeddings are built, and a cosine similarity query returns 3 ranked hits (self-sim=1.000, cross-track-sim≈0.840). The pipeline is fully verified end-to-end.
+
+#### New CI commands working
+
+```bash
+visionservex florence2 doctor
+visionservex florence2 smoke-test florence-2-base <image> --task caption
+visionservex classify convnextv2-tiny image.jpg --top-k 5
+visionservex embed clip-vit-base-patch32 image.jpg --out /tmp/clip.npy
+visionservex embed siglip-base-patch16-224 image.jpg --out /tmp/siglip.npy
+visionservex open-vocab owlvit-base-patch32 image.jpg --prompt "person, car"
+visionservex medical segment medsam image.png --box 10,20,100,200 --out /tmp/medsam_out
+```
+
+#### Tests (19 new — `tests/test_v210.py`)
+
+OWL-ViT registration, HFClassifyEngine mocked inference, CLIP/SigLIP engine aliases,
+Florence-2 CLI doctor, Florence-2 version guard, MedSAM registry wired, ConvNeXtV2
+manifest entries, anomaly API structure, surveillance non-empty mocked end-to-end.
+
+#### Before/after
+
+| Metric | v2.0.1 | v2.1.0 |
+|--------|--------|--------|
+| Manifest runnable | 17/42 (40%) | **26/50 (52%)** |
+| New engines/aliases | — | 2 new, 4 new aliases |
+| New CLI command groups | — | `florence2` |
+| New extras | — | `[florence2]` |
+| Surveillance non-empty smoke | 0 detections | **18 detections, 5 tracks** |
+
+#### What still did NOT land (honest)
+
+- Florence-2 real inference in this environment (transformers 5.3.0): still blocked. The `[florence2]` extra and doctor command give the exact path; inference is not possible without downgrading transformers.
+- SAM2.1 variants: not wired — HF Hub model IDs for sam2.1-hiera-* differ from sam2 and the existing sam2_hf engine needs explicit routing.
+- ByteTrack/Torchreid optional extras: structured errors exist (`BYTETRACK_REQUIRED` etc.) but pip install wiring not added to pyproject.toml this pass.
+- Benchmark-classification and benchmark-anomaly functional routes: still return `BENCHMARK_NOT_IMPLEMENTED`.
+- DEIMv2/RT-DETRv4 loaders: still upstream-blocked (HF issue #41211 open).
+
 ## [2.0.1] - 2026-05-16
 
 ### Patch — fast-CI compatibility for test_v200.py

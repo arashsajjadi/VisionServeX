@@ -2618,3 +2618,348 @@ models:
   model_category: external_api
   unavailable_reason: Access may be gated at facebook namespace. Auth-aware wrapper required.
   notes: Do not auto-pull. Verify access via HF login before enabling.
+
+# ============================================================
+# OWL-ViT v1 — open-vocabulary detection (wired via owlvit engine)
+# ============================================================
+
+- id: owlvit-base-patch32
+  display_name: OWL-ViT v1 (Base, patch32) — open-vocabulary detection
+  task: open_vocab_detect
+  family: owlvit
+  backend: huggingface_owlv2
+  engine: owlvit
+  license: Apache-2.0
+  upstream_url: https://huggingface.co/docs/transformers/en/model_doc/owlvit
+  download_type: huggingface
+  hf_repo_id: google/owlvit-base-patch32
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_vram_gb: 1.0
+  recommended_vram_gb: 3.0
+  difficulty: easy
+  status: beta
+  model_category: experimental_sota
+  notes: OWL-ViT v1 (predecessor to OWLv2). Same OWLv2Engine with OwlViTForObjectDetection.
+
+- id: owlvit-large-patch14
+  display_name: OWL-ViT v1 (Large, patch14) — open-vocabulary detection
+  task: open_vocab_detect
+  family: owlvit
+  backend: huggingface_owlv2
+  engine: owlvit
+  license: Apache-2.0
+  upstream_url: https://huggingface.co/docs/transformers/en/model_doc/owlvit
+  download_type: huggingface
+  hf_repo_id: google/owlvit-large-patch14
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cuda
+  supported_precisions:
+  - fp16
+  - bf16
+  minimum_vram_gb: 4.0
+  recommended_vram_gb: 8.0
+  difficulty: medium
+  status: beta
+  model_category: experimental_sota
+  notes: OWL-ViT v1 large variant. Heavy model; GPU required.
+
+# ============================================================
+# CLIP — image-text embedding
+# ============================================================
+
+- id: clip-vit-base-patch32
+  display_name: CLIP (ViT-B/32) — image-text embedding
+  task: embed
+  family: clip
+  backend: huggingface_dinov2
+  engine: clip
+  license: MIT
+  upstream_url: https://github.com/openai/CLIP
+  download_type: huggingface
+  hf_repo_id: openai/clip-vit-base-patch32
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_vram_gb: 1.0
+  recommended_vram_gb: 2.0
+  difficulty: easy
+  status: beta
+  model_category: feature_backbone
+  notes: CLIP ViT-B/32. Uses DINOv2Engine image side (vision_model path).
+
+- id: clip-vit-large-patch14
+  display_name: CLIP (ViT-L/14) — image-text embedding
+  task: embed
+  family: clip
+  backend: huggingface_dinov2
+  engine: clip
+  license: MIT
+  upstream_url: https://github.com/openai/CLIP
+  download_type: huggingface
+  hf_repo_id: openai/clip-vit-large-patch14
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_vram_gb: 2.0
+  recommended_vram_gb: 6.0
+  difficulty: medium
+  status: beta
+  model_category: feature_backbone
+  notes: CLIP ViT-L/14. Higher quality embeddings than B/32.
+
+# ============================================================
+# SigLIP v1 — image-text retrieval
+# ============================================================
+
+- id: siglip-base-patch16-224
+  display_name: SigLIP (Base, 224) — image-text retrieval
+  task: embed
+  family: siglip
+  backend: huggingface_dinov2
+  engine: siglip
+  license: Apache-2.0
+  upstream_url: https://huggingface.co/docs/transformers/en/model_doc/siglip
+  download_type: huggingface
+  hf_repo_id: google/siglip-base-patch16-224
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_vram_gb: 1.0
+  recommended_vram_gb: 2.0
+  difficulty: easy
+  status: beta
+  model_category: feature_backbone
+  notes: SigLIP v1 base. Sigmoid-based contrastive learning.
+
+# ============================================================
+# SigLIP2 — additional variants
+# ============================================================
+
+- id: siglip2-large-patch16-256
+  display_name: SigLIP2 (Large, 256) — text-image retrieval
+  task: embed
+  family: siglip2
+  backend: huggingface_dinov2
+  engine: siglip2
+  license: Apache-2.0
+  upstream_url: https://huggingface.co/docs/transformers/en/model_doc/siglip2
+  download_type: huggingface
+  hf_repo_id: google/siglip2-large-patch16-256
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_vram_gb: 2.0
+  recommended_vram_gb: 6.0
+  difficulty: medium
+  status: beta
+  model_category: feature_backbone
+  notes: SigLIP2 large. Higher capacity than base.
+
+- id: siglip2-so400m-patch14-384
+  display_name: SigLIP2 (SO400M, 384) — text-image retrieval
+  task: embed
+  family: siglip2
+  backend: huggingface_dinov2
+  engine: siglip2
+  license: Apache-2.0
+  upstream_url: https://huggingface.co/docs/transformers/en/model_doc/siglip2
+  download_type: huggingface
+  hf_repo_id: google/siglip2-so400m-patch14-384
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cuda
+  supported_precisions:
+  - fp16
+  minimum_vram_gb: 4.0
+  recommended_vram_gb: 12.0
+  difficulty: hard
+  status: beta
+  model_category: feature_backbone
+  notes: SigLIP2 400M architecture. Highest quality but very heavy.
+
+# ============================================================
+# ConvNeXtV2 — classification
+# ============================================================
+
+- id: convnextv2-tiny
+  display_name: ConvNeXtV2 (Tiny) — image classification
+  task: classify
+  family: convnextv2
+  backend: huggingface_classify
+  engine: convnextv2
+  license: Apache-2.0
+  upstream_url: https://github.com/facebookresearch/ConvNeXt-V2
+  download_type: huggingface
+  hf_repo_id: facebook/convnextv2-tiny-22k-224
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_ram_gb: 2.0
+  difficulty: easy
+  status: beta
+  model_category: production_recommended
+  notes: ConvNeXtV2-Tiny. Fastest ConvNeXtV2 variant. ImageNet-22k pretrained.
+
+- id: convnextv2-base
+  display_name: ConvNeXtV2 (Base) — image classification
+  task: classify
+  family: convnextv2
+  backend: huggingface_classify
+  engine: convnextv2
+  license: Apache-2.0
+  upstream_url: https://github.com/facebookresearch/ConvNeXt-V2
+  download_type: huggingface
+  hf_repo_id: facebook/convnextv2-base-22k-224
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_ram_gb: 4.0
+  difficulty: easy
+  status: beta
+  model_category: accuracy_grade
+  notes: ConvNeXtV2-Base. Good balance of accuracy and inference cost.
+
+- id: convnextv2-large
+  display_name: ConvNeXtV2 (Large) — image classification
+  task: classify
+  family: convnextv2
+  backend: huggingface_classify
+  engine: convnextv2
+  license: Apache-2.0
+  upstream_url: https://github.com/facebookresearch/ConvNeXt-V2
+  download_type: huggingface
+  hf_repo_id: facebook/convnextv2-large-22k-224
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_ram_gb: 8.0
+  difficulty: medium
+  status: beta
+  model_category: accuracy_grade
+  notes: ConvNeXtV2-Large.
+
+# ============================================================
+# MaxViT — classification
+# ============================================================
+
+- id: maxvit-tiny-tf-224
+  display_name: MaxViT (Tiny, TF) — image classification
+  task: classify
+  family: maxvit
+  backend: huggingface_classify
+  engine: maxvit
+  license: Apache-2.0
+  upstream_url: https://huggingface.co/docs/transformers/en/model_doc/maxvit
+  download_type: huggingface
+  hf_repo_id: google/maxvit-tiny-tf-224
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  minimum_ram_gb: 2.0
+  difficulty: easy
+  status: beta
+  model_category: production_recommended
+  notes: MaxViT tiny variant.
+
+# ============================================================
+# MedSAM — HF-based promptable medical segmentation
+# ============================================================
+
+- id: medsam
+  display_name: MedSAM (HF wanglab/medsam-vit-base) — medical SAM
+  task: foundation_segment
+  family: sam
+  backend: huggingface_sam
+  engine: sam_hf
+  license: Apache-2.0
+  upstream_url: https://github.com/bowang-lab/MedSAM
+  download_type: huggingface
+  hf_repo_id: wanglab/medsam-vit-base
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  minimum_vram_gb: 2.0
+  recommended_vram_gb: 6.0
+  difficulty: medium
+  status: beta
+  model_category: medical_extra
+  notes: MedSAM fine-tuned on medical images. Loads via SamModel (standard HF SAM). Requires box or point prompt. Research and education only — no diagnostic claims.
+  warnings:
+  - VisionServeX medical models are for RESEARCH AND EDUCATION ONLY. No diagnostic or regulatory claims.

@@ -192,7 +192,10 @@ def _factory(entry: ModelEntry) -> DINOv2Engine:
 
 
 register_engine("dinov2", _factory)
-register_engine("siglip2", _factory)  # same engine handles SigLIP2 image side
+register_engine("siglip2", _factory)  # SigLIP2 image side (vision_model path)
+register_engine("siglip", _factory)  # SigLIP v1 image side
+register_engine("clip", _factory)  # OpenAI CLIP image side
+register_engine("openclip", _factory)  # OpenCLIP image side
 
 
 __all__ = ["DINOv2Engine"]
