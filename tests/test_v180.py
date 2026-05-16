@@ -41,7 +41,7 @@ def test_owlv2_engine_registered():
 @pytest.mark.fast
 def test_owlv2_predict_with_mocked_outputs():
     """Mock processor/model and verify OWLv2 result normalization."""
-    import torch
+    torch = pytest.importorskip("torch", reason="OWLv2 mocked-inference test needs torch tensors")
 
     from visionservex.engines.owlv2 import OWLv2Engine
     from visionservex.registry import default_registry
@@ -100,7 +100,7 @@ def test_owlv2_predict_with_mocked_outputs():
 @pytest.mark.fast
 def test_owlv2_accepts_comma_separated_prompt():
     """OWLv2 accepts a comma-separated string via prompt= (CLI shape)."""
-    import torch
+    torch = pytest.importorskip("torch", reason="OWLv2 mocked-inference test needs torch tensors")
 
     from visionservex.engines.owlv2 import OWLv2Engine
     from visionservex.registry import default_registry
@@ -231,7 +231,7 @@ def test_florence2_parse_quad_boxes_to_axis_aligned():
 @pytest.mark.fast
 def test_florence2_unknown_task_raises():
     """Unknown task should raise ValueError listing supported tasks."""
-    import torch
+    torch = pytest.importorskip("torch", reason="Florence-2 task-token test needs torch tensors")
 
     from visionservex.engines.florence2 import Florence2Engine
     from visionservex.registry import default_registry

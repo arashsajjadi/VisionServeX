@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.8.1] - 2026-05-16
+
+### Patch — fast-CI compatibility for v1.8.0 OWLv2/Florence-2 mocked tests
+
+Three new tests added in v1.8.0 imported `torch` at the function-body level:
+`test_owlv2_predict_with_mocked_outputs`, `test_owlv2_accepts_comma_separated_prompt`,
+and `test_florence2_unknown_task_raises`. Because the fast CI environment
+deliberately omits the `[hf]` extra (to keep wall-time under 10 minutes), torch
+is not installed there, and these three tests failed with `ModuleNotFoundError`.
+
+This patch wraps each `import torch` in `pytest.importorskip("torch", reason=...)`
+so the tests skip cleanly when torch is absent. No production code changed; the
+OWLv2 and Florence-2 engines added in v1.8.0 remain fully wired.
+
 ## [1.8.0] - 2026-05-16
 
 ### OWLv2 + Florence-2 runnable engines, SAM3 auth wrapper, expert-sidecar dry-run commands
