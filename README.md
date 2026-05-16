@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-1.3.0-informational.svg" alt="v1.3.0">
+  <img src="https://img.shields.io/badge/version-1.4.0-informational.svg" alt="v1.4.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -60,6 +60,77 @@ For a quick demo (smallest model):
 visionservex pull rfdetr-nano          # demo_fast, CPU-capable
 visionservex predict rfdetr-nano image.jpg
 ```
+
+---
+
+## Ultralytics-Like Workflow
+
+Same mental model — different backends, all permissive-license.
+
+```python
+from visionservex import VisionModel
+
+model = VisionModel("dfine-x-o365-coco")
+model.pull()                          # download checkpoint
+model.info()                          # show registry metadata
+results = model.predict("image.jpg", conf=0.25)
+results.save("outputs/")             # save annotated image
+results.plot()                        # returns PIL Image
+results.to_json()                     # JSON string
+results.to_csv()                      # CSV string
+results.debug()                       # detailed debug string
+
+# Check what operations are supported
+model.supports("val")                 # {"supported": True, ...}
+model.supports("train")               # {"supported": False, "reason": "..."}
+model.training_info()                 # per-family training capabilities
+model.export_info()                   # per-family export capabilities
+model.val(dataset="yolo:/data/coco128", max_images=100)  # AP50/mAP50:95
+```
+
+> **Note:** Not all operations exist for all models. Use `model.supports("operation")`
+> and `visionservex model-card show MODEL` to check capabilities.
+> Unlike Ultralytics, VisionServeX does not depend on Ultralytics as a package.
+
+```bash
+# CLI task aliases
+visionservex detect dfine-x-o365-coco image.jpg --conf 0.25 --device cuda
+visionservex segment rfdetr-seg-medium image.jpg --save-image out.jpg
+visionservex classify swinv2-base image.jpg --top-k 5
+visionservex open-vocab grounding-dino-swin-b image.jpg --prompt "car,person"
+visionservex val dfine-x-o365-coco --dataset yolo:/path/to/coco128 --max-images 128
+
+# Model lifecycle
+visionservex model pull dfine-x-o365-coco --dry-run
+visionservex model info dfine-x-o365-coco
+visionservex model checkpoint-info dfine-x-o365-coco
+visionservex training capabilities --model rfdetr-large
+visionservex export-cmd capabilities --model dfine-x-o365-coco
+```
+
+---
+
+## Output Normalization
+
+The built-in normalizer handles all common detection serialization formats:
+
+```python
+from visionservex import normalize_detections, parse_api_response
+
+# Accepts all these formats:
+dets = normalize_detections([
+    {"xyxy": [10, 20, 100, 200], "score": 0.9, "label": "cat"},
+    {"box": {"x1": 10, "y1": 20, "x2": 100, "y2": 200}, "confidence": 0.8, "category": "dog"},
+    {"bbox": [10, 20, 90, 180], "bbox_format": "xywh", "conf": 0.7, "class_id": 0},
+])
+
+# Parse VisionServeX HTTP API responses directly:
+import requests
+resp = requests.get("http://127.0.0.1:8080/detect", ...)
+dets = parse_api_response(resp.json())
+```
+
+Never silently drops all predictions — emits `AllPredictionsDroppedWarning` if normalization fails.
 
 ---
 

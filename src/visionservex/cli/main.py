@@ -30,6 +30,7 @@ from visionservex.cli import (
     gateway_commands,
     gpu_commands,
     model_card_commands,
+    model_lifecycle_commands,
     openmmlab_commands,
     privacy_commands,
     replacement_map_commands,
@@ -37,6 +38,7 @@ from visionservex.cli import (
     suite_commands,
     syntax_audit,
     tensorrt_commands,
+    training_commands,
     validation_commands,
 )
 from visionservex.cli import tunnel as tunnel_cli
@@ -92,6 +94,10 @@ app.add_typer(colab_commands.app, name="colab")
 app.add_typer(capabilities_commands.app, name="capabilities")
 app.add_typer(model_card_commands.app, name="model-card")
 app.add_typer(replacement_map_commands.app, name="replacement-map")
+app.add_typer(model_lifecycle_commands.app, name="model")
+app.add_typer(training_commands.training_app, name="training")
+app.add_typer(training_commands.export_app, name="export-cmd")
+app.add_typer(training_commands.video_app, name="video")
 
 console = Console()
 
@@ -1998,3 +2004,243 @@ def parallel_test_pair(
     )
     color = "green" if "excellent" in status else "yellow" if "acceptable" in status else "red"
     console.print(f"  Status: [{color}]{status}[/{color}]")
+
+
+# ---------------------------------------------------------------------------
+# Task alias commands (Ultralytics-like ergonomics)
+# ---------------------------------------------------------------------------
+
+
+@app.command(
+    "detect", help="Alias: visionservex detect MODEL IMAGE [same as predict for detect models]."
+)
+def detect_alias(
+    model_id: str,
+    input_path: Path,
+    conf: float = typer.Option(0.25, "--conf", "--threshold"),
+    device: str | None = typer.Option(None, "--device"),
+    save_image: Path | None = typer.Option(None, "--save-image"),
+    save_json: Path | None = typer.Option(None, "--save-json"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Ultralytics-like detect alias. Equivalent to: visionservex predict MODEL IMAGE."""
+    predict(
+        model_id=model_id,
+        input_path=input_path,
+        save=None,
+        save_json=save_json,
+        save_image=save_image,
+        prompt=None,
+        device=device,
+        precision=None,
+        top_k=None,
+        threshold=conf,
+        point=None,
+        box=None,
+        task=None,
+        timeout=None,
+        auto_pull=False,
+        no_auto_pull=False,
+        json_=json_,
+        debug=False,
+    )
+
+
+@app.command(
+    "segment", help="Alias: visionservex segment MODEL IMAGE [same as predict for segment models]."
+)
+def segment_alias(
+    model_id: str,
+    input_path: Path,
+    conf: float = typer.Option(0.25, "--conf", "--threshold"),
+    device: str | None = typer.Option(None, "--device"),
+    save_image: Path | None = typer.Option(None, "--save-image"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Ultralytics-like segment alias."""
+    predict(
+        model_id=model_id,
+        input_path=input_path,
+        save=None,
+        save_json=None,
+        save_image=save_image,
+        prompt=None,
+        device=device,
+        precision=None,
+        top_k=None,
+        threshold=conf,
+        point=None,
+        box=None,
+        task=None,
+        timeout=None,
+        auto_pull=False,
+        no_auto_pull=False,
+        json_=json_,
+        debug=False,
+    )
+
+
+@app.command(
+    "classify",
+    help="Alias: visionservex classify MODEL IMAGE [same as predict for classify models].",
+)
+def classify_alias(
+    model_id: str,
+    input_path: Path,
+    top_k: int = typer.Option(5, "--top-k"),
+    device: str | None = typer.Option(None, "--device"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Ultralytics-like classify alias."""
+    predict(
+        model_id=model_id,
+        input_path=input_path,
+        save=None,
+        save_json=None,
+        save_image=None,
+        prompt=None,
+        device=device,
+        precision=None,
+        top_k=top_k,
+        threshold=None,
+        point=None,
+        box=None,
+        task=None,
+        timeout=None,
+        auto_pull=False,
+        no_auto_pull=False,
+        json_=json_,
+        debug=False,
+    )
+
+
+@app.command("open-vocab", help="Open-vocabulary detection with a text prompt.")
+def open_vocab_alias(
+    model_id: str,
+    input_path: Path,
+    prompt: str = typer.Option(..., "--prompt", help="Comma-separated class names."),
+    conf: float = typer.Option(0.25, "--conf", "--threshold"),
+    device: str | None = typer.Option(None, "--device"),
+    save_image: Path | None = typer.Option(None, "--save-image"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Open-vocabulary detection: visionservex open-vocab MODEL IMAGE --prompt 'cat,dog'."""
+    predict(
+        model_id=model_id,
+        input_path=input_path,
+        save=None,
+        save_json=None,
+        save_image=save_image,
+        prompt=prompt,
+        device=device,
+        precision=None,
+        top_k=None,
+        threshold=conf,
+        point=None,
+        box=None,
+        task=None,
+        timeout=None,
+        auto_pull=False,
+        no_auto_pull=False,
+        json_=json_,
+        debug=False,
+    )
+
+
+@app.command(
+    "grounded-segment", help="Text-prompted segmentation: find and segment objects by name."
+)
+def grounded_segment_alias(
+    model_id: str,
+    input_path: Path,
+    prompt: str = typer.Option(..., "--prompt", help="Comma-separated class names."),
+    conf: float = typer.Option(0.25, "--conf", "--threshold"),
+    device: str | None = typer.Option(None, "--device"),
+    save_image: Path | None = typer.Option(None, "--save-image"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Grounded segmentation: text prompt → detect → segment."""
+    predict(
+        model_id=model_id,
+        input_path=input_path,
+        save=None,
+        save_json=None,
+        save_image=save_image,
+        prompt=prompt,
+        device=device,
+        precision=None,
+        top_k=None,
+        threshold=conf,
+        point=None,
+        box=None,
+        task=None,
+        timeout=None,
+        auto_pull=False,
+        no_auto_pull=False,
+        json_=json_,
+        debug=False,
+    )
+
+
+@app.command("val", help="Evaluate model AP on an annotated dataset (detect task).")
+def val_cmd(
+    model_id: str,
+    dataset: str = typer.Option(..., "--dataset", help="'yolo:<path>' or 'coco-json:<img>:<ann>'"),
+    max_images: int = typer.Option(100, "--max-images"),
+    device: str | None = typer.Option(None, "--device"),
+    out: Path | None = typer.Option(None, "--out"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Evaluate detection AP50/mAP50:95. Detection task only; others return BENCHMARK_NOT_IMPLEMENTED."""
+    from visionservex.cli.training_commands import val_model
+
+    val_model(
+        model_id=model_id,
+        dataset=dataset,
+        max_images=max_images,
+        device=device or "auto",
+        out=out,
+        json_=json_,
+    )
+
+
+@app.command(
+    "train", help="Train a model — returns structured TRAINING_NOT_SUPPORTED for most models."
+)
+def train_cmd(
+    model_id: str,
+    data: str | None = typer.Option(None, "--data"),
+    epochs: int = typer.Option(50, "--epochs"),
+    device: str | None = typer.Option(None, "--device"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Train. Most models return TRAINING_NOT_SUPPORTED with a structured error and hint."""
+    from visionservex.cli.training_commands import train_model
+
+    train_model(
+        model_id=model_id,
+        data=data,
+        epochs=epochs,
+        device=device or "auto",
+        json_=json_,
+    )
+
+
+@app.command("finetune", help="Fine-tune a model — returns structured error for most models.")
+def finetune_cmd(
+    model_id: str,
+    data: str | None = typer.Option(None, "--data"),
+    epochs: int = typer.Option(20, "--epochs"),
+    device: str | None = typer.Option(None, "--device"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Fine-tune. Most models return TRAINING_NOT_SUPPORTED with a structured error and hint."""
+    from visionservex.cli.training_commands import finetune_model
+
+    finetune_model(
+        model_id=model_id,
+        data=data,
+        epochs=epochs,
+        device=device or "auto",
+        json_=json_,
+    )

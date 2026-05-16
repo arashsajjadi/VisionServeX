@@ -7,6 +7,96 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-05-16
+
+### Ultralytics-like ergonomics, output normalizer, model lifecycle CLI
+
+VisionServeX gains Ultralytics-style ergonomics, a robust multi-schema output
+normalizer, model lifecycle CLI commands, training/export capability matrices,
+task alias commands, and video/tracking stubs.
+
+#### Output normalizer (Phase 1 / Phase 13F)
+- Added `src/visionservex/core/normalizer.py` — accepts all common box schemas:
+  `xyxy:[...]`, `box:[...]`, `bbox:[...]`, `bbox_format=xywh`,
+  `box:{"x1":...}`, `xyxy:{"x1":...}`, `box:{"xmin":...}`, `coordinates:{...}`.
+- Accepted score keys: `score`, `confidence`, `conf`, `probability`, `prob`.
+- Accepted label keys: `class_name`, `label`, `category`, `name`, `phrase`,
+  `class_id`, `category_id`, `label_id`, `cls`.
+- COCO official category IDs 1-90 → contiguous 0-79 mapping built-in.
+- `AllPredictionsDroppedWarning` emitted if normalization drops all predictions.
+- `parse_api_response()` handles the VisionServeX HTTP API JSON format directly.
+- Exported at top-level: `from visionservex import normalize_detections, parse_api_response`.
+
+#### Ultralytics-like Python API (Phase 13A/B)
+- `VisionModel.from_pretrained()`, `from_registry()` — factory class methods.
+- `VisionModel.from_checkpoint()` — returns `CHECKPOINT_LOAD_UNSUPPORTED` structured error.
+- `VisionModel.to(device)` — move to device (returns self).
+- `VisionModel.pull(force=False)` — download weights.
+- `VisionModel.cache_info()` — cache path, size, HF path.
+- `VisionModel.checkpoint_info()` — provenance, trust level, AP verification status.
+- `VisionModel.clear_cache()` — delete cached weights.
+- `VisionModel.names` — COCO80 class names for detection models.
+- `VisionModel.supports(operation)` — check predict/val/export/train/track support.
+- `VisionModel.training_info()` — per-family training capability dict.
+- `VisionModel.export_info()` — per-family export capability dict.
+- `VisionModel.val(dataset=..., max_images=...)` — evaluates AP50/mAP50:95 when detection model.
+
+#### Results objects (Phase 13E)
+- Added `BaseResult.to_csv()` — CSV-formatted string of predictions.
+- Added `BaseResult.to_pandas()` — pandas DataFrame (requires pandas installed).
+- Added `BaseResult.debug()` — multi-line debug string with full result details.
+- Added `BaseResult.show()` — best-effort image display in notebooks/windows.
+
+#### Model lifecycle CLI (Phase 13D)
+- `visionservex model info MODEL` — registry + cache status.
+- `visionservex model pull MODEL [--force] [--dry-run]` — download checkpoint.
+- `visionservex model checkpoint-info MODEL` — provenance, trust level.
+- `visionservex model cache MODEL` — cache size and path.
+- `visionservex model verify MODEL` — SHA-256 verification.
+- `visionservex model clear-cache MODEL` — delete cached weights.
+- `visionservex model list-local` — all locally cached models.
+
+#### Training / export capabilities (Phase 13G/H)
+- `visionservex training capabilities [--model MODEL]` — table of train/finetune/resume support.
+- `visionservex training train MODEL --data ... --epochs N` — structured TRAINING_NOT_SUPPORTED.
+- `visionservex training finetune MODEL --data ... --epochs N` — structured error.
+- `visionservex training val MODEL --dataset yolo:<path>` — detection AP evaluation.
+- `visionservex export-cmd capabilities [--model MODEL]` — ONNX/TRT/other export status.
+- `visionservex export-cmd export MODEL --format onnx --out path` — structured EXPORT_UNSUPPORTED.
+- RF-DETR: train_supported=True, finetune_supported=True (rfdetr package).
+- All others: train_supported=False with explicit notes and upstream docs link.
+
+#### CLI task aliases (Phase 13C)
+- `visionservex detect MODEL IMAGE [--conf 0.25] [--device auto]`
+- `visionservex segment MODEL IMAGE [--conf 0.25]`
+- `visionservex classify MODEL IMAGE [--top-k 5]`
+- `visionservex open-vocab MODEL IMAGE --prompt "car,person"`
+- `visionservex grounded-segment MODEL IMAGE --prompt "person"`
+- `visionservex val MODEL --dataset yolo:<path>` (detection only)
+- `visionservex train MODEL --data ... --epochs N` (structured error for most)
+- `visionservex finetune MODEL --data ... --epochs N` (structured error)
+
+#### Video/tracking stubs (Phase 13I)
+- `visionservex video predict MODEL SOURCE` — VIDEO_NOT_IMPLEMENTED (exit 2).
+- `visionservex video track MODEL SOURCE` — TRACKING_NOT_IMPLEMENTED (exit 2).
+- `visionservex video stream MODEL --source webcam` — STREAMING_NOT_IMPLEMENTED (exit 2).
+- Roadmap: v1.5.0.
+
+### Decisions
+- **Training**: Only RF-DETR has train/finetune=True. All HF Transformers backends (D-FINE,
+  SwinV2, Grounding DINO, OneFormer, SAM, SAM2) return TRAINING_NOT_SUPPORTED — HF
+  inference API does not expose training. Use upstream repos directly for training.
+- **ONNX export**: rfdetr=supported, others=experimental or unsupported.
+- **DEIMv2/RT-DETRv4**: still experimental_sota stubs — no change from v1.3.0.
+- **Mask AP**: still roadmap v1.5.
+- **Video inference**: roadmap v1.5.
+
+### Known limitations
+- `VisionModel.val()` only works for detect/open_vocab_detect tasks.
+- Training is only semantically supported for RF-DETR (rfdetr package exposes training).
+- `to_pandas()` requires `pip install pandas`.
+- Video, tracking, and stream operations return structured NOT_IMPLEMENTED errors.
+
 ## [1.3.0] - 2026-05-15
 
 ### Evaluation and scientific usability upgrade

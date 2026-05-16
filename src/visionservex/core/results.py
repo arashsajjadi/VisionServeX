@@ -198,6 +198,124 @@ class BaseResult:
         annotated.save(out)
         return out
 
+    def to_csv(self) -> str:
+        """Return a CSV-formatted string of the result's primary predictions."""
+        import csv
+        import io
+
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+
+        if isinstance(self, (DetectionResult, OpenVocabularyResult)):
+            writer.writerow(["model_id", "label", "class_id", "score", "x1", "y1", "x2", "y2"])
+            for det in getattr(self, "detections", []):
+                if isinstance(det, dict):
+                    b = det.get("box") or {}
+                    writer.writerow(
+                        [
+                            self.model_id,
+                            det.get("label", ""),
+                            det.get("class_id", ""),
+                            det.get("score", ""),
+                            b.get("x1", "") if isinstance(b, dict) else "",
+                            b.get("y1", "") if isinstance(b, dict) else "",
+                            b.get("x2", "") if isinstance(b, dict) else "",
+                            b.get("y2", "") if isinstance(b, dict) else "",
+                        ]
+                    )
+                else:
+                    # Detection dataclass
+                    b = det.box
+                    writer.writerow(
+                        [
+                            self.model_id,
+                            det.label,
+                            det.class_id,
+                            det.score,
+                            b.x1,
+                            b.y1,
+                            b.x2,
+                            b.y2,
+                        ]
+                    )
+        elif isinstance(self, ClassificationResult):
+            writer.writerow(["model_id", "label", "score"])
+            for label, score in self.top_k:
+                writer.writerow([self.model_id, label, score])
+        else:
+            writer.writerow(["model_id", "kind", "latency_ms"])
+            writer.writerow([self.model_id, self.kind, self.latency_ms])
+
+        return buf.getvalue()
+
+    def to_pandas(self):
+        """Return a pandas DataFrame of primary predictions.
+
+        Raises ImportError if pandas is not installed.
+        """
+        import pandas as pd  # type: ignore
+
+        d = self.to_dict()
+        if isinstance(self, (DetectionResult, OpenVocabularyResult)):
+            rows = []
+            for det in d.get("detections", []):
+                box = det.get("box", {}) or {}
+                rows.append(
+                    {
+                        "model_id": self.model_id,
+                        "label": det.get("label", ""),
+                        "class_id": det.get("class_id"),
+                        "score": det.get("score", 0.0),
+                        "x1": box.get("x1"),
+                        "y1": box.get("y1"),
+                        "x2": box.get("x2"),
+                        "y2": box.get("y2"),
+                    }
+                )
+            return pd.DataFrame(rows)
+        if isinstance(self, ClassificationResult):
+            return pd.DataFrame(self.top_k, columns=["label", "score"])
+        return pd.DataFrame(
+            [{"model_id": self.model_id, "kind": self.kind, "latency_ms": self.latency_ms}]
+        )
+
+    def debug(self) -> str:
+        """Return a multi-line debug string with full result details."""
+        lines = [
+            f"=== Debug: {self.__class__.__name__} ===",
+            f"Model:     {self.model_id}",
+            f"Task:      {self.task}",
+            f"Device:    {self.device} ({self.precision})",
+            f"Backend:   {self.backend}",
+            f"Latency:   {self.latency_ms:.1f} ms",
+            f"Image:     {self.image_size[0]}x{self.image_size[1]}",
+        ]
+        if isinstance(self, (DetectionResult, OpenVocabularyResult)):
+            dets = self.detections
+            lines.append(f"Detections: {len(dets)}")
+            for i, d in enumerate(dets[:10]):
+                b = d.box
+                lines.append(
+                    f"  [{i}] {d.label} (id={d.class_id}) score={d.score:.3f} "
+                    f"box=[{b.x1:.1f},{b.y1:.1f},{b.x2:.1f},{b.y2:.1f}]"
+                )
+        elif isinstance(self, ClassificationResult):
+            lines.append(f"Top-k: {self.top_k[:5]}")
+        elif isinstance(self, SegmentationResult):
+            lines.append(f"Segments: {len(self.segments)}")
+        if self.warnings:
+            for w in self.warnings:
+                lines.append(f"  WARNING: {w}")
+        return "\n".join(lines)
+
+    def show(self) -> None:
+        """Display the annotated image in a notebook or window (best-effort)."""
+        try:
+            img = self.plot()
+            img.show()
+        except Exception as exc:
+            print(f"show() failed: {exc}")
+
     def summary(self) -> str:
         """Return a short, human-readable single-line summary."""
         return f"<{self.__class__.__name__} model={self.model_id} latency={self.latency_ms:.1f}ms>"

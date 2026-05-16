@@ -9,7 +9,7 @@ authors:
     affiliation: "University of Saskatchewan, Department of Computer Science"
     email: "arash.sajjadi@usask.ca"
 date-released: "2026-05-15"
-version: "1.3.0"
+version: "1.4.0"
 license: "Apache-2.0"
 repository-code: "https://github.com/arashsajjadi/VisionServeX"
 url: "https://github.com/arashsajjadi/VisionServeX"

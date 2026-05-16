@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 __author__ = "Arash Sajjadi"
 __email__ = "arash.sajjadi@usask.ca"
 __license__ = "Apache-2.0"
 
 from visionservex.client import AsyncClient, Client, ClientResult, GatewayError
 from visionservex.core.model import VisionModel
+from visionservex.core.normalizer import (
+    normalize_detection,
+    normalize_detections,
+    parse_api_response,
+)
 from visionservex.core.results import (
     ClassificationResult,
     DetectionResult,
@@ -51,4 +56,7 @@ __all__ = [
     "VisionModel",
     "VisionServeXError",
     "__version__",
+    "normalize_detection",
+    "normalize_detections",
+    "parse_api_response",
 ]

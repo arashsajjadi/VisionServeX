@@ -1,10 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2026 Arash Sajjadi
-"""High-level ``VisionModel`` API.
+"""High-level ``VisionModel`` API — Ultralytics-like ergonomics.
 
 A ``VisionModel`` is the friendly facade users interact with. It hides
 engine selection, device choice, weight download, and result construction
 behind a single object.
+
+Ultralytics-like workflow::
+
+    model = VisionModel("dfine-x-o365-coco")
+    model.pull()
+    model.info()
+    results = model.predict("image.jpg", conf=0.25)
+    results.save("outputs/")
+    results.plot()
 """
 
 from __future__ import annotations
@@ -274,6 +283,211 @@ class VisionModel:
             "backend": self.entry.backend,
         }
 
+    # ------- Ultralytics-like API extensions -------
+
+    @classmethod
+    def from_pretrained(cls, model_id: str, **kwargs: Any) -> VisionModel:
+        """Alias for VisionModel(model_id). Ultralytics-style factory."""
+        return cls(model_id, **kwargs)
+
+    @classmethod
+    def from_registry(cls, model_id: str, **kwargs: Any) -> VisionModel:
+        """Alias for VisionModel(model_id). Explicit registry-based factory."""
+        return cls(model_id, **kwargs)
+
+    @classmethod
+    def from_checkpoint(cls, checkpoint_path: str | Path, **kwargs: Any) -> VisionModel:
+        """Not generally supported. Raises a structured error with a hint."""
+        raise NotImplementedError(
+            "CHECKPOINT_LOAD_UNSUPPORTED: VisionModel does not support loading arbitrary "
+            "local checkpoints. Use VisionModel('MODEL_ID').pull() to download an official "
+            "checkpoint, or register a custom backend with visionservex model register-custom."
+        )
+
+    def to(self, device: str) -> VisionModel:
+        """Move model to a device (Ultralytics-style). Returns self."""
+        self.device = device
+        if self._loaded:
+            self.unload()
+        return self
+
+    def pull(self, *, force: bool = False) -> Path | None:
+        """Download model weights. Returns local path or None for synthetic models."""
+        from visionservex.runtime.downloads import download
+
+        if self.entry.download_type == "synthetic":
+            return None
+        path = download(self.entry, force=force)
+        self._cache_path = str(path)
+        self._model_loaded_from = self.entry.download_type
+        return path
+
+    def cache_info(self) -> dict[str, Any]:
+        """Return cache metadata for this model."""
+        from visionservex.config import get_settings
+        from visionservex.runtime.downloads import cached_path, is_cached
+
+        cp = cached_path(self.entry)
+        size_bytes = 0
+        if cp and cp.exists():
+            if cp.is_dir():
+                size_bytes = sum(f.stat().st_size for f in cp.rglob("*") if f.is_file())
+            else:
+                size_bytes = cp.stat().st_size
+        return {
+            "model_id": self.entry.id,
+            "cached": is_cached(self.entry),
+            "cache_path": str(cp) if cp else None,
+            "size_bytes": size_bytes,
+            "cache_dir": str(get_settings().cache.cache_dir),
+            "auto_download": self.entry.auto_download,
+        }
+
+    def checkpoint_info(self) -> dict[str, Any]:
+        """Return checkpoint provenance and trust metadata."""
+        return {
+            "model_id": self.entry.id,
+            "source": self.entry.download_type,
+            "hf_repo_id": getattr(self.entry, "hf_repo_id", None),
+            "upstream_url": self.entry.upstream_url,
+            "license": self.entry.license,
+            "license_uncertain": self.entry.license_uncertain or False,
+            "implementation_status": self.entry.implementation_status,
+            "checkpoint_source": self.entry.download_type,
+            "checkpoint_trust_level": (
+                "community_hf"
+                if self.entry.download_type == "huggingface"
+                else "package_managed"
+                if self.entry.download_type == "package_managed"
+                else "manual"
+            ),
+            "official_ap_claim": "see model-card for upstream benchmark claims",
+            "verified_by_visionservex": "latency_tested_only — use benchmark-competitiveness --dataset for AP",
+        }
+
+    def clear_cache(self) -> int:
+        """Delete cached model weights. Returns bytes freed."""
+        from visionservex.runtime.downloads import cache_clean
+
+        if self._loaded:
+            self.unload()
+        return cache_clean(self.entry.id)
+
+    @property
+    def names(self) -> list[str]:
+        """Class names for this model (COCO80 for detection models)."""
+        from visionservex.core.normalizer import COCO80_NAMES
+
+        if self.entry.task == "detect":
+            return COCO80_NAMES
+        return []
+
+    def supports(self, operation: str) -> dict[str, Any]:
+        """Check whether an operation is supported for this model.
+
+        Returns a dict with keys: supported (bool), reason (str), hint (str).
+        """
+        return _capability_check(self.entry.id, self.entry, operation)
+
+    def training_info(self) -> dict[str, Any]:
+        """Return training and fine-tuning capabilities for this model."""
+        return _training_capabilities(self.entry.id)
+
+    def export_info(self) -> dict[str, Any]:
+        """Return export capabilities for this model."""
+        return _export_capabilities(self.entry.id)
+
+    def val(
+        self,
+        data: str | None = None,
+        *,
+        dataset: str | None = None,
+        max_images: int = 100,
+        device: str | None = None,
+        out: str | None = None,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        """Evaluate model AP on an annotated dataset.
+
+        Args:
+            data: Dataset path. Accepts ``yolo:<path>`` or ``coco-json:<img>:<ann>`` formats.
+            dataset: Alias for ``data``.
+            max_images: Maximum number of images to evaluate.
+            device: Device override.
+            out: Path prefix for output JSON/CSV.
+
+        Returns:
+            Evaluation result dict with ap50, map50_95, precision, recall, f1, latency.
+
+        Notes:
+            Only detection task is fully supported. Segmentation/pose/OBB
+            return BENCHMARK_NOT_IMPLEMENTED.
+        """
+        if self.entry.task not in ("detect", "open_vocab_detect"):
+            return {
+                "status": "BENCHMARK_NOT_IMPLEMENTED",
+                "task": self.entry.task,
+                "message": f"AP evaluation for task={self.entry.task!r} is not yet implemented.",
+                "hint": "Detection AP is available. Use visionservex benchmark benchmark-segmentation for roadmap.",
+            }
+
+        ds = data or dataset
+        if not ds:
+            return {
+                "status": "DATASET_REQUIRED",
+                "message": "Provide data= as 'yolo:<path>' or 'coco-json:<img_dir>:<ann_file>'",
+                "hint": "visionservex val MODEL --dataset yolo:/path/to/coco128",
+            }
+
+        from pathlib import Path as _Path
+
+        from visionservex.runtime.evaluation import (
+            load_coco_json,
+            load_yolo_format,
+            run_model_on_dataset,
+        )
+
+        samples = None
+        if ds.startswith("yolo:"):
+            yolo_path = _Path(ds[5:])
+            if not yolo_path.exists():
+                return {
+                    "status": "DATASET_NOT_FOUND",
+                    "message": f"Path not found: {yolo_path}",
+                    "hint": "Provide an existing directory with images/ and labels/ subdirs.",
+                }
+            samples, _ = load_yolo_format(yolo_path, max_images=max_images)
+        elif ds.startswith("coco-json:"):
+            parts = ds[10:].split(":", 1)
+            if len(parts) == 2:
+                images_p, ann_p = _Path(parts[0]), _Path(parts[1])
+                if not images_p.exists() or not ann_p.exists():
+                    return {
+                        "status": "DATASET_NOT_FOUND",
+                        "message": f"images_dir={images_p} or ann_file={ann_p} not found.",
+                    }
+                samples, _ = load_coco_json(images_p, ann_p, max_images=max_images)
+
+        if samples is None:
+            return {
+                "status": "DATASET_PARSE_FAILED",
+                "message": f"Could not load dataset from {ds!r}",
+                "hint": "Use 'yolo:<path>' or 'coco-json:<img_dir>:<ann_file>'",
+            }
+
+        result = run_model_on_dataset(
+            self.entry.id, samples, device=device or self.device, dataset_name=ds
+        )
+
+        if out:
+            import json as _json
+
+            op = _Path(out).with_suffix(".json")
+            op.parent.mkdir(parents=True, exist_ok=True)
+            op.write_text(_json.dumps(result.to_dict(), indent=2, default=str), encoding="utf-8")
+
+        return result.to_dict()
+
     # ------- helpers -------
 
     def _coerce_image(self, image: Image.Image | bytes | str | Path) -> Image.Image:
@@ -294,6 +508,282 @@ class VisionModel:
                 Path(image), max_pixels=limits.max_image_pixels, max_dim=limits.max_image_dim
             )
         raise TypeError(f"unsupported image input type: {type(image).__name__}")
+
+
+def _capability_check(model_id: str, entry: Any, operation: str) -> dict[str, Any]:
+    """Return support status for an operation on a model."""
+    op = operation.lower().replace("-", "_").replace(" ", "_")
+
+    # Always supported for wired models
+    always_ok = {"predict", "pull", "info", "benchmark", "cache_info", "checkpoint_info", "debug"}
+    if op in always_ok:
+        return {
+            "supported": True,
+            "reason": "core operation",
+            "hint": f"visionservex {op} {model_id}",
+        }
+
+    # Export
+    if op in ("export", "export_onnx"):
+        from visionservex.core.model import _export_capabilities
+
+        info = _export_capabilities(model_id)
+        onnx_status = info.get("onnx", {}).get("status", "unsupported")
+        return {
+            "supported": onnx_status in ("supported", "experimental"),
+            "status": onnx_status,
+            "reason": info.get("onnx", {}).get("notes", ""),
+            "hint": f"visionservex export {model_id} --format onnx",
+        }
+
+    # Training
+    if op in ("train", "finetune", "fine_tune"):
+        from visionservex.core.model import _training_capabilities
+
+        info = _training_capabilities(model_id)
+        sup = info.get("finetune_supported", False) or info.get("train_supported", False)
+        return {
+            "supported": sup,
+            "reason": info.get("notes", "See training_info() for details"),
+            "hint": f"visionservex model-card show {model_id} --json | jq '.visionservex_benchmark_status'",
+        }
+
+    # Tracking
+    if op in ("track", "tracking"):
+        family = getattr(entry, "family", "")
+        supported = family in ("sam2",)
+        return {
+            "supported": supported,
+            "reason": "SAM2 video tracking is experimental"
+            if supported
+            else "TRACKING_NOT_SUPPORTED",
+            "hint": "visionservex track MODEL VIDEO"
+            if supported
+            else "Tracking not supported for this model.",
+        }
+
+    # Video
+    if op in ("video", "video_predict"):
+        return {
+            "supported": False,
+            "reason": "VIDEO_NOT_IMPLEMENTED",
+            "hint": "Video inference is a roadmap item. Use batch_predict() on extracted frames.",
+        }
+
+    # Val/evaluate
+    if op in ("val", "evaluate", "benchmark_ap"):
+        task = getattr(entry, "task", "")
+        sup = task in ("detect", "open_vocab_detect")
+        return {
+            "supported": sup,
+            "reason": "AP50/mAP50:95 evaluation via benchmark-competitiveness"
+            if sup
+            else "BENCHMARK_NOT_IMPLEMENTED",
+            "hint": f"visionservex val {model_id} --dataset yolo:/path/to/data"
+            if sup
+            else "See benchmark roadmap.",
+        }
+
+    return {
+        "supported": False,
+        "reason": f"Operation '{operation}' is not recognized.",
+        "hint": "Use model.supports('predict'), model.supports('val'), model.supports('export'), etc.",
+    }
+
+
+# ---------------------------------------------------------------------------
+# Static training capability tables
+# ---------------------------------------------------------------------------
+
+_TRAINING_TABLE: dict[str, dict[str, Any]] = {
+    "dfine": {
+        "train_supported": False,
+        "finetune_supported": False,
+        "resume_supported": False,
+        "checkpoint_save_supported": False,
+        "checkpoint_load_supported": False,
+        "export_supported": ["onnx_experimental"],
+        "supported_dataset_formats": [],
+        "required_extra": "hf",
+        "notes": "TRAINING_NOT_SUPPORTED_IN_HF_BACKEND. HF Transformers does not expose D-FINE training. Use official Peterande/D-FINE repository for training.",
+        "docs": "https://github.com/Peterande/D-FINE",
+    },
+    "rfdetr": {
+        "train_supported": True,
+        "finetune_supported": True,
+        "resume_supported": True,
+        "checkpoint_save_supported": True,
+        "checkpoint_load_supported": True,
+        "export_supported": ["onnx"],
+        "supported_dataset_formats": ["coco-json", "yolo"],
+        "required_extra": "rfdetr",
+        "notes": "RF-DETR supports training/fine-tuning via the rfdetr package. Use rfdetr.train() directly.",
+        "docs": "https://github.com/roboflow/rf-detr",
+    },
+    "swinv2": {
+        "train_supported": False,
+        "finetune_supported": False,
+        "resume_supported": False,
+        "checkpoint_save_supported": False,
+        "checkpoint_load_supported": False,
+        "export_supported": ["onnx_experimental"],
+        "supported_dataset_formats": [],
+        "required_extra": "hf",
+        "notes": "TRAINING_NOT_SUPPORTED. SwinV2 classification fine-tuning is not wired in VisionServeX. Use HF Trainer or timm directly.",
+        "docs": "https://github.com/microsoft/Swin-Transformer",
+    },
+    "sam": {
+        "train_supported": False,
+        "finetune_supported": False,
+        "resume_supported": False,
+        "checkpoint_save_supported": False,
+        "checkpoint_load_supported": False,
+        "export_supported": [],
+        "supported_dataset_formats": [],
+        "required_extra": "hf",
+        "notes": "TRAINING_NOT_SUPPORTED. SAM/SAM2 training not exposed in this build.",
+        "docs": "https://github.com/facebookresearch/segment-anything",
+    },
+    "sam2": {
+        "train_supported": False,
+        "finetune_supported": False,
+        "resume_supported": False,
+        "checkpoint_save_supported": False,
+        "checkpoint_load_supported": False,
+        "export_supported": [],
+        "supported_dataset_formats": [],
+        "required_extra": "hf",
+        "notes": "TRAINING_NOT_SUPPORTED. SAM2 training not exposed in this build.",
+        "docs": "https://github.com/facebookresearch/sam2",
+    },
+    "grounding-dino": {
+        "train_supported": False,
+        "finetune_supported": False,
+        "resume_supported": False,
+        "checkpoint_save_supported": False,
+        "checkpoint_load_supported": False,
+        "export_supported": [],
+        "supported_dataset_formats": [],
+        "required_extra": "hf",
+        "notes": "TRAINING_NOT_SUPPORTED. Grounding DINO fine-tuning not wired.",
+        "docs": "https://github.com/IDEA-Research/GroundingDINO",
+    },
+    "oneformer": {
+        "train_supported": False,
+        "finetune_supported": False,
+        "resume_supported": False,
+        "checkpoint_save_supported": False,
+        "checkpoint_load_supported": False,
+        "export_supported": [],
+        "supported_dataset_formats": [],
+        "required_extra": "hf",
+        "notes": "TRAINING_NOT_SUPPORTED. OneFormer training not wired.",
+        "docs": "https://github.com/SHI-Labs/OneFormer",
+    },
+    "default": {
+        "train_supported": False,
+        "finetune_supported": False,
+        "resume_supported": False,
+        "checkpoint_save_supported": False,
+        "checkpoint_load_supported": False,
+        "export_supported": [],
+        "supported_dataset_formats": [],
+        "notes": "TRAINING_NOT_SUPPORTED for this model family.",
+    },
+}
+
+# ---------------------------------------------------------------------------
+# Static export capability tables
+# ---------------------------------------------------------------------------
+
+_EXPORT_TABLE: dict[str, dict[str, Any]] = {
+    "dfine": {
+        "onnx": {
+            "status": "experimental",
+            "notes": "HF D-FINE ONNX export path not fully integrated. Use official repo script.",
+        },
+        "tensorrt": {"status": "unsupported", "notes": "TensorRT export not integrated."},
+        "torchscript": {"status": "unsupported", "notes": "Not supported in HF backend."},
+        "openvino": {"status": "unsupported", "notes": "Not integrated."},
+        "hf_save_pretrained": {
+            "status": "supported",
+            "notes": "Use model.engine._model.save_pretrained(path) if loaded.",
+        },
+    },
+    "rfdetr": {
+        "onnx": {
+            "status": "supported",
+            "notes": "Use rfdetr package ONNX export. See rfdetr docs.",
+        },
+        "tensorrt": {
+            "status": "backend_supported_but_not_integrated",
+            "notes": "rfdetr supports TRT but not wired in VisionServeX.",
+        },
+        "torchscript": {"status": "unsupported", "notes": "Not supported."},
+        "hf_save_pretrained": {"status": "unsupported", "notes": "Not HF-based."},
+    },
+    "swinv2": {
+        "onnx": {
+            "status": "experimental",
+            "notes": "HF transformers ONNX export may work via optimum.",
+        },
+        "tensorrt": {"status": "unsupported", "notes": "Not integrated."},
+        "hf_save_pretrained": {
+            "status": "supported",
+            "notes": "SwinV2 is HF-based; save_pretrained() available.",
+        },
+    },
+    "sam": {
+        "onnx": {
+            "status": "unsupported",
+            "notes": "SAM ONNX export not integrated in VisionServeX.",
+        },
+        "tensorrt": {"status": "unsupported", "notes": "Not integrated."},
+    },
+    "sam2": {
+        "onnx": {"status": "unsupported", "notes": "SAM2 ONNX export not integrated."},
+        "tensorrt": {"status": "unsupported", "notes": "Not integrated."},
+    },
+    "grounding-dino": {
+        "onnx": {"status": "unsupported", "notes": "Not integrated."},
+        "hf_save_pretrained": {
+            "status": "supported",
+            "notes": "HF-based; save_pretrained() available.",
+        },
+    },
+    "default": {
+        "onnx": {"status": "unsupported", "notes": "Not supported for this model family."},
+        "tensorrt": {"status": "unsupported", "notes": "Not integrated."},
+    },
+}
+
+
+def _training_capabilities(model_id: str) -> dict[str, Any]:
+    """Return training/fine-tuning capability dict for a model."""
+    try:
+        entry = default_registry().get(model_id)
+        family = entry.family
+    except Exception:
+        family = model_id.split("-")[0]
+
+    info = _TRAINING_TABLE.get(family, _TRAINING_TABLE["default"]).copy()
+    info["model_id"] = model_id
+    info["family"] = family
+    return info
+
+
+def _export_capabilities(model_id: str) -> dict[str, Any]:
+    """Return export capability dict for a model."""
+    try:
+        entry = default_registry().get(model_id)
+        family = entry.family
+    except Exception:
+        family = model_id.split("-")[0]
+
+    info = _EXPORT_TABLE.get(family, _EXPORT_TABLE["default"]).copy()
+    info["model_id"] = model_id
+    info["family"] = family
+    return info
 
 
 __all__ = ["VisionModel"]
