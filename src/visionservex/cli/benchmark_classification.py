@@ -189,6 +189,40 @@ def _benchmark_model(
     )
 
 
+def _build_classification_md(payload: dict) -> str:
+    lines = [
+        "# Classification Benchmark Report",
+        f"\n**Dataset:** `{payload['dataset']}`  ",
+        f"**Images per model:** {payload['n_images_per_model']}  ",
+        f"**Top-k:** {payload['top_k']}",
+        "\n## Results\n",
+        "| Model | Top-1 | Top-5 | Lat p50 (ms) | Lat p95 (ms) | Failures |",
+        "|-------|-------|-------|------------|------------|---------|",
+    ]
+    for r in payload.get("models", []):
+        if r.get("error"):
+            lines.append(f"| {r['model_id']} | ERROR | ERROR | — | — | {r.get('error', '')[:60]} |")
+        else:
+            lines.append(
+                f"| {r['model_id']} | {r['top1_accuracy']:.3f} | {r['top5_accuracy']:.3f}"
+                f" | {r['latency_p50_ms']:.1f} | {r['latency_p95_ms']:.1f} | {r['n_failures']} |"
+            )
+    lines.append(f"\n*{payload.get('notes', '')}*")
+    return "\n".join(lines) + "\n"
+
+
+def _build_per_class_csv(results: list[ClassificationBenchmarkResult]) -> str:
+    import io
+
+    buf = io.StringIO()
+    buf.write("model_id,class,accuracy\n")
+    for r in results:
+        if r.per_class_accuracy:
+            for cls, acc in sorted(r.per_class_accuracy.items()):
+                buf.write(f"{r.model_id},{cls},{acc:.4f}\n")
+    return buf.getvalue()
+
+
 @app.callback(invoke_without_command=True)
 def benchmark_classification(
     dataset: str = typer.Option(
@@ -205,6 +239,10 @@ def benchmark_classification(
     max_images: int = typer.Option(100, "--max-images"),
     device: str = typer.Option("auto", "--device"),
     out: Path = typer.Option(None, "--out"),
+    report_md: Path = typer.Option(None, "--report-md", help="Write Markdown report."),
+    per_class_csv: Path = typer.Option(
+        None, "--per-class-csv", help="Write per-class accuracy CSV."
+    ),
     auto_pull: bool = typer.Option(False, "--auto-pull"),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
@@ -252,6 +290,12 @@ def benchmark_classification(
     if out:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(payload, indent=2))
+    if report_md:
+        report_md.parent.mkdir(parents=True, exist_ok=True)
+        report_md.write_text(_build_classification_md(payload))
+    if per_class_csv:
+        per_class_csv.parent.mkdir(parents=True, exist_ok=True)
+        per_class_csv.write_text(_build_per_class_csv(results))
     if json_:
         print(json.dumps(payload, indent=2))
         return

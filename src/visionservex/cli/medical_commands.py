@@ -293,11 +293,20 @@ def segment(
         _emit_err(err, json_)
         raise typer.Exit(3)
 
+    # MedSAM real inference via SAM HF engine
+    if model_id == "medsam":
+        _segment_medsam(
+            input=input,
+            box=box,
+            out=out,
+            json_=json_,
+        )
+        return
+
     # Honest delegation — v1.9.0 does not duplicate upstream segmentation engines.
     out.mkdir(parents=True, exist_ok=True)
     next_step_lookup = {
         "totalsegmentator": f"TotalSegmentator -i {input} -o {out}",
-        "medsam": f"# MedSAM HF requires box/point prompts; see {info.upstream}/blob/main/README.md",
         "medsam2": f"# See {info.upstream}/blob/main/README.md for prompt format",
         "sam-med2d": f"# See {info.upstream}/blob/main/README.md",
         "nnunet-v2": f"nnUNetv2_predict -i {input} -o {out} -d <DATASET_ID> -c 3d_fullres",
@@ -348,6 +357,114 @@ def list_models(json_: bool = typer.Option(False, "--json")) -> None:
         installed = "[green]yes[/green]" if r["installed"] else "[dim]no[/dim]"
         table.add_row(r["id"], installed, r["description"])
     console.print(table)
+
+
+def _segment_medsam(
+    *,
+    input: Path,
+    box: str,
+    out: Path,
+    json_: bool,
+) -> None:
+    """Run MedSAM inference using the SAM HF engine. Saves mask PNG + metadata JSON."""
+    import json as json_mod
+
+    from PIL import Image
+
+    out.mkdir(parents=True, exist_ok=True)
+
+    # Parse box prompt
+    boxes = None
+    if box:
+        try:
+            parts = [float(x.strip()) for x in box.split(",")]
+            if len(parts) != 4:
+                raise ValueError(f"Expected x1,y1,x2,y2 got {len(parts)} values")
+            boxes = [parts]
+        except ValueError as exc:
+            err = MedicalError(
+                code="INPUT_SCHEMA_ERROR",
+                message=f"Invalid box format {box!r}: {exc}",
+                fix="Use --box x1,y1,x2,y2 (e.g. --box 10,20,100,200)",
+            )
+            _emit_err(err, json_)
+            raise typer.Exit(3)
+
+    # Load image
+    try:
+        image = Image.open(input).convert("RGB")
+    except Exception as exc:
+        err = MedicalError(code="INPUT_LOAD_ERROR", message=str(exc), fix="Check image file.")
+        _emit_err(err, json_)
+        raise typer.Exit(3)
+
+    # Run inference via VisionModel
+    try:
+        from visionservex import VisionModel
+
+        model = VisionModel("medsam")
+        predict_kwargs: dict = {}
+        if boxes:
+            predict_kwargs["boxes"] = boxes
+        result = model.predict(image, **predict_kwargs)
+    except Exception as exc:
+        msg = str(exc)
+        if "checkpoint" in msg.lower() or "download" in msg.lower() or "not found" in msg.lower():
+            err = MedicalError(
+                code="CHECKPOINT_REQUIRED",
+                message=f"MedSAM checkpoint not cached: {exc}",
+                fix="visionservex model pull medsam",
+            )
+            _emit_err(err, json_)
+            raise typer.Exit(3)
+        err = MedicalError(
+            code="MEDSAM_ENGINE_ERROR",
+            message=str(exc)[:300],
+            fix="Check transformers version and wanglab/medsam-vit-base cache.",
+        )
+        _emit_err(err, json_)
+        raise typer.Exit(4)
+
+    # Save masks
+    import numpy as np
+
+    masks_saved = []
+    for i, seg in enumerate(result.segments if hasattr(result, "segments") else []):
+        if seg.mask is not None:
+            mask_path = out / f"mask_{i:03d}.png"
+            mask_img = Image.fromarray((seg.mask * 255).astype(np.uint8))
+            mask_img.save(mask_path)
+            masks_saved.append(
+                {
+                    "mask_path": str(mask_path),
+                    "iou_score": seg.score,
+                    "box": ([seg.box.x1, seg.box.y1, seg.box.x2, seg.box.y2] if seg.box else None),
+                }
+            )
+
+    payload = {
+        "model_id": "medsam",
+        "input": str(input),
+        "box": box or None,
+        "out": str(out),
+        "masks_saved": masks_saved,
+        "n_masks": len(masks_saved),
+        "device": getattr(result, "device", "unknown"),
+        "status": "ok" if masks_saved else "no_masks_predicted",
+        "disclaimer": DISCLAIMER,
+    }
+    meta_path = out / "medsam_metadata.json"
+    meta_path.write_text(json_mod.dumps(payload, indent=2))
+
+    if json_:
+        print(json_mod.dumps(payload, indent=2))
+        return
+
+    console.print("[green]MedSAM segmentation complete[/green]")
+    console.print(f"  masks saved: {len(masks_saved)}")
+    console.print(f"  metadata: {meta_path}")
+    for m in masks_saved:
+        console.print(f"  mask: {m['mask_path']} (IoU={m['iou_score']:.3f})")
 
 
 def _emit_err(err: MedicalError, json_: bool) -> None:

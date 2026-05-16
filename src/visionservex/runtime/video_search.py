@@ -385,6 +385,8 @@ def build_index(
     max_frames: int | None = None,
     iou_threshold: float = 0.3,
     max_lost_frames: int = 5,
+    tracker_instance: Any | None = None,
+    tracker_name: str = "simple-iou",
 ) -> Path:
     """Build a video-search index using caller-supplied detect/embed functions.
 
@@ -393,10 +395,20 @@ def build_index(
 
     This signature deliberately accepts callables (not VisionModel) so tests
     can run end-to-end with mocked detector + embedder.
+
+    ``tracker_instance`` — optional external tracker adapter (e.g. ByteTrack).
+    If None, uses SimpleIoUTracker with ``iou_threshold`` / ``max_lost_frames``.
+    ``tracker_name`` — recorded in the manifest for inspection.
     """
     import numpy as np
 
-    tracker = SimpleIoUTracker(iou_threshold=iou_threshold, max_lost_frames=max_lost_frames)
+    if tracker_instance is None:
+        _tracker: Any = SimpleIoUTracker(
+            iou_threshold=iou_threshold, max_lost_frames=max_lost_frames
+        )
+    else:
+        _tracker = tracker_instance
+    tracker = _tracker
     crops: list[IndexedCrop] = []
     embeddings: list[Any] = []
     n_detections = 0
@@ -434,6 +446,7 @@ def build_index(
     manifest = IndexManifest(
         detector_model_id=detector_model_id,
         embedder_model_id=embedder_model_id,
+        tracker=tracker_name,
         source=str(source),
         sample_fps=sample_fps,
         stride=stride,

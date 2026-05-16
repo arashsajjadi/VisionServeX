@@ -86,6 +86,35 @@ def _compute_auroc(normal_scores: list[float], anomaly_scores: list[float]) -> f
     return n_correct / max(n_pos * n_neg, 1)
 
 
+def _build_anomaly_md(payload: dict, result: AnomalyBenchmarkResult) -> str:
+    r = result
+    auroc_str = f"{r.image_auroc:.3f}" if r.image_auroc is not None else "n/a (labels required)"
+    lines = [
+        "# Anomaly Detection Benchmark Report",
+        f"\n**Model:** `{r.model}`  ",
+        f"**Dataset:** `{r.dataset}`",
+        "\n## Metrics\n",
+        "| Metric | Value |",
+        "|--------|-------|",
+        f"| image_auroc | {auroc_str} |",
+        f"| score_mean_normal | {r.anomaly_score_mean_normal:.4f} |",
+        f"| score_mean_anomaly | {r.anomaly_score_mean_anomaly:.4f} |",
+        f"| score_separation | {r.score_separation:.4f} |",
+        f"| latency_p50_ms | {r.latency_p50_ms:.1f} |",
+        f"| latency_p95_ms | {r.latency_p95_ms:.1f} |",
+        f"| n_normal_train | {r.n_normal_train} |",
+        f"| n_anomaly_test | {r.n_anomaly_test} |",
+    ]
+    if r.image_auroc is None:
+        lines.append(
+            "\n> **Note:** image_auroc unavailable — no labeled normal/anomaly split found."
+        )
+    if r.error:
+        lines.append(f"\n> **Error:** {r.error[:200]}")
+    lines.append(f"\n*{r.notes}*")
+    return "\n".join(lines) + "\n"
+
+
 _MOCK_MODELS = {"mock-anomaly", "mock"}
 _ANOMALIB_MODELS = {
     "patchcore",
@@ -123,6 +152,7 @@ def benchmark_anomaly(
     model: str = typer.Option("patchcore", "--model"),
     max_images: int = typer.Option(50, "--max-images"),
     out: Path = typer.Option(None, "--out"),
+    report_md: Path = typer.Option(None, "--report-md", help="Write Markdown report."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Benchmark anomaly detection. Use --model mock-anomaly to run without [anomaly] installed."""
@@ -329,6 +359,9 @@ def benchmark_anomaly(
     if out:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(payload, indent=2))
+    if report_md:
+        report_md.parent.mkdir(parents=True, exist_ok=True)
+        report_md.write_text(_build_anomaly_md(payload, result))
     if json_:
         print(json.dumps(payload, indent=2))
         return
@@ -336,9 +369,10 @@ def benchmark_anomaly(
     r = result
     console.print(f"[bold]Anomaly benchmark — {r.model}[/bold]")
     console.print(f"  n_train_normal: {r.n_normal_train}")
-    console.print(
-        f"  image_auroc: {r.image_auroc:.3f}" if r.image_auroc else "  image_auroc: n/a (no labels)"
-    )
+    if r.image_auroc is not None:
+        console.print(f"  image_auroc: {r.image_auroc:.3f}")
+    else:
+        console.print("  image_auroc: n/a — labels required (normal vs anomaly split)")
     console.print(f"  score sep: {r.score_separation:.3f}")
     if r.error:
         console.print(f"  [red]error:[/red] {r.error[:120]}")

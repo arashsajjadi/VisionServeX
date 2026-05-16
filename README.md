@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-2.3.0-informational.svg" alt="v2.3.0">
+  <img src="https://img.shields.io/badge/version-2.4.0-informational.svg" alt="v2.4.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -442,10 +442,14 @@ PatchCore / PaDiM / FastFlow / EfficientAD / WinCLIP / DRAEM / Reverse-Distillat
 visionservex medical list
 visionservex medical validate totalsegmentator
 visionservex medical recommend --goal ct-segmentation
+
+# MedSAM — real mask output (produces mask_000.png + medsam_metadata.json)
 visionservex medical segment medsam image.png --box 10,20,200,200 --out output/
 ```
 
 No diagnostic claims. Optional extras: `pip install 'visionservex[medical]'` for nibabel/NIfTI I/O.
+
+MedSAM produces binary mask PNGs with IoU scores via SAM HF engine (`wanglab/medsam-vit-base`). Returns `CHECKPOINT_REQUIRED` if model not cached.
 
 ## Agriculture and Aerial Domain Commands
 
@@ -472,13 +476,15 @@ OBB models (RTMDet-R/R2 via MMRotate) report **rotated IoU mAP50**, not axis-ali
 visionservex sam3 status --model sam3.1-base-plus
 visionservex sam3 login-help
 
-# Heavy frameworks (OpenMMLab, Detectron2, MaskDINO, Co-DETR) — dry-run install
+# Heavy frameworks (OpenMMLab, Detectron2, MaskDINO, Co-DETR) — conda env recipe
 visionservex expert list
-visionservex expert install openmmlab        # dry-run by default
-visionservex expert doctor
+visionservex openmmlab create-env --name visionservex-openmmlab --python 3.10  # conda recipe
+visionservex openmmlab install-help    # native/conda/docker install options
+visionservex openmmlab doctor          # check which packages are installed
+visionservex openmmlab validate rtmpose-s  # OPENMMLAB_REQUIRED if deps missing
 ```
 
-VisionServeX never auto-installs expert frameworks. The `expert install` command prints the exact `pip` / `mim` commands; you copy them into a shell.
+VisionServeX never auto-installs expert frameworks. `openmmlab create-env` generates the exact conda recipe; `openmmlab validate` returns structured errors with exact checkpoint/config expectations.
 
 ---
 
@@ -713,10 +719,12 @@ OpenMMLab (RTMPose, RTMDet-R, Co-DINO, InternImage): Docker sidecar or `pip inst
 - **D-FINE COCO-only variants** (`dfine-s-coco` etc.): Point to HF repos that may not exist yet. Use `dfine-s-o365-coco` (Objects365+COCO) for guaranteed availability.
 - **DEIM / RT-DETRv4**: Registered as `experimental_sota` but not wired. Blockers documented per-model in the registry.
 - **AP50/mAP benchmark**: The `benchmark-competitiveness` tool reports latency and detection health only. Full AP evaluation requires ground-truth COCO annotations not bundled with VisionServeX.
-- **benchmark-anomaly**: Functional — `--model mock-anomaly` computes pixel-stats proxy scores without anomalib on any dataset. PatchCore training requires `pip install 'visionservex[anomaly]'`; anomalib Engine API varies by version.
-- **Florence-2**: Real smoke **PASSED** in isolated env: `conda create -n vsx-florence python=3.11 -y && conda run -n vsx-florence pip install "transformers==4.46.3" einops timm accelerate`. The current environment (transformers 5.x) is incompatible — use `visionservex florence2 create-env` to generate the exact validated recipe.
-- **SAM2.1**: Runtime registry wired (`facebook/sam2.1-hiera-*`); inference requires `pip install 'visionservex[hf]'` and a GPU. Lighter alternatives (MobileSAM, EfficientSAM, HQ-SAM, EdgeSAM) are available as expert sidecars with Apache-2.0 licenses but require GitHub install. FastSAM is excluded (AGPL-3.0).
-- **OpenMMLab** (RTMPose, RTMDet-R/R2, Co-DINO, InternImage): Requires the OpenMMLab toolchain and manually-obtained checkpoints. Returns `CHECKPOINT_REQUIRED` structured error — no fake output.
+- **benchmark-anomaly**: Functional — `--model mock-anomaly` computes pixel-stats proxy scores without anomalib. PatchCore training requires `pip install 'visionservex[anomaly]'`; version-dispatch adapter handles anomalib 1.x/2.x API differences.
+- **Florence-2**: Real smoke **PASSED** in isolated env (transformers==4.46.3 + einops + timm). Use `visionservex florence2 create-env` for the exact validated recipe. The current environment (transformers 5.x) is incompatible.
+- **MedSAM**: `medical segment medsam image.png --box 10,20,100,200 --out /tmp/out` now produces `mask_000.png` + `medsam_metadata.json` (real SAM HF engine). No longer delegates.
+- **ByteTrack**: `video-search index --tracker bytetrack` is now a real selectable option. Returns `BYTETRACK_REQUIRED` if package missing, uses `_ByteTrackAdapter` if installed.
+- **SAM2.1**: Registry wired (`facebook/sam2.1-hiera-*`); inference requires `[hf]` and a GPU. MobileSAM/EfficientSAM/HQ-SAM/EdgeSAM: Apache-2.0 expert sidecars. FastSAM: excluded (AGPL-3.0).
+- **OpenMMLab** (RTMPose, RTMDet-R/R2, Co-DINO, InternImage): Use `visionservex openmmlab create-env` for the conda recipe. Returns `OPENMMLAB_REQUIRED` if deps missing; `CHECKPOINT_REQUIRED` if checkpoint missing.
 - **TensorRT**: ONNX export works for SwinV2. TensorRT engine build requires `trtexec`.
 - **Apple MPS**: Implemented but not maintainer-verified.
 

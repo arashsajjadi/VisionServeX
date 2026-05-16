@@ -7,6 +7,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-05-16
+
+### MedSAM real mask; ByteTrack selectable tracker in video-search index; anomalib version-dispatch adapter; OpenMMLab create-env; benchmark Markdown/CSV reports
+
+This release resolves four of the five v2.4 blockers and fully standardizes the optional-dependency workflow pattern.
+
+#### Blocker D: MedSAM real mask output — RESOLVED
+
+`visionservex medical segment medsam image.png --box 10,20,100,200 --out /tmp/out` now produces:
+- `mask_000.png` — binary mask from SAM HF engine
+- `medsam_metadata.json` — model_id, input, box, masks_saved, iou_score, device, status
+
+Structured errors: `INPUT_SCHEMA_ERROR`, `INPUT_LOAD_ERROR`, `CHECKPOINT_REQUIRED`, `MEDSAM_ENGINE_ERROR`. No more delegation.
+
+Real smoke verified: MedSAM produced 1 mask (`status: ok`, `n_masks: 1`) on a synthetic 256×256 image using cached `wanglab/medsam-vit-base`.
+
+#### Blocker E: ByteTrack selectable in video-search index — RESOLVED
+
+New: `src/visionservex/runtime/trackers.py` — tracker adapter registry with:
+- `build_tracker(name)` — returns `None` for `simple-iou`, `_ByteTrackAdapter` for `bytetrack` if installed, or raises `TrackerUnavailableError`
+- `_ByteTrackAdapter` — wraps `bytetracker.BYTETracker`, converts detections to TrackBox list
+
+`video-search index` now has `--tracker` option (default: `simple-iou`). If `bytetrack` is selected but not installed, returns `{"code": "BYTETRACK_REQUIRED", "install": "pip install bytetracker"}` with exit code 3.
+
+#### Blocker A: Anomalib version-dispatch adapter — RESOLVED
+
+New: `src/visionservex/integrations/anomalib_adapter.py`:
+- `detect_anomalib_version()` — returns `"1.x"`, `"2.x"`, or `None`
+- `get_anomalib_capabilities()` — probes Engine API and CLI availability
+- `AnomalibUnavailableError` — code `ANOMALIB_REQUIRED`, `.to_dict()`
+- `AnomalibUnsupportedVersionError` — code `ANOMALIB_API_UNSUPPORTED`, `.to_dict()`
+- `PatchCoreAdapter.train()` — tries anomalib Engine API with dual Folder API (1.x/2.x), falls back to CLI, returns structured dict
+- `PatchCoreAdapter.predict()` — same pattern
+
+#### Blocker B: OpenMMLab create-env and install-help — RESOLVED
+
+New commands in `openmmlab_commands.py`:
+- `visionservex openmmlab create-env --name NAME --python 3.10 --json` — generates 8-step conda recipe
+- `visionservex openmmlab install-help --json` — prints native/conda/docker install paths
+
+#### Benchmark hardening
+
+- `benchmark-classification` gains `--report-md PATH` (Markdown table) and `--per-class-csv PATH` (CSV)
+- `benchmark-anomaly` gains `--report-md PATH` (Markdown table with AUROC note when labels missing)
+- `image_auroc: n/a` message now reads: "labels required (normal vs anomaly split)"
+
+#### Tests added
+
+- `tests/test_v240.py` — 22 tests covering all five blockers
+
+#### Validation
+
+- `ruff check .`: 0 errors
+- Tests: 716 passed, 37 skipped, 32s
+- Build: `visionservex-2.4.0.tar.gz` + `visionservex-2.4.0-py3-none-any.whl`
+- Artifact hygiene: clean
+
 ## [2.3.0] - 2026-05-16
 
 ### Florence-2 real isolated-env smoke PASSED; 4 HF real-smoke verified; benchmark-anomaly mock path; ByteTrack/Torchreid doctor; benchmark-classification proved with real model

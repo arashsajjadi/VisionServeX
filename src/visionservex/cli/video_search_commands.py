@@ -56,12 +56,18 @@ def index_cmd(
     ),
     threshold: float = typer.Option(0.1, "--threshold", help="Detector confidence threshold."),
     auto_pull: bool = typer.Option(False, "--auto-pull", help="Allow checkpoint auto-download."),
+    tracker: str = typer.Option(
+        "simple-iou",
+        "--tracker",
+        help="Tracker backend: simple-iou (default), bytetrack, bot-sort, ocsort.",
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Index a video or frame folder for later text retrieval."""
     _print_privacy()
 
     from visionservex import VisionModel
+    from visionservex.runtime.trackers import TrackerUnavailableError, build_tracker
     from visionservex.runtime.video_search import (
         build_index,
         detections_from_result,
@@ -71,6 +77,18 @@ def index_cmd(
     if not source.exists():
         console.print(f"[red]Source not found:[/red] {source}")
         raise typer.Exit(2)
+
+    # Build tracker adapter (raises TrackerUnavailableError if package missing)
+    try:
+        tracker_adapter = build_tracker(tracker)
+    except TrackerUnavailableError as exc:
+        payload = exc.to_dict()
+        if json_:
+            print(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[red]{exc.code}[/red]: {exc.name} not installed")
+            console.print(f"  install: {exc.install}")
+        raise typer.Exit(3)
 
     # Build detector + embedder via VisionModel.
     det_model = VisionModel(detector, auto_pull=auto_pull)
@@ -95,13 +113,21 @@ def index_cmd(
         sample_fps=sample_fps if sample_fps > 0 else None,
         stride=stride if stride > 0 else None,
         max_frames=max_frames if max_frames > 0 else None,
+        tracker_instance=tracker_adapter,
+        tracker_name=tracker,
     )
 
-    summary = {"index_dir": str(out_path), "detector": detector, "embedder": embedder}
+    summary = {
+        "index_dir": str(out_path),
+        "detector": detector,
+        "embedder": embedder,
+        "tracker": tracker,
+    }
     if json_:
         print(json.dumps(summary, indent=2))
         return
     console.print(f"[green]Index written to[/green] {out_path}")
+    console.print(f"  tracker: {tracker}")
 
 
 # ---------------------------------------------------------------------------

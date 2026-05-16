@@ -107,6 +107,58 @@ def doctor(json_: bool = typer.Option(False, "--json")) -> None:
         console.print("See: [dim]docs/openmmlab_expert_models.md[/dim]")
 
 
+@app.command("create-env", help="Generate conda environment recipe for OpenMMLab models.")
+def create_env(
+    name: str = typer.Option("visionservex-openmmlab", "--name"),
+    python: str = typer.Option("3.10", "--python"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Generate (or print) the conda/pip recipe for OpenMMLab environment."""
+    commands = [
+        f"conda create -n {name} python={python} -y",
+        f"conda run -n {name} pip install -U pip",
+        f"conda run -n {name} pip install openmim",
+        f"conda run -n {name} mim install mmengine",
+        f'conda run -n {name} mim install "mmcv>=2.0.0"',
+        f"conda run -n {name} mim install mmpose",
+        f"conda run -n {name} mim install mmdet",
+        f"conda run -n {name} mim install mmrotate",
+    ]
+    if json_:
+        typer.echo(json.dumps({"env_name": name, "python": python, "commands": commands}, indent=2))
+        return
+    console.print(f"[bold]OpenMMLab conda env recipe (name={name}, python={python})[/bold]")
+    for cmd in commands:
+        console.print(f"  [cyan]{cmd}[/cyan]")
+    console.print("\n[dim]Copy and run these commands in your terminal.[/dim]")
+
+
+@app.command("install-help", help="Print OpenMMLab install instructions.")
+def install_help(json_: bool = typer.Option(False, "--json")) -> None:
+    """Print exact commands to install OpenMMLab in current environment."""
+    commands = {
+        "native": [
+            "pip install openmim",
+            "mim install mmengine",
+            'mim install "mmcv>=2.0.0"',
+            "mim install mmpose",
+            "mim install mmdet",
+            "mim install mmrotate",
+        ],
+        "conda_env": "visionservex openmmlab create-env --name visionservex-openmmlab",
+        "docker": "visionservex openmmlab docker-build && visionservex openmmlab docker-run",
+    }
+    if json_:
+        print(json.dumps(commands, indent=2))
+    else:
+        console.print("[bold]OpenMMLab install options:[/bold]")
+        console.print("\n[cyan]Native:[/cyan]")
+        for cmd in commands["native"]:
+            console.print(f"  {cmd}")
+        console.print(f"\n[cyan]Conda env:[/cyan] {commands['conda_env']}")
+        console.print(f"[cyan]Docker:[/cyan] {commands['docker']}")
+
+
 @app.command("docker-build", help="Build the VisionServeX OpenMMLab Docker image.")
 def docker_build(
     tag: str = typer.Option("visionservex-openmmlab:latest", "--tag"),
