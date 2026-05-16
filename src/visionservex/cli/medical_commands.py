@@ -257,7 +257,10 @@ def validate(
 def segment(
     model_id: str = typer.Argument(..., help="Medical segmentation model id."),
     input: Path = typer.Argument(..., help="Input image or NIfTI volume."),
-    box: str = typer.Option("", "--box", help="Box prompt 'x1,y1,x2,y2' for MedSAM-style models."),
+    box: list[str] = typer.Option(
+        default=[],
+        help="Box prompt 'x1,y1,x2,y2' (repeat for multiple boxes).",
+    ),
     point: str = typer.Option("", "--point", help="Point prompt 'x,y' for MedSAM-style models."),
     out: Path = typer.Option(..., "--out", help="Output directory."),
     json_: bool = typer.Option(False, "--json"),
@@ -297,7 +300,7 @@ def segment(
     if model_id == "medsam":
         _segment_medsam(
             input=input,
-            box=box,
+            boxes_raw=box,
             out=out,
             json_=json_,
         )
@@ -318,7 +321,7 @@ def segment(
         "model_id": model_id,
         "input": str(input),
         "out": str(out),
-        "box": box or None,
+        "boxes": list(box) or None,
         "point": point or None,
         "status": "delegate_to_upstream",
         "next_step": delegation,
@@ -329,6 +332,41 @@ def segment(
         return
     console.print(f"[bold]{model_id}[/bold] — VisionServeX delegates to upstream:")
     console.print(f"  [cyan]{delegation}[/cyan]")
+
+
+@app.command("doctor")
+def doctor(json_: bool = typer.Option(False, "--json")) -> None:
+    """Check medical dependency status."""
+    results = []
+    for model_id, info in MEDICAL_MODELS.items():
+        missing = _missing(info)
+        entry: dict = {
+            "model_id": model_id,
+            "installed": not missing,
+            "required_modules": list(info.required_modules),
+            "missing_modules": missing,
+            "install_commands": list(info.install),
+        }
+        if missing:
+            entry["code"] = info.structured_error_code
+            entry["fix"] = " && ".join(info.install)
+        results.append(entry)
+
+    if json_:
+        print(json.dumps(results, indent=2))
+        return
+
+    table = Table(title="Medical dependency status", show_header=True)
+    table.add_column("Model ID", style="cyan", no_wrap=True)
+    table.add_column("Installed", no_wrap=True)
+    table.add_column("Missing modules")
+    table.add_column("Install command")
+    for entry in results:
+        installed_label = "[green]yes[/green]" if entry["installed"] else "[red]no[/red]"
+        missing_label = ", ".join(entry["missing_modules"]) if entry["missing_modules"] else "-"
+        install_label = entry["install_commands"][0] if entry["install_commands"] else "-"
+        table.add_row(entry["model_id"], installed_label, missing_label, install_label)
+    console.print(table)
 
 
 @app.command("list")
@@ -362,7 +400,7 @@ def list_models(json_: bool = typer.Option(False, "--json")) -> None:
 def _segment_medsam(
     *,
     input: Path,
-    box: str,
+    boxes_raw: list[str],
     out: Path,
     json_: bool,
 ) -> None:
@@ -373,18 +411,18 @@ def _segment_medsam(
 
     out.mkdir(parents=True, exist_ok=True)
 
-    # Parse box prompt
-    boxes = None
-    if box:
+    # Parse all box prompts
+    parsed_boxes: list[list[float]] = []
+    for idx, raw in enumerate(boxes_raw):
         try:
-            parts = [float(x.strip()) for x in box.split(",")]
+            parts = [float(x.strip()) for x in raw.split(",")]
             if len(parts) != 4:
                 raise ValueError(f"Expected x1,y1,x2,y2 got {len(parts)} values")
-            boxes = [parts]
+            parsed_boxes.append(parts)
         except ValueError as exc:
             err = MedicalError(
                 code="INPUT_SCHEMA_ERROR",
-                message=f"Invalid box format {box!r}: {exc}",
+                message=f"Invalid box at index {idx} {raw!r}: {exc}",
                 fix="Use --box x1,y1,x2,y2 (e.g. --box 10,20,100,200)",
             )
             _emit_err(err, json_)
@@ -404,8 +442,8 @@ def _segment_medsam(
 
         model = VisionModel("medsam")
         predict_kwargs: dict = {}
-        if boxes:
-            predict_kwargs["boxes"] = boxes
+        if parsed_boxes:
+            predict_kwargs["boxes"] = parsed_boxes
         result = model.predict(image, **predict_kwargs)
     except Exception as exc:
         msg = str(exc)
@@ -445,7 +483,7 @@ def _segment_medsam(
     payload = {
         "model_id": "medsam",
         "input": str(input),
-        "box": box or None,
+        "boxes": boxes_raw or None,
         "out": str(out),
         "masks_saved": masks_saved,
         "n_masks": len(masks_saved),

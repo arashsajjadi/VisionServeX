@@ -132,6 +132,80 @@ def _require_dataset(path: Path) -> AnomalyError | None:
 # ---------------------------------------------------------------------------
 
 
+@app.command("create-env")
+def create_env(
+    name: str = typer.Option("visionservex-anomaly", "--name"),
+    python: str = typer.Option("3.11", "--python"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Generate conda recipe for anomalib-compatible environment."""
+    commands = [
+        f"conda create -n {name} python={python} -y",
+        f"conda run -n {name} pip install -U pip",
+        f"conda run -n {name} pip install anomalib",
+        f"conda run -n {name} pip install 'visionservex[anomaly]'",
+        f'conda run -n {name} python -c "import anomalib; print(anomalib.__version__)"',
+        f"conda run -n {name} visionservex anomaly doctor",
+    ]
+    payload = {
+        "env_name": name,
+        "python": python,
+        "commands": commands,
+        "validated_versions": ["anomalib>=1.0,<3.0"],
+        "smoke_command": (
+            f"conda run -n {name} visionservex anomaly train patchcore"
+            " --data /path/to/normal_images --out /tmp/vsx_patchcore --dry-run"
+        ),
+    }
+    if json_:
+        print(json.dumps(payload, indent=2))
+        return
+    console.print(f"[bold]Conda recipe for anomalib environment:[/bold] {name}")
+    for cmd in commands:
+        console.print(f"  [cyan]{cmd}[/cyan]")
+    console.print(f"\n[dim]Smoke test: {payload['smoke_command']}[/dim]")
+
+
+@app.command("install-help")
+def install_help(json_: bool = typer.Option(False, "--json")) -> None:
+    """Show install options for anomalib (native pip, conda env, docker)."""
+    options = {
+        "native_pip": {
+            "description": "Install anomalib directly into current environment",
+            "commands": [
+                "pip install 'visionservex[anomaly]'",
+                "# or: pip install anomalib",
+            ],
+            "validated_versions": ["anomalib>=1.0,<3.0"],
+        },
+        "conda_env": {
+            "description": "Isolated conda environment (recommended to avoid conflicts)",
+            "commands": [
+                "visionservex anomaly create-env --name visionservex-anomaly --python 3.11",
+                "conda activate visionservex-anomaly",
+                "visionservex anomaly doctor",
+            ],
+        },
+        "docker": {
+            "description": "Docker image with anomalib pre-installed",
+            "commands": [
+                "docker pull openedgeplatform/anomalib:latest",
+                "docker run --rm -v $(pwd):/data openedgeplatform/anomalib:latest anomalib --help",
+            ],
+            "note": "See https://anomalib.readthedocs.io/ for official Docker instructions.",
+        },
+    }
+    if json_:
+        print(json.dumps(options, indent=2))
+        return
+    for method, info in options.items():
+        console.print(f"\n[bold]{method}[/bold]: {info['description']}")
+        for cmd in info.get("commands", []):
+            console.print(f"  [cyan]{cmd}[/cyan]")
+        if "note" in info:
+            console.print(f"  [dim]{info['note']}[/dim]")
+
+
 @app.command("list")
 def list_algos(json_: bool = typer.Option(False, "--json")) -> None:
     """List supported anomaly algorithms."""

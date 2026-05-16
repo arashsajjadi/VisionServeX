@@ -387,6 +387,100 @@ def list_reid(json_: bool = typer.Option(False, "--json")) -> None:
     console.print(table)
 
 
+@app.command("install-help")
+def install_help(
+    tracker: str = typer.Option("", "--tracker"),
+    reid: str = typer.Option("", "--reid"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Show install commands for tracker/ReID backends."""
+    results: dict = {}
+
+    if tracker:
+        info = _TRACKER_REGISTRY.get(tracker)
+        if not info:
+            err = {
+                "code": "TRACKER_UNKNOWN",
+                "message": f"Unknown tracker {tracker!r}.",
+                "available": list(_TRACKER_REGISTRY),
+                "fix": f"Choose from: {', '.join(_TRACKER_REGISTRY)}",
+            }
+            if json_:
+                print(json.dumps(err, indent=2))
+            else:
+                console.print(f"[red]TRACKER_UNKNOWN[/red]: {err['message']}")
+                console.print(f"  available: {err['available']}")
+            raise typer.Exit(2)
+        results["tracker"] = {
+            "name": tracker,
+            "description": info["description"],
+            "install": info.get("install") or "Built-in (no extra install needed)",
+            "code": info.get("blocker"),
+        }
+
+    if reid:
+        info = _REID_REGISTRY.get(reid)
+        if not info:
+            err = {
+                "code": "REID_UNKNOWN",
+                "message": f"Unknown ReID backend {reid!r}.",
+                "available": list(_REID_REGISTRY),
+                "fix": f"Choose from: {', '.join(_REID_REGISTRY)}",
+            }
+            if json_:
+                print(json.dumps(err, indent=2))
+            else:
+                console.print(f"[red]REID_UNKNOWN[/red]: {err['message']}")
+                console.print(f"  available: {err['available']}")
+            raise typer.Exit(2)
+        results["reid"] = {
+            "name": reid,
+            "description": info["description"],
+            "install": info.get("install") or "Built-in (no extra install needed)",
+            "code": info.get("blocker"),
+        }
+
+    if not tracker and not reid:
+        # Show all options
+        results["trackers"] = {
+            name: {
+                "description": info["description"],
+                "install": info.get("install") or "Built-in",
+                "code": info.get("blocker"),
+            }
+            for name, info in _TRACKER_REGISTRY.items()
+        }
+        results["reid_backends"] = {
+            name: {
+                "description": info["description"],
+                "install": info.get("install") or "Built-in",
+                "code": info.get("blocker"),
+            }
+            for name, info in _REID_REGISTRY.items()
+        }
+
+    if json_:
+        print(json.dumps(results, indent=2))
+        return
+
+    if "trackers" in results:
+        console.print("[bold]Tracker backends:[/bold]")
+        for name, info in results["trackers"].items():
+            console.print(f"  [cyan]{name}[/cyan]: {info['description']}")
+            if info["install"] != "Built-in":
+                console.print(f"    install: {info['install']}")
+        console.print("\n[bold]ReID backends:[/bold]")
+        for name, info in results["reid_backends"].items():
+            console.print(f"  [cyan]{name}[/cyan]: {info['description']}")
+            if info["install"] != "Built-in":
+                console.print(f"    install: {info['install']}")
+    else:
+        for key, val in results.items():
+            console.print(f"[bold]{key}[/bold]: {val['name']}")
+            console.print(f"  description: {val['description']}")
+            console.print(f"  install: {val['install']}")
+
+
 @app.command("doctor")
 def doctor_cmd(
     tracker: str = typer.Option(

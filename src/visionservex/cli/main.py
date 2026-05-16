@@ -50,6 +50,7 @@ from visionservex.cli import (
     privacy_commands,
     replacement_map_commands,
     sam3_commands,
+    sam_family_commands,
     security_commands,
     suite_commands,
     syntax_audit,
@@ -129,6 +130,7 @@ app.add_typer(benchmark_open_vocab.app, name="benchmark-open-vocab", invoke_with
 app.add_typer(agriculture_commands.app, name="agriculture")
 app.add_typer(aerial_commands.app, name="aerial")
 app.add_typer(florence2_commands.app, name="florence2")
+app.add_typer(sam_family_commands.app, name="sam-family")
 app.add_typer(
     benchmark_classification.app, name="benchmark-classification", invoke_without_command=True
 )

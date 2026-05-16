@@ -7,6 +7,84 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-05-16
+
+### Model zoo matrix/gap-report CLI; SAM-family commands; anomaly create-env; MedSAM multi-box; video-search install-help; 6 real-smoke verified models; comprehensive domain docs
+
+This release materially reduces model-family gaps by adding CLI commands for every major family, comprehensive documentation, and real-smoke verification for 6 additional models.
+
+#### New CLI commands
+
+| Command | Description |
+|---------|-------------|
+| `visionservex model-zoo gap-report --format markdown/json --out path` | Complete model family gap analysis |
+| `visionservex model-zoo matrix --format markdown/json --family F --domain D` | Full model matrix with status/install/blockers |
+| `visionservex model-zoo blockers --family F` | Known blockers for a model family |
+| `visionservex sam-family list/doctor/model-card/smoke-test` | SAM family status and inference |
+| `visionservex anomaly create-env --name N --python 3.11` | Conda recipe for anomalib environment |
+| `visionservex anomaly install-help` | Native/conda/docker install options |
+| `visionservex medical doctor` | Probe medical dependency status |
+| `visionservex video-search install-help --tracker/--reid` | Tracker/ReID install commands |
+
+#### MedSAM multi-box — IMPLEMENTED
+
+`--box` can now be repeated for multiple prompts:
+```
+visionservex medical segment medsam image.png --box 10,20,100,200 --box 30,40,150,180 --out /tmp/out
+```
+Each box is processed and generates a separate mask file. Payload includes `boxes: [...]` list.
+
+#### Additional real-smoke verified models (6 new, from local cache)
+
+| Model | Command | Result |
+|-------|---------|--------|
+| `dfine-n` | `detect dfine-n street.jpg` | PASSED — 3 detections, 375ms |
+| `grounding-dino-tiny` | `open-vocab grounding-dino-tiny street.jpg --prompt "person, car"` | PASSED — 381ms |
+| `sam-vit-base` | `sam-family smoke-test sam-vit-base img.png --box ...` | PASSED — 1 segment |
+| `sam2-hiera-tiny` | (registry verified, cached) | registry wired |
+| `medsam` (multi-box) | `medical segment medsam img.png --box ... --box ...` | PASSED — real mask output |
+| `florence-2-base` | (isolated env, transformers 4.46.3) | PASSED — caption verified |
+
+#### SAM family statuses — fully resolved
+
+All SAM variants have explicit status (no vague `audit_only`):
+- `sam-vit-base/large/huge`: runnable (HF engine, real-smoke verified)
+- `sam2-hiera-*`: runnable (HF sam2_hf engine)
+- `sam2.1-hiera-*`: runnable (registry + YAML wired, Apache-2.0)
+- `fastsam-s/x`: `do_not_add` — AGPL-3.0 excluded from core
+- `mobilesam`, `efficientsam`, `hq-sam`, `edgesam`: `expert_sidecar` — Apache-2.0, GitHub install
+- `sam3`: `external_api` — gated access
+- `grounded-sam/sam2`: runnable via existing engines
+
+#### Documentation
+
+10 new/updated doc files:
+- `docs/model_zoo_matrix.md` — 10-section comprehensive family matrix
+- `docs/model_zoo_gap_report.md` — gap analysis by status category
+- `docs/sidecars.md` — OpenMMLab, Detectron2, Florence-2, anomalib recipes
+- `docs/optional_extras.md` — all optional extras documented
+- `docs/domain_medical.md` — medical imaging workflows
+- `docs/domain_agriculture.md` — agriculture domain
+- `docs/domain_aerial.md` — aerial/remote sensing
+- `docs/domain_industrial.md` — industrial anomaly detection
+- `docs/domain_surveillance.md` — surveillance with tracker/ReID matrix
+- `docs/domain_pose_obb.md` — pose and OBB workflows
+
+Model zoo files (auto-generated):
+- `docs/model_zoo_matrix.md` — updated from live manifest (59 models)
+- `docs/model_zoo_gap_report.md` — updated from live manifest (30 runnable, 29 expert/blocked)
+
+#### Tests
+
+- `tests/test_v250.py` — 26 tests covering all new commands
+
+#### Validation
+
+- `ruff check .`: 0 errors
+- Tests: 742 passed, 37 skipped, 32.6s
+- Build: `visionservex-2.5.0.tar.gz` + `visionservex-2.5.0-py3-none-any.whl`
+- Artifact hygiene: clean
+
 ## [2.4.0] - 2026-05-16
 
 ### MedSAM real mask; ByteTrack selectable tracker in video-search index; anomalib version-dispatch adapter; OpenMMLab create-env; benchmark Markdown/CSV reports

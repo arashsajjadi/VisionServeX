@@ -1,0 +1,380 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Arash Sajjadi
+"""SAM-family CLI commands.
+
+Covers: SAM v1, SAM 2, SAM 2.1, SAM 3, EfficientSAM, MobileSAM, FastSAM,
+HQ-SAM, EdgeSAM.
+
+For runnable variants (sam/sam2/sam2.1), uses VisionModel(MODEL_ID).predict().
+For non-runnable variants, returns structured errors with recommended_action and
+known_blockers from SOURCE_MANIFEST.
+"""
+
+from __future__ import annotations
+
+import importlib
+import json
+from pathlib import Path
+
+import typer
+from rich.console import Console
+from rich.table import Table
+
+app = typer.Typer(help="SAM-family segment-anything model commands.", no_args_is_help=True)
+console = Console()
+
+_SAM_FAMILIES: dict[str, dict] = {
+    "sam": {
+        "license": "Apache-2.0",
+        "install": "pip install 'visionservex[hf]'",
+        "recommended_action": "add_now",
+        "status": "runnable",
+        "dep_modules": ["transformers"],
+        "description": "SAM v1 — Segment Anything Model (ViT-B/L/H). Official HF checkpoints.",
+    },
+    "sam2": {
+        "license": "Apache-2.0",
+        "install": "pip install 'visionservex[hf]'",
+        "recommended_action": "add_now",
+        "status": "runnable",
+        "dep_modules": ["transformers"],
+        "description": "SAM 2 — video/image prompted segmentation (hiera backbone).",
+    },
+    "sam2.1": {
+        "license": "Apache-2.0",
+        "install": "pip install 'visionservex[hf]'",
+        "recommended_action": "add_now",
+        "status": "runnable",
+        "dep_modules": ["transformers"],
+        "description": "SAM 2.1 — improved SAM 2 with updated checkpoints.",
+    },
+    "sam3": {
+        "license": "Apache-2.0",
+        "install": "# gated — see https://huggingface.co/facebook/sam3",
+        "recommended_action": "external_api",
+        "status": "unavailable",
+        "dep_modules": [],
+        "description": "SAM 3 — gated release; not auto-pulled by VisionServeX.",
+    },
+    "efficientsam": {
+        "license": "Apache-2.0",
+        "install": "pip install efficientsam  # or: git clone https://github.com/yformer/EfficientSAM",
+        "recommended_action": "expert_sidecar",
+        "status": "optional_extra",
+        "dep_modules": ["efficientsam"],
+        "description": "EfficientSAM — distilled lightweight SAM (CVPR 2024).",
+    },
+    "mobilesam": {
+        "license": "Apache-2.0",
+        "install": "pip install mobile-sam",
+        "recommended_action": "expert_sidecar",
+        "status": "optional_extra",
+        "dep_modules": ["mobile_sam"],
+        "description": "MobileSAM — tiny ViT-based SAM for edge devices.",
+    },
+    "fastsam": {
+        "license": "AGPL-3.0",
+        "install": "# AGPL-3.0 — excluded from permissive core; see https://github.com/CASIA-IVA-Lab/FastSAM",
+        "recommended_action": "do_not_add",
+        "status": "unavailable",
+        "dep_modules": [],
+        "description": "FastSAM — AGPL-3.0 license; excluded from permissive Apache/MIT core.",
+    },
+    "hq-sam": {
+        "license": "Apache-2.0",
+        "install": "pip install segment-anything-hq",
+        "recommended_action": "expert_sidecar",
+        "status": "optional_extra",
+        "dep_modules": ["segment_anything_hq"],
+        "description": "HQ-SAM — high-quality mask prediction for complex structures.",
+    },
+    "edgesam": {
+        "license": "Apache-2.0",
+        "install": "git clone https://github.com/chongzhou96/EdgeSAM && pip install -e .",
+        "recommended_action": "expert_sidecar",
+        "status": "optional_extra",
+        "dep_modules": ["edgesam"],
+        "description": "EdgeSAM — real-time SAM for edge/mobile deployment.",
+    },
+}
+
+_RUNNABLE_FAMILIES = {"sam", "sam2", "sam2.1"}
+
+
+def _module_present(name: str) -> bool:
+    try:
+        importlib.import_module(name)
+        return True
+    except ImportError:
+        return False
+
+
+def _sam_models_from_manifest() -> list:
+    """Return all SAM-family entries from SOURCE_MANIFEST."""
+    from visionservex.model_zoo import SOURCE_MANIFEST
+
+    sam_families = set(_SAM_FAMILIES.keys())
+    return [entry for entry in SOURCE_MANIFEST.values() if entry.family in sam_families]
+
+
+# ---------------------------------------------------------------------------
+# Commands
+# ---------------------------------------------------------------------------
+
+
+@app.command("list")
+def list_cmd(json_: bool = typer.Option(False, "--json")) -> None:
+    """List all SAM-family models from the manifest."""
+    from visionservex.model_zoo import SOURCE_MANIFEST
+
+    sam_families = set(_SAM_FAMILIES.keys())
+    entries = [e for e in SOURCE_MANIFEST.values() if e.family in sam_families]
+
+    if json_:
+        print(json.dumps([e.to_dict() for e in entries], indent=2))
+        return
+
+    table = Table(title=f"SAM-family models ({len(entries)})", show_header=True)
+    table.add_column("Model ID", style="cyan", no_wrap=True)
+    table.add_column("Family", no_wrap=True)
+    table.add_column("Status", no_wrap=True)
+    table.add_column("License", no_wrap=True)
+    table.add_column("Install")
+    for e in entries:
+        fam_info = _SAM_FAMILIES.get(e.family, {})
+        status = fam_info.get("status", e.recommended_action)
+        run_label = (
+            "[green]runnable[/green]" if e.runnable_in_visionservex else f"[dim]{status}[/dim]"
+        )
+        table.add_row(
+            e.model_id,
+            e.family,
+            run_label,
+            e.license,
+            e.install_command,
+        )
+    console.print(table)
+
+
+@app.command("doctor")
+def doctor_cmd(json_: bool = typer.Option(False, "--json")) -> None:
+    """Check which SAM variants have their dependencies installed."""
+    results = []
+    for family, info in _SAM_FAMILIES.items():
+        deps = info.get("dep_modules", [])
+        missing = [m for m in deps if not _module_present(m)]
+        entry: dict = {
+            "family": family,
+            "status": info["status"],
+            "deps": deps,
+            "missing": missing,
+            "installed": not missing,
+            "install_command": info["install"],
+            "license": info["license"],
+        }
+        if missing:
+            entry["code"] = "SAM_EXTRA_REQUIRED"
+            entry["fix"] = info["install"]
+        results.append(entry)
+
+    if json_:
+        print(json.dumps(results, indent=2))
+        return
+
+    table = Table(title="SAM family dependency check", show_header=True)
+    table.add_column("Family", style="cyan", no_wrap=True)
+    table.add_column("Status", no_wrap=True)
+    table.add_column("Installed", no_wrap=True)
+    table.add_column("Missing deps")
+    for entry in results:
+        installed_label = "[green]yes[/green]" if entry["installed"] else "[red]no[/red]"
+        missing_label = ", ".join(entry["missing"]) if entry["missing"] else "-"
+        table.add_row(
+            entry["family"],
+            entry["status"],
+            installed_label,
+            missing_label,
+        )
+    console.print(table)
+
+
+@app.command("model-card")
+def model_card_cmd(
+    model_id: str = typer.Argument(..., help="SAM model ID (e.g. sam-vit-base)."),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Print the SOURCE_MANIFEST entry for a SAM model."""
+    from visionservex.model_zoo import get_model_source
+
+    src = get_model_source(model_id)
+    if src is None:
+        err = {
+            "code": "MODEL_NOT_FOUND",
+            "message": f"Model {model_id!r} not found in SOURCE_MANIFEST.",
+            "fix": "Run 'visionservex sam-family list' to see available models.",
+        }
+        if json_:
+            print(json.dumps(err, indent=2))
+        else:
+            console.print(f"[red]MODEL_NOT_FOUND[/red]: {err['message']}")
+            console.print(f"  fix: {err['fix']}")
+        raise typer.Exit(1)
+
+    # Verify it's a SAM family model
+    if src.family not in _SAM_FAMILIES:
+        err = {
+            "code": "NOT_SAM_FAMILY",
+            "message": f"Model {model_id!r} has family {src.family!r}, not a SAM variant.",
+            "fix": "Run 'visionservex sam-family list' for SAM models.",
+        }
+        if json_:
+            print(json.dumps(err, indent=2))
+        else:
+            console.print(f"[yellow]NOT_SAM_FAMILY[/yellow]: {err['message']}")
+        raise typer.Exit(1)
+
+    data = src.to_dict()
+    if json_:
+        print(json.dumps(data, indent=2))
+        return
+
+    console.print(f"[bold]{src.model_id}[/bold]  ({src.family}, {src.task})")
+    if src.official_repo:
+        console.print(f"  Repo:       {src.official_repo}")
+    if src.hf_repo:
+        console.print(f"  HF:         {src.hf_repo}")
+    if src.paper_url:
+        console.print(f"  Paper:      {src.paper_url}")
+    console.print(f"  License:    {src.license} ({src.license_risk})")
+    console.print(f"  Install:    {src.install_command}")
+    console.print(f"  Runnable:   {src.runnable_in_visionservex}")
+    console.print(f"  Action:     {src.recommended_action}")
+    if src.known_blockers:
+        console.print("  Blockers:")
+        for b in src.known_blockers:
+            console.print(f"    - {b}")
+    if src.notes:
+        console.print(f"  Notes:      {src.notes}")
+
+
+@app.command("smoke-test")
+def smoke_test_cmd(
+    model_id: str = typer.Argument(..., help="SAM model ID to test."),
+    image: Path = typer.Argument(..., help="Input image path."),
+    box: str = typer.Option(
+        "",
+        "--box",
+        help="Box prompt 'x1,y1,x2,y2'.",
+    ),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Smoke-test a SAM model: run inference if runnable, else return structured error."""
+    from visionservex.model_zoo import get_model_source
+
+    src = get_model_source(model_id)
+    if src is None:
+        err = {
+            "code": "MODEL_NOT_FOUND",
+            "message": f"Model {model_id!r} not found in SOURCE_MANIFEST.",
+            "fix": "Run 'visionservex sam-family list' to see available models.",
+        }
+        if json_:
+            print(json.dumps(err, indent=2))
+        else:
+            console.print(f"[red]MODEL_NOT_FOUND[/red]: {err['message']}")
+        raise typer.Exit(1)
+
+    if not src.runnable_in_visionservex:
+        fam_info = _SAM_FAMILIES.get(src.family, {})
+        err = {
+            "code": "MODEL_NOT_RUNNABLE",
+            "message": f"Model {model_id!r} is not runnable in this build.",
+            "recommended_action": src.recommended_action,
+            "known_blockers": src.known_blockers,
+            "install": fam_info.get("install", src.install_command),
+            "fix": (
+                f"Install required deps: {fam_info.get('install', src.install_command)}"
+                if fam_info.get("status") == "optional_extra"
+                else "See known_blockers for details."
+            ),
+        }
+        if json_:
+            print(json.dumps(err, indent=2))
+        else:
+            console.print(f"[yellow]MODEL_NOT_RUNNABLE[/yellow]: {err['message']}")
+            for b in src.known_blockers:
+                console.print(f"  blocker: {b}")
+            console.print(f"  action:  {src.recommended_action}")
+        raise typer.Exit(3)
+
+    if not image.exists():
+        err = {
+            "code": "INPUT_NOT_FOUND",
+            "message": f"Image not found: {image}",
+            "fix": f"Check path: {image}",
+        }
+        if json_:
+            print(json.dumps(err, indent=2))
+        else:
+            console.print(f"[red]INPUT_NOT_FOUND[/red]: {err['message']}")
+        raise typer.Exit(3)
+
+    # Parse box
+    boxes = None
+    if box:
+        try:
+            parts = [float(x.strip()) for x in box.split(",")]
+            if len(parts) != 4:
+                raise ValueError(f"Expected x1,y1,x2,y2 got {len(parts)} values")
+            boxes = [parts]
+        except ValueError as exc:
+            err = {
+                "code": "INPUT_SCHEMA_ERROR",
+                "message": f"Invalid box format {box!r}: {exc}",
+                "fix": "Use --box x1,y1,x2,y2",
+            }
+            if json_:
+                print(json.dumps(err, indent=2))
+            else:
+                console.print(f"[red]INPUT_SCHEMA_ERROR[/red]: {err['message']}")
+            raise typer.Exit(3)
+
+    # Run inference
+    try:
+        from PIL import Image as PILImage
+
+        from visionservex import VisionModel
+
+        pil_image = PILImage.open(image).convert("RGB")
+        model = VisionModel(model_id)
+        predict_kwargs: dict = {}
+        if boxes:
+            predict_kwargs["boxes"] = boxes
+        result = model.predict(pil_image, **predict_kwargs)
+        payload = {
+            "model_id": model_id,
+            "image": str(image),
+            "box": box or None,
+            "status": "ok",
+            "n_segments": len(getattr(result, "segments", []) or []),
+            "family": src.family,
+        }
+        if json_:
+            print(json.dumps(payload, indent=2))
+            return
+        console.print(f"[green]smoke-test passed[/green]: {model_id}")
+        console.print(f"  segments: {payload['n_segments']}")
+    except Exception as exc:
+        err = {
+            "code": "SMOKE_TEST_ERROR",
+            "message": str(exc)[:300],
+            "fix": "Check transformers version and HF cache.",
+        }
+        if json_:
+            print(json.dumps(err, indent=2))
+        else:
+            console.print(f"[red]SMOKE_TEST_ERROR[/red]: {err['message']}")
+        raise typer.Exit(4)
+
+
+__all__ = ["app"]

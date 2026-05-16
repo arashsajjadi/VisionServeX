@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-2.4.0-informational.svg" alt="v2.4.0">
+  <img src="https://img.shields.io/badge/version-2.5.0-informational.svg" alt="v2.5.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -171,60 +171,65 @@ Every model in the registry now carries an explicit `model_category` label.
 
 ---
 
-## What works today
+## Model Families
 
-### Detection (wired, runnable)
+Full detail: [docs/model_zoo_matrix.md](docs/model_zoo_matrix.md) | [docs/model_zoo_gap_report.md](docs/model_zoo_gap_report.md)
 
-| Model ID | Category | Checkpoint | Install |
-|----------|----------|-----------|---------|
-| `dfine-n` / `dfine-n-coco` | demo_fast | ustc-community/dfine-nano-coco | `[hf]` |
-| `dfine-s-o365-coco` ★ | **accuracy_grade** | ustc-community/dfine-small-obj2coco | `[hf]` |
-| `dfine-m-o365-coco` | **accuracy_grade** | ustc-community/dfine-medium-obj2coco | `[hf]` |
-| `dfine-l-o365-coco` | **accuracy_grade** | ustc-community/dfine-large-obj2coco-e25 | `[hf]` |
-| `dfine-x-o365-coco` | **accuracy_grade** | ustc-community/dfine-xlarge-obj2coco | `[hf]` |
-| `rfdetr-nano` | demo_fast | rfdetr pkg | `[rfdetr]` |
-| `rfdetr-small` ★ | production_recommended | rfdetr pkg | `[rfdetr]` |
-| `rfdetr-medium` | **accuracy_grade** | rfdetr pkg | `[rfdetr]` |
-| `rfdetr-large` | **accuracy_grade** | rfdetr pkg | `[rfdetr]` |
+| Family | Best Model | Status | Install | Example |
+|--------|-----------|--------|---------|---------|
+| D-FINE | `dfine-s-o365-coco` | runnable | `[hf]` | `visionservex detect dfine-s-o365-coco image.jpg` |
+| RF-DETR | `rfdetr-large` | runnable | `[rfdetr]` | `visionservex detect rfdetr-large image.jpg` |
+| RF-DETR-Seg | `rfdetr-seg-medium` | runnable | `[rfdetr]` | `visionservex segment rfdetr-seg-medium image.jpg` |
+| SAM v1 | `sam-vit-base` | runnable | `[hf]` | `visionservex sam-family smoke-test sam-vit-base img.jpg` |
+| SAM 2 | `sam2-hiera-tiny` | runnable | `[hf]` | `visionservex sam-family smoke-test sam2-hiera-tiny img.jpg` |
+| SAM 2.1 | `sam2.1-hiera-large` | runnable | `[hf]` | `visionservex sam-family smoke-test sam2.1-hiera-large img.jpg` |
+| Florence-2 | `florence-2-large` | runnable | `[hf]` | `visionservex florence2 predict florence-2-large img.jpg --task '<OD>'` |
+| OWLv2 | `owlv2-large-patch14` | runnable | `[hf]` | `visionservex open-vocab owlv2-large-patch14 img.jpg --prompt "cat"` |
+| OWL-ViT | `owlvit-large-patch14` | runnable | `[hf]` | `visionservex open-vocab owlvit-large-patch14 img.jpg --prompt "dog"` |
+| Grounding DINO | `grounding-dino-swin-b` | runnable | `[hf]` | `visionservex open-vocab grounding-dino-swin-b img.jpg --prompt "car"` |
+| SwinV2 | `swinv2-base` | runnable | `[hf]` | `visionservex classify swinv2-base image.jpg --top-k 5` |
+| ConvNeXtV2 | `convnextv2-large` | runnable | `[hf]` | `visionservex classify convnextv2-large image.jpg` |
+| DINOv2 | `dinov2-large` | runnable | `[hf]` | `visionservex feature embed dinov2-large image.jpg` |
+| CLIP | `clip-vit-large-patch14` | runnable | `[hf]` | `visionservex feature embed clip-vit-large-patch14 image.jpg` |
+| SigLIP2 | `siglip2-base-patch16-224` | runnable | `[hf]` | `visionservex feature embed siglip2-base-patch16-224 image.jpg` |
+| MedSAM | `medsam` | runnable | `[hf]` | `visionservex medical segment medsam ct.png --box 10,20,100,200 --out /tmp` |
+| PatchCore | `anomalib-patchcore` | optional_extra | `[anomaly]` | `visionservex anomaly train patchcore --data /data/normal --out /tmp` |
+| RTMDet-R | `rtmdet-r2-s` | expert_sidecar | OpenMMLab | `visionservex aerial detect aerial.jpg --model rtmdet-r2-s` |
+| ByteTrack | `bytetrack` | optional_extra | `pip install bytetracker` | `visionservex video-search index video.mp4 --tracker bytetrack --out /tmp/idx` |
+| DEIMv2 | `deimv2-s/m/l/x` | unavailable | — | Blocked: no HF Transformers support |
+| FastSAM | `fastsam-s/x` | do_not_add | — | AGPL-3.0 license; use SAM v1/2 instead |
 
-★ Recommended accuracy entry points: `dfine-s-o365-coco` (CPU-capable) and `rfdetr-small` (GPU-preferred).
+### Status Legend
 
-### Segmentation
+| Status | Meaning |
+|--------|---------|
+| `runnable` | Works now with the listed install command |
+| `real_smoke_verified` | Runnable + smoke-tested on real hardware |
+| `optional_extra` | Needs an extra pip package; clean install path exists |
+| `expert_sidecar` | Needs isolated env (OpenMMLab, Detectron2, etc.) |
+| `external_api` | API-gated; not self-hostable |
+| `do_not_add` | Excluded (license or policy reason) |
+| `unavailable` | Blocked by a known technical issue |
 
-| Family | Models | Category | Install |
-|--------|--------|----------|---------|
-| RF-DETR-Seg | `rfdetr-seg-nano/small/medium` | demo_fast / production_recommended / accuracy_grade | `[rfdetr]` |
-| SAM v1 | `sam-vit-base/large/huge` | production_recommended / accuracy_grade | `[hf]` |
-| SAM 2 | `sam2-hiera-tiny/small/base-plus/large` | production_recommended / accuracy_grade | `[hf]` |
-| SAM 2.1 | `sam2.1-hiera-tiny/small/base-plus/large` | accuracy_grade | `[hf]` |
-| Grounded SAM | `grounded-sam`, `grounded-sam2` | production_recommended | `[hf]` |
-| OneFormer | `oneformer-swin-large/dinat-large/convnext-large` | accuracy_grade | `[hf]` |
+### What works today (runnable models)
 
-### Classification
+**Detection:** D-FINE (n/s/m/l/x), RF-DETR (nano/small/medium/large), Grounding DINO (tiny, swin-b)
 
-| Family | Models | Category | Install |
-|--------|--------|----------|---------|
-| SwinV2 | `swinv2-tiny/small` | production_recommended | `[hf]` |
-| SwinV2 | `swinv2-base/large` | accuracy_grade | `[hf]` |
-| ConvNeXtV2 | `convnextv2-tiny/base/large` | production_recommended | `[hf]` |
-| MaxViT | `maxvit-tiny-tf-224` | production_recommended | `[hf]` |
-| InternImage | `internimage-t/s/b/l/h` | expert_sidecar | OpenMMLab |
+**Segmentation:** RF-DETR-Seg (nano/small/medium), SAM v1 (vit-base), SAM 2 (hiera-tiny/small/base-plus/large), SAM 2.1 (tiny/small/base-plus/large), MedSAM
 
-### Open-Vocabulary Detection
+**Classification:** SwinV2 (tiny/small/base/large), ConvNeXtV2 (tiny/base/large), MaxViT (tiny)
 
-| Model | Category | Install |
-|-------|----------|---------|
-| `grounding-dino-tiny` | demo_fast | `[hf]` |
-| `grounding-dino-swin-b` | accuracy_grade | `[hf]` |
-| `grounding-dino-1.5/1.6` | external_api | API token required |
+**Open-vocab / VLM:** Florence-2 (base, large), OWLv2 (base, large), OWL-ViT (base, large), Grounding DINO (tiny, swin-b)
 
-### Experimental SOTA (stub — not runnable yet)
+**Embedding:** DINOv2 (small/base/large/giant), CLIP (base, large), SigLIP (base), SigLIP2 (base)
+
+**Experimental SOTA (not runnable yet):**
 
 | Family | Models | Blocker |
 |--------|--------|---------|
-| DEIM | `deim-s/m`, `deimv2-s/m` | No HF/pip path; custom loader + license verification needed |
-| RT-DETRv4 | `rtdetrv4-s/m/l/x` | No official release numbering; checkpoint source unclear |
-| MaskDINO | `maskdino-r50-coco/panoptic` | detectron2 environment required |
+| DEIMv2 | `deimv2-s/m/l/x` | No HF Transformers support; custom loader required |
+| RT-DETRv4 | `rtdetrv4-s` | No official checkpoint URLs |
+| MaskDINO | `maskdino-swinl-coco` | Detectron2 environment required |
 
 ---
 

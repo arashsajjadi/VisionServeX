@@ -165,4 +165,214 @@ def show_cmd(
         console.print(f"  Notes:       {src.notes}")
 
 
+@app.command("gap-report")
+def gap_report(
+    format_: str = typer.Option("markdown", "--format"),
+    out: Path = typer.Option(None, "--out"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Generate a gap report from SOURCE_MANIFEST grouped by recommended_action."""
+    from visionservex.model_zoo import SOURCE_MANIFEST
+
+    groups: dict[str, list] = {
+        "runnable": [],
+        "optional_extra": [],
+        "expert_sidecar": [],
+        "external_api": [],
+        "do_not_add": [],
+        "audit_only": [],
+        "unavailable": [],
+        "non_core_license_optional": [],
+    }
+    for entry in SOURCE_MANIFEST.values():
+        action = entry.recommended_action
+        if entry.runnable_in_visionservex and action == "add_now":
+            groups["runnable"].append(entry)
+        elif action == "expert_sidecar":
+            groups["expert_sidecar"].append(entry)
+        elif action == "external_api":
+            groups["external_api"].append(entry)
+        elif action == "do_not_add":
+            groups["do_not_add"].append(entry)
+        elif action == "non_core_license_optional":
+            groups["non_core_license_optional"].append(entry)
+        elif action == "audit_only":
+            if entry.known_blockers:
+                groups["unavailable"].append(entry)
+            else:
+                groups["audit_only"].append(entry)
+        else:
+            groups["audit_only"].append(entry)
+
+    payload = {grp: [e.to_dict() for e in entries] for grp, entries in groups.items()}
+    counts = {grp: len(entries) for grp, entries in groups.items()}
+    payload["_counts"] = counts  # type: ignore[assignment]
+
+    if json_:
+        print(json.dumps(payload, indent=2))
+        return
+
+    if format_ == "json":
+        text = json.dumps(payload, indent=2)
+        if out:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(text, encoding="utf-8")
+            console.print(f"[green]Gap report written to {out}[/green]")
+        else:
+            print(text)
+        return
+
+    lines = ["# VisionServeX Model Zoo Gap Report", ""]
+    section_labels = {
+        "runnable": "Runnable (wired, usable now)",
+        "optional_extra": "Optional extras (require extra install)",
+        "expert_sidecar": "Expert sidecars (OpenMMLab, Detectron2, etc.)",
+        "external_api": "External / gated APIs",
+        "non_core_license_optional": "Non-core license (optional)",
+        "do_not_add": "Excluded (do_not_add with reason)",
+        "audit_only": "Audit only (no blockers yet)",
+        "unavailable": "Unresolved blockers",
+    }
+    for grp, label in section_labels.items():
+        entries = groups[grp]
+        lines.append(f"## {label} ({len(entries)})")
+        lines.append("")
+        if entries:
+            lines.append("| Model ID | Family | Task | License | Blockers |")
+            lines.append("|----------|--------|------|---------|---------|")
+            for e in entries:
+                blockers = "; ".join(e.known_blockers[:2]) if e.known_blockers else "-"
+                lines.append(
+                    f"| `{e.model_id}` | {e.family} | {e.task} | {e.license} | {blockers} |"
+                )
+        else:
+            lines.append("_None_")
+        lines.append("")
+
+    text = "\n".join(lines)
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(text, encoding="utf-8")
+        console.print(f"[green]Gap report written to {out}[/green]")
+    else:
+        console.print(text)
+
+
+@app.command("matrix")
+def matrix(
+    format_: str = typer.Option("markdown", "--format"),
+    out: Path = typer.Option(None, "--out"),
+    json_: bool = typer.Option(False, "--json"),
+    family: str = typer.Option("", "--family", help="Filter by family"),
+    domain: str = typer.Option("", "--domain", help="Filter by domain"),
+) -> None:
+    """Generate a full model matrix from SOURCE_MANIFEST."""
+    from visionservex.model_zoo import SOURCE_MANIFEST
+
+    entries = list(SOURCE_MANIFEST.values())
+    if family:
+        entries = [e for e in entries if e.family.lower() == family.lower()]
+    if domain:
+        entries = [e for e in entries if e.domain.lower() == domain.lower()]
+
+    rows = []
+    for e in entries:
+        rows.append(
+            {
+                "model_id": e.model_id,
+                "family": e.family,
+                "task": e.task,
+                "status": "runnable" if e.runnable_in_visionservex else e.recommended_action,
+                "license": e.license,
+                "install": e.install_command,
+                "source_url": e.official_repo or e.hf_repo or "",
+                "blockers": e.known_blockers,
+            }
+        )
+
+    if json_:
+        print(json.dumps(rows, indent=2))
+        return
+
+    if format_ == "json":
+        text = json.dumps(rows, indent=2)
+        if out:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(text, encoding="utf-8")
+            console.print(f"[green]Matrix written to {out}[/green]")
+        else:
+            print(text)
+        return
+
+    lines = ["# VisionServeX Model Matrix", ""]
+    lines.append("| Model ID | Family | Task | Status | License | Install | Source | Blockers |")
+    lines.append("|----------|--------|------|--------|---------|---------|--------|---------|")
+    for row in rows:
+        blockers = "; ".join(row["blockers"][:1]) if row["blockers"] else "-"
+        lines.append(
+            f"| `{row['model_id']}` | {row['family']} | {row['task']} | "
+            f"{row['status']} | {row['license']} | `{row['install']}` | "
+            f"{row['source_url'] or '-'} | {blockers} |"
+        )
+    lines.append("")
+
+    text = "\n".join(lines)
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(text, encoding="utf-8")
+        console.print(f"[green]Matrix written to {out}[/green]")
+    else:
+        console.print(text)
+
+
+@app.command("blockers")
+def blockers_cmd(
+    family: str = typer.Option("", "--family"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Show known blockers for a model family."""
+    from visionservex.model_zoo import SOURCE_MANIFEST
+
+    entries = list(SOURCE_MANIFEST.values())
+    if family:
+        entries = [e for e in entries if e.family.lower() == family.lower()]
+
+    blocked = [e for e in entries if e.known_blockers]
+    rows = []
+    for e in blocked:
+        rows.append(
+            {
+                "model_id": e.model_id,
+                "family": e.family,
+                "recommended_action": e.recommended_action,
+                "known_blockers": e.known_blockers,
+                "install": e.install_command,
+            }
+        )
+
+    if json_:
+        print(json.dumps(rows, indent=2))
+        return
+
+    if not rows:
+        label = f" for family {family!r}" if family else ""
+        console.print(f"[green]No blockers found{label}.[/green]")
+        return
+
+    table = Table(title=f"Known blockers ({len(rows)})", show_header=True)
+    table.add_column("Model ID", style="cyan", no_wrap=True)
+    table.add_column("Family", no_wrap=True)
+    table.add_column("Action", no_wrap=True)
+    table.add_column("Blockers")
+    for row in rows:
+        blockers_text = "\n".join(f"- {b}" for b in row["known_blockers"])
+        table.add_row(
+            row["model_id"],
+            row["family"],
+            row["recommended_action"],
+            blockers_text,
+        )
+    console.print(table)
+
+
 __all__ = ["app"]
