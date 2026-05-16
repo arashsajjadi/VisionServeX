@@ -64,6 +64,7 @@ def test_broken_cuda_not_selected():
 
 
 def test_device_benchmark_cpu():
+    pytest.importorskip("torch", reason="device_benchmark requires torch")
     from visionservex.runtime.device import device_benchmark
 
     result = device_benchmark("cpu", quick=True)

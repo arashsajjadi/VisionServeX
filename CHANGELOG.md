@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-05-16
+
+### Patch — fast CI compatibility fix
+
+`tests/test_v050.py::test_device_benchmark_cpu` now uses `pytest.importorskip("torch")` so it skips cleanly when torch is not installed (e.g. in the new fast-CI environment that intentionally omits `[hf]` to keep wall-time under 10 minutes). No production code changed. All v1.7.0 features remain intact.
+
 ## [1.7.0] - 2026-05-16
 
 ### Resource guard, dev safety commands, fast test strategy, model health report
