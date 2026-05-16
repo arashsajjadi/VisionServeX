@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-1.4.0-informational.svg" alt="v1.4.0">
+  <img src="https://img.shields.io/badge/version-1.5.0-informational.svg" alt="v1.5.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -359,6 +359,60 @@ visionservex tunnel config --domain api.yourdomain.com --out tunnel.yaml
 visionservex serve &
 visionservex tunnel run tunnel.yaml --i-understand-this-is-public
 ```
+
+---
+
+## VRAM Lifecycle Safety
+
+VisionServeX manages GPU memory to prevent stepwise VRAM accumulation during repeated model loads.
+
+```python
+# Context manager — GPU cleanup on exit
+with VisionModel("dfine-x-o365-coco", device="cuda") as model:
+    result = model.predict("image.jpg")
+# GPU memory flushed automatically after context exit
+
+# Explicit cleanup
+model = VisionModel("rfdetr-large", device="cuda")
+result = model.predict("image.jpg")
+model.unload()  # full cleanup: engine.unload + GC + CUDA empty_cache + ipc_collect
+
+# One-shot predict with immediate unload
+result = model.predict("image.jpg", unload_after=True)
+```
+
+```bash
+# VRAM diagnostics
+visionservex gpu explain-memory      # allocated vs reserved breakdown
+visionservex gpu cleanup-cache       # flush CUDA allocator cache
+visionservex gpu memory-test dfine-s-o365-coco --runs 5   # check VRAM growth
+visionservex gpu memory-test-suite --models dfine-s-o365-coco,rfdetr-small
+
+# Process-isolated benchmark (full CUDA context released after each model)
+visionservex benchmark benchmark-competitiveness \
+  --models dfine-x-o365-coco,rfdetr-large \
+  --dataset yolo:/path/to/coco128 \
+  --isolate-process \
+  --out reports/ap_benchmark
+```
+
+---
+
+## Segmentation Evaluation
+
+```bash
+# Latency-only (no ground truth needed)
+visionservex benchmark benchmark-segmentation \
+  --models rfdetr-seg-medium --max-images 20
+
+# Real mask AP with COCO JSON annotations
+visionservex benchmark benchmark-segmentation \
+  --models rfdetr-seg-medium \
+  --dataset coco-json:/data/coco/images:/data/coco/annotations/instances_val2017.json \
+  --max-images 200 --out reports/seg_ap
+```
+
+**Note:** Mask AP uses binary mask IoU — NOT the same as detection box AP50. Do not mix these metrics.
 
 ---
 

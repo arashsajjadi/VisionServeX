@@ -718,4 +718,264 @@ def doctor(json_: bool = typer.Option(False, "--json")) -> None:
             console.print(f"  [cyan]→[/cyan] {s}")
 
 
+# ---------------------------------------------------------------------------
+# VRAM lifecycle commands (v1.5.0)
+# ---------------------------------------------------------------------------
+
+
+@app.command("cleanup-cache", help="Flush GPU VRAM caches without killing any process.")
+def cleanup_cache(json_: bool = typer.Option(False, "--json")) -> None:
+    """Flush the CUDA allocator cache. Safe — does NOT kill any process or reset GPU."""
+    from visionservex.runtime.gpu_lifecycle import (
+        clear_torch_cuda_cache,
+        get_gpu_memory_state,
+    )
+
+    before = get_gpu_memory_state("before")
+    clear_torch_cuda_cache()
+    after = get_gpu_memory_state("after")
+
+    payload = {
+        "before_allocated_mb": before.allocated_mb,
+        "before_reserved_mb": before.reserved_mb,
+        "after_allocated_mb": after.allocated_mb,
+        "after_reserved_mb": after.reserved_mb,
+        "freed_allocated_mb": round(before.allocated_mb - after.allocated_mb, 1),
+        "freed_reserved_mb": round(before.reserved_mb - after.reserved_mb, 1),
+        "cuda_available": after.cuda_available,
+    }
+    if json_:
+        _emit(payload, json_mode=True)
+        return
+    if not after.cuda_available:
+        console.print("[grey50]CUDA not available — no GPU cache to flush.[/grey50]")
+        return
+    freed = payload["freed_reserved_mb"]
+    console.print(
+        f"[green]GPU cache flushed.[/green] "
+        f"Reserved: {before.reserved_mb:.1f} → {after.reserved_mb:.1f} MB "
+        f"(freed {freed:.1f} MB). "
+        f"Allocated: {before.allocated_mb:.1f} → {after.allocated_mb:.1f} MB."
+    )
+
+
+@app.command(
+    "explain-memory", help="Show GPU memory state with explanation of allocated vs reserved."
+)
+def explain_memory(json_: bool = typer.Option(False, "--json")) -> None:
+    """Print GPU memory state with a clear explanation of allocated vs cached/reserved."""
+    from visionservex.runtime.gpu_lifecycle import get_gpu_memory_state, get_process_gpu_memory
+
+    state = get_gpu_memory_state("current")
+    proc = get_process_gpu_memory()
+
+    payload = {
+        "cuda_available": state.cuda_available,
+        "device_name": state.device_name,
+        "allocated_mb": state.allocated_mb,
+        "reserved_mb": state.reserved_mb,
+        "max_allocated_mb": state.max_allocated_mb,
+        "processes": proc.get("processes", []) if proc["available"] else [],
+        "explanation": {
+            "allocated": "Memory actively held by live PyTorch tensors.",
+            "reserved": "Memory held by the CUDA caching allocator (can be reused without OS call).",
+            "max_allocated": "Peak allocated during this process session.",
+            "cleanup_command": "visionservex gpu cleanup-cache  (flushes reserved back to OS)",
+        },
+    }
+
+    if json_:
+        _emit(payload, json_mode=True)
+        return
+
+    if not state.cuda_available:
+        console.print("[grey50]CUDA not available.[/grey50]")
+        return
+
+    console.print(f"[bold]GPU memory:[/bold] {state.device_name}")
+    console.print(f"  Allocated (live tensors):   {state.allocated_mb:.1f} MB")
+    console.print(f"  Reserved  (CUDA cache):     {state.reserved_mb:.1f} MB")
+    console.print(f"  Peak allocated this session: {state.max_allocated_mb:.1f} MB")
+    console.print("\n  [dim]'allocated' = live tensors held by Python objects[/dim]")
+    console.print(
+        "  [dim]'reserved' = CUDA allocator cache (safe to release with cleanup-cache)[/dim]"
+    )
+
+    if proc["available"] and proc.get("processes"):
+        console.print("\n[bold]Per-process GPU usage:[/bold]")
+        for p in proc["processes"]:
+            console.print(
+                f"  PID {p['pid']} {p['process_name'][:30]}: {p.get('used_memory_mb', '?')} MB"
+            )
+
+    console.print("\n  [cyan]$[/cyan] visionservex gpu cleanup-cache   # flush reserved memory")
+
+
+@app.command(
+    "memory-test",
+    help="Load a model N times and check VRAM growth. Safe to stop with Ctrl+C.",
+)
+def memory_test(
+    model_id: str,
+    runs: int = typer.Option(5, "--runs", min=1, max=20),
+    max_growth_mb: float = typer.Option(512.0, "--max-growth-mb"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Load, predict, unload a model N times. Reports VRAM growth per run."""
+    from visionservex.core.model import VisionModel
+    from visionservex.runtime.gpu_lifecycle import (
+        assert_memory_returned_to_baseline,
+        get_gpu_memory_state,
+    )
+
+    if not json_:
+        console.print(
+            f"[bold]VRAM memory test:[/bold] {model_id}  runs={runs}  max_growth={max_growth_mb} MB"
+        )
+
+    from PIL import Image as _PIL
+
+    dummy_img = _PIL.new("RGB", (320, 240), "blue")
+    baseline = get_gpu_memory_state("baseline")
+    snapshots = [baseline.to_dict()]
+    warnings_found = []
+
+    for i in range(runs):
+        try:
+            with VisionModel(model_id) as model:
+                model.predict(dummy_img)
+        except Exception as exc:
+            if not json_:
+                console.print(f"  run {i + 1}: [red]error[/red] {str(exc)[:80]}")
+            continue
+
+        snap = get_gpu_memory_state(f"after_run_{i + 1}")
+        check = assert_memory_returned_to_baseline(baseline, snap, max_growth_mb=max_growth_mb)
+        snapshots.append(snap.to_dict())
+        if not json_:
+            color = "green" if check["status"] == "ok" else "yellow"
+            console.print(
+                f"  run {i + 1}: [{color}]{check['status']}[/{color}] "
+                f"alloc={snap.allocated_mb:.1f} MB  reserved={snap.reserved_mb:.1f} MB  "
+                f"growth={check['allocated_growth_mb']:+.1f} MB"
+            )
+        if check["status"] != "ok":
+            warnings_found.append(check["message"])
+
+    final = get_gpu_memory_state("final")
+    final_check = assert_memory_returned_to_baseline(baseline, final, max_growth_mb=max_growth_mb)
+
+    payload = {
+        "model_id": model_id,
+        "runs": runs,
+        "baseline_mb": baseline.allocated_mb,
+        "final_allocated_mb": final.allocated_mb,
+        "total_growth_mb": final_check["allocated_growth_mb"],
+        "status": final_check["status"],
+        "message": final_check["message"],
+        "warnings": warnings_found,
+        "snapshots": snapshots,
+    }
+    if json_:
+        _emit(payload, json_mode=True)
+    else:
+        color = "green" if final_check["status"] == "ok" else "yellow"
+        console.print(f"\n[bold]Result:[/bold] [{color}]{final_check['status']}[/{color}]")
+        console.print(f"  Total growth: {final_check['allocated_growth_mb']:+.1f} MB allocated")
+        if warnings_found:
+            for w in warnings_found:
+                console.print(f"  [yellow]⚠[/yellow] {w}")
+
+
+@app.command("memory-test-suite", help="VRAM memory test across multiple models.")
+def memory_test_suite(
+    models: str = typer.Option("mock-detect", "--models", help="Comma-separated model IDs."),
+    max_growth_mb: float = typer.Option(512.0, "--max-growth-mb"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Run VRAM memory test for each model sequentially. Reports total VRAM growth."""
+    from visionservex.runtime.gpu_lifecycle import get_gpu_memory_state
+
+    model_ids = [m.strip() for m in models.split(",") if m.strip()]
+    all_results = []
+    baseline = get_gpu_memory_state("suite_baseline")
+
+    for mid in model_ids:
+        if not json_:
+            console.print(f"  testing [cyan]{mid}[/cyan] ...", end=" ")
+        try:
+            from PIL import Image as _PIL
+
+            from visionservex.core.model import VisionModel
+            from visionservex.runtime.gpu_lifecycle import assert_memory_returned_to_baseline
+
+            before = get_gpu_memory_state(f"before_{mid}")
+            with VisionModel(mid) as model:
+                model.predict(_PIL.new("RGB", (320, 240)))
+            after = get_gpu_memory_state(f"after_{mid}")
+            check = assert_memory_returned_to_baseline(before, after, max_growth_mb=max_growth_mb)
+            result = {
+                "model_id": mid,
+                "growth_mb": check["allocated_growth_mb"],
+                "status": check["status"],
+            }
+            if not json_:
+                color = "green" if check["status"] == "ok" else "yellow"
+                console.print(
+                    f"[{color}]{check['status']}[/{color}] growth={check['allocated_growth_mb']:+.1f} MB"
+                )
+        except Exception as exc:
+            result = {"model_id": mid, "status": "error", "error": str(exc)[:100], "growth_mb": 0.0}
+            if not json_:
+                console.print(f"[red]error[/red] {str(exc)[:60]}")
+        all_results.append(result)
+
+    final = get_gpu_memory_state("suite_final")
+    suite_result = {
+        "models_tested": len(model_ids),
+        "baseline_mb": baseline.allocated_mb,
+        "final_mb": final.allocated_mb,
+        "total_growth_mb": round(final.allocated_mb - baseline.allocated_mb, 1),
+        "results": all_results,
+    }
+    if json_:
+        _emit(suite_result, json_mode=True)
+    else:
+        ok_count = sum(1 for r in all_results if r["status"] == "ok")
+        console.print(
+            f"\n[bold]Suite result:[/bold] {ok_count}/{len(model_ids)} models within VRAM limit"
+        )
+        console.print(f"  Total VRAM growth: {suite_result['total_growth_mb']:+.1f} MB")
+
+
+@app.command("unload-all", help="Unload all models in the current process and flush VRAM caches.")
+def unload_all(json_: bool = typer.Option(False, "--json")) -> None:
+    """Flush all CUDA caches in the current process. Does NOT kill other processes."""
+    from visionservex.runtime.gpu_lifecycle import (
+        clear_torch_cuda_cache,
+        force_gc,
+        get_gpu_memory_state,
+    )
+
+    before = get_gpu_memory_state("before")
+    force_gc()
+    clear_torch_cuda_cache()
+    after = get_gpu_memory_state("after")
+
+    payload = {
+        "freed_allocated_mb": round(before.allocated_mb - after.allocated_mb, 1),
+        "freed_reserved_mb": round(before.reserved_mb - after.reserved_mb, 1),
+        "after_allocated_mb": after.allocated_mb,
+        "after_reserved_mb": after.reserved_mb,
+    }
+    if json_:
+        _emit(payload, json_mode=True)
+    else:
+        console.print(
+            f"[green]VRAM caches flushed.[/green] "
+            f"Allocated: {before.allocated_mb:.1f}→{after.allocated_mb:.1f} MB  "
+            f"Reserved: {before.reserved_mb:.1f}→{after.reserved_mb:.1f} MB"
+        )
+
+
 __all__ = ["app"]

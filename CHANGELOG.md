@@ -7,6 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-05-16
+
+### VRAM lifecycle fix, process-isolated benchmarking, real mask AP evaluator
+
+Prevents stepwise VRAM accumulation during repeated model loads and benchmarks.
+Adds process-isolated benchmark mode and a real mask AP evaluator for instance
+segmentation.
+
+#### VRAM lifecycle fix (Phase 1)
+- Added `src/visionservex/runtime/gpu_lifecycle.py` — central GPU memory manager:
+  - `get_gpu_memory_state()` — snapshot allocated/reserved/peak VRAM.
+  - `get_process_gpu_memory()` — per-process VRAM via nvidia-smi.
+  - `clear_torch_cuda_cache()` — synchronize + empty_cache + ipc_collect + reset_peak.
+  - `cleanup_gpu_after_model(model)` — full cleanup after a model run.
+  - `assert_memory_returned_to_baseline()` — compare memory growth vs threshold.
+  - `MemoryState` dataclass with growth arithmetic.
+- `VisionModel.unload()` now runs the full cleanup sequence after engine.unload():
+  Python GC → CUDA sync → empty_cache → ipc_collect → reset_peak_stats.
+- `VisionModel.close()` alias for `unload()`.
+- `VisionModel.predict(..., unload_after=True)` — unload after a single prediction.
+- `VisionModel.__exit__` now calls `unload()` with full GPU cleanup.
+- All benchmark runs default to `--unload-between-models` (GPU cache flushed after each model).
+
+#### New GPU CLI commands (Phase 1)
+- `visionservex gpu cleanup-cache` — flush CUDA allocator cache (no process kill).
+- `visionservex gpu explain-memory` — show allocated vs reserved with explanation.
+- `visionservex gpu memory-test MODEL --runs 5` — check VRAM growth over N runs.
+- `visionservex gpu memory-test-suite --models ... --max-growth-mb 512` — multi-model test.
+- `visionservex gpu unload-all` — GC + CUDA flush for current process.
+
+#### Process-isolated benchmark (Phase 2)
+- `benchmark-competitiveness --isolate-process` runs each model in a child process.
+- Child uses `multiprocessing.spawn` context. No CUDA tensors cross process boundary.
+- Child exits cleanly, releasing its CUDA context. Parent collects JSON results.
+- Protects parent from CUDA OOM in child.
+
+#### Mask AP evaluator (Phase 6)
+- Added `src/visionservex/runtime/segmentation_eval.py`:
+  - `load_coco_segmentation_json()` — load COCO segmentation JSON with polygon/RLE masks.
+  - `MaskDetectionEvaluator` — mask IoU matching, cumulative TP/FP, 101-point AP.
+  - `run_segmentation_evaluation(model_id, samples)` — full evaluation runner.
+  - `SegEvaluationResult` — mask_ap50, mask_map50_95, box_ap50, latency, n_no_mask.
+- `benchmark-segmentation` upgraded from a stub to a real command:
+  - Synthetic mode: latency + detection count.
+  - COCO JSON mode: real mask AP50 and mAP50:95.
+  - `--unload-between-models` (default: on) — flush GPU between models.
+  - Results exported as JSON.
+- Mask AP uses binary mask IoU (not box IoU). Not comparable to detection mAP.
+
+### Decisions
+- **DEIMv2**: checkpoint download path not verified — remains experimental_sota stub.
+- **RT-DETRv4**: no official release numbering confirmed — remains experimental_sota stub.
+- **Co-DINO/MaskDINO**: expert_sidecar stubs — OpenMMLab/Detectron2 required.
+- **RF-DETR-Seg Large/XL/2XL**: HF checkpoints not published — remain unavailable_with_reason.
+- **process isolation**: uses multiprocessing.spawn (not fork) for CUDA safety.
+
+### Known limitations
+- CUDA allocator retains a reserved pool even after empty_cache. This is expected
+  behavior. "reserved" memory (CUDA cache) can be larger than "allocated" (live tensors).
+- process-isolated mode is slower per model due to spawn overhead (~5-10s per model).
+- Mask AP with polygon GT requires polygon-to-binary conversion; RLE GT requires
+  either pycocotools (fast) or manual decode (slower, built-in).
+
 ## [1.4.0] - 2026-05-16
 
 ### Ultralytics-like ergonomics, output normalizer, model lifecycle CLI

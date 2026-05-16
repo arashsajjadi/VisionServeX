@@ -624,10 +624,11 @@ def test_video_stubs_exit2(subcmd, args):
 # ============================================================
 
 
-def test_version_is_140():
+def test_version_is_at_least_140():
     from visionservex import __version__
 
-    assert __version__ == "1.4.0", f"Expected 1.4.0, got {__version__}"
+    major, minor, _ = (int(x) for x in __version__.split("."))
+    assert (major, minor) >= (1, 4), f"Expected at least 1.4.x, got {__version__}"
 
 
 # ============================================================

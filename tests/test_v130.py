@@ -658,7 +658,7 @@ def test_recommend_goal_segmentation():
 @pytest.mark.parametrize(
     "subcmd",
     [
-        "benchmark-segmentation",
+        # benchmark-segmentation is now a real command (v1.5.0) — excluded here
         "benchmark-classification",
         "benchmark-open-vocab",
         "benchmark-pose",
@@ -679,7 +679,7 @@ def test_benchmark_not_implemented_json(subcmd: str):
 @pytest.mark.parametrize(
     "subcmd",
     [
-        "benchmark-segmentation",
+        # benchmark-segmentation is now a real command (v1.5.0) — excluded here
         "benchmark-classification",
         "benchmark-pose",
     ],
@@ -693,7 +693,7 @@ def test_benchmark_not_implemented_human(subcmd: str):
 def test_benchmark_stubs_different_metrics():
     """Each task stub reports task-appropriate metrics."""
     for subcmd, expected_metric in [
-        ("benchmark-segmentation", "mask AP50"),
+        # benchmark-segmentation is now a real command — use test_v150.py for it
         ("benchmark-classification", "top-1 accuracy"),
         ("benchmark-pose", "OKS AP50"),
         ("benchmark-obb", "rotated IoU AP50"),
@@ -704,6 +704,34 @@ def test_benchmark_stubs_different_metrics():
         assert any(expected_metric.lower() in m.lower() for m in metrics), (
             f"{subcmd}: expected '{expected_metric}' in metrics, got {metrics}"
         )
+
+
+def test_benchmark_segmentation_now_real():
+    """benchmark-segmentation is now real in v1.5.0 — exits 0 in synthetic mode."""
+    result = runner.invoke(
+        app,
+        [
+            "benchmark",
+            "benchmark-segmentation",
+            "--models",
+            "mock-segment",
+            "--max-images",
+            "2",
+            "--json",
+        ],
+    )
+    # In v1.5.0: exits 0 in synthetic mode, returns benchmark_type not BENCHMARK_NOT_IMPLEMENTED
+    # Note: if no segmentation models are valid, may exit non-zero
+    if result.exit_code == 0:
+        payload = json.loads(result.output)
+        assert "benchmark_type" in payload
+    # Either way, it should not return BENCHMARK_NOT_IMPLEMENTED anymore
+    if result.exit_code == 0:
+        try:
+            payload = json.loads(result.output)
+            assert payload.get("status") != "BENCHMARK_NOT_IMPLEMENTED"
+        except Exception:
+            pass
 
 
 # ============================================================

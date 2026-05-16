@@ -110,9 +110,26 @@ class VisionModel:
         self.engine.warmup()
 
     def unload(self) -> None:
+        """Unload the model and flush GPU caches.
+
+        Performs the full cleanup sequence:
+        1. Engine.unload() (drops HF/torch model references).
+        2. Python garbage collection.
+        3. CUDA cache flush (empty_cache + ipc_collect + reset_peak_stats).
+
+        This prevents stepwise VRAM accumulation across sequential model loads.
+        """
         if self._loaded:
             self.engine.unload()
             self._loaded = False
+        from visionservex.runtime.gpu_lifecycle import clear_torch_cuda_cache, force_gc
+
+        force_gc()
+        clear_torch_cuda_cache()
+
+    def close(self) -> None:
+        """Alias for unload(). Mirrors the Ultralytics-style .close() idiom."""
+        self.unload()
 
     def _ensure_weights(self) -> None:
         """Ensure local weights exist; pull if allowed."""
@@ -166,6 +183,7 @@ class VisionModel:
         top_k: int | None = None,
         threshold: float | None = None,
         task: str | None = None,
+        unload_after: bool = False,
         **kwargs: Any,
     ) -> BaseResult:
         """Run inference.
@@ -218,6 +236,8 @@ class VisionModel:
         result.cache_path = self._cache_path
         result.image_size = pil.size
         result._image = pil
+        if unload_after:
+            self.unload()
         return result
 
     def batch_predict(

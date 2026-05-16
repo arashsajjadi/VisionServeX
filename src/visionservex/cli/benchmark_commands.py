@@ -376,6 +376,16 @@ def benchmark_competitiveness(
     ),
     device: str = typer.Option("auto", "--device"),
     out: Path | None = typer.Option(None, "--out", help="Write JSON results here."),
+    unload_between_models: bool = typer.Option(
+        True,
+        "--unload-between-models/--no-unload",
+        help="Flush GPU caches between models to prevent VRAM accumulation.",
+    ),
+    isolate_process: bool = typer.Option(
+        False,
+        "--isolate-process",
+        help="Run each model in a child process for full CUDA context isolation.",
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Competitiveness benchmark: honest head-to-head comparison.
@@ -384,6 +394,8 @@ def benchmark_competitiveness(
     Dataset mode (--dataset yolo:<path>): real AP50/mAP50:95 from annotated ground truth.
 
     AP is computed with COCO-style 101-point interpolated PR curve.
+    --unload-between-models flushes GPU cache between models (default: on).
+    --isolate-process runs each model in a separate subprocess for full VRAM isolation.
     Honest by design: if YOLO beats VisionServeX models, this command will say so.
     """
 
@@ -418,7 +430,10 @@ def benchmark_competitiveness(
     # ---- Dataset mode: real AP/mAP ----
     dataset_str = (dataset or "synthetic").strip()
     if dataset_str not in ("synthetic", "") and not dataset_str.startswith("synthetic"):
-        _run_ap_benchmark(validated, dataset_str, max_images, device, out, json_)
+        if isolate_process:
+            _run_ap_benchmark_isolated(validated, dataset_str, max_images, device, out, json_)
+        else:
+            _run_ap_benchmark(validated, dataset_str, max_images, device, out, json_)
         return
 
     # Generate synthetic test images
@@ -431,6 +446,11 @@ def benchmark_competitiveness(
 
         result = _run_competitiveness_model(mid, test_images, threshold=threshold, device=device)
         all_results.append(result)
+
+        if unload_between_models:
+            from visionservex.runtime.gpu_lifecycle import clear_torch_cuda_cache
+
+            clear_torch_cuda_cache()
 
         if not json_:
             st = result.get("status", "?")
@@ -725,6 +745,168 @@ def _generate_conclusion(results: list[dict]) -> str:
         "health only, not accuracy. Run on real COCO images for AP50/mAP comparison."
     )
     return " ".join(parts)
+
+
+# ---------------------------------------------------------------------------
+# Process-isolated benchmark (each model in child process)
+# ---------------------------------------------------------------------------
+
+
+def _child_model_eval(
+    model_id: str, dataset_str: str, max_images: int, device: str, result_file: str
+) -> None:
+    """Run in a child process: load model, evaluate, write JSON to result_file."""
+    import json as _json
+    import sys
+
+    try:
+        from pathlib import Path as _Path
+
+        from visionservex.runtime.evaluation import (
+            load_coco_json,
+            load_yolo_format,
+            run_model_on_dataset,
+        )
+
+        if dataset_str.startswith("yolo:"):
+            samples, _ = load_yolo_format(_Path(dataset_str[5:]), max_images=max_images)
+            dname = f"yolo:{_Path(dataset_str[5:]).name}"
+        elif dataset_str.startswith("coco-json:"):
+            parts = dataset_str[10:].split(":", 1)
+            samples, _ = load_coco_json(_Path(parts[0]), _Path(parts[1]), max_images=max_images)
+            dname = f"coco-json:{_Path(parts[1]).stem}"
+        else:
+            samples, _ = load_yolo_format(_Path(dataset_str), max_images=max_images)
+            dname = _Path(dataset_str).name
+
+        result = run_model_on_dataset(model_id, samples, device=device, dataset_name=dname)
+        from visionservex.runtime.gpu_lifecycle import clear_torch_cuda_cache
+
+        clear_torch_cuda_cache()
+        with open(result_file, "w", encoding="utf-8") as f:
+            _json.dump(result.to_dict(), f)
+    except Exception as exc:
+        with open(result_file, "w", encoding="utf-8") as f:
+            _json.dump({"status": "error", "model_id": model_id, "error": str(exc)[:200]}, f)
+        sys.exit(1)
+
+
+def _run_ap_benchmark_isolated(
+    model_ids: list[str],
+    dataset_str: str,
+    max_images: int,
+    device: str,
+    out: Path | None,
+    json_: bool,
+) -> None:
+    """Run AP benchmark with each model in a separate child process."""
+    import json as _json
+    import multiprocessing
+    import tempfile
+
+    if not json_:
+        console.print(
+            f"[bold]AP benchmark (process-isolated):[/bold] {len(model_ids)} models | device={device}"
+        )
+        console.print(
+            "[dim]Each model runs in a child process — CUDA context fully released after each.[/dim]\n"
+        )
+
+    all_results = []
+    for mid in model_ids:
+        if not json_:
+            console.print(f"  [cyan]{mid}[/cyan] (isolated) ...", end=" ")
+
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False, mode="w") as tf:
+            result_file = tf.name
+
+        ctx = multiprocessing.get_context("spawn")
+        proc = ctx.Process(
+            target=_child_model_eval,
+            args=(mid, dataset_str, max_images, device, result_file),
+            daemon=False,
+        )
+        proc.start()
+        proc.join(timeout=600)
+
+        if proc.exitcode is None:
+            proc.terminate()
+            result = {"status": "error", "model_id": mid, "error": "child process timed out (600s)"}
+        elif proc.exitcode != 0:
+            try:
+                with open(result_file, encoding="utf-8") as f:
+                    result = _json.load(f)
+            except Exception:
+                result = {
+                    "status": "error",
+                    "model_id": mid,
+                    "error": f"child process exit code {proc.exitcode}",
+                }
+        else:
+            try:
+                with open(result_file, encoding="utf-8") as f:
+                    result = _json.load(f)
+            except Exception:
+                result = {
+                    "status": "error",
+                    "model_id": mid,
+                    "error": "could not read child output",
+                }
+
+        all_results.append(result)
+        if not json_:
+            st = result.get("status", "?")
+            if st == "ok":
+                console.print(
+                    f"[green]ok[/green] AP50={result.get('ap50', '?'):.3f} "
+                    f"mAP50:95={result.get('map50_95', '?'):.3f}"
+                )
+            else:
+                console.print(f"[red]{st}[/red] {result.get('error', '')[:60]}")
+
+    from visionservex.runtime.evaluation import EvaluationResult, generate_honest_conclusion
+
+    ok_results = []
+    for r in all_results:
+        if r.get("status") == "ok":
+            try:
+                er = EvaluationResult(
+                    model_id=r["model_id"],
+                    dataset=r.get("dataset", ""),
+                    n_images=r.get("n_images", 0),
+                    ap50=r.get("ap50", 0.0),
+                    map50_95=r.get("map50_95", 0.0),
+                    precision=r.get("precision", 0.0),
+                    recall=r.get("recall", 0.0),
+                    f1=r.get("f1", 0.0),
+                    latency_p50_ms=r.get("latency_p50_ms", 0.0),
+                    latency_p95_ms=r.get("latency_p95_ms", 0.0),
+                    n_classes_with_gt=r.get("n_classes_with_gt", 0),
+                )
+                ok_results.append(er)
+            except Exception:
+                pass
+
+    conclusion = generate_honest_conclusion(ok_results)
+    payload = {
+        "benchmark_type": "competitiveness_ap_isolated_process",
+        "dataset": dataset_str,
+        "n_models": len(model_ids),
+        "models": all_results,
+        "conclusion": conclusion,
+    }
+
+    if out:
+        op = out.with_suffix(".json") if out.suffix != ".json" else out
+        op.parent.mkdir(parents=True, exist_ok=True)
+        op.write_text(_json.dumps(payload, indent=2, default=str), encoding="utf-8")
+        if not json_:
+            console.print(f"\nResults written to {op}")
+
+    if json_:
+        typer.echo(_json.dumps(payload, indent=2, default=str))
+    else:
+        console.print(f"\n[bold]Conclusion:[/bold] {conclusion}")
 
 
 # ---------------------------------------------------------------------------
@@ -1180,11 +1362,204 @@ def _benchmark_not_implemented(task_key: str, json_: bool) -> None:
 
 @app.command(
     "benchmark-segmentation",
-    help="[PLANNED v1.4] Segmentation benchmark — returns BENCHMARK_NOT_IMPLEMENTED.",
+    help="Mask AP benchmark for instance segmentation models.",
 )
-def benchmark_segmentation(json_: bool = typer.Option(False, "--json")) -> None:
-    """Honest stub: segmentation AP benchmark is roadmap item for v1.4."""
-    _benchmark_not_implemented("segmentation", json_)
+def benchmark_segmentation(
+    models: str = typer.Option(
+        "rfdetr-seg-small",
+        "--models",
+        help="Comma-separated segmentation model IDs.",
+    ),
+    dataset: str | None = typer.Option(
+        None,
+        "--dataset",
+        help="Dataset: 'synthetic' (latency only), 'coco-json:<img_dir>:<ann_file>'",
+    ),
+    max_images: int = typer.Option(20, "--max-images", min=1, max=2000),
+    device: str = typer.Option("auto", "--device"),
+    out: Path | None = typer.Option(None, "--out"),
+    unload_between_models: bool = typer.Option(True, "--unload-between-models/--no-unload"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Mask AP50/mAP50:95 benchmark for instance segmentation models.
+
+    Requires COCO JSON annotations with polygon/RLE masks for real AP.
+    Without --dataset, runs in synthetic latency-only mode.
+    """
+    from visionservex.registry import default_registry
+
+    model_ids = [m.strip() for m in models.split(",") if m.strip()]
+
+    # Validate all model IDs
+    validated: list[str] = []
+    for mid in model_ids:
+        try:
+            entry = default_registry().get(mid)
+            if entry.task not in ("segment", "grounded_segment", "foundation_segment"):
+                if not json_:
+                    console.print(f"[yellow]skip[/yellow] {mid}: task={entry.task} (not segment)")
+                continue
+        except Exception as exc:
+            if not json_:
+                console.print(f"[yellow]skip[/yellow] {mid}: {exc}")
+            continue
+        validated.append(mid)
+
+    if not validated:
+        if not json_:
+            console.print("[red]No valid segmentation models to benchmark.[/red]")
+        raise typer.Exit(1)
+
+    dataset_str = (dataset or "synthetic").strip()
+
+    # Synthetic mode: latency + detection count only
+    if dataset_str in ("synthetic", ""):
+        test_images = _make_test_images(max_images)
+        all_results = []
+        for mid in validated:
+            if not json_:
+                console.print(f"  [cyan]{mid}[/cyan] (synthetic latency) ...", end=" ")
+            r = _run_competitiveness_model(mid, test_images, threshold=0.3, device=device)
+            all_results.append(r)
+            if unload_between_models:
+                from visionservex.runtime.gpu_lifecycle import clear_torch_cuda_cache
+
+                clear_torch_cuda_cache()
+            if not json_:
+                st = r.get("status", "?")
+                if st == "ok":
+                    console.print(f"[green]ok[/green] P50={r.get('latency_p50_ms')}ms")
+                else:
+                    console.print(f"[red]{st}[/red]")
+
+        payload = {
+            "benchmark_type": "segmentation_latency_synthetic",
+            "note": "Synthetic mode — no mask GT. Use --dataset coco-json:... for mask AP.",
+            "models": all_results,
+        }
+        if json_:
+            import json as _json
+
+            typer.echo(_json.dumps(payload, indent=2, default=str))
+        else:
+            console.print(
+                "[dim]Synthetic mode: latency + detection health only (no mask AP). Provide --dataset for real AP.[/dim]"
+            )
+        return
+
+    # COCO JSON mode: real mask AP
+    if dataset_str.startswith("coco-json:"):
+        parts = dataset_str[10:].split(":", 1)
+        if len(parts) != 2:
+            if not json_:
+                console.print("[red]coco-json format: coco-json:<images_dir>:<ann_file>[/red]")
+            raise typer.Exit(1)
+        images_dir = Path(parts[0])
+        ann_file = Path(parts[1])
+        if not images_dir.exists() or not ann_file.exists():
+            if not json_:
+                console.print(
+                    f"[red]images_dir={images_dir} or ann_file={ann_file} not found.[/red]"
+                )
+            raise typer.Exit(1)
+
+        from visionservex.runtime.segmentation_eval import (
+            load_coco_segmentation_json,
+            run_segmentation_evaluation,
+        )
+
+        if not json_:
+            console.print(
+                f"Loading segmentation dataset: {ann_file.name} (max {max_images} images)..."
+            )
+        samples, _ = load_coco_segmentation_json(images_dir, ann_file, max_images=max_images)
+        if not samples:
+            if not json_:
+                console.print("[red]No images found in dataset.[/red]")
+            raise typer.Exit(1)
+
+        all_results = []
+        for mid in validated:
+            if not json_:
+                console.print(f"  evaluating [cyan]{mid}[/cyan] ...", end=" ")
+            result = run_segmentation_evaluation(mid, samples, device=device)
+            all_results.append(result.to_dict())
+            if unload_between_models:
+                from visionservex.runtime.gpu_lifecycle import clear_torch_cuda_cache
+
+                clear_torch_cuda_cache()
+            if not json_:
+                st = result.status
+                if st == "ok":
+                    console.print(
+                        f"[green]ok[/green] "
+                        f"mask_AP50={result.mask_ap50:.3f} "
+                        f"mask_mAP50:95={result.mask_map50_95:.3f} "
+                        f"P50={result.latency_p50_ms:.1f}ms"
+                    )
+                else:
+                    console.print(f"[red]{st}[/red] {result.error[:60]}")
+
+        payload = {
+            "benchmark_type": "segmentation_mask_ap",
+            "dataset": dataset_str,
+            "n_images": len(samples),
+            "models": all_results,
+            "ap_method": "COCO-style 101-point interpolated mask IoU PR curve",
+        }
+        if out:
+            import json as _json
+
+            op = out.with_suffix(".json")
+            op.parent.mkdir(parents=True, exist_ok=True)
+            op.write_text(_json.dumps(payload, indent=2, default=str), encoding="utf-8")
+            if not json_:
+                console.print(f"\nResults written to {op}")
+        if json_:
+            import json as _json
+
+            typer.echo(_json.dumps(payload, indent=2, default=str))
+        else:
+            from rich.table import Table
+
+            table = Table(title="Segmentation Mask AP Results")
+            for col in (
+                "Model",
+                "Mask AP50",
+                "Mask mAP50:95",
+                "Precision",
+                "Recall",
+                "Latency P50",
+                "Status",
+            ):
+                table.add_column(col)
+            for r in all_results:
+                if r.get("status") == "ok":
+                    table.add_row(
+                        r["model_id"],
+                        f"{r['mask_ap50']:.3f}",
+                        f"{r['mask_map50_95']:.3f}",
+                        f"{r['precision']:.3f}",
+                        f"{r['recall']:.3f}",
+                        f"{r['latency_p50_ms']:.1f} ms",
+                        "[green]ok[/green]",
+                    )
+                else:
+                    table.add_row(
+                        r["model_id"], "-", "-", "-", "-", "-", f"[red]{r.get('status', '?')}[/red]"
+                    )
+            console.print(table)
+            console.print(
+                "\n[dim]Mask AP uses binary mask IoU (not box IoU). Do NOT compare with detection AP50.[/dim]"
+            )
+        return
+
+    # Unknown dataset format
+    if not json_:
+        console.print(
+            f"[red]Unknown dataset format: {dataset_str!r}. Use 'synthetic' or 'coco-json:<img>:<ann>'[/red]"
+        )
+    raise typer.Exit(1)
 
 
 @app.command(
