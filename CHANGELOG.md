@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-05-16
+
+### Patch — fast-CI compatibility for test_v200.py
+
+`tests/test_v200.py` imported `torch` at module level. Fast CI omits `[hf]`
+to keep wall-time under 10 minutes, so torch is not installed there, causing
+`ModuleNotFoundError` on import. Replaced the bare `import torch` with
+`pytest.importorskip("torch", ...)`. No production code changed.
+
 ## [2.0.0] - 2026-05-16
 
 ### Real-model smoke verification, engine fixes, agriculture + aerial CLIs

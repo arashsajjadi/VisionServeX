@@ -6,8 +6,9 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import pytest
-import torch
 from PIL import Image
+
+torch = pytest.importorskip("torch", reason="v2.0.0 engine tests require torch tensors")
 
 
 def _tiny():
