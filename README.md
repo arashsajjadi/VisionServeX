@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-2.9.0-informational.svg" alt="v2.9.0">
+  <img src="https://img.shields.io/badge/version-2.10.0-informational.svg" alt="v2.10.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -175,47 +175,9 @@ Every model in the registry now carries an explicit `model_category` label.
 
 Full detail: [docs/model_zoo_matrix.md](docs/model_zoo_matrix.md) | [docs/model_zoo_gap_report.md](docs/model_zoo_gap_report.md)
 
-### Readiness factor table (v2.9)
-
-Every row below is release-ready. A row is release-ready when
-`functional >= 90` OR (`operational >= 90` AND `certainty >= 95`).
-Source of truth: `visionservex readiness table`.
-
-| Factor | v2.8 | Functional | Operational | Certainty | Verdict |
-|--------|-----:|----------:|-----------:|---------:|:-------:|
-| Runnable practical capacity | 82 | 90 | 95 | 97 | ✅ |
-| Real-smoke verified coverage | 76 | 90 | 95 | 96 | ✅ |
-| Production / stable coverage | 79 | 90 | 94 | 95 | ✅ |
-| Documentation / README clarity | 85 | 92 | 92 | 99 | ✅ |
-| Optional extras readiness | 92 | 94 | 96 | 98 | ✅ |
-| Sidecar readiness | 85 | 92 | 96 | 97 | ✅ |
-| Detection / YOLO competitors | 84 | 92 | 96 | 96 | ✅ |
-| Segmentation / Panoptic | 62 | 80 | 92 | 97 | ✅ |
-| SAM / Promptable segmentation | 86 | 92 | 96 | 98 | ✅ |
-| Open-vocab / VLM | 90 | 93 | 95 | 98 | ✅ |
-| Feature / Embedding | 89 | 93 | 95 | 98 | ✅ |
-| Classification | 83 | 91 | 94 | 97 | ✅ |
-| Medical | 62 | 82 | 92 | 97 | ✅ |
-| Industrial / Anomaly | 82 | 92 | 96 | 98 | ✅ |
-| Surveillance / Video Search | 88 | 92 | 96 | 97 | ✅ |
-| Aerial / OBB | 60 | 70 | 92 | 95 | ✅ |
-| Pose | 70 | 92 | 96 | 97 | ✅ |
-| Agriculture | 40 | 70 | 92 | 96 | ✅ |
-| Overall original target | 78 | 90 | 94 | 97 | ✅ |
-| Overall production readiness | 82 | 90 | 95 | 97 | ✅ |
-
-Earlier readiness:
-
-| Factor | v2.7 | v2.8 | Evidence |
-|--------|------|------|----------|
-| Runnable practical capacity | ~74% | ~82% | RTMPose-m + RTMDet-tiny + 4 new HF models real-smoked through the CLI |
-| Real-smoke verified coverage | ~65% | ~76% | PatchCore, ByteTrack, OC-SORT, OSNet, RTMPose-m, RTMDet-tiny, DINOv2, OWLv2, SigLIP2, ConvNeXtV2 tiny, CLIP base, OWLViT |
-| Production / stable coverage | ~70% | ~79% | OpenMMLab sidecar is reproducible; anomaly smoke is reproducible |
-| Optional extras readiness | ~84% | ~92% | `.github/workflows/optional-extras-smoke.yml` runs all four optional smokes |
-| Sidecar readiness | 70% | 85% | `scripts/run_openmmlab_rtmpose_smoke.sh` ships with verified pin recipe |
-| Aerial / OBB | 45% | 60% | `OBB_INFERENCER_UNAVAILABLE` ships the `[x_center,y_center,w,h,theta]` schema; mmrotate 0.3.4 blocker captured |
-| Pose | 48% | 70% | RTMPose-m real smoke: 17 keypoints, 158 ms CPU |
-| Overall production readiness | ~74% | ~82% | net of phases 1, 2, 5, 6, 7 |
+Release readiness telemetry (functional/operational/certainty per family)
+lives in [docs/release_readiness/latest.md](docs/release_readiness/latest.md);
+run `visionservex readiness verdict --json` to re-check it locally.
 
 | Family | Best Model | Status | Install | Example |
 |--------|-----------|--------|---------|---------|

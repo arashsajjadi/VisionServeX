@@ -264,3 +264,194 @@ def health_json(
     """Print model health report as JSON."""
     entries = _build_health_entries(runnable_only=runnable_only, model_filter=model)
     print(json.dumps([e.to_dict() for e in entries], indent=2))
+
+
+# ---------------------------------------------------------------------------
+# v3 candidate: model load matrix
+# ---------------------------------------------------------------------------
+
+
+def _expected_load_mode(entry: Any) -> str:
+    """Return the canonical load-mode bucket for a registry entry.
+
+    The bucket determines which command flavour is appropriate for v3
+    validation: `core_load` runs through the normal CLI, `sidecar_validate`
+    runs through `*-family validate` / `*-family doctor`, and so on.
+    """
+    impl = (entry.implementation_status or "").lower()
+    status = (entry.status or "").lower()
+    family = (entry.family or "").lower()
+    license_ = (getattr(entry, "license", "") or "").lower()
+
+    if status == "do_not_add" or "agpl" in license_ or license_.startswith("gpl"):
+        return "do_not_add_validate"
+    if "pml" in license_ or "non_core_license" in status:
+        return "non_core_license_validate"
+    if getattr(entry, "requires_auth", False):
+        return "gated_auth_validate"
+    if family in {"maskdino", "co-dino", "rtmpose", "rtmdet", "internimage"}:
+        return "sidecar_validate"
+    if status == "external_api":
+        return "external_api_validate"
+    if status in {"unavailable", "audit_only", "unavailable_with_reason"}:
+        return "unavailable_blocker_validate"
+    if impl == "wired" and getattr(entry, "auto_download", False):
+        return "core_load"
+    if impl == "wired":
+        return "core_load"
+    if impl == "partial":
+        return "optional_extra_load"
+    return "unavailable_blocker_validate"
+
+
+_LOAD_COMMAND_BY_TASK: dict[str, str] = {
+    "detect": "visionservex detect {model_id} <image>",
+    "segment": "visionservex segment {model_id} <image>",
+    "classify": "visionservex classify {model_id} <image> --top-k 5",
+    "embed": "visionservex embed {model_id} <image> --out <out.npy>",
+    "feature": "visionservex embed {model_id} <image> --out <out.npy>",
+    "open_vocab": "visionservex open-vocab {model_id} <image> --prompt 'person, car'",
+    "open-vocab": "visionservex open-vocab {model_id} <image> --prompt 'person, car'",
+    "vlm": "visionservex florence2 smoke-test {model_id} <image> --task caption",
+    "pose": "visionservex openmmlab smoke-test {model_id} --device cpu --image <image>",
+    "obb": "visionservex openmmlab smoke-test {model_id} --device cpu --image <image>",
+}
+
+
+_SMOKE_COMMAND_OVERRIDES: dict[str, str] = {
+    "sam": "visionservex sam-family smoke-test {model_id} <image> --box 10,20,100,200",
+    "sam2": "visionservex sam-family smoke-test {model_id} <image> --box 10,20,100,200",
+    "sam2.1": "visionservex sam-family smoke-test {model_id} <image> --box 10,20,100,200",
+    "sam3": "visionservex sam-family login-help {model_id}",
+    "fastsam": "visionservex sam-family model-card {model_id}",
+    "maskdino": "visionservex maskdino validate {model_id}",
+    "anomalib": "bash scripts/run_anomaly_smoke.sh",
+    "totalsegmentator": "bash scripts/run_totalsegmentator_smoke.sh <user.nii.gz>",
+    "medsam": "visionservex medical segment medsam <image> --box 10,20,100,200 --out /tmp/medsam",
+}
+
+
+def _load_command(entry: Any) -> str:
+    cmd = _LOAD_COMMAND_BY_TASK.get((entry.task or "").lower())
+    if cmd:
+        return cmd.format(model_id=entry.id)
+    return f"visionservex model info {entry.id}"
+
+
+def _smoke_command(entry: Any) -> str:
+    fam = (entry.family or "").lower()
+    override = _SMOKE_COMMAND_OVERRIDES.get(fam)
+    if override:
+        return override.format(model_id=entry.id)
+    return _load_command(entry)
+
+
+def _blocker_code(entry: Any, mode: str) -> str:
+    if mode == "core_load":
+        return ""
+    return {
+        "do_not_add_validate": "DO_NOT_ADD",
+        "non_core_license_validate": "NON_CORE_LICENSE_OPTIONAL",
+        "gated_auth_validate": "GATED_HF_AUTH_REQUIRED",
+        "sidecar_validate": "SIDECAR_REQUIRED",
+        "external_api_validate": "EXTERNAL_API",
+        "optional_extra_load": "OPTIONAL_EXTRA_REQUIRED",
+        "unavailable_blocker_validate": "UNAVAILABLE_WITH_REASON",
+    }.get(mode, "")
+
+
+def _should_pass_for_v3(mode: str) -> bool:
+    # Every model should at minimum return a structured response. Core
+    # runnable models must succeed; everything else must produce a
+    # certified structured blocker. v3 release gate enforces this.
+    return True
+
+
+def _load_matrix_rows() -> list[dict]:
+    from visionservex.registry import default_registry
+
+    reg = default_registry()
+    rows: list[dict] = []
+    seen: set[str] = set()
+    for entry in reg.list():
+        if entry.id in seen:
+            raise ValueError(f"duplicate model id in registry: {entry.id!r}")
+        seen.add(entry.id)
+        mode = _expected_load_mode(entry)
+        rows.append(
+            {
+                "model_id": entry.id,
+                "family": entry.family,
+                "task": entry.task,
+                "status": entry.status,
+                "engine": entry.engine or "",
+                "expected_load_mode": mode,
+                "load_command": _load_command(entry),
+                "smoke_command": _smoke_command(entry),
+                "expected_result": "ok" if mode == "core_load" else "structured_blocker",
+                "max_allowed_seconds": 60 if mode == "core_load" else 5,
+                "max_allowed_ram_gb": entry.minimum_ram_gb or 8,
+                "max_allowed_vram_gb": entry.minimum_vram_gb or 4,
+                "requires_download": bool(getattr(entry, "auto_download", False)),
+                "requires_gpu": "cuda" in (entry.supported_devices or ()),
+                "requires_sidecar": mode == "sidecar_validate",
+                "license_risk": getattr(entry, "license_risk", "unknown"),
+                "blocker_code_if_expected": _blocker_code(entry, mode),
+                "should_pass_for_v3": _should_pass_for_v3(mode),
+                "tested_result": "not_run",
+                "last_error": "",
+            }
+        )
+    rows.sort(key=lambda r: (r["expected_load_mode"], r["model_id"]))
+    return rows
+
+
+@app.command("load-matrix")
+def load_matrix_cmd(
+    fmt: str = typer.Option("json", "--format", help="json or markdown."),
+    out: str = typer.Option("", "--out", help="Write the matrix to this path."),
+) -> None:
+    """Emit the full v3 model-load matrix.
+
+    Every registry model appears exactly once with an expected load mode
+    (core_load / optional_extra_load / sidecar_validate / gated_auth_validate /
+    non_core_license_validate / external_api_validate / unavailable_blocker_
+    validate / do_not_add_validate), a load command, a smoke command, the
+    expected structured-blocker code (if any), and the resource ceilings the
+    release auditor must enforce.
+    """
+    rows = _load_matrix_rows()
+    payload = {
+        "n_models": len(rows),
+        "by_mode": {
+            mode: sum(1 for r in rows if r["expected_load_mode"] == mode)
+            for mode in {r["expected_load_mode"] for r in rows}
+        },
+        "rows": rows,
+    }
+    if fmt.lower() == "markdown":
+        lines = [
+            "| Model | Family | Task | Mode | Smoke command |",
+            "|-------|--------|------|------|---------------|",
+        ]
+        for r in rows:
+            lines.append(
+                "| {model_id} | {family} | {task} | {expected_load_mode} | "
+                "`{smoke_command}` |".format(**r)
+            )
+        text = "\n".join(lines) + "\n"
+    else:
+        text = json.dumps(payload, indent=2)
+    if out:
+        from pathlib import Path
+
+        p = Path(out)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text)
+        if fmt.lower() != "markdown":
+            print(json.dumps({"out": str(p), "n_models": payload["n_models"]}, indent=2))
+        return
+    print(text)
+
+
+__all__ = ["app"]

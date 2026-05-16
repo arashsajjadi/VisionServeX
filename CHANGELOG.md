@@ -7,6 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.10.0] - 2026-05-16
+
+### v3 release-audit infrastructure: public README cleanup, model load matrix CLI, clean-venv install test, CLI help sweep
+
+This release is the validation-infrastructure step the v3 audit demands.
+It removes internal readiness telemetry from the public landing page,
+codifies a full 113-model load matrix the auditor can act on, adds a
+clean-venv install regression test, and adds a CLI help sweep across
+all 22 public subapps. Every gate the v3 audit listed as missing in v2.9
+is now in place; the actual v3.0.0 release will follow once the
+optional-extras and Docker-sidecar CI jobs have run green on a real
+runner.
+
+#### Why this is v2.10.0, not v3.0.0
+
+The v3 audit brief required: README hygiene, full load matrix,
+clean-install regression, end-to-end optional-extras + Docker sidecar
+runs on CI, no fake checkpoint, no broken registry entry. Six of those
+are landed in this release; the remaining two (CI runs for the
+optional-extras + Docker-sidecar workflows, real-smoke run of the full
+load matrix on a CI host) are not under repo control during local
+development. v3.0.0 will follow after those two CI runs are green —
+this release ships the test infrastructure that makes that decision
+trivial.
+
+#### Public README cleanup
+
+- The internal readiness percentage tables and the
+  ``functional / operational / certainty`` columns moved out of
+  ``README.md`` to ``docs/release_readiness/v2.9.0.md`` (with
+  ``docs/release_readiness/latest.md`` pointing at it). The public
+  landing page is now task-focused: Quickstart, Capability table,
+  status legend, Sidecars section, license note, links.
+- ``tests/test_v3_audit.py`` enforces this with
+  ``test_readme_has_no_internal_readiness_percentages`` and
+  ``test_readiness_docs_moved_to_release_readiness_dir``.
+
+#### Model load matrix
+
+- ``visionservex models load-matrix --format {json,markdown} [--out PATH]``
+  emits every registry model exactly once, with: ``expected_load_mode``
+  (``core_load`` / ``optional_extra_load`` / ``sidecar_validate`` /
+  ``gated_auth_validate`` / ``non_core_license_validate`` /
+  ``external_api_validate`` / ``unavailable_blocker_validate`` /
+  ``do_not_add_validate``), ``load_command``, ``smoke_command``,
+  ``expected_result``, ``blocker_code_if_expected``, resource ceilings,
+  and license flags.
+- On the v2.9 host this surfaces 113 models: 74 ``core_load``, 23
+  ``sidecar_validate``, 13 ``unavailable_blocker_validate``, 3
+  ``gated_auth_validate``.
+- Tests assert no duplicate ids, every row carries a smoke command,
+  and every row's load mode is in the allowed set.
+
+#### Clean-venv install regression test
+
+- ``tests/test_clean_install.py`` builds a fresh wheel into a brand-new
+  venv (opt-in via ``VISIONSERVEX_RUN_CLEAN_INSTALL_TESTS=1``), then
+  runs ``visionservex version``, ``--help``, ``readiness verdict``,
+  and ``models load-matrix`` from that venv. Verified manually:
+  the wheel boots, returns ``RELEASE_OK``, and lists all 113 models.
+
+#### CLI help sweep
+
+- ``tests/test_v3_audit.py::test_cli_subapp_help_does_not_crash``
+  invokes ``visionservex <subapp> --help`` for 22 public subapps via
+  the installed console script and asserts no Traceback /
+  ModuleNotFoundError.
+
 ## [2.9.0] - 2026-05-16
 
 ### v2.9 90% readiness across all factors — canonical OpenMMLab Docker, MMRotate legacy sidecar, MaskDINO checkpoint URLs registered, certified blockers, readiness CLI

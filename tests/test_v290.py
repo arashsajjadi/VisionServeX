@@ -269,7 +269,8 @@ def test_totalsegmentator_script_exists_and_blocks_missing_input(tmp_path):
 
 
 @pytest.mark.fast
-def test_version_is_290():
+def test_version_is_at_least_290():
     import visionservex
 
-    assert visionservex.__version__ == "2.9.0"
+    parts = tuple(int(p) for p in visionservex.__version__.split(".")[:3])
+    assert parts >= (2, 9, 0)
