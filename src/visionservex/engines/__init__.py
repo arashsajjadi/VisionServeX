@@ -6,6 +6,7 @@
 # because they are imported only for their side effects.
 
 from visionservex.engines import dfine as _dfine
+from visionservex.engines import dinov2 as _dinov2
 from visionservex.engines import grounded_sam as _grounded_sam
 from visionservex.engines import grounded_sam2 as _grounded_sam2
 from visionservex.engines import grounding_dino as _gd

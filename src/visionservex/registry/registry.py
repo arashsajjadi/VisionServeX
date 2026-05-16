@@ -41,6 +41,11 @@ Task = Literal[
     "open_vocab_detect",
     "grounded_segment",
     "foundation_segment",
+    "embed",
+    "vlm",
+    "anomaly",
+    "track",
+    "reid",
 ]
 
 Status = Literal["stable", "beta", "experimental", "manual", "external", "stub", "optional"]
@@ -55,6 +60,15 @@ ModelCategory = Literal[
     "external_api",
     "unavailable_with_reason",
     "utility",
+    "feature_backbone",
+    "promptable_foundation",
+    "surveillance_pipeline_component",
+    "medical_extra",
+    "industrial_extra",
+    "geospatial_extra",
+    "agriculture_extra",
+    "non_core_license_optional",
+    "audit_only",
 ]
 DownloadType = Literal[
     "huggingface",

@@ -102,17 +102,15 @@ def test_unavailable_with_reason_models():
 
 
 def test_model_category_type_valid():
-    """model_category values must be valid ModelCategory literals."""
-    valid = {
-        "demo_fast",
-        "production_recommended",
-        "accuracy_grade",
-        "experimental_sota",
-        "expert_sidecar",
-        "external_api",
-        "unavailable_with_reason",
-        "utility",
-    }
+    """model_category values must be valid ModelCategory literals.
+
+    v1.6.0 added more categories — read the live Literal so tests stay in sync.
+    """
+    import typing
+
+    from visionservex.registry.registry import ModelCategory
+
+    valid = set(typing.get_args(ModelCategory))
     for e in default_registry().list():
         assert e.model_category in valid, f"{e.id} has invalid model_category={e.model_category!r}"
 

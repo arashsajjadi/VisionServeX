@@ -26,11 +26,14 @@ from visionservex.cli import (
     benchmark_commands,
     capabilities_commands,
     colab_commands,
+    domain_zoo_commands,
     downloads_commands,
+    embedding_commands,
     gateway_commands,
     gpu_commands,
     model_card_commands,
     model_lifecycle_commands,
+    model_zoo_commands,
     openmmlab_commands,
     privacy_commands,
     replacement_map_commands,
@@ -98,6 +101,12 @@ app.add_typer(model_lifecycle_commands.app, name="model")
 app.add_typer(training_commands.training_app, name="training")
 app.add_typer(training_commands.export_app, name="export-cmd")
 app.add_typer(training_commands.video_app, name="video")
+app.add_typer(model_zoo_commands.app, name="model-zoo")
+app.add_typer(domain_zoo_commands.app, name="domain-zoo")
+app.add_typer(embedding_commands.app, name="feature")
+
+# Top-level embedding aliases for Ultralytics-style ergonomics
+embedding_alias_app = embedding_commands.app
 
 console = Console()
 
@@ -2244,3 +2253,248 @@ def finetune_cmd(
         device=device or "auto",
         json_=json_,
     )
+
+
+# ---------------------------------------------------------------------------
+# Top-level embedding aliases (v1.6.0 — feature intelligence)
+# ---------------------------------------------------------------------------
+
+
+@app.command("embed", help="Compute image embeddings (DINOv2 / SigLIP2 / etc.).")
+def embed_top_alias(
+    model_id: str,
+    target: Path,
+    out: Path | None = typer.Option(None, "--out"),
+    device: str = typer.Option("auto", "--device"),
+    max_images: int | None = typer.Option(None, "--max-images"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Top-level alias for `visionservex feature embed`."""
+    from visionservex.cli.embedding_commands import embed_cmd
+
+    embed_cmd(
+        model_id=model_id,
+        target=target,
+        out=out,
+        device=device,
+        max_images=max_images,
+        json_=json_,
+    )
+
+
+@app.command("similarity", help="Cosine similarity between two images.")
+def similarity_top_alias(
+    model_id: str,
+    image_a: Path,
+    image_b: Path,
+    device: str = typer.Option("auto", "--device"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Top-level alias for `visionservex feature similarity`."""
+    from visionservex.cli.embedding_commands import similarity_cmd
+
+    similarity_cmd(model_id, image_a, image_b, device=device, json_=json_)
+
+
+@app.command("index", help="Build an embedding search index.")
+def index_top_alias(
+    model_id: str,
+    folder: Path,
+    out: Path = typer.Option(..., "--out"),
+    device: str = typer.Option("auto", "--device"),
+    max_images: int | None = typer.Option(None, "--max-images"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Top-level alias for `visionservex feature index`."""
+    from visionservex.cli.embedding_commands import index_cmd
+
+    index_cmd(model_id, folder, out=out, device=device, max_images=max_images, json_=json_)
+
+
+@app.command("search", help="Search an embedding index for nearest neighbors.")
+def search_top_alias(
+    model_id: str,
+    query: Path,
+    index_dir: Path = typer.Option(..., "--index"),
+    top_k: int = typer.Option(10, "--top-k"),
+    device: str = typer.Option("auto", "--device"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Top-level alias for `visionservex feature search`."""
+    from visionservex.cli.embedding_commands import search_cmd
+
+    search_cmd(model_id, query, index_dir=index_dir, top_k=top_k, device=device, json_=json_)
+
+
+@app.command("deduplicate", help="Find likely duplicates in a folder using embeddings.")
+def deduplicate_top_alias(
+    model_id: str,
+    folder: Path,
+    threshold: float = typer.Option(0.98, "--threshold"),
+    out: Path | None = typer.Option(None, "--out"),
+    device: str = typer.Option("auto", "--device"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Top-level alias for `visionservex feature deduplicate`."""
+    from visionservex.cli.embedding_commands import deduplicate_cmd
+
+    deduplicate_cmd(model_id, folder, threshold=threshold, out=out, device=device, json_=json_)
+
+
+@app.command("dataset-report", help="Generate a dataset report using embeddings.")
+def dataset_report_top_alias(
+    model_id: str,
+    folder: Path,
+    out: Path | None = typer.Option(None, "--out"),
+    device: str = typer.Option("auto", "--device"),
+    max_images: int | None = typer.Option(None, "--max-images"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Top-level alias for `visionservex feature dataset-report`."""
+    from visionservex.cli.embedding_commands import dataset_report_cmd
+
+    dataset_report_cmd(model_id, folder, out=out, device=device, max_images=max_images, json_=json_)
+
+
+@app.command("active-select", help="Active learning sample selection from a folder.")
+def active_select_top_alias(
+    model_id: str,
+    folder: Path,
+    budget: int = typer.Option(100, "--budget"),
+    out: Path | None = typer.Option(None, "--out"),
+    device: str = typer.Option("auto", "--device"),
+    max_images: int | None = typer.Option(None, "--max-images"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Top-level alias for `visionservex feature active-select`."""
+    from visionservex.cli.embedding_commands import active_select_cmd
+
+    active_select_cmd(
+        model_id, folder, budget=budget, out=out, device=device, max_images=max_images, json_=json_
+    )
+
+
+@app.command("domain-shift", help="Estimate domain shift between train and test folders.")
+def domain_shift_top_alias(
+    model_id: str,
+    train_folder: Path,
+    test_folder: Path,
+    out: Path | None = typer.Option(None, "--out"),
+    device: str = typer.Option("auto", "--device"),
+    max_images: int = typer.Option(200, "--max-images"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Top-level alias for `visionservex feature domain-shift`."""
+    from visionservex.cli.embedding_commands import domain_shift_cmd
+
+    domain_shift_cmd(
+        model_id,
+        train_folder,
+        test_folder,
+        out=out,
+        device=device,
+        max_images=max_images,
+        json_=json_,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Benchmark-embeddings (v1.6.0)
+# ---------------------------------------------------------------------------
+
+
+@app.command("benchmark-embeddings", help="Benchmark embedding model: kNN accuracy and latency.")
+def benchmark_embeddings_top(
+    model_id: str = typer.Option(..., "--model"),
+    dataset: str = typer.Option(..., "--dataset", help="folder:<path> with labels.csv inside"),
+    metrics: str = typer.Option("knn_accuracy,recall_at_5,latency", "--metrics"),
+    out: Path | None = typer.Option(None, "--out"),
+    device: str = typer.Option("auto", "--device"),
+    max_images: int = typer.Option(200, "--max-images"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Lightweight embedding benchmark: structural readiness check + kNN if labels exist."""
+    from visionservex.runtime.embeddings import embed_folder
+
+    if not dataset.startswith("folder:"):
+        _die(
+            f"benchmark-embeddings requires --dataset folder:<path>, got {dataset!r}",
+            json_mode=json_,
+            code="BAD_DATASET",
+        )
+        return
+    folder = Path(dataset[len("folder:") :])
+    if not folder.exists():
+        _die(f"folder not found: {folder}", json_mode=json_, code="DATASET_NOT_FOUND")
+        return
+
+    import time
+
+    t0 = time.perf_counter()
+    embeddings, paths = embed_folder(model_id, folder, device=device, max_images=max_images)
+    duration_ms = (time.perf_counter() - t0) * 1000.0
+
+    payload: dict = {
+        "model_id": model_id,
+        "dataset": dataset,
+        "n_images": int(embeddings.shape[0]),
+        "embedding_dim": int(embeddings.shape[1]) if embeddings.ndim == 2 else 0,
+        "total_time_ms": round(duration_ms, 1),
+        "mean_latency_ms": round(duration_ms / max(1, embeddings.shape[0]), 2),
+        "metrics_requested": metrics.split(","),
+    }
+
+    # Try optional kNN accuracy if labels.csv exists
+    labels_csv = folder / "labels.csv"
+    if labels_csv.exists() and embeddings.shape[0] >= 2:
+        try:
+            import csv
+
+            label_map: dict[str, str] = {}
+            with open(labels_csv, encoding="utf-8") as f:
+                reader = csv.reader(f)
+                for row in reader:
+                    if len(row) >= 2:
+                        label_map[row[0]] = row[1]
+            y = [label_map.get(Path(p).name, "?") for p in paths]
+            classes = sorted(set(y))
+            if len(classes) >= 2:
+                # Leave-one-out kNN
+                import numpy as _np
+
+                sim = embeddings @ embeddings.T
+                correct = 0
+                for i in range(len(y)):
+                    sim_i = sim[i].copy()
+                    sim_i[i] = -_np.inf
+                    nn = int(_np.argmax(sim_i))
+                    if y[nn] == y[i]:
+                        correct += 1
+                acc = correct / len(y)
+                payload["knn_accuracy"] = round(acc, 4)
+                payload["n_classes"] = len(classes)
+        except Exception as exc:
+            payload["knn_error"] = str(exc)[:100]
+    else:
+        payload["knn_accuracy"] = None
+        payload["note"] = (
+            "Provide labels.csv (filename,label per row) in the folder for kNN accuracy."
+        )
+
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    if json_:
+        typer.echo(json.dumps(payload, indent=2))
+    else:
+        console.print(f"[bold]Embedding benchmark:[/bold] {model_id}")
+        console.print(f"  Images:       {payload['n_images']}")
+        console.print(f"  Embedding:    {payload['embedding_dim']}-d")
+        console.print(f"  Mean latency: {payload['mean_latency_ms']} ms/image")
+        if payload.get("knn_accuracy") is not None:
+            console.print(
+                f"  kNN accuracy: {payload['knn_accuracy']:.4f} ({payload.get('n_classes')} classes)"
+            )
+        else:
+            console.print(f"  [dim]{payload.get('note', '')}[/dim]")

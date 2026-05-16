@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-1.5.0-informational.svg" alt="v1.5.0">
+  <img src="https://img.shields.io/badge/version-1.6.0-informational.svg" alt="v1.6.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -359,6 +359,64 @@ visionservex tunnel config --domain api.yourdomain.com --out tunnel.yaml
 visionservex serve &
 visionservex tunnel run tunnel.yaml --i-understand-this-is-public
 ```
+
+---
+
+## Feature Intelligence (DINOv2)
+
+```bash
+# Single-image embedding
+visionservex embed dinov2-base image.jpg --out embedding.npy
+
+# Folder embedding
+visionservex embed dinov2-base folder/ --out embeddings_dir/
+
+# Pairwise similarity
+visionservex similarity dinov2-base a.jpg b.jpg
+
+# Build search index + query
+visionservex index dinov2-base folder/ --out indexes/dinov2_base
+visionservex search dinov2-base query.jpg --index indexes/dinov2_base --top-k 10
+
+# Deduplication
+visionservex deduplicate dinov2-base folder/ --threshold 0.98 --out dups.csv
+
+# Dataset intelligence
+visionservex dataset-report dinov2-base folder/ --out report.md
+visionservex active-select dinov2-base folder/ --budget 100 --out selected.csv
+visionservex domain-shift dinov2-base train/ test/
+
+# kNN benchmark (with labels.csv)
+visionservex benchmark-embeddings --model dinov2-base --dataset folder:test_set/
+```
+
+Powered by `facebook/dinov2-{small,base,large,giant}` and `google/siglip2-base-patch16-224`. L2-normalized embeddings. **Do not** mix with detection AP — embeddings serve retrieval, deduplication, dataset audits, active learning.
+
+---
+
+## Specialized Model Zoo
+
+```bash
+# Source-grounded manifest (every model cites its upstream)
+visionservex model-zoo sources
+visionservex model-zoo show dinov2-base
+visionservex model-zoo verify-links
+visionservex model-zoo export --format markdown --out docs/model_zoo_manifest.md
+
+# Domain recommendations
+visionservex domain-zoo list
+visionservex domain-zoo yolo26-competitors
+visionservex domain-zoo sam-family
+visionservex domain-zoo feature-intelligence
+visionservex domain-zoo surveillance
+visionservex domain-zoo medical
+visionservex domain-zoo industrial
+
+# Goal-driven recipe
+visionservex domain-zoo recommend --domain surveillance --goal "red shirt person search"
+```
+
+Every model entry carries `recommended_action`: `add_now`, `expert_sidecar`, `external_api`, `non_core_license_optional`, `audit_only`, or `do_not_add` (e.g. YOLO-World — GPL/AGPL).
 
 ---
 

@@ -7,6 +7,96 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-05-16
+
+### Source-grounded model zoo, DINOv2 feature intelligence, domain-zoo recommender
+
+Adds a link-grounded model manifest, a runnable DINOv2/SigLIP2 feature
+backbone with image embedding / retrieval / deduplication / dataset
+intelligence, a domain-zoo recommender, and structured registry entries for
+Florence-2, OWLv2, SAM3 (gated), and unverified models.
+
+#### Source-grounded model manifest (new)
+- Added `src/visionservex/model_zoo/manifest.py` with `ModelSource` dataclass.
+- Every model entry cites: official_repo, official_docs, paper_url, hf_repo,
+  checkpoint_url, license, license_risk, install_command, hf_class,
+  runnable_in_visionservex, access_status (open/api_token/gated), domain,
+  known_blockers, recommended_action.
+- Initial coverage: D-FINE, RF-DETR, DEIMv2, RT-DETRv4, Co-DINO, MaskDINO,
+  SAM/SAM2/SAM2.1/SAM3, DINOv2/DINOv3, Florence-2, OWLv2, SigLIP2, Grounding
+  DINO 1.5/1.6/DINO-X, Anomalib, Torchreid/OSNet, ByteTrack, TotalSegmentator,
+  MedSAM/MedSAM2, nnU-Net, RTMDet-R, Prithvi, AgriCLIP, YOLO-World.
+- New CLI: `visionservex model-zoo sources/verify-links/export/show`.
+
+#### Domain-zoo recommender (new)
+- Added `src/visionservex/model_zoo/domain_zoo.py` with `DomainRecipe` dataclass.
+- Domains: yolo26-competitors, sam-family, promptable, feature-intelligence,
+  surveillance, industrial, medical, agriculture, aerial.
+- Each recipe has: pipeline steps, recommended models, install commands,
+  quick commands, expected hardware, runnable_today flag, limitations,
+  license notes.
+- New CLI: `visionservex domain-zoo list/recommend/<domain>/export`.
+
+#### DINOv2 feature backbone (new — runnable!)
+- Added `src/visionservex/engines/dinov2.py` — wraps HF AutoModel for
+  facebook/dinov2-{small,base,large,giant} and google/siglip2-*.
+- New task type: `embed`. Returns `EmbeddingResult` (L2-normalized vector).
+- New `embed` task added to Task literal.
+- `EmbeddingResult`, `SimilarityResult`, `SearchResult`, `SearchHit`,
+  `DatasetReport` result classes in `src/visionservex/core/embedding_results.py`.
+
+#### Embedding runtime (new)
+- Added `src/visionservex/runtime/embeddings.py`:
+  - `embed_folder()` — batch image embedding.
+  - `EmbeddingIndex` — flat numpy index with manifest.json.
+  - `search_index()` — top-k nearest neighbor by cosine.
+  - `deduplicate_index()` — find pairs above similarity threshold.
+  - `build_dataset_report()` — mean similarity, diversity, suggested clusters.
+  - `active_learning_select()` — farthest-point sampling on embeddings.
+  - `domain_shift_report()` — train/test centroid + mean nearest similarity.
+
+#### Embedding CLI (new top-level commands)
+- `visionservex embed MODEL image_or_folder --out path`
+- `visionservex similarity MODEL image_a image_b`
+- `visionservex index MODEL folder/ --out indexes/name`
+- `visionservex search MODEL query.jpg --index indexes/name --top-k 10`
+- `visionservex deduplicate MODEL folder/ --threshold 0.98 --out duplicates.csv`
+- `visionservex dataset-report MODEL folder/ --out report.md`
+- `visionservex active-select MODEL folder/ --budget 100`
+- `visionservex domain-shift MODEL train/ test/`
+- `visionservex benchmark-embeddings --model MODEL --dataset folder:<path>` — kNN accuracy if labels.csv present.
+
+#### New model registry entries
+- `dinov2-small/base/large/giant`: runnable, feature_backbone, Apache-2.0.
+- `siglip2-base-patch16-224`: runnable, text-image retrieval.
+- `florence-2-base/large`: stub, MIT, prompt-format wiring pending.
+- `owlv2-base-patch16` / `owlv2-large-patch14`: stub, Apache-2.0, engine pending.
+- `sam3-base`: external_api stub, gated access.
+
+#### Task / category taxonomy extensions
+- New `Task` values: `embed`, `vlm`, `anomaly`, `track`, `reid`.
+- New `ModelCategory` values: `feature_backbone`, `promptable_foundation`,
+  `surveillance_pipeline_component`, `medical_extra`, `industrial_extra`,
+  `geospatial_extra`, `agriculture_extra`, `non_core_license_optional`,
+  `audit_only`.
+
+### Decisions
+- **DEIMv2**: still audit_only (no HF Transformers support per upstream).
+- **SAM3/SAM3.1**: external_api stub (gated access at facebook namespace).
+- **MaskDINO/Co-DINO**: expert_sidecar (Detectron2/MMDet required).
+- **YOLO-World**: do_not_add (license likely GPL/AGPL — excluded from permissive core).
+- **TotalSegmentator/MedSAM**: non_core_license_optional (medical/regulatory care).
+- **Anomalib/torchreid/ByteTrack**: expert_sidecar (heavy deps, not in core).
+- **Florence-2 / OWLv2 engines**: registered as stub. HF Transformers backend
+  wiring with task-specific prompts/processors is roadmap v1.7.
+
+### Known limitations
+- DINOv2 returns L2-normalized embeddings; do not feed them to detection AP.
+- Embedding search uses numpy nearest neighbors (no FAISS dep). For >100k
+  images, consider exporting embeddings and using FAISS externally.
+- DINOv3 entries remain audit_only — HF model card names not verified live.
+- Video search pipeline (surveillance) is recipe-only, not yet wired.
+
 ## [1.5.0] - 2026-05-16
 
 ### VRAM lifecycle fix, process-isolated benchmarking, real mask AP evaluator

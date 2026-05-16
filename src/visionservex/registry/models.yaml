@@ -2314,3 +2314,307 @@ models:
   model_category: experimental_sota
   unavailable_reason: Custom loader and verified checkpoint source required.
   notes: RT-DETRv4 XL. Not yet wired. Requires 24 GB VRAM.
+
+# ===========================================================
+# v1.6.0 — Feature backbones, VLMs, open-vocab additions
+# ===========================================================
+
+- id: dinov2-small
+  display_name: DINOv2 (Small, ViT-S/14) — feature backbone
+  task: embed
+  family: dinov2
+  backend: huggingface_dinov2
+  engine: dinov2
+  license: Apache-2.0
+  upstream_url: https://github.com/facebookresearch/dinov2
+  download_type: huggingface
+  hf_repo_id: facebook/dinov2-small
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_notes: Self-supervised ViT-S/14. 384-d embedding. Use for retrieval/dedup/dataset reports.
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  recommended_device: cpu
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_vram_gb: 0.5
+  recommended_vram_gb: 1.0
+  minimum_ram_gb: 2.0
+  difficulty: easy
+  batch_support: true
+  beginner_recommendation: true
+  status: beta
+  best_for:
+  - feature extraction
+  - retrieval
+  - deduplication
+  - dataset intelligence
+  not_good_for:
+  - detection (use D-FINE / RF-DETR)
+  - classification top-k (use SwinV2)
+  model_category: feature_backbone
+  notes: DO NOT use for detection AP. 384-d L2-normalized embedding.
+
+- id: dinov2-base
+  display_name: DINOv2 (Base, ViT-B/14) — feature backbone
+  task: embed
+  family: dinov2
+  backend: huggingface_dinov2
+  engine: dinov2
+  license: Apache-2.0
+  upstream_url: https://github.com/facebookresearch/dinov2
+  download_type: huggingface
+  hf_repo_id: facebook/dinov2-base
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  recommended_device: cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_vram_gb: 1.0
+  recommended_vram_gb: 2.0
+  minimum_ram_gb: 3.0
+  difficulty: easy
+  batch_support: true
+  beginner_recommendation: true
+  status: beta
+  best_for:
+  - production retrieval default
+  - dataset intelligence
+  - active learning sample selection
+  model_category: feature_backbone
+  notes: 768-d L2-normalized embedding. Default for VisionServeX feature-intelligence pipeline.
+
+- id: dinov2-large
+  display_name: DINOv2 (Large, ViT-L/14) — feature backbone
+  task: embed
+  family: dinov2
+  backend: huggingface_dinov2
+  engine: dinov2
+  license: Apache-2.0
+  upstream_url: https://github.com/facebookresearch/dinov2
+  download_type: huggingface
+  hf_repo_id: facebook/dinov2-large
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cuda
+  recommended_device: cuda
+  supported_precisions:
+  - fp16
+  - bf16
+  minimum_vram_gb: 3.0
+  recommended_vram_gb: 6.0
+  difficulty: medium
+  status: beta
+  model_category: feature_backbone
+  notes: 1024-d embedding. Higher quality for retrieval. GPU recommended.
+
+- id: dinov2-giant
+  display_name: DINOv2 (Giant, ViT-g/14) — feature backbone
+  task: embed
+  family: dinov2
+  backend: huggingface_dinov2
+  engine: dinov2
+  license: Apache-2.0
+  upstream_url: https://github.com/facebookresearch/dinov2
+  download_type: huggingface
+  hf_repo_id: facebook/dinov2-giant
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cuda
+  supported_precisions:
+  - fp16
+  - bf16
+  minimum_vram_gb: 8.0
+  recommended_vram_gb: 14.0
+  difficulty: hard
+  status: beta
+  model_category: feature_backbone
+  notes: 1536-d embedding. Highest quality. Use --isolate-process for safety.
+
+- id: siglip2-base-patch16-224
+  display_name: SigLIP2 (Base, 224) — text-image retrieval
+  task: embed
+  family: siglip2
+  backend: huggingface_dinov2
+  engine: siglip2
+  license: Apache-2.0
+  upstream_url: https://huggingface.co/docs/transformers/en/model_doc/siglip2
+  download_type: huggingface
+  hf_repo_id: google/siglip2-base-patch16-224
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_vram_gb: 1.0
+  recommended_vram_gb: 2.0
+  difficulty: easy
+  status: beta
+  best_for:
+  - text-image retrieval
+  - surveillance text search (appearance-based)
+  - dataset captioning hints
+  not_good_for:
+  - detection (use Grounding DINO/OWLv2)
+  model_category: feature_backbone
+  notes: SigLIP2 base. Supports text encoder for text-image matching.
+
+- id: florence-2-base
+  display_name: Florence-2 (Base) — multi-task VLM
+  task: vlm
+  family: florence-2
+  backend: huggingface
+  engine: huggingface
+  license: MIT
+  upstream_url: https://github.com/microsoft/Florence-2
+  download_type: huggingface
+  hf_repo_id: microsoft/Florence-2-base
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_notes: Tasks via prompt — caption, dense_caption, object_detection, phrase_grounding, region_ocr.
+  implementation_status: stub
+  supported_devices:
+  - cpu
+  - cuda
+  recommended_device: cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_vram_gb: 2.0
+  recommended_vram_gb: 4.0
+  difficulty: medium
+  status: experimental
+  model_category: experimental_sota
+  notes: Engine wiring requires Florence-2 specific prompt format (e.g. '<OD>'). Use HF directly for now.
+
+- id: florence-2-large
+  display_name: Florence-2 (Large) — multi-task VLM
+  task: vlm
+  family: florence-2
+  backend: huggingface
+  engine: huggingface
+  license: MIT
+  upstream_url: https://github.com/microsoft/Florence-2
+  download_type: huggingface
+  hf_repo_id: microsoft/Florence-2-large
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: stub
+  supported_devices:
+  - cuda
+  recommended_device: cuda
+  supported_precisions:
+  - fp16
+  - bf16
+  minimum_vram_gb: 4.0
+  recommended_vram_gb: 8.0
+  difficulty: medium
+  status: experimental
+  model_category: experimental_sota
+  notes: Same as Florence-2 base — prompt-format wiring pending.
+
+- id: owlv2-base-patch16
+  display_name: OWLv2 (Base) — open-vocabulary detection
+  task: open_vocab_detect
+  family: owlv2
+  backend: huggingface
+  engine: huggingface
+  license: Apache-2.0
+  upstream_url: https://huggingface.co/docs/transformers/en/model_doc/owlv2
+  download_type: huggingface
+  hf_repo_id: google/owlv2-base-patch16-ensemble
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_notes: Uses transformers Owlv2ForObjectDetection. Provide list of text queries.
+  implementation_status: stub
+  supported_devices:
+  - cpu
+  - cuda
+  recommended_device: cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_vram_gb: 2.0
+  recommended_vram_gb: 4.0
+  difficulty: medium
+  status: experimental
+  model_category: experimental_sota
+  notes: Engine wiring pending. Use Grounding DINO for now.
+
+- id: owlv2-large-patch14
+  display_name: OWLv2 (Large) — open-vocabulary detection
+  task: open_vocab_detect
+  family: owlv2
+  backend: huggingface
+  engine: huggingface
+  license: Apache-2.0
+  upstream_url: https://huggingface.co/docs/transformers/en/model_doc/owlv2
+  download_type: huggingface
+  hf_repo_id: google/owlv2-large-patch14-ensemble
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: stub
+  supported_devices:
+  - cuda
+  recommended_device: cuda
+  supported_precisions:
+  - fp16
+  - bf16
+  minimum_vram_gb: 6.0
+  recommended_vram_gb: 12.0
+  difficulty: hard
+  status: experimental
+  model_category: experimental_sota
+  notes: Engine wiring pending.
+
+- id: sam3-base
+  display_name: SAM 3 (Base) — gated upstream
+  task: foundation_segment
+  family: sam3
+  backend: huggingface
+  engine: huggingface
+  license: Apache-2.0
+  license_uncertain: true
+  upstream_url: https://github.com/facebookresearch/sam3
+  download_type: external_api
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  requires_auth: true
+  implementation_status: stub
+  supported_devices:
+  - cuda
+  supported_precisions:
+  - fp16
+  minimum_vram_gb: 8.0
+  recommended_vram_gb: 14.0
+  difficulty: expert
+  status: external
+  model_category: external_api
+  unavailable_reason: Access may be gated at facebook namespace. Auth-aware wrapper required.
+  notes: Do not auto-pull. Verify access via HF login before enabling.
