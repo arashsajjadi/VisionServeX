@@ -483,7 +483,7 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         recommended_action="audit_only",
     ),
     # =====================================================================
-    # Florence-2 — VLM (HF, NOT yet wired — registry stub)
+    # Florence-2 — VLM (HF, RUNNABLE via Florence2Engine in v1.8.0)
     # =====================================================================
     "florence-2-base": ModelSource(
         model_id="florence-2-base",
@@ -496,18 +496,15 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         license="MIT",
         install_command="pip install 'visionservex[hf]'",
         hf_class="AutoModelForCausalLM",
-        runnable_in_visionservex=False,
+        runnable_in_visionservex=True,
         access_status="open",
         domain="open_vocab",
         recommended_action="add_now",
-        known_blockers=[
-            "No Florence-2 engine in src/visionservex/engines/ yet",
-            "Florence-2 uses task-specific prompt tokens (<OD>, <CAPTION>, ...) — needs custom prompt builder",
-            "Generated string output needs parsing to structured VisionServeX result types",
-        ],
         notes=(
-            "Tasks: caption, dense_caption, object_detection, phrase_grounding, "
-            "region_ocr. Trust remote code required. Use HF directly until engine is wired."
+            "Wired in v1.8.0 via Florence2Engine. Task tokens: <CAPTION>, "
+            "<DETAILED_CAPTION>, <MORE_DETAILED_CAPTION>, <OD>, "
+            "<DENSE_REGION_CAPTION>, <CAPTION_TO_PHRASE_GROUNDING>, <OCR>, "
+            "<OCR_WITH_REGION>. trust_remote_code is enabled automatically."
         ),
     ),
     "florence-2-large": ModelSource(
@@ -520,16 +517,14 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         license="MIT",
         install_command="pip install 'visionservex[hf]'",
         hf_class="AutoModelForCausalLM",
-        runnable_in_visionservex=False,
+        runnable_in_visionservex=True,
         access_status="open",
         domain="open_vocab",
         recommended_action="add_now",
-        known_blockers=[
-            "Same as florence-2-base: engine wiring + prompt-token builder + output parser",
-        ],
+        notes="Same engine as florence-2-base. Heavier weights; recommend GPU.",
     ),
     # =====================================================================
-    # OWLv2 — open-vocabulary detection (HF, NOT yet wired — registry stub)
+    # OWLv2 — open-vocabulary detection (HF, RUNNABLE via OWLv2Engine in v1.8.0)
     # =====================================================================
     "owlv2-base-patch16": ModelSource(
         model_id="owlv2-base-patch16",
@@ -542,16 +537,14 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         license="Apache-2.0",
         install_command="pip install 'visionservex[hf]'",
         hf_class="Owlv2ForObjectDetection",
-        runnable_in_visionservex=False,
+        runnable_in_visionservex=True,
         access_status="open",
         domain="open_vocab",
         recommended_action="add_now",
-        known_blockers=[
-            "No OWLv2 engine in src/visionservex/engines/ yet",
-            "Needs Owlv2Processor + Owlv2ForObjectDetection wiring + post_process_object_detection",
-            "Output normalization to VisionServeX DetectionResult required",
-        ],
-        notes="Use Grounding DINO for open-vocab detection until OWLv2 engine is wired.",
+        notes=(
+            "Wired in v1.8.0 via OWLv2Engine. Pass prompts as a list or "
+            "comma-separated string. Returns OpenVocabularyResult."
+        ),
     ),
     "owlv2-large-patch14": ModelSource(
         model_id="owlv2-large-patch14",
@@ -563,11 +556,11 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         license="Apache-2.0",
         install_command="pip install 'visionservex[hf]'",
         hf_class="Owlv2ForObjectDetection",
-        runnable_in_visionservex=False,
+        runnable_in_visionservex=True,
         access_status="open",
         domain="open_vocab",
         recommended_action="add_now",
-        known_blockers=["Same as owlv2-base-patch16"],
+        notes="Same engine as owlv2-base-patch16. Heavier; recommend GPU.",
     ),
     # =====================================================================
     # SigLIP2 — text-image retrieval (HF, runnable)

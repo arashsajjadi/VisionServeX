@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-1.7.1-informational.svg" alt="v1.7.1">
+  <img src="https://img.shields.io/badge/version-1.8.0-informational.svg" alt="v1.8.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -325,6 +325,48 @@ visionservex recommend --task detect --device cuda --vram 8
 ```
 
 For `--goal accuracy --task detect`, the recommender surfaces `dfine-s/m-o365-coco` and `rfdetr-small/medium`, not nano variants.
+
+---
+
+## Open-Vocabulary Detection & Multi-Task VLM
+
+```python
+# OWLv2 — zero-shot detection with free-form text queries
+from visionservex import VisionModel
+model = VisionModel("owlv2-base-patch16")
+result = model.predict("image.jpg", prompt="person, red shirt, car")
+result.to_json()
+
+# Florence-2 — captioning, detection, OCR, phrase grounding (one model, many tasks)
+model = VisionModel("florence-2-base")
+model.predict("image.jpg", task="caption")
+model.predict("image.jpg", task="object_detection")
+model.predict("image.jpg", task="phrase_grounding", prompt="person wearing red shirt")
+model.predict("image.jpg", task="ocr")
+```
+
+```bash
+visionservex model pull owlv2-base-patch16
+visionservex open-vocab owlv2-base-patch16 image.jpg --prompt "person, car"
+
+visionservex model pull florence-2-base
+visionservex predict florence-2-base image.jpg --task caption
+```
+
+## Gated Models & Expert Sidecars
+
+```bash
+# SAM3 / SAM3.1 — gated, auth-aware status check
+visionservex sam3 status --model sam3.1-base-plus
+visionservex sam3 login-help
+
+# Heavy frameworks (OpenMMLab, Detectron2, MaskDINO, Co-DETR) — dry-run install
+visionservex expert list
+visionservex expert install openmmlab        # dry-run by default
+visionservex expert doctor
+```
+
+VisionServeX never auto-installs expert frameworks. The `expert install` command prints the exact `pip` / `mim` commands; you copy them into a shell.
 
 ---
 

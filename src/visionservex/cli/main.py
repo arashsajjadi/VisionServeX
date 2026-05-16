@@ -30,6 +30,7 @@ from visionservex.cli import (
     domain_zoo_commands,
     downloads_commands,
     embedding_commands,
+    expert_commands,
     gateway_commands,
     gpu_commands,
     model_card_commands,
@@ -39,6 +40,7 @@ from visionservex.cli import (
     openmmlab_commands,
     privacy_commands,
     replacement_map_commands,
+    sam3_commands,
     security_commands,
     suite_commands,
     syntax_audit,
@@ -108,6 +110,8 @@ app.add_typer(domain_zoo_commands.app, name="domain-zoo")
 app.add_typer(embedding_commands.app, name="feature")
 app.add_typer(dev_commands.app, name="dev")
 app.add_typer(model_health_commands.app, name="models")
+app.add_typer(sam3_commands.app, name="sam3")
+app.add_typer(expert_commands.app, name="expert")
 
 # Top-level embedding aliases for Ultralytics-style ergonomics
 embedding_alias_app = embedding_commands.app

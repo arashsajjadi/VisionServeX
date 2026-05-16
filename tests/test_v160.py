@@ -441,7 +441,9 @@ def test_florence_in_registry():
     reg = default_registry()
     entry = reg.get("florence-2-base")
     assert entry.task == "vlm"
-    assert entry.implementation_status == "stub"  # not wired yet
+    # v1.8.0 wired florence-2-base via Florence2Engine.
+    assert entry.implementation_status in {"wired", "partial"}
+    assert entry.engine == "florence2"
 
 
 def test_owlv2_in_registry():

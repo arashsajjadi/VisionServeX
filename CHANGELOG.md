@@ -7,6 +7,126 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-05-16
+
+### OWLv2 + Florence-2 runnable engines, SAM3 auth wrapper, expert-sidecar dry-run commands
+
+Real model-capacity expansion on top of the v1.7.x test/CI infrastructure.
+Two model families that had been declared as stubs since v1.6.0 are now
+genuinely wired: OWLv2 for open-vocabulary detection and Florence-2 for
+multi-task VLM. A SAM3 auth-aware wrapper exposes structured access errors
+for the gated facebookresearch release. New `visionservex expert *` and
+`visionservex sam3 *` CLI groups make heavy sidecar and gated-model
+workflows explicit. **No model was fake-wired**: every previously-stub
+model in this prompt is either now runnable, has an exact auth/install
+recipe, or remains audit-only with a documented blocker.
+
+#### OWLv2 — open-vocabulary detection (new — `engines/owlv2.py`)
+- `Owlv2Processor` + `Owlv2ForObjectDetection` via HF Transformers.
+- Accepts prompts as a list or comma-separated string.
+- Returns `OpenVocabularyResult` with one `Detection` per matched query.
+- Threshold + post_process_object_detection wired correctly.
+- Models: `owlv2-base-patch16`, `owlv2-large-patch14`.
+- Registry: `implementation_status="wired"`, `engine="owlv2"`,
+  `auto_download=false` (explicit pull required — first-run safety).
+
+#### Florence-2 — multi-task VLM (new — `engines/florence2.py`)
+- `AutoProcessor` + `AutoModelForCausalLM` with `trust_remote_code=True`.
+- Task-to-token mapping for: caption, detailed_caption, more_detailed_caption,
+  object_detection, dense_caption, phrase_grounding, ocr, region_ocr.
+- Generated-string parser (`parse_florence2_generation`) extracts boxes +
+  labels for box-producing tasks and text for caption/OCR; handles
+  `bboxes`, `boxes`, `quad_boxes` shapes across upstream versions.
+- Models: `florence-2-base`, `florence-2-large`.
+- Registry: `implementation_status="wired"`, `engine="florence2"`,
+  `auto_download=false`.
+
+#### SAM3 / SAM3.1 — auth-aware wrapper (new — `cli/sam3_commands.py`)
+- `visionservex sam3 status [--model MODEL] [--json]` — structured snapshot:
+  HF token presence (redacted, never logs the full token), transformers
+  installed, sam3 repo installed, checkpoint cached, blocker code, fix.
+- `visionservex sam3 login-help` — exact authentication recipe.
+- `visionservex sam3 supported-prompts` — honestly reports zero wired
+  prompt types in v1.8.0; users should use the upstream facebookresearch/sam3
+  repo directly for inference until the engine is implemented.
+- Structured error codes: `HF_AUTH_REQUIRED`, `MODEL_ACCESS_GATED`,
+  `SAM3_REPO_REQUIRED`, `CHECKPOINT_REQUIRED`, `PROMPT_TYPE_UNSUPPORTED`.
+- **No fake SAM3 inference path.** No mock fallback for gated weights.
+
+#### Expert sidecars (new — `cli/expert_commands.py`)
+- `visionservex expert list` — all sidecars with current install state.
+- `visionservex expert install <id> [--dry-run]` — prints exact install
+  recipe; **dry-run is the default** and `subprocess` is never called.
+- `visionservex expert doctor` — multi-framework dependency check.
+- Sidecars covered: `openmmlab`, `mmdet`, `mmrotate`, `mmpose`,
+  `detectron2`, `maskdino`, `co-detr`.
+- Structured error codes per sidecar: `OPENMMLAB_REQUIRED`, `MMDET_REQUIRED`,
+  `MMROTATE_REQUIRED`, `MMPOSE_REQUIRED`, `DETECTRON2_REQUIRED`,
+  `MASKDINO_REQUIRED`, `CO_DETR_REQUIRED`.
+
+#### Manifest accuracy (corrected from v1.7.0)
+- `florence-2-base/large` and `owlv2-base-patch16/large-patch14` were
+  honestly downgraded to `runnable_in_visionservex=False` in v1.7.0
+  because no engine existed. v1.8.0 flips them back to `True` because
+  the engines now exist and tests verify the parsers.
+- Registry YAML for those four entries: `engine` switched from generic
+  `huggingface` to dedicated `owlv2` / `florence2`; `backend` switched
+  to `huggingface_owlv2` / `huggingface_florence2`;
+  `implementation_status` → `wired`; `status` → `beta`.
+
+#### Tests (new — `tests/test_v180.py`, 20 tests)
+- `test_owlv2_engine_registered` — factory + registry wiring.
+- `test_owlv2_predict_with_mocked_outputs` — full inference path with
+  mocked HF processor/model returning fake boxes/scores/labels.
+- `test_owlv2_accepts_comma_separated_prompt` — CLI shape compatibility.
+- `test_florence2_engine_registered`.
+- `test_florence2_parse_caption_text` — text-only task parsing.
+- `test_florence2_parse_object_detection_bboxes` — OD box+label parsing.
+- `test_florence2_parse_phrase_grounding`.
+- `test_florence2_parse_quad_boxes_to_axis_aligned` — OCR polygon to
+  axis-aligned bbox conversion.
+- `test_florence2_unknown_task_raises` — clean ValueError.
+- `test_florence2_task_token_mapping` — token table sanity.
+- `test_sam3_status_without_token` — HF_AUTH_REQUIRED behavior.
+- `test_sam3_status_redacts_token` — never exposes full token.
+- `test_sam3_status_short_token_redacted`.
+- `test_sam3_models_mapping`.
+- `test_sam3_supported_prompts_returns_empty` — no fake predict()/infer().
+- `test_expert_list_includes_required_sidecars`.
+- `test_expert_install_dry_run_does_not_execute` — patches subprocess
+  to fail if any install command is actually run.
+- `test_expert_module_missing_returns_structured_code`.
+- `test_expert_install_commands_reference_official_tools` — only
+  pip/mim/git/cd/python/comment lines allowed.
+- `test_manifest_florence_and_owlv2_runnable_again` — manifest tracks the
+  new wired state.
+
+#### Updated regression tests
+- `tests/test_v160.py::test_florence_in_registry` updated: now asserts
+  `implementation_status == "wired"` and `engine == "florence2"`.
+
+#### Validation
+- Quick suite: **592 passed, 37 deselected — ~31 s** (was 572 in v1.7.1).
+- Ruff lint: clean. Ruff format: clean (162 files).
+- Artifact hygiene: zero tracked weights/reports/indexes.
+
+#### What did NOT land in v1.8.0 (honest)
+- **Minimal surveillance-search pipeline**: not implemented in this pass.
+  The Phase 3 recipe in this prompt would require ~1500 lines of new
+  code (video sampler + simple tracker + embedding index + timeline
+  exporter). Recommend as primary v1.9.0 feature.
+- **Anomalib PatchCore optional extra**: not implemented. The PatchCore
+  pipeline needs train/predict/heatmap commands + an `[anomaly]` extra in
+  `pyproject.toml`. Recommend for v1.9.0.
+- **OpenMMLab/Detectron2 actual `smoke-test` over heavy frameworks**: the
+  *commands* are wired but the smoke-test paths still require the heavy
+  frameworks to be installed by the user. The `expert install --dry-run`
+  output gives the exact recipe.
+- **DEIMv2 / RT-DETRv4 native loaders**: still blocked upstream
+  (HF Transformers issue #41211). Manifest blocker text unchanged.
+- **Medical / agriculture / aerial extras**: domain-zoo recipes exist
+  from v1.6.0; no new runnable wiring this pass.
+
 ## [1.7.1] - 2026-05-16
 
 ### Patch — fast CI compatibility fix

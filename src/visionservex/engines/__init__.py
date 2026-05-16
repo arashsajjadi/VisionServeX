@@ -7,6 +7,7 @@
 
 from visionservex.engines import dfine as _dfine
 from visionservex.engines import dinov2 as _dinov2
+from visionservex.engines import florence2 as _florence2
 from visionservex.engines import grounded_sam as _grounded_sam
 from visionservex.engines import grounded_sam2 as _grounded_sam2
 from visionservex.engines import grounding_dino as _gd
@@ -18,6 +19,7 @@ from visionservex.engines import oneformer as _oneformer
 from visionservex.engines import onnx as _onnx
 from visionservex.engines import openmmlab as _mm
 from visionservex.engines import openmmlab_sidecar as _mm_sidecar
+from visionservex.engines import owlv2 as _owlv2
 from visionservex.engines import pytorch as _torch
 from visionservex.engines import rfdetr as _rfdetr
 from visionservex.engines import sam2 as _sam

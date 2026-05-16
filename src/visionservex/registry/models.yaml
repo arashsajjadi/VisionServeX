@@ -2484,8 +2484,8 @@ models:
   display_name: Florence-2 (Base) — multi-task VLM
   task: vlm
   family: florence-2
-  backend: huggingface
-  engine: huggingface
+  backend: huggingface_florence2
+  engine: florence2
   license: MIT
   upstream_url: https://github.com/microsoft/Florence-2
   download_type: huggingface
@@ -2493,8 +2493,8 @@ models:
   auto_download: false
   requires_optional_extra: true
   install_extra: hf
-  implementation_notes: Tasks via prompt — caption, dense_caption, object_detection, phrase_grounding, region_ocr.
-  implementation_status: stub
+  implementation_notes: Multi-task VLM. Tasks via prompt token — caption, detailed_caption, object_detection, dense_caption, phrase_grounding, ocr, region_ocr. Uses trust_remote_code.
+  implementation_status: wired
   supported_devices:
   - cpu
   - cuda
@@ -2505,16 +2505,16 @@ models:
   minimum_vram_gb: 2.0
   recommended_vram_gb: 4.0
   difficulty: medium
-  status: experimental
+  status: beta
   model_category: experimental_sota
-  notes: Engine wiring requires Florence-2 specific prompt format (e.g. '<OD>'). Use HF directly for now.
+  notes: Runnable via Florence2Engine (engines/florence2.py). Pass task= to select prompt token; phrase_grounding accepts a free-form prompt string.
 
 - id: florence-2-large
   display_name: Florence-2 (Large) — multi-task VLM
   task: vlm
   family: florence-2
-  backend: huggingface
-  engine: huggingface
+  backend: huggingface_florence2
+  engine: florence2
   license: MIT
   upstream_url: https://github.com/microsoft/Florence-2
   download_type: huggingface
@@ -2522,7 +2522,7 @@ models:
   auto_download: false
   requires_optional_extra: true
   install_extra: hf
-  implementation_status: stub
+  implementation_status: wired
   supported_devices:
   - cuda
   recommended_device: cuda
@@ -2532,16 +2532,16 @@ models:
   minimum_vram_gb: 4.0
   recommended_vram_gb: 8.0
   difficulty: medium
-  status: experimental
+  status: beta
   model_category: experimental_sota
-  notes: Same as Florence-2 base — prompt-format wiring pending.
+  notes: Same engine as florence-2-base. Heavier weights — keep auto_download=false to avoid silent pulls.
 
 - id: owlv2-base-patch16
   display_name: OWLv2 (Base) — open-vocabulary detection
   task: open_vocab_detect
   family: owlv2
-  backend: huggingface
-  engine: huggingface
+  backend: huggingface_owlv2
+  engine: owlv2
   license: Apache-2.0
   upstream_url: https://huggingface.co/docs/transformers/en/model_doc/owlv2
   download_type: huggingface
@@ -2549,8 +2549,8 @@ models:
   auto_download: false
   requires_optional_extra: true
   install_extra: hf
-  implementation_notes: Uses transformers Owlv2ForObjectDetection. Provide list of text queries.
-  implementation_status: stub
+  implementation_notes: Uses transformers Owlv2Processor + Owlv2ForObjectDetection. Pass prompts as a list or comma-separated string.
+  implementation_status: wired
   supported_devices:
   - cpu
   - cuda
@@ -2561,16 +2561,16 @@ models:
   minimum_vram_gb: 2.0
   recommended_vram_gb: 4.0
   difficulty: medium
-  status: experimental
+  status: beta
   model_category: experimental_sota
-  notes: Engine wiring pending. Use Grounding DINO for now.
+  notes: Runnable via OWLv2Engine (engines/owlv2.py). Returns OpenVocabularyResult with one detection per matched text query.
 
 - id: owlv2-large-patch14
   display_name: OWLv2 (Large) — open-vocabulary detection
   task: open_vocab_detect
   family: owlv2
-  backend: huggingface
-  engine: huggingface
+  backend: huggingface_owlv2
+  engine: owlv2
   license: Apache-2.0
   upstream_url: https://huggingface.co/docs/transformers/en/model_doc/owlv2
   download_type: huggingface
@@ -2578,7 +2578,7 @@ models:
   auto_download: false
   requires_optional_extra: true
   install_extra: hf
-  implementation_status: stub
+  implementation_status: wired
   supported_devices:
   - cuda
   recommended_device: cuda
@@ -2588,9 +2588,9 @@ models:
   minimum_vram_gb: 6.0
   recommended_vram_gb: 12.0
   difficulty: hard
-  status: experimental
+  status: beta
   model_category: experimental_sota
-  notes: Engine wiring pending.
+  notes: Same engine as owlv2-base-patch16; heavier. Keep auto_download=false.
 
 - id: sam3-base
   display_name: SAM 3 (Base) — gated upstream
