@@ -160,7 +160,8 @@ def test_rtmpose_sidecar_script_pins_setuptools_below_72():
 
 
 @pytest.mark.fast
-def test_version_is_280():
+def test_version_is_at_least_280():
     import visionservex
 
-    assert visionservex.__version__ == "2.8.0"
+    parts = tuple(int(p) for p in visionservex.__version__.split(".")[:3])
+    assert parts >= (2, 8, 0)

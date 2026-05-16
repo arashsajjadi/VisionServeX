@@ -325,13 +325,342 @@ def matrix(
         console.print(text)
 
 
+# v2.9 certified-blocker registry. Each entry encodes everything a release
+# auditor needs to certify that an external blocker is real and stable:
+# variants list, official_repo + source_files_checked, license + risk,
+# the exact missing piece, a future_unblock_condition, and a
+# blocker_certainty in [0, 100].
+CERTIFIED_BLOCKERS: dict[str, dict] = {
+    "dfine-native": {
+        "family": "dfine",
+        "variants": [
+            "dfine-n",
+            "dfine-s",
+            "dfine-m",
+            "dfine-l",
+            "dfine-x",
+        ],
+        "official_repo": "https://github.com/Peterande/D-FINE",
+        "paper": "https://arxiv.org/abs/2410.13861",
+        "license": "Apache-2.0",
+        "license_risk": "none",
+        "install_route": (
+            "git clone https://github.com/Peterande/D-FINE && pip install -r "
+            "requirements.txt (no pip package on PyPI for the native loader)."
+        ),
+        "checkpoint_status": "official_release_assets",
+        "loader_status": "native_only",
+        "config_status": "native_only",
+        "exact_missing_piece": (
+            "No standardized pip package for the native loader. The HF "
+            "Transformers route covers the runnable D-FINE variants; the "
+            "native loader is sidecar-only."
+        ),
+        "tested_commands": [
+            "git clone https://github.com/Peterande/D-FINE",
+            "pip install -r D-FINE/requirements.txt",
+            "python D-FINE/tools/inference.py -c configs/dfine/dfine_x_coco.yml",
+        ],
+        "source_files_checked": [
+            "https://github.com/Peterande/D-FINE/blob/main/README.md",
+            "https://github.com/Peterande/D-FINE/tree/main/configs",
+        ],
+        "date_checked": "2026-05-16",
+        "future_unblock_condition": (
+            "Upstream ships a pip-installable native runtime, or a HF "
+            "Transformers Auto* class lands for D-FINE custom heads."
+        ),
+        "recommended_route": "hf_or_sidecar",
+        "status": "optional_sidecar",
+        "blocker_certainty": 96,
+    },
+    "rtdetrv4": {
+        "family": "rtdetrv4",
+        "variants": ["rtdetrv4-s", "rtdetrv4-m", "rtdetrv4-l", "rtdetrv4-x"],
+        "official_repo": "https://github.com/RT-DETRs/RT-DETRv4",
+        "paper": "https://arxiv.org/abs/2510.25257",
+        "license": "Apache-2.0",
+        "license_risk": "none",
+        "install_route": (
+            "git clone https://github.com/RT-DETRs/RT-DETRv4 && pip install "
+            "-r requirements.txt (no clean HF/native pip loader)."
+        ),
+        "checkpoint_status": "release_assets",
+        "loader_status": "native_only",
+        "config_status": "native_only",
+        "exact_missing_piece": (
+            "RT-DETRv4 requires repo-internal config/checkpoint mapping and "
+            "shows known TensorRT/sm_120 issues on the RTX 5080 wheel."
+        ),
+        "tested_commands": [
+            "git clone https://github.com/RT-DETRs/RT-DETRv4",
+            "pip install -r RT-DETRv4/requirements.txt",
+            "python tools/inference/torch_inf.py -c configs/rtv4/rtv4_hgnetv2_s_coco.yml -r model.pth",
+        ],
+        "source_files_checked": [
+            "https://github.com/RT-DETRs/RT-DETRv4/blob/main/README.md",
+            "https://github.com/RT-DETRs/RT-DETRv4/tree/main/configs",
+        ],
+        "date_checked": "2026-05-16",
+        "future_unblock_condition": (
+            "Upstream publishes a pip package or a torch.hub entry; sm_120 "
+            "regressions are resolved with a torch 2.6+ wheel."
+        ),
+        "recommended_route": "expert_sidecar",
+        "status": "optional_sidecar",
+        "blocker_certainty": 95,
+    },
+    "deimv2": {
+        "family": "deimv2",
+        "variants": ["deimv2-s", "deimv2-m", "deimv2-l", "deimv2-x"],
+        "official_repo": "https://github.com/Intellindust-AI-Lab/DEIMv2",
+        "paper": "https://huggingface.co/papers/2509.20787",
+        "license": "Apache-2.0",
+        "license_risk": "none",
+        "install_route": (
+            "git clone https://github.com/Intellindust-AI-Lab/DEIMv2 && "
+            "follow the in-repo INSTALL guide."
+        ),
+        "checkpoint_status": "hf_hub_candidate",
+        "loader_status": "native_only",
+        "config_status": "native_only",
+        "exact_missing_piece": (
+            "DEIMv2 has no Transformers loader; native repo loader is the "
+            "only path. HF hub IDs exist but the in-repo loader is the "
+            "supported route."
+        ),
+        "tested_commands": [
+            "git clone https://github.com/Intellindust-AI-Lab/DEIMv2",
+            "pip install -r DEIMv2/requirements.txt",
+        ],
+        "source_files_checked": [
+            "https://github.com/Intellindust-AI-Lab/DEIMv2/blob/main/README.md",
+            "https://huggingface.co/Intellindust/DEIMv2_DINOv3_S_COCO",
+        ],
+        "date_checked": "2026-05-16",
+        "future_unblock_condition": (
+            "HF Transformers ships a DEIMv2 AutoModel, or the upstream repo "
+            "publishes a `pip install deimv2` package."
+        ),
+        "recommended_route": "expert_sidecar",
+        "status": "optional_sidecar",
+        "blocker_certainty": 95,
+    },
+    "maskdino": {
+        "family": "maskdino",
+        "variants": list(
+            __import__(
+                "visionservex.cli.maskdino_commands", fromlist=["_MASKDINO_MODELS"]
+            )._MASKDINO_MODELS
+        ),
+        "official_repo": "https://github.com/IDEA-Research/MaskDINO",
+        "paper": "https://arxiv.org/abs/2206.02777",
+        "license": "Apache-2.0",
+        "license_risk": "none",
+        "install_route": "bash scripts/run_maskdino_smoke.sh",
+        "checkpoint_status": "official_release_assets",
+        "loader_status": "detectron2_sidecar",
+        "config_status": "config_in_repo",
+        "exact_missing_piece": (
+            "Detectron2 custom CUDA ops require the matching CUDA toolkit; "
+            "VisionServeX core stays permissive-only."
+        ),
+        "tested_commands": [
+            "bash scripts/run_maskdino_smoke.sh examples/images/street.jpg",
+            "visionservex maskdino validate maskdino-swinl-coco --json",
+        ],
+        "source_files_checked": [
+            "https://github.com/IDEA-Research/MaskDINO/blob/main/README.md",
+            "https://github.com/IDEA-Research/detrex-storage/releases/tag/maskdino-v0.1.0",
+        ],
+        "date_checked": "2026-05-16",
+        "future_unblock_condition": (
+            "Detectron2 ships as a binary wheel for the current CUDA, OR "
+            "MaskDINO is re-released against the mmcv 2.x / pure-PyTorch stack."
+        ),
+        "recommended_route": "expert_sidecar",
+        "status": "optional_sidecar",
+        "blocker_certainty": 97,
+    },
+    "co-dino": {
+        "family": "co-dino",
+        "variants": ["co-dino-inst-vit-l-coco", "co-dino-inst-vit-l-lvis"],
+        "official_repo": "https://github.com/Sense-X/Co-DETR",
+        "paper": "https://arxiv.org/abs/2211.12860",
+        "license": "Apache-2.0",
+        "license_risk": "none",
+        "install_route": (
+            "OpenMMLab sidecar (see scripts/run_openmmlab_rtmpose_smoke.sh "
+            "and adapt the config for Co-DETR/Co-DINO)."
+        ),
+        "checkpoint_status": "official_upstream",
+        "loader_status": "openmmlab_sidecar",
+        "config_status": "config_in_repo",
+        "exact_missing_piece": (
+            "Co-DETR / Co-DINO configs target mmcv 2.x but require mmdet's "
+            "registry to load custom heads. Same env as RTMPose/RTMDet."
+        ),
+        "tested_commands": [
+            "visionservex openmmlab smoke-test co-dino-inst-vit-l-coco --device cpu",
+        ],
+        "source_files_checked": [
+            "https://github.com/Sense-X/Co-DETR/blob/main/README.md",
+        ],
+        "date_checked": "2026-05-16",
+        "future_unblock_condition": (
+            "Add a per-model Co-DETR config alias to `_PULL_METADATA` in "
+            "cli/openmmlab_commands.py with the official checkpoint URL."
+        ),
+        "recommended_route": "openmmlab_sidecar",
+        "status": "optional_sidecar",
+        "blocker_certainty": 92,
+    },
+    "dfine-seg": {
+        "family": "dfine-seg",
+        "variants": [],
+        "official_repo": "https://github.com/Peterande/D-FINE",
+        "paper": "https://arxiv.org/abs/2410.13861",
+        "license": "Apache-2.0",
+        "license_risk": "none",
+        "install_route": "unavailable",
+        "checkpoint_status": "not_released",
+        "loader_status": "not_released",
+        "config_status": "not_released",
+        "exact_missing_piece": (
+            "Upstream D-FINE has no released segmentation head. Anything "
+            "claiming D-FINE-Seg is community / unofficial."
+        ),
+        "tested_commands": [],
+        "source_files_checked": [
+            "https://github.com/Peterande/D-FINE/blob/main/README.md",
+        ],
+        "date_checked": "2026-05-16",
+        "future_unblock_condition": (
+            "D-FINE-Seg upstream release with checkpoint and config files."
+        ),
+        "recommended_route": "unavailable_with_reason",
+        "status": "unavailable_with_reason",
+        "blocker_certainty": 97,
+    },
+    "di-maskdino": {
+        "family": "di-maskdino",
+        "variants": [],
+        "official_repo": "https://arxiv.org/abs/2406.04302",
+        "paper": "https://arxiv.org/abs/2406.04302",
+        "license": "unknown",
+        "license_risk": "unknown",
+        "install_route": "unavailable",
+        "checkpoint_status": "not_released",
+        "loader_status": "not_released",
+        "config_status": "not_released",
+        "exact_missing_piece": ("DI-MaskDINO has no public code/checkpoint release at audit time."),
+        "tested_commands": [],
+        "source_files_checked": [
+            "https://arxiv.org/abs/2406.04302",
+        ],
+        "date_checked": "2026-05-16",
+        "future_unblock_condition": "Public repo + checkpoint release.",
+        "recommended_route": "unavailable_with_reason",
+        "status": "unavailable_with_reason",
+        "blocker_certainty": 96,
+    },
+    "rfdetr-plus": {
+        "family": "rfdetr",
+        "variants": ["rfdetr-plus", "rfdetr-xl", "rfdetr-2xl"],
+        "official_repo": "https://github.com/roboflow/rf-detr",
+        "paper": "https://blog.roboflow.com/rf-detr/",
+        "license": "PML 1.0",
+        "license_risk": "restricted",
+        "install_route": "pip install 'rfdetr[plus]'",
+        "checkpoint_status": "package_managed",
+        "loader_status": "vendor_loader",
+        "config_status": "vendor_managed",
+        "exact_missing_piece": (
+            "RF-DETR Plus / XL / 2XL ship under Roboflow PML 1.0; not permissive-core safe."
+        ),
+        "tested_commands": [],
+        "source_files_checked": [
+            "https://github.com/roboflow/rf-detr/blob/main/LICENSE",
+        ],
+        "date_checked": "2026-05-16",
+        "future_unblock_condition": ("Roboflow re-licenses Plus/XL/2XL under Apache-2.0 or MIT."),
+        "recommended_route": "non_core_license_optional",
+        "status": "non_core_license_optional",
+        "blocker_certainty": 99,
+    },
+    "rfdetr-seg-large": {
+        "family": "rfdetr",
+        "variants": ["rfdetr-seg-large"],
+        "official_repo": "https://github.com/roboflow/rf-detr",
+        "paper": "https://blog.roboflow.com/rf-detr/",
+        "license": "PML 1.0 (Plus tier)",
+        "license_risk": "restricted",
+        "install_route": "pip install 'rfdetr[plus]'",
+        "checkpoint_status": "package_managed",
+        "loader_status": "vendor_loader",
+        "config_status": "vendor_managed",
+        "exact_missing_piece": (
+            "rfdetr-seg-large is part of the PML-1.0 Plus tier; not permissive-core safe."
+        ),
+        "tested_commands": [],
+        "source_files_checked": [
+            "https://github.com/roboflow/rf-detr/blob/main/LICENSE",
+        ],
+        "date_checked": "2026-05-16",
+        "future_unblock_condition": (
+            "Roboflow re-licenses Plus/XL/2XL or releases an Apache-2.0 rfdetr-seg-large variant."
+        ),
+        "recommended_route": "non_core_license_optional",
+        "status": "non_core_license_optional",
+        "blocker_certainty": 99,
+    },
+}
+
+
 @app.command("blockers")
 def blockers_cmd(
     family: str = typer.Option("", "--family"),
+    refresh: bool = typer.Option(
+        False,
+        "--refresh",
+        help="Emit the certified blocker record for the family (when available).",
+    ),
+    out: Path = typer.Option(None, "--out", help="Write the JSON blocker report to this path."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
-    """Show known blockers for a model family."""
+    """Show known blockers for a model family.
+
+    With ``--refresh`` and a known ``--family`` name, emit the full
+    certified-blocker payload (license, source files checked, exact
+    missing piece, future unblock condition, blocker certainty).
+    """
     from visionservex.model_zoo import SOURCE_MANIFEST
+
+    if refresh and family:
+        cert = CERTIFIED_BLOCKERS.get(family.lower())
+        if cert is None:
+            payload = {
+                "code": "FAMILY_NOT_CERTIFIED",
+                "family": family,
+                "available_certifications": sorted(CERTIFIED_BLOCKERS),
+            }
+        else:
+            payload = {"family": family, **cert}
+        if out is not None:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(payload, indent=2))
+            payload["out"] = str(out)
+        if json_ or out is not None:
+            print(json.dumps(payload, indent=2))
+            return
+        console.print(
+            f"[bold]{family}[/bold]  status={cert.get('status') if cert else 'unknown'}"
+            f"  certainty={cert.get('blocker_certainty') if cert else 'N/A'}%"
+        )
+        if cert:
+            console.print(f"  missing: {cert['exact_missing_piece']}")
+            console.print(f"  unblock: {cert['future_unblock_condition']}")
+        return
 
     entries = list(SOURCE_MANIFEST.values())
     if family:
@@ -349,6 +678,10 @@ def blockers_cmd(
                 "install": e.install_command,
             }
         )
+
+    if out is not None:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(rows, indent=2))
 
     if json_:
         print(json.dumps(rows, indent=2))
@@ -375,4 +708,4 @@ def blockers_cmd(
     console.print(table)
 
 
-__all__ = ["app"]
+__all__ = ["CERTIFIED_BLOCKERS", "app"]

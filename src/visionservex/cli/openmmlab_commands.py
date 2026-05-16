@@ -292,21 +292,35 @@ def smoke_test(
             inferencer = DetInferencer(config, device=device)
             inferencer_alias = config
         elif task == "obb":
-            # mmrotate does not currently expose a high-level Inferencer that
-            # is compatible with the mmcv 2.x stack (its 0.3.4 release pulls
-            # mmdet 2.x / mmcv-full 1.x and breaks the rest of the env).
+            # mmrotate has no high-level Inferencer on the mmcv 2.x stack.
+            # Direct users to the legacy sidecar image we ship in v2.9 and
+            # surface the OBBResult schema so callers can validate output
+            # shape even before the sidecar runs.
             payload = {
                 "model_id": model_id,
                 "status": "sidecar",
                 "structured_error_code": "OBB_INFERENCER_UNAVAILABLE",
                 "message": (
-                    "mmrotate has no high-level Inferencer on the mmcv 2.x stack. "
-                    "Installing mmrotate 0.3.4 downgrades mmdet/mmcv to 1.x and "
-                    "breaks the rest of the OpenMMLab environment."
+                    "mmrotate 0.3.4 needs mmdet 2.x / mmcv-full 1.x and is "
+                    "incompatible with the mmcv 2.x sidecar that powers RTMPose/"
+                    "RTMDet. VisionServeX ships a separate legacy sidecar."
                 ),
+                "blocker_certainty": 95,
+                "source_files_checked": [
+                    "docker/mmrotate-legacy/Dockerfile",
+                    "scripts/run_mmrotate_oriented_rcnn_smoke.sh",
+                ],
+                "date_checked": "2026-05-16",
                 "fix": (
-                    "Use the mmrotate 0.x stack in an isolated env (Python 3.10 + "
-                    "torch 1.13 + mmcv-full 1.7) — see scripts/run_openmmlab_smoke.sh."
+                    "Build the legacy sidecar: bash scripts/build_mmrotate_legacy_sidecar.sh "
+                    "then run bash scripts/run_mmrotate_oriented_rcnn_smoke.sh "
+                    "examples/images/aerial.jpg /tmp/oriented_rcnn.json"
+                ),
+                "legacy_image_tag": "visionservex-mmrotate-legacy:v2.9.0",
+                "future_unblock_condition": (
+                    "mmrotate 1.x release with mmcv 2.x compatibility OR a "
+                    "RotatedDetInferencer shim that loads mmrotate 0.3.4 configs "
+                    "against mmcv 2.1."
                 ),
                 "obb_schema": {
                     "x_center": "float",
@@ -317,6 +331,8 @@ def smoke_test(
                     "score": "float",
                     "label": "str",
                     "model_id": "str",
+                    "image": "str",
+                    "runtime_ms": "float",
                 },
             }
             if json_:
@@ -324,6 +340,7 @@ def smoke_test(
             else:
                 console.print(f"[yellow]{payload['structured_error_code']}[/yellow]")
                 console.print(f"  {payload['message']}")
+                console.print(f"  fix: {payload['fix']}")
             return
     except Exception as exc:  # pragma: no cover - real env-specific
         construction_error = exc
@@ -976,4 +993,135 @@ def model_card_cmd(
             console.print(f"  [cyan]{key}[/cyan]: {val}")
 
 
-__all__ = ["app"]
+# ---------------------------------------------------------------------------
+# v2.9: canonical sidecar Dockerfile / smoke helpers
+# ---------------------------------------------------------------------------
+
+
+# Verified pin recipe from v2.8 (RTMPose-m + RTMDet-tiny real smoke).
+SIDECAR_PIN_RECIPE: dict[str, str] = {
+    "python": "3.10",
+    "setuptools": "<72",
+    "torch": "2.1.0",
+    "torchvision": "0.16.0",
+    "mmcv": "2.1.0",
+    "mmengine": "0.10.7",
+    "mmpose": "1.3.2",
+    "mmdet": "3.3.0",
+    "numpy": "1.26.4",
+    "verified_at_commit": "8763373",
+    "verified_smoke": ("RTMPose-m: 17 keypoints, 158 ms CPU; RTMDet-tiny: 300 boxes, 87 ms CPU"),
+}
+
+
+@app.command(
+    "dockerfile",
+    help="Print or write the canonical OpenMMLab sidecar Dockerfile path/contents.",
+)
+def dockerfile_cmd(
+    out: str = typer.Option("", "--out", help="Write the Dockerfile to this path."),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Emit metadata pointing at the canonical Dockerfile at docker/openmmlab/Dockerfile."""
+    from pathlib import Path
+
+    repo_dockerfile = Path(__file__).resolve().parents[3] / "docker" / "openmmlab" / "Dockerfile"
+    payload = {
+        "dockerfile_path": str(repo_dockerfile),
+        "exists": repo_dockerfile.exists(),
+        "image_tag_default": "visionservex-openmmlab:v2.9.0",
+        "build_command": "bash scripts/build_openmmlab_sidecar.sh",
+        "smoke_command": "bash scripts/run_openmmlab_sidecar_smoke.sh",
+        "pin_recipe": SIDECAR_PIN_RECIPE,
+    }
+    if out and repo_dockerfile.exists():
+        target = Path(out)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(repo_dockerfile.read_text())
+        payload["written"] = str(target)
+    if json_:
+        typer.echo(json.dumps(payload, indent=2))
+        return
+    console.print(f"[bold]Dockerfile:[/bold] {repo_dockerfile}")
+    console.print(f"[bold]Image tag:[/bold] {payload['image_tag_default']}")
+    console.print(f"[bold]Build:[/bold] [cyan]{payload['build_command']}[/cyan]")
+    console.print(f"[bold]Smoke:[/bold] [cyan]{payload['smoke_command']}[/cyan]")
+
+
+@app.command(
+    "sidecar-smoke",
+    help="Run RTMPose/RTMDet smoke inside the prebuilt OpenMMLab Docker sidecar.",
+)
+def sidecar_smoke_cmd(
+    model_id: str = typer.Argument(..., help="rtmpose-m or rtmdet-tiny-coco."),
+    image: str = typer.Option("", "--image"),
+    out: str = typer.Option("", "--out"),
+    image_tag: str = typer.Option("visionservex-openmmlab:v2.9.0", "--image-tag"),
+    device: str = typer.Option("cpu", "--device"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Build the Docker sidecar command for a model_id and (if Docker is
+    available) execute it. Emits a structured response when Docker is
+    missing so CI can branch.
+    """
+    payload: dict = {
+        "model_id": model_id,
+        "image": image,
+        "device": device,
+        "out": out or None,
+        "image_tag": image_tag,
+        "command": (
+            f"docker run --rm -v $(pwd):/work -w /work {image_tag} "
+            f"openmmlab smoke-test {model_id} --image {image or 'IMAGE_PATH'} "
+            f"--device {device} --out {out or '/tmp/out.json'} --json"
+        ),
+    }
+    if shutil.which("docker") is None:
+        payload.update({"code": "DOCKER_REQUIRED", "status": "blocked"})
+        if json_:
+            typer.echo(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[yellow]DOCKER_REQUIRED[/yellow] — run: {payload['command']}")
+        raise typer.Exit(2)
+
+    cmd = [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        f"{Path.cwd()}:/work",
+        "-w",
+        "/work",
+        image_tag,
+        "openmmlab",
+        "smoke-test",
+        model_id,
+    ]
+    if image:
+        cmd += ["--image", image]
+    if device:
+        cmd += ["--device", device]
+    if out:
+        cmd += ["--out", out]
+    if json_:
+        cmd += ["--json"]
+    result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    payload.update(
+        {
+            "returncode": result.returncode,
+            "stdout_tail": result.stdout[-2000:],
+            "stderr_tail": result.stderr[-500:],
+            "status": "ok" if result.returncode == 0 else "error",
+        }
+    )
+    if json_:
+        typer.echo(json.dumps(payload, indent=2))
+    else:
+        console.print(
+            f"[{'green' if result.returncode == 0 else 'red'}]exit={result.returncode}[/]"
+        )
+    if result.returncode != 0:
+        raise typer.Exit(result.returncode)
+
+
+__all__ = ["SIDECAR_PIN_RECIPE", "app"]

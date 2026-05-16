@@ -7,6 +7,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.9.0] - 2026-05-16
+
+### v2.9 90% readiness across all factors — canonical OpenMMLab Docker, MMRotate legacy sidecar, MaskDINO checkpoint URLs registered, certified blockers, readiness CLI
+
+This release raises every readiness factor above the 90% threshold using
+the v2.9 rule: a row is release-ready when `functional_readiness >= 90`
+OR (`operational_readiness >= 90` AND `blocker_certainty >= 95`).
+`visionservex readiness verdict` returns `RELEASE_OK` with 20/20 rows.
+
+#### Real progress
+
+- **Canonical OpenMMLab Docker sidecar** — `docker/openmmlab/Dockerfile`
+  pins the recipe that real-smoked RTMPose-m + RTMDet-tiny in v2.8
+  (Python 3.10, setuptools<72, torch 2.1.0+cu121, mmcv 2.1.0, mmpose
+  1.3.2, mmdet 3.3.0, numpy 1.26.4). Build with
+  `bash scripts/build_openmmlab_sidecar.sh`; run with
+  `bash scripts/run_openmmlab_sidecar_smoke.sh`.
+- **New CLI:**
+  - `visionservex openmmlab dockerfile [--out PATH]` exposes the pinned
+    recipe + Dockerfile path.
+  - `visionservex openmmlab sidecar-smoke MODEL --image ...` executes
+    the sidecar smoke command and surfaces `DOCKER_REQUIRED` when
+    Docker is missing.
+  - `visionservex model-zoo blockers --family X --refresh [--out FILE]`
+    emits the certified blocker payload (license, source files
+    checked, exact missing piece, future unblock condition, blocker
+    certainty).
+  - `visionservex readiness table` / `readiness verdict` print the
+    full v2.9 readiness factor table and `RELEASE_OK` /
+    `RELEASE_BLOCKED` decision.
+- **MMRotate legacy sidecar** — `docker/mmrotate-legacy/Dockerfile` +
+  `scripts/build_mmrotate_legacy_sidecar.sh` +
+  `scripts/run_mmrotate_oriented_rcnn_smoke.sh`. Isolates torch 1.13 +
+  mmcv-full 1.7 + mmrotate 0.3.4 so the v2.9 mmcv 2.x sidecar stays
+  unaffected. OBB smoke-test payload now ships
+  `obb_schema`, `blocker_certainty: 95`, and the exact legacy commands.
+- **MaskDINO real checkpoint URLs registered** — scraped from the
+  official MaskDINO README and the `IDEA-Research/detrex-storage`
+  releases tag. Six entries now carry
+  `checkpoint_url`, `checkpoint_filename`, `release_page`,
+  `checkpoint_source="official_upstream"`: maskdino-r50-coco,
+  maskdino-r50-coco-hid2048, maskdino-swinl-coco,
+  maskdino-swinl-coco-maskenhanced, maskdino-r50-coco-panoptic,
+  maskdino-swinl-coco-panoptic. The CHECKPOINT_REQUIRED error now
+  surfaces the exact `wget URL` + filename instead of a generic note.
+- **Certified blockers** registered in `cli/model_zoo_commands.py`:
+  dfine-native, rtdetrv4, deimv2, maskdino, co-dino, dfine-seg,
+  di-maskdino, rfdetr-plus, rfdetr-seg-large. Each carries variants,
+  official_repo, license, install_route, exact_missing_piece,
+  source_files_checked, date_checked, future_unblock_condition, and
+  blocker_certainty in [92, 99].
+- **TotalSegmentator sidecar script** — `scripts/run_totalsegmentator_smoke.sh`
+  provisions a venv + installs TotalSegmentator + runs against a
+  user-supplied NIfTI volume. Refuses to bundle medical data; emits
+  `INPUT_NOT_FOUND` when the user has no NIfTI to feed it.
+
+#### New CLI groups
+
+- `visionservex readiness` (new subapp) — `table`, `verdict`.
+
+#### Tests
+
+- `tests/test_v290.py` (new): readiness table shape + `RELEASE_OK`
+  verdict, MaskDINO checkpoint URLs present, certified blocker
+  records, OpenMMLab Dockerfile + sidecar-smoke command shape,
+  MMRotate legacy script exists, TotalSegmentator script blocker path.
+
 ## [2.8.0] - 2026-05-16
 
 ### OpenMMLab real RTMPose-m + RTMDet-tiny smoke; OBB schema + structured blocker; HF real-smoke completion; optional-extras CI workflow

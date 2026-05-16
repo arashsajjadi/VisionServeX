@@ -27,34 +27,113 @@ app = typer.Typer(
 console = Console()
 
 
+_MASKDINO_RELEASE_BASE = (
+    "https://github.com/IDEA-Research/detrex-storage/releases/download/maskdino-v0.1.0"
+)
+_MASKDINO_RELEASE_PAGE = (
+    "https://github.com/IDEA-Research/detrex-storage/releases/tag/maskdino-v0.1.0"
+)
+
 _MASKDINO_MODELS: dict[str, dict] = {
-    "maskdino-swinl-coco": {
-        "display": "MaskDINO (Swin-L, COCO instance)",
-        "source_repo": "https://github.com/IDEA-Research/MaskDINO",
-        "license": "Apache-2.0",
-        "task": "segment",
-        "config_path": "configs/coco/instance-segmentation/maskdino_R50_bs16_50ep_4s_dowsample1_2048.yaml",
-        "checkpoint_url": None,
-        "checkpoint_note": (
-            "MaskDINO checkpoint URL was NOT FOUND in retrieved source set. "
-            "Obtain from the official model zoo at "
-            "https://github.com/IDEA-Research/MaskDINO/blob/main/README.md "
-            "and pass the local path."
-        ),
-        "install": ("Detectron2 sidecar — see `visionservex maskdino create-env`."),
-    },
     "maskdino-r50-coco": {
-        "display": "MaskDINO (R50, COCO instance)",
+        "display": "MaskDINO (R50, COCO instance, mask 46.1 / box 51.5 AP)",
         "source_repo": "https://github.com/IDEA-Research/MaskDINO",
+        "release_page": _MASKDINO_RELEASE_PAGE,
         "license": "Apache-2.0",
         "task": "segment",
         "config_path": "configs/coco/instance-segmentation/maskdino_R50_bs16_50ep_4s.yaml",
-        "checkpoint_url": None,
-        "checkpoint_note": (
-            "MaskDINO checkpoint URL was NOT FOUND in retrieved source set. "
-            "Obtain from the official README and pass the local path."
+        "checkpoint_url": (
+            f"{_MASKDINO_RELEASE_BASE}/"
+            "maskdino_r50_50ep_300q_hid1024_3sd1_instance_maskenhanced_mask46.1ap_box51.5ap.pth"
         ),
-        "install": ("Detectron2 sidecar — see `visionservex maskdino create-env`."),
+        "checkpoint_filename": (
+            "maskdino_r50_50ep_300q_hid1024_3sd1_instance_maskenhanced_mask46.1ap_box51.5ap.pth"
+        ),
+        "checkpoint_source": "official_upstream",
+        "install": "Detectron2 sidecar — see `visionservex maskdino create-env`.",
+    },
+    "maskdino-r50-coco-hid2048": {
+        "display": "MaskDINO (R50, COCO instance, hid2048, mask 46.3 / box 51.7 AP)",
+        "source_repo": "https://github.com/IDEA-Research/MaskDINO",
+        "release_page": _MASKDINO_RELEASE_PAGE,
+        "license": "Apache-2.0",
+        "task": "segment",
+        "config_path": "configs/coco/instance-segmentation/maskdino_R50_bs16_50ep_4s_dowsample1_2048.yaml",
+        "checkpoint_url": (
+            f"{_MASKDINO_RELEASE_BASE}/"
+            "maskdino_r50_50ep_300q_hid2048_3sd1_instance_maskenhanced_mask46.3ap_box51.7ap.pth"
+        ),
+        "checkpoint_filename": (
+            "maskdino_r50_50ep_300q_hid2048_3sd1_instance_maskenhanced_mask46.3ap_box51.7ap.pth"
+        ),
+        "checkpoint_source": "official_upstream",
+        "install": "Detectron2 sidecar — see `visionservex maskdino create-env`.",
+    },
+    "maskdino-swinl-coco": {
+        "display": "MaskDINO (Swin-L, COCO instance, mask 52.1 / box 58.3 AP)",
+        "source_repo": "https://github.com/IDEA-Research/MaskDINO",
+        "release_page": _MASKDINO_RELEASE_PAGE,
+        "license": "Apache-2.0",
+        "task": "segment",
+        "config_path": (
+            "configs/coco/instance-segmentation/swin/maskdino_R50_bs16_50ep_4s_dowsample1_2048.yaml"
+        ),
+        "checkpoint_url": (
+            f"{_MASKDINO_RELEASE_BASE}/"
+            "maskdino_swinl_50ep_300q_hid2048_3sd1_instance_mask52.1ap_box58.3ap.pth"
+        ),
+        "checkpoint_filename": (
+            "maskdino_swinl_50ep_300q_hid2048_3sd1_instance_mask52.1ap_box58.3ap.pth"
+        ),
+        "checkpoint_source": "official_upstream",
+        "install": "Detectron2 sidecar — see `visionservex maskdino create-env`.",
+    },
+    "maskdino-swinl-coco-maskenhanced": {
+        "display": "MaskDINO (Swin-L, COCO instance, mask-enhanced 52.3 / 59.0 AP)",
+        "source_repo": "https://github.com/IDEA-Research/MaskDINO",
+        "release_page": _MASKDINO_RELEASE_PAGE,
+        "license": "Apache-2.0",
+        "task": "segment",
+        "config_path": (
+            "configs/coco/instance-segmentation/swin/maskdino_R50_bs16_50ep_4s_dowsample1_2048.yaml"
+        ),
+        "checkpoint_url": (
+            f"{_MASKDINO_RELEASE_BASE}/"
+            "maskdino_swinl_50ep_300q_hid2048_3sd1_instance_maskenhanced_mask52.3ap_box59.0ap.pth"
+        ),
+        "checkpoint_filename": (
+            "maskdino_swinl_50ep_300q_hid2048_3sd1_instance_maskenhanced_mask52.3ap_box59.0ap.pth"
+        ),
+        "checkpoint_source": "official_upstream",
+        "install": "Detectron2 sidecar — see `visionservex maskdino create-env`.",
+    },
+    "maskdino-r50-coco-panoptic": {
+        "display": "MaskDINO (R50, COCO panoptic, PQ 53.0)",
+        "source_repo": "https://github.com/IDEA-Research/MaskDINO",
+        "release_page": _MASKDINO_RELEASE_PAGE,
+        "license": "Apache-2.0",
+        "task": "panoptic",
+        "config_path": "configs/coco/panoptic-segmentation/maskdino_R50_bs16_50ep_3s.yaml",
+        "checkpoint_url": (
+            f"{_MASKDINO_RELEASE_BASE}/maskdino_r50_50ep_300q_hid2048_3sd1_panoptic_pq53.0.pth"
+        ),
+        "checkpoint_filename": ("maskdino_r50_50ep_300q_hid2048_3sd1_panoptic_pq53.0.pth"),
+        "checkpoint_source": "official_upstream",
+        "install": "Detectron2 sidecar — see `visionservex maskdino create-env`.",
+    },
+    "maskdino-swinl-coco-panoptic": {
+        "display": "MaskDINO (Swin-L, COCO panoptic, PQ 58.3)",
+        "source_repo": "https://github.com/IDEA-Research/MaskDINO",
+        "release_page": _MASKDINO_RELEASE_PAGE,
+        "license": "Apache-2.0",
+        "task": "panoptic",
+        "config_path": ("configs/coco/panoptic-segmentation/swin/maskdino_R50_bs16_50ep_3s.yaml"),
+        "checkpoint_url": (
+            f"{_MASKDINO_RELEASE_BASE}/maskdino_swinl_50ep_300q_hid2048_3sd1_panoptic_58.3pq.pth"
+        ),
+        "checkpoint_filename": ("maskdino_swinl_50ep_300q_hid2048_3sd1_panoptic_58.3pq.pth"),
+        "checkpoint_source": "official_upstream",
+        "install": "Detectron2 sidecar — see `visionservex maskdino create-env`.",
     },
 }
 
@@ -205,10 +284,12 @@ def validate_cmd(
             {
                 "status": "error",
                 "structured_error_code": "CHECKPOINT_REQUIRED",
-                "message": meta.get("checkpoint_note", "MaskDINO checkpoint is required."),
+                "message": "MaskDINO checkpoint is required.",
+                "checkpoint_url": meta.get("checkpoint_url"),
+                "release_page": meta.get("release_page"),
                 "fix": (
-                    "Download from the official MaskDINO README and pass "
-                    "`--checkpoint /path/to/maskdino_*.pth`."
+                    "Download the checkpoint from `checkpoint_url` (or the release_page) "
+                    "and re-run with --checkpoint /path/to/the.pth."
                 ),
             }
         )
@@ -256,8 +337,13 @@ def smoke_test(
             "model_id": model_id,
             "status": "error",
             "structured_error_code": "CHECKPOINT_REQUIRED",
-            "message": info.get("checkpoint_note", "MaskDINO checkpoint required."),
-            "fix": "Pass --checkpoint /path/to/maskdino_*.pth",
+            "message": "MaskDINO checkpoint not provided.",
+            "checkpoint_url": info.get("checkpoint_url"),
+            "release_page": info.get("release_page"),
+            "fix": (
+                f"wget {info.get('checkpoint_url')} -O /tmp/{info.get('checkpoint_filename')} "
+                f"&& re-run smoke-test with --checkpoint /tmp/{info.get('checkpoint_filename')}."
+            ),
         }
         _emit(payload, json_)
         raise typer.Exit(3)

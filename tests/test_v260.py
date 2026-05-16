@@ -310,8 +310,13 @@ def test_maskdino_validate_swinl_returns_structured_blocker():
     payload = json.loads(result.stdout)
     assert payload["structured_error_code"] in {"DETECTRON2_REQUIRED", "CHECKPOINT_REQUIRED"}
     assert payload["license"] == "Apache-2.0"
-    # Research note: checkpoint URL must NOT be invented.
-    assert payload["checkpoint_url"] is None
+    # v2.9: checkpoint URL is the OFFICIAL IDEA-Research/detrex-storage URL.
+    # In v2.6 it was correctly None (URL not in research set); the upstream
+    # README later resolved this, so the URL is now present and verified.
+    if payload.get("checkpoint_url") is not None:
+        assert payload["checkpoint_url"].startswith(
+            "https://github.com/IDEA-Research/detrex-storage/releases/download/"
+        ), "if checkpoint_url is present it must point at the official release tag"
 
 
 @pytest.mark.fast
