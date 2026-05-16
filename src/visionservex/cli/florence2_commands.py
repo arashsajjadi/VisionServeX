@@ -186,4 +186,69 @@ def smoke_test(
         console.print(f"  {d.label}: {d.score:.3f}")
 
 
+@app.command("create-env")
+def create_env(
+    name: str = typer.Option("visionservex-florence", "--name", help="Conda environment name."),
+    python: str = typer.Option("3.11", "--python", help="Python version."),
+    execute: bool = typer.Option(
+        False, "--execute", help="Actually run the commands (requires conda in PATH)."
+    ),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Generate (or execute) the conda/pip recipe for a Florence-2 compatible environment.
+
+    By default this prints the commands without running them.
+    Pass --execute to attempt running them automatically.
+    """
+    import shutil
+    import subprocess
+
+    commands = [
+        f"conda create -n {name} python={python} -y",
+        f"conda run -n {name} pip install -U pip",
+        f'conda run -n {name} pip install "visionservex[florence2]"',
+        # Explicit transformers pin in case pyproject extra isn't resolved strictly:
+        f'conda run -n {name} pip install "transformers>=4.40,<5.0" accelerate',
+        f"conda run -n {name} python -c \"import transformers; print('transformers version:', transformers.__version__)\"",
+        f"conda run -n {name} visionservex florence2 doctor",
+    ]
+    payload = {
+        "env_name": name,
+        "python": python,
+        "commands": commands,
+        "smoke_test_command": f"conda run -n {name} visionservex florence2 smoke-test florence-2-base <image> --task caption",
+    }
+
+    if json_:
+        print(json.dumps(payload, indent=2))
+        return
+
+    console.print(f"[bold]Florence-2 environment setup: {name}[/bold]\n")
+    for cmd in commands:
+        console.print(f"  [cyan]{cmd}[/cyan]")
+    console.print(f"\n[dim]Smoke test: {payload['smoke_test_command']}[/dim]")
+
+    if not execute:
+        console.print("\n[dim](Pass --execute to run these commands automatically)[/dim]")
+        return
+
+    if not shutil.which("conda"):
+        console.print("[red]conda not found in PATH. Cannot --execute.[/red]")
+        raise typer.Exit(2)
+
+    for cmd in commands:
+        console.print(f"\n[bold]Running:[/bold] {cmd}")
+        try:
+            result = subprocess.run(cmd, shell=True, check=True)
+            console.print(f"[green]✓ {result.returncode}[/green]")
+        except subprocess.CalledProcessError as exc:
+            console.print(f"[red]Failed:[/red] {exc}")
+            raise typer.Exit(1) from exc
+
+    console.print(
+        f"\n[green]Environment '{name}' ready.[/green] "
+        f"Run: conda activate {name} && {payload['smoke_test_command']}"
+    )
+
+
 __all__ = ["app"]

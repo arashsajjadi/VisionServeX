@@ -2963,3 +2963,177 @@ models:
   notes: MedSAM fine-tuned on medical images. Loads via SamModel (standard HF SAM). Requires box or point prompt. Research and education only — no diagnostic claims.
   warnings:
   - VisionServeX medical models are for RESEARCH AND EDUCATION ONLY. No diagnostic or regulatory claims.
+
+# ============================================================
+# SAM2.1 — confirmed HF model IDs (apache-2.0), same sam2_hf engine
+# ============================================================
+
+- id: sam2.1-hiera-tiny
+  display_name: SAM 2.1 (Hiera Tiny) — improved video+image segmentation
+  task: foundation_segment
+  family: sam2.1
+  backend: huggingface_sam2
+  engine: sam2_hf
+  license: Apache-2.0
+  upstream_url: https://github.com/facebookresearch/sam2
+  download_type: huggingface
+  hf_repo_id: facebook/sam2.1-hiera-tiny
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_notes: SAM 2.1 uses the same API as SAM 2; sam2_hf engine handles both.
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  - mps
+  recommended_device: cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  - bf16
+  minimum_vram_gb: 1.5
+  recommended_vram_gb: 4.0
+  minimum_ram_gb: 4.0
+  difficulty: medium
+  beginner_recommendation: true
+  status: beta
+  model_category: production_recommended
+  notes: "SAM 2.1 improves on SAM 2 with better object permanence in video; HF ID confirmed: facebook/sam2.1-hiera-tiny"
+
+- id: sam2.1-hiera-small
+  display_name: SAM 2.1 (Hiera Small) — improved video+image segmentation
+  task: foundation_segment
+  family: sam2.1
+  backend: huggingface_sam2
+  engine: sam2_hf
+  license: Apache-2.0
+  upstream_url: https://github.com/facebookresearch/sam2
+  download_type: huggingface
+  hf_repo_id: facebook/sam2.1-hiera-small
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  - mps
+  supported_precisions:
+  - fp32
+  - fp16
+  - bf16
+  minimum_vram_gb: 2.0
+  recommended_vram_gb: 6.0
+  difficulty: medium
+  status: beta
+  model_category: production_recommended
+
+- id: sam2.1-hiera-base-plus
+  display_name: SAM 2.1 (Hiera Base+) — improved video+image segmentation
+  task: foundation_segment
+  family: sam2.1
+  backend: huggingface_sam2
+  engine: sam2_hf
+  license: Apache-2.0
+  upstream_url: https://github.com/facebookresearch/sam2
+  download_type: huggingface
+  hf_repo_id: facebook/sam2.1-hiera-base-plus
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cuda
+  - mps
+  - cpu
+  supported_precisions:
+  - fp32
+  - fp16
+  - bf16
+  minimum_vram_gb: 4.0
+  recommended_vram_gb: 8.0
+  difficulty: medium
+  status: beta
+  model_category: accuracy_grade
+
+- id: sam2.1-hiera-large
+  display_name: SAM 2.1 (Hiera Large) — improved video+image segmentation
+  task: foundation_segment
+  family: sam2.1
+  backend: huggingface_sam2
+  engine: sam2_hf
+  license: Apache-2.0
+  upstream_url: https://github.com/facebookresearch/sam2
+  download_type: huggingface
+  hf_repo_id: facebook/sam2.1-hiera-large
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  - bf16
+  minimum_vram_gb: 8.0
+  recommended_vram_gb: 12.0
+  difficulty: hard
+  status: beta
+  model_category: accuracy_grade
+  notes: Highest quality SAM2.1 variant. GPU required.
+
+# ============================================================
+# DINOv2-base / DINOv2-large additional registry entries
+# ============================================================
+
+- id: dinov2-base
+  display_name: DINOv2 (Base) — 768-d image embeddings
+  task: embed
+  family: dinov2
+  backend: huggingface_dinov2
+  engine: dinov2
+  license: Apache-2.0
+  upstream_url: https://github.com/facebookresearch/dinov2
+  download_type: huggingface
+  hf_repo_id: facebook/dinov2-base
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_vram_gb: 1.0
+  difficulty: easy
+  status: beta
+  model_category: feature_backbone
+
+- id: dinov2-large
+  display_name: DINOv2 (Large) — 1024-d image embeddings
+  task: embed
+  family: dinov2
+  backend: huggingface_dinov2
+  engine: dinov2
+  license: Apache-2.0
+  upstream_url: https://github.com/facebookresearch/dinov2
+  download_type: huggingface
+  hf_repo_id: facebook/dinov2-large
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_vram_gb: 2.0
+  difficulty: medium
+  status: beta
+  model_category: feature_backbone

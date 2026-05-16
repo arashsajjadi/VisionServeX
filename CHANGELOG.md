@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-05-16
+
+### benchmark-classification, benchmark-anomaly, benchmark-surveillance-search implemented; Florence-2 create-env; SAM2.1 resolved; lightweight SAM license decisions; YAML and lint fixes
+
+This release delivers the three benchmark commands that were `BENCHMARK_NOT_IMPLEMENTED` in v2.1.x, adds the Florence-2 isolated-env workflow, and resolves all four SAM2.1 variants plus five lightweight SAM alternatives.
+
+#### New CLI commands (functional)
+
+| Command | Status | Notes |
+|---------|--------|-------|
+| `visionservex benchmark-classification --dataset folder:/path --models m1,m2` | Functional | top-1/top-5/per-class accuracy, latency p50/p95, throughput |
+| `visionservex benchmark-anomaly --dataset mvtec:/path --model patchcore` | Functional | AUROC when labels exist; `ANOMALIB_REQUIRED` when [anomaly] not installed |
+| `visionservex benchmark-surveillance-search --index /path --queries q.json` | Functional | cosine-sim retrieval, MAP@k when labeled |
+| `visionservex florence2 create-env --name vsx-florence --python 3.11` | Functional | generates/runs conda+pip recipe for transformers<5.0 env |
+
+#### SAM2.1 — resolved (4 models)
+
+All four SAM 2.1 Hiera variants (`tiny`, `small`, `base-plus`, `large`) added to both the source manifest and the runtime registry with confirmed HF repos (`facebook/sam2.1-hiera-*`, Apache-2.0).
+
+#### Lightweight SAM — license decisions (5 models)
+
+| Model | License | Decision |
+|-------|---------|----------|
+| `fastsam-s`, `fastsam-x` | AGPL-3.0 | `do_not_add` — AGPL excluded from core |
+| `mobilesam` | Apache-2.0 | `expert_sidecar` — GitHub-only checkpoint; no HF Hub |
+| `efficientsam` | Apache-2.0 | `expert_sidecar` — GitHub install only |
+| `hq-sam` | Apache-2.0 | `expert_sidecar` — no standard SAM API compat confirmed |
+| `edgesam` | Apache-2.0 | `expert_sidecar` — targets edge/mobile, not server |
+
+#### Bug fixes
+
+- Removed duplicate `sam2.1-hiera-large` manifest key (old `audit_only` entry shadowed by new `add_now` entry).
+- Fixed YAML syntax error in `models.yaml` (unquoted colon in notes field at SAM2.1-tiny entry).
+- Removed unused `prefix` variable (F841) in `benchmark_anomaly_cmd.py`.
+- Removed unused `img` variables (F841) in anomaly engine prediction loops.
+- Fixed AP@k computation in surveillance benchmark: deduplicates retrieved crops by track_id before computing precision, preventing MAP > 1.0 on indexes with multiple crops per track.
+- Fixed Typer positional Argument to Option for `--dataset` and `--index` in benchmark commands (Typer 0.20.x compatibility).
+- Suppressed progress console messages in `--json` mode (benchmark-classification).
+
+#### Tests added
+
+- `tests/test_benchmark_classification.py` — 11 tests: dataset loading, metrics, CLI mocked model, invalid schema
+- `tests/test_benchmark_anomaly.py` — 8 tests: AUROC computation, structured errors, dataclass
+- `tests/test_benchmark_surveillance.py` — 7 tests: self-retrieval, labeled MAP, empty index, structured errors
+- `tests/test_v220.py` — 15 tests: CLI registration, florence2 create-env, SAM2.1 manifest/registry consistency, lightweight SAM decisions
+
+#### Validation
+
+- `ruff check .`: 0 errors
+- `ruff format --check .`: 0 files to reformat
+- Quick test: 684 passed, 37 skipped, 32s
+- Full release test: 684 passed, 37 skipped
+
 ## [2.1.1] - 2026-05-16
 
 ### Patch — fast-CI compat for test_v210 transformers import

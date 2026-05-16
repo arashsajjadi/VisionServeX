@@ -26,8 +26,11 @@ from visionservex.cli import (
     aerial_commands,
     agriculture_commands,
     anomaly_commands,
+    benchmark_anomaly_cmd,
+    benchmark_classification,
     benchmark_commands,
     benchmark_open_vocab,
+    benchmark_surveillance,
     capabilities_commands,
     colab_commands,
     dev_commands,
@@ -126,6 +129,13 @@ app.add_typer(benchmark_open_vocab.app, name="benchmark-open-vocab", invoke_with
 app.add_typer(agriculture_commands.app, name="agriculture")
 app.add_typer(aerial_commands.app, name="aerial")
 app.add_typer(florence2_commands.app, name="florence2")
+app.add_typer(
+    benchmark_classification.app, name="benchmark-classification", invoke_without_command=True
+)
+app.add_typer(benchmark_anomaly_cmd.app, name="benchmark-anomaly", invoke_without_command=True)
+app.add_typer(
+    benchmark_surveillance.app, name="benchmark-surveillance-search", invoke_without_command=True
+)
 
 # Top-level embedding aliases for Ultralytics-style ergonomics
 embedding_alias_app = embedding_commands.app

@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-2.1.1-informational.svg" alt="v2.1.1">
+  <img src="https://img.shields.io/badge/version-2.2.0-informational.svg" alt="v2.2.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -196,6 +196,7 @@ Every model in the registry now carries an explicit `model_category` label.
 | RF-DETR-Seg | `rfdetr-seg-nano/small/medium` | demo_fast / production_recommended / accuracy_grade | `[rfdetr]` |
 | SAM v1 | `sam-vit-base/large/huge` | production_recommended / accuracy_grade | `[hf]` |
 | SAM 2 | `sam2-hiera-tiny/small/base-plus/large` | production_recommended / accuracy_grade | `[hf]` |
+| SAM 2.1 | `sam2.1-hiera-tiny/small/base-plus/large` | accuracy_grade | `[hf]` |
 | Grounded SAM | `grounded-sam`, `grounded-sam2` | production_recommended | `[hf]` |
 | OneFormer | `oneformer-swin-large/dinat-large/convnext-large` | accuracy_grade | `[hf]` |
 
@@ -205,6 +206,8 @@ Every model in the registry now carries an explicit `model_category` label.
 |--------|--------|----------|---------|
 | SwinV2 | `swinv2-tiny/small` | production_recommended | `[hf]` |
 | SwinV2 | `swinv2-base/large` | accuracy_grade | `[hf]` |
+| ConvNeXtV2 | `convnextv2-tiny/base/large` | production_recommended | `[hf]` |
+| MaxViT | `maxvit-tiny-tf-224` | production_recommended | `[hf]` |
 | InternImage | `internimage-t/s/b/l/h` | expert_sidecar | OpenMMLab |
 
 ### Open-Vocabulary Detection
@@ -251,7 +254,30 @@ visionservex benchmark benchmark-competitiveness \
 
 **Note:** Accuracy-grade models are separate from demo models. Do not judge VisionServeX by `dfine-n` or `rfdetr-nano` — use `dfine-s-o365-coco` or `rfdetr-small` for AP comparison.
 
-Detection, segmentation, classification, pose, OBB, and open-vocabulary tasks need different metrics. Non-detection benchmark tools return `BENCHMARK_NOT_IMPLEMENTED` with honest roadmap information (roadmap: v1.4).
+Detection, segmentation, classification, pose, OBB, and open-vocabulary tasks need different metrics.
+
+**Task-specific benchmark commands:**
+
+```bash
+# Classification benchmark (top-k accuracy, per-class, latency)
+visionservex benchmark-classification \
+  --dataset folder:/path/to/dataset \
+  --models convnextv2-tiny,swinv2-base,maxvit-tiny-tf-224 \
+  --top-k 5 --max-images 100 --out /tmp/cls_bench.json
+
+# Anomaly detection benchmark (PatchCore; requires [anomaly])
+visionservex benchmark-anomaly \
+  --dataset mvtec:/path/to/mvtec_like \
+  --model patchcore --max-images 50 --out /tmp/anom_bench.json
+
+# Surveillance-search retrieval benchmark (MAP@k, cosine similarity)
+visionservex benchmark-surveillance-search \
+  --index /path/to/index \
+  --queries /path/to/queries.json \
+  --top-k 5 --out /tmp/surv_bench.json
+```
+
+If `anomalib` is not installed, `benchmark-anomaly` returns `ANOMALIB_REQUIRED` with the exact install command rather than crashing.
 
 ---
 
@@ -340,6 +366,7 @@ visionservex model pull clip-vit-base-patch32
 visionservex embed clip-vit-base-patch32 image.jpg --out /tmp/clip.npy
 
 # Florence-2 (requires isolated env with transformers < 5.0)
+visionservex florence2 create-env --name vsx-florence --python 3.11  # generate conda recipe
 visionservex florence2 doctor        # check compatibility
 visionservex florence2 smoke-test florence-2-base image.jpg --task caption
 ```
@@ -679,6 +706,9 @@ OpenMMLab (RTMPose, RTMDet-R, Co-DINO, InternImage): Docker sidecar or `pip inst
 - **D-FINE COCO-only variants** (`dfine-s-coco` etc.): Point to HF repos that may not exist yet. Use `dfine-s-o365-coco` (Objects365+COCO) for guaranteed availability.
 - **DEIM / RT-DETRv4**: Registered as `experimental_sota` but not wired. Blockers documented per-model in the registry.
 - **AP50/mAP benchmark**: The `benchmark-competitiveness` tool reports latency and detection health only. Full AP evaluation requires ground-truth COCO annotations not bundled with VisionServeX.
+- **benchmark-anomaly**: Fully functional for structured error reporting and MVTec-like dataset loading. PatchCore training requires `pip install 'visionservex[anomaly]'`; the API changes between anomalib versions and may require version-specific handling.
+- **Florence-2**: Real smoke in the current environment is blocked by transformers≥5.0. Use `visionservex florence2 create-env` to generate the exact conda/pip recipe for an isolated transformers<5.0 environment.
+- **SAM2.1**: Runtime registry wired (`facebook/sam2.1-hiera-*`); inference requires `pip install 'visionservex[hf]'` and a GPU. Lighter alternatives (MobileSAM, EfficientSAM, HQ-SAM, EdgeSAM) are available as expert sidecars with Apache-2.0 licenses but require GitHub install. FastSAM is excluded (AGPL-3.0).
 - **OpenMMLab** (RTMPose, RTMDet-R/R2, Co-DINO, InternImage): Requires the OpenMMLab toolchain and manually-obtained checkpoints. Returns `CHECKPOINT_REQUIRED` structured error — no fake output.
 - **TensorRT**: ONNX export works for SwinV2. TensorRT engine build requires `trtexec`.
 - **Apple MPS**: Implemented but not maintainer-verified.
