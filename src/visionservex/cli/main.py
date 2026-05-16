@@ -24,12 +24,15 @@ from rich.table import Table
 from visionservex import __version__
 from visionservex.cli import (
     benchmark_commands,
+    capabilities_commands,
     colab_commands,
     downloads_commands,
     gateway_commands,
     gpu_commands,
+    model_card_commands,
     openmmlab_commands,
     privacy_commands,
+    replacement_map_commands,
     security_commands,
     suite_commands,
     syntax_audit,
@@ -86,6 +89,9 @@ app.add_typer(security_commands.app, name="security")
 app.add_typer(privacy_commands.app, name="privacy")
 app.add_typer(validation_commands.app, name="validation")
 app.add_typer(colab_commands.app, name="colab")
+app.add_typer(capabilities_commands.app, name="capabilities")
+app.add_typer(model_card_commands.app, name="model-card")
+app.add_typer(replacement_map_commands.app, name="replacement-map")
 
 console = Console()
 
@@ -1513,10 +1519,18 @@ def debug_output(
         0.01, "--threshold", help="Low threshold to see all detections."
     ),
     device: str | None = typer.Option(None, "--device"),
+    save_json: Path | None = typer.Option(
+        None, "--save-json", help="Save diagnostics JSON to this path."
+    ),
+    visualize: Path | None = typer.Option(
+        None, "--visualize", help="Save annotated image with detection boxes."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Diagnostic tool: print raw output keys, normalized detections, score/label histograms,
-    invalid boxes, and preprocessing config. Run this before declaring a checkpoint weak."""
+    invalid boxes, preprocessing config, and optional visualization.
+    Run this before declaring a checkpoint weak.
+    """
 
     from visionservex.core.results import DetectionResult
 
@@ -1675,6 +1689,33 @@ def debug_output(
             )
 
     console.print(f"\n  [dim]{diag.get('preprocessing_notes', '')}[/dim]")
+
+    # Save JSON if requested
+    if save_json:
+        import json as _json
+
+        save_json.parent.mkdir(parents=True, exist_ok=True)
+        save_json.write_text(_json.dumps(diag, indent=2, default=str), encoding="utf-8")
+        console.print(f"\n  [green]Diagnostics JSON saved to {save_json}[/green]")
+
+    # Visualize if requested
+    if visualize and isinstance(result, DetectionResult):
+        try:
+            from PIL import ImageDraw as _Draw
+
+            vis_img = img.copy()
+            draw = _Draw.Draw(vis_img)
+            for det in result.detections:
+                b = det.box
+                draw.rectangle([b.x1, b.y1, b.x2, b.y2], outline=(255, 0, 0), width=2)
+                draw.text(
+                    (b.x1, max(0, b.y1 - 12)), f"{det.label} {det.score:.2f}", fill=(255, 0, 0)
+                )
+            visualize.parent.mkdir(parents=True, exist_ok=True)
+            vis_img.save(str(visualize))
+            console.print(f"  [green]Visualization saved to {visualize}[/green]")
+        except Exception as vis_exc:
+            console.print(f"  [yellow]Visualization failed: {vis_exc}[/yellow]")
 
 
 @app.command("downloads-audit", help="Audit download metadata for all registry models.")

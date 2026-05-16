@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-1.2.0-informational.svg" alt="v1.2.0">
+  <img src="https://img.shields.io/badge/version-1.3.0-informational.svg" alt="v1.3.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -24,8 +24,8 @@
 
 VisionServeX is an open-source, permissive-license-aware Python framework for running modern computer vision models locally and exposing them through a stable HTTP API. It works as a **local model gateway**: start it once, call any supported model through one clean API.
 
-**Accuracy-aware design (v1.2.0):**  
-Every model carries an explicit accuracy taxonomy label: `demo_fast`, `production_recommended`, `accuracy_grade`, `experimental_sota`, `expert_sidecar`, `external_api`, or `unavailable_with_reason`. The recommender, benchmark tools, and registry are aligned to these labels so you always know what tier you are running.
+**Accuracy-aware and scientifically usable:**  
+Every model carries an explicit accuracy taxonomy label: `demo_fast`, `production_recommended`, `accuracy_grade`, `experimental_sota`, `expert_sidecar`, `external_api`, or `unavailable_with_reason`. The recommender, benchmark tools, and registry are aligned to these labels so you always know what tier you are running. Real AP50/mAP50:95 is computed when you provide an annotated dataset.
 
 **Honesty policy:**  
 VisionServeX does not claim to beat Ultralytics globally. The `benchmark-competitiveness` tool is designed to reveal the honest truth. If YOLO wins, it will say so.
@@ -157,24 +157,72 @@ Every model in the registry now carries an explicit `model_category` label.
 ## Competitiveness Benchmark
 
 ```bash
-# Compare models head-to-head (latency + detection health)
+# Synthetic mode (latency + detection health, no ground truth needed)
 visionservex benchmark benchmark-competitiveness \
   --models dfine-s-o365-coco,rfdetr-small \
-  --max-images 20 \
-  --device auto
+  --max-images 20 --device auto
 
-# Add YOLO baseline (requires ultralytics)
+# Real AP mode (AP50/mAP50:95 with YOLO-format annotated dataset)
 visionservex benchmark benchmark-competitiveness \
   --models dfine-s-o365-coco,rfdetr-small,ultralytics:yolo11n \
-  --max-images 50
+  --dataset yolo:/path/to/coco128 \
+  --max-images 100 \
+  --out reports/ap_benchmark
 
-# Export results as JSON
+# COCO JSON format
 visionservex benchmark benchmark-competitiveness \
   --models dfine-s-o365-coco,rfdetr-small \
-  --max-images 20 --json
+  --dataset coco-json:/data/coco/images:/data/coco/annotations/instances_val2017.json \
+  --max-images 500
 ```
 
-**Note:** This tool reports latency and output health diagnostics. AP50/mAP computation requires ground-truth COCO annotations (not included). The tool is designed to be honest — if YOLO wins on latency, it will say so.
+**Real AP/mAP** is computed with COCO-style 101-point interpolated PR curves when `--dataset` is provided. Results are exported as JSON + CSV. The tool is honest — if YOLO wins, it will say so.
+
+**Note:** Accuracy-grade models are separate from demo models. Do not judge VisionServeX by `dfine-n` or `rfdetr-nano` — use `dfine-s-o365-coco` or `rfdetr-small` for AP comparison.
+
+Detection, segmentation, classification, pose, OBB, and open-vocabulary tasks need different metrics. Non-detection benchmark tools return `BENCHMARK_NOT_IMPLEMENTED` with honest roadmap information (roadmap: v1.4).
+
+---
+
+## Capabilities Report
+
+```bash
+# What can VisionServeX do on this machine right now?
+visionservex capabilities report
+visionservex capabilities report --format markdown --out docs/capabilities.md
+visionservex capabilities report --json
+```
+
+Covers: devices, installed extras, model counts by task/category, runnable models, unavailable blockers, goal-based recommendations, security status, and known limitations.
+
+---
+
+## Model Cards
+
+```bash
+# Structured per-model documentation
+visionservex model-card show dfine-s-o365-coco
+visionservex model-card show dfine-s-o365-coco --format markdown
+visionservex model-card list --task detect
+visionservex model-card export --out docs/model_cards.md
+```
+
+Every card includes: recommended_for, not_recommended_for, competes_with, hardware requirements, official benchmark note, and VisionServeX benchmark status.
+
+---
+
+## Replacement Map
+
+```bash
+# Which VisionServeX models replace each Ultralytics/YOLO task?
+visionservex replacement-map map --task detect
+visionservex replacement-map map --task segment
+visionservex replacement-map map --task classify
+visionservex replacement-map map --task pose
+visionservex replacement-map map --format markdown
+```
+
+Honest and task-specific. Does not claim "better" unless AP evidence exists.
 
 ---
 
@@ -320,6 +368,10 @@ visionservex validation run release   # run full CI test suite
 | [Security](docs/security.md) | Threat model, modes, configuration |
 | [Privacy](docs/privacy.md) | No E2E claim, retention policy, encryption |
 | [Model zoo](docs/model_zoo.md) | All 87 models with current status and taxonomy |
+| [Model cards](docs/model_cards.md) | Structured per-model cards with honest benchmark notes |
+| [Replacement map](docs/replacement_map.md) | Ultralytics/YOLO → VisionServeX replacement guide |
+| [Benchmark competitiveness](docs/benchmark_competitiveness.md) | AP/mAP evaluation guide |
+| [Evaluation metrics](docs/evaluation_metrics.md) | AP50, mAP50:95, and metric definitions |
 | [Model downloads](docs/model_downloads.md) | Download system, auto-pull |
 | [GPU safety](docs/gpu_safety.md) | VRAM guard, cleanup, emergency recovery |
 | [Parallel safety](docs/parallel_safety.md) | Model concurrency policies, benchmarks |

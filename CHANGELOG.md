@@ -7,6 +7,86 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-05-15
+
+### Evaluation and scientific usability upgrade
+
+VisionServeX is upgraded from an accuracy-tagged model gateway to a
+**scientifically usable evaluation platform**. Real AP/mAP computation,
+structured model cards, an Ultralytics replacement map, a comprehensive
+capabilities report, and honest task-specific benchmark stubs are added.
+
+#### Capabilities report (Phase 1)
+- Added `visionservex capabilities report` command (human/json/markdown formats).
+  Reports: package version, Python, OS, devices, installed extras, model counts
+  by task/category, runnable models, unavailable models with reasons, goal-based
+  recommendations, security status, and known limitations.
+- `--out <file>` writes the report to disk.
+
+#### Model card system (Phase 2)
+- Added `visionservex model-card show MODEL_ID` (human/json/markdown).
+- Added `visionservex model-card list` and `visionservex model-card export`.
+- Explicit supplementary card data for 24 model families including:
+  dfine-n/s/m/l/x-o365-coco, rfdetr-nano/small/medium/large,
+  rfdetr-seg-nano/small/medium, sam-vit-base, sam2-hiera-tiny,
+  grounding-dino-tiny/swin-b, grounded-sam/sam2,
+  swinv2-tiny/base, oneformer-swin-large, rtmpose-s, internimage-t.
+- Every card includes: recommended_for, not_recommended_for,
+  replaces_or_competes_with, hardware requirements, official_benchmark_note,
+  visionservex_benchmark_status.
+- Demo_fast model cards explicitly warn against using them for AP comparison.
+- SAM/SAM2 cards explicitly warn against mixing with detection mAP.
+
+#### Replacement map (Phase 3)
+- Added `visionservex replacement-map map` (human/json/markdown, `--task` filter).
+- Covers: detect, segment, pose, obb, classify, open-vocab, sam → ultralytics.
+- Every replacement entry has ap_claim=false; honest_caveats included.
+- Pose/OBB explicitly state no verified winner over YOLO; expert_sidecar required.
+- Does not claim 'better' without evidence.
+
+#### Real AP/mAP evaluation (Phase 4)
+- Added `src/visionservex/runtime/evaluation.py` with COCO-style 101-point
+  interpolated AP computation engine.
+- Supports: YOLO-format datasets (images/ + labels/ + data.yaml),
+  COCO JSON annotation format, class-aware and class-agnostic matching.
+- Metrics: AP50, mAP50:95 (IoU 0.50→0.95 sweep), precision, recall, F1
+  (per-class and macro-averaged), latency P50/P95, no-detection count.
+- `benchmark-competitiveness --dataset yolo:<path>` activates real AP mode.
+- `benchmark-competitiveness --dataset coco-json:<img_dir>:<ann_file>` for COCO JSON.
+- Ultralytics baseline (ultralytics:yolo11n) also evaluated with full AP when dataset provided.
+- Results saved as JSON + CSV summary when `--out` is specified.
+- Honest conclusion: reports which model has best AP50/mAP50:95, warns on small datasets.
+
+#### Debug-output improvements (Phase 5)
+- Added `--save-json <file>`: save full diagnostics to JSON.
+- Added `--visualize <file>`: save annotated image with detection boxes drawn.
+
+#### Non-detection benchmark stubs (Phase 8)
+- Added honest BENCHMARK_NOT_IMPLEMENTED stubs (exit code 2, structured JSON):
+  - `visionservex benchmark benchmark-segmentation` (roadmap: v1.4)
+  - `visionservex benchmark benchmark-classification` (roadmap: v1.4)
+  - `visionservex benchmark benchmark-open-vocab` (roadmap: v1.4)
+  - `visionservex benchmark benchmark-pose` (roadmap: v1.4)
+  - `visionservex benchmark benchmark-obb` (roadmap: v1.4)
+  Each stub reports task, expected annotation format, recommended dataset,
+  correct metrics, expected models, and roadmap note.
+  Detection AP is the only task currently implemented.
+
+### Decisions
+- **Segmentation mask AP**: not implemented. Requires polygon/RLE IoU — roadmap v1.4.
+- **Classification top-k**: not implemented — roadmap v1.4.
+- **Open-vocab zero-shot AP**: not implemented — roadmap v1.4.
+- **OKS/rotated IoU AP**: not implemented — roadmap v1.4.
+- **COCO128 auto-download**: not bundled. Users provide dataset path via --dataset.
+- **InternImage/Co-DINO/MaskDINO**: still stubs — no change from v1.2.0.
+
+### Known limitations
+- `benchmark-competitiveness` AP results depend on class label matching between
+  model outputs (strings) and YOLO/COCO GT labels. Mismatches produce 0 AP.
+- AP estimates from <100 images have high variance; conclusions warn about this.
+- mAP50:95 computation (10 IoU thresholds) is slower than AP50 alone.
+- The Ultralytics AP baseline in `benchmark-competitiveness` requires `pip install ultralytics`.
+
 ## [1.2.0] - 2026-05-15
 
 ### Accuracy-aware model gateway upgrade

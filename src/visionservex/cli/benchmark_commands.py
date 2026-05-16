@@ -339,28 +339,52 @@ def benchmark_server(
 
 @app.command(
     "benchmark-competitiveness",
-    help="Compare detection models head-to-head. Reports latency, detection counts, and schema validity.",
+    help=(
+        "Compare detection models head-to-head. "
+        "Reports latency + detection health (synthetic mode) OR real AP50/mAP50:95 (with --dataset)."
+    ),
 )
 def benchmark_competitiveness(
     models: str = typer.Option(
         "dfine-s-o365-coco,rfdetr-small",
         "--models",
-        help="Comma-separated model IDs (must be detect task). Add 'ultralytics:yolo11n' for YOLO baseline.",
+        help=(
+            "Comma-separated model IDs (detect task). "
+            "Prefix with 'ultralytics:yolo11n' for YOLO baseline."
+        ),
+    ),
+    dataset: str | None = typer.Option(
+        None,
+        "--dataset",
+        help=(
+            "Dataset for real AP evaluation. Options: "
+            "'synthetic' (default, latency-only), "
+            "'yolo:<path>' (YOLO-format directory), "
+            "'coco-json:<images_dir>:<ann_file>' (COCO JSON). "
+            "When omitted: synthetic images, latency + detection health only."
+        ),
     ),
     max_images: int = typer.Option(
-        20, "--max-images", min=1, max=500, help="Number of test images."
+        20, "--max-images", min=1, max=5000, help="Number of images to evaluate."
     ),
-    threshold: float = typer.Option(0.3, "--threshold", min=0.01, max=1.0),
+    threshold: float = typer.Option(
+        0.3,
+        "--threshold",
+        min=0.01,
+        max=1.0,
+        help="Confidence threshold for synthetic mode. AP mode uses threshold=0.01 for full PR curve.",
+    ),
     device: str = typer.Option("auto", "--device"),
     out: Path | None = typer.Option(None, "--out", help="Write JSON results here."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
-    """Competitiveness benchmark: latency, detection statistics, schema validation.
+    """Competitiveness benchmark: honest head-to-head comparison.
 
-    For AP50/mAP computation, use `visionservex debug-output` with ground-truth annotations.
-    This command focuses on latency and output health diagnostics across models.
+    Synthetic mode (default, no --dataset): latency + detection health on synthetic images.
+    Dataset mode (--dataset yolo:<path>): real AP50/mAP50:95 from annotated ground truth.
 
-    Honest by design: if YOLO beats VisionServeX models, this command will show it.
+    AP is computed with COCO-style 101-point interpolated PR curve.
+    Honest by design: if YOLO beats VisionServeX models, this command will say so.
     """
 
     from visionservex.registry import default_registry
@@ -390,6 +414,12 @@ def benchmark_competitiveness(
         if not json_:
             console.print("[red]No valid detection models to benchmark.[/red]")
         raise typer.Exit(1)
+
+    # ---- Dataset mode: real AP/mAP ----
+    dataset_str = (dataset or "synthetic").strip()
+    if dataset_str not in ("synthetic", "") and not dataset_str.startswith("synthetic"):
+        _run_ap_benchmark(validated, dataset_str, max_images, device, out, json_)
+        return
 
     # Generate synthetic test images
     test_images = _make_test_images(max_images)
@@ -695,6 +725,502 @@ def _generate_conclusion(results: list[dict]) -> str:
         "health only, not accuracy. Run on real COCO images for AP50/mAP comparison."
     )
     return " ".join(parts)
+
+
+# ---------------------------------------------------------------------------
+# Real AP/mAP benchmark (dataset mode)
+# ---------------------------------------------------------------------------
+
+
+def _run_ap_benchmark(
+    model_ids: list[str],
+    dataset_str: str,
+    max_images: int,
+    device: str,
+    out: Path | None,
+    json_: bool,
+) -> None:
+    """Run real AP/mAP evaluation with ground-truth annotations."""
+    from visionservex.runtime.evaluation import (
+        generate_honest_conclusion,
+        load_coco_json,
+        load_yolo_format,
+        run_model_on_dataset,
+    )
+
+    # Parse dataset string
+    samples = None
+    dataset_name = "unknown"
+
+    if dataset_str.startswith("yolo:"):
+        yolo_path = Path(dataset_str[5:])
+        if not yolo_path.exists():
+            if not json_:
+                console.print(f"[red]YOLO dataset path not found: {yolo_path}[/red]")
+                console.print(
+                    "[dim]Tip: download COCO128 with: "
+                    'python -c "from ultralytics.utils import DATASETS_DIR; '
+                    'import ultralytics; ultralytics.checks()"[/dim]'
+                )
+            raise typer.Exit(1)
+        if not json_:
+            console.print(f"Loading YOLO dataset from {yolo_path} (max {max_images} images)...")
+        samples, _ = load_yolo_format(yolo_path, max_images=max_images)
+        dataset_name = f"yolo:{yolo_path.name}"
+
+    elif dataset_str.startswith("coco-json:"):
+        parts = dataset_str[10:].split(":", 1)
+        if len(parts) != 2:
+            if not json_:
+                console.print("[red]coco-json format: coco-json:<images_dir>:<ann_file>[/red]")
+            raise typer.Exit(1)
+        images_dir = Path(parts[0])
+        ann_file = Path(parts[1])
+        if not images_dir.exists() or not ann_file.exists():
+            if not json_:
+                console.print(
+                    f"[red]images_dir={images_dir} or ann_file={ann_file} not found.[/red]"
+                )
+            raise typer.Exit(1)
+        if not json_:
+            console.print(f"Loading COCO JSON dataset: {ann_file.name}...")
+        samples, _ = load_coco_json(images_dir, ann_file, max_images=max_images)
+        dataset_name = f"coco-json:{ann_file.stem}"
+
+    elif dataset_str == "coco128":
+        if not json_:
+            console.print(
+                "[yellow]coco128 shortcut: please provide the path explicitly.[/yellow]\n"
+                "Example: --dataset yolo:/path/to/coco128\n"
+                "Get COCO128: wget https://github.com/ultralytics/assets/releases/download/v0.0.0/coco128.zip"
+            )
+        raise typer.Exit(1)
+
+    else:
+        # Treat as YOLO path directly
+        yolo_path = Path(dataset_str)
+        if not yolo_path.exists():
+            if not json_:
+                console.print(
+                    f"[red]Dataset path not found: {yolo_path}[/red]\n"
+                    "Specify dataset with: --dataset yolo:<path> or --dataset coco-json:<img_dir>:<ann_file>"
+                )
+            raise typer.Exit(1)
+        samples, _ = load_yolo_format(yolo_path, max_images=max_images)
+        dataset_name = yolo_path.name
+
+    if not samples:
+        if not json_:
+            console.print("[red]No images found in dataset.[/red]")
+        raise typer.Exit(1)
+
+    if not json_:
+        console.print(
+            f"[bold]AP benchmark:[/bold] {len(samples)} images | "
+            f"{len(model_ids)} models | device={device}"
+        )
+        console.print("[dim]Using threshold=0.01 for full PR curve (AP computation).[/dim]\n")
+
+    all_results = []
+    for mid in model_ids:
+        if mid.startswith("ultralytics:"):
+            r = _run_ultralytics_ap(mid, samples, device=device)
+        else:
+            if not json_:
+                console.print(f"  evaluating [cyan]{mid}[/cyan] ...", end=" ")
+            r = run_model_on_dataset(mid, samples, device=device, dataset_name=dataset_name)
+            if not json_:
+                st = r.status
+                if st == "ok":
+                    console.print(
+                        f"[green]ok[/green] AP50={r.ap50:.3f} mAP50:95={r.map50_95:.3f} "
+                        f"P50={r.latency_p50_ms:.1f}ms"
+                    )
+                else:
+                    console.print(f"[red]{st}[/red] {r.error[:60]}")
+        all_results.append(r)
+
+    ok_results = [r for r in all_results if r.status == "ok"]
+
+    conclusion = generate_honest_conclusion(ok_results)
+
+    payload = {
+        "benchmark_type": "competitiveness_with_ap_evaluation",
+        "dataset": dataset_name,
+        "n_images": len(samples),
+        "device": device,
+        "ap_method": "COCO-style 101-point interpolated PR curve",
+        "models": [r.to_dict() if hasattr(r, "to_dict") else r for r in all_results],
+        "conclusion": conclusion,
+    }
+
+    if out:
+        out_json = out.with_suffix(".json") if out.suffix != ".json" else out
+        out_json.parent.mkdir(parents=True, exist_ok=True)
+        import json as _json
+
+        out_json.write_text(_json.dumps(payload, indent=2, default=str), encoding="utf-8")
+        if not json_:
+            console.print(f"\nResults written to {out_json}")
+
+        # Also write summary CSV
+        try:
+            import csv
+
+            csv_path = out.with_suffix(".csv")
+            with open(csv_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow(
+                    [
+                        "model_id",
+                        "ap50",
+                        "map50_95",
+                        "precision",
+                        "recall",
+                        "f1",
+                        "latency_p50_ms",
+                        "latency_p95_ms",
+                        "n_images",
+                        "n_no_detection",
+                        "n_classes",
+                        "status",
+                    ]
+                )
+                for r in all_results:
+                    if hasattr(r, "ap50"):
+                        writer.writerow(
+                            [
+                                r.model_id,
+                                r.ap50,
+                                r.map50_95,
+                                r.precision,
+                                r.recall,
+                                r.f1,
+                                r.latency_p50_ms,
+                                r.latency_p95_ms,
+                                r.n_images,
+                                r.n_no_detection,
+                                r.n_classes_with_gt,
+                                r.status,
+                            ]
+                        )
+            if not json_:
+                console.print(f"Summary CSV: {csv_path}")
+        except Exception:
+            pass
+
+    if json_:
+        import json as _json
+
+        typer.echo(_json.dumps(payload, indent=2, default=str))
+        return
+
+    # Print results table
+    if ok_results:
+        table = Table(title="AP Benchmark Results")
+        for col in ("Model", "AP50", "mAP50:95", "Precision", "Recall", "F1", "P50 ms", "Classes"):
+            table.add_column(col)
+        for r in sorted(
+            all_results, key=lambda x: -(x.ap50 if hasattr(x, "ap50") and x.status == "ok" else -1)
+        ):
+            if hasattr(r, "ap50") and r.status == "ok":
+                table.add_row(
+                    r.model_id,
+                    f"{r.ap50:.3f}",
+                    f"{r.map50_95:.3f}",
+                    f"{r.precision:.3f}",
+                    f"{r.recall:.3f}",
+                    f"{r.f1:.3f}",
+                    f"{r.latency_p50_ms:.1f}",
+                    str(r.n_classes_with_gt),
+                )
+            else:
+                status = getattr(r, "status", "error")
+                model_id = getattr(r, "model_id", str(r))
+                table.add_row(model_id, "-", "-", "-", "-", "-", "-", f"[red]{status}[/red]")
+        console.print(table)
+
+    console.print(f"\n[bold]Conclusion:[/bold] {conclusion}")
+    console.print(
+        "\n[dim]AP computed with COCO-style 101-point interpolation. "
+        "mAP50:95 sweeps IoU 0.50→0.95 in 0.05 steps. "
+        "Results depend on dataset quality and class label matching. "
+        "Small datasets (<100 images) have high variance.[/dim]"
+    )
+
+
+def _run_ultralytics_ap(
+    model_id: str,
+    samples: list,
+    *,
+    device: str,
+) -> object:
+    """Run Ultralytics model for AP comparison. Returns an EvaluationResult-like dict."""
+    import time
+
+    from visionservex.runtime.evaluation import (
+        DetectionEvaluator,
+        EvaluationResult,
+        PerClassMetric,
+    )
+
+    parts = model_id.split(":", 1)
+    yolo_name = parts[1] if len(parts) > 1 else "yolo11n"
+
+    try:
+        from PIL import Image as _PIL
+        from ultralytics import YOLO  # type: ignore
+
+        yolo = YOLO(yolo_name)
+        evaluator = DetectionEvaluator()
+        latencies: list[float] = []
+        n_no_det = 0
+
+        for sample in samples:
+            try:
+                img = _PIL.open(sample.image_path).convert("RGB")
+                t0 = time.perf_counter()
+                preds = yolo(
+                    img, conf=0.01, verbose=False, device=device if device != "auto" else None
+                )
+                latencies.append((time.perf_counter() - t0) * 1000)
+
+                pred_boxes: list[list[float]] = []
+                pred_scores: list[float] = []
+                pred_classes: list[str] = []
+
+                if preds and hasattr(preds[0], "boxes") and preds[0].boxes is not None:
+                    boxes = preds[0].boxes
+                    xyxy = boxes.xyxy.tolist() if hasattr(boxes.xyxy, "tolist") else []
+                    confs = boxes.conf.tolist() if hasattr(boxes.conf, "tolist") else []
+                    cls_ids = boxes.cls.tolist() if hasattr(boxes.cls, "tolist") else []
+                    for box, conf, cls_id in zip(xyxy, confs, cls_ids, strict=False):
+                        from visionservex.runtime.evaluation import COCO80_CLASSES
+
+                        cls_name = (
+                            COCO80_CLASSES[int(cls_id)]
+                            if int(cls_id) < len(COCO80_CLASSES)
+                            else f"class_{int(cls_id)}"
+                        )
+                        pred_boxes.append(box[:4])
+                        pred_scores.append(float(conf))
+                        pred_classes.append(cls_name)
+
+                if not pred_boxes:
+                    n_no_det += 1
+
+                evaluator.add_image(
+                    pred_boxes, pred_scores, pred_classes, sample.gt_boxes, sample.gt_classes
+                )
+            except Exception:
+                evaluator.add_image([], [], [], sample.gt_boxes, sample.gt_classes)
+                n_no_det += 1
+
+        s_lat = sorted(latencies) if latencies else [0.0]
+        lat_p50 = s_lat[len(s_lat) // 2]
+        lat_p95 = s_lat[min(len(s_lat) - 1, int(len(s_lat) * 0.95))]
+
+        metrics = evaluator.compute_map50_95()
+        per_class = [
+            PerClassMetric(
+                class_name=d["class"],
+                ap50=d["ap"],
+                precision=d["precision"],
+                recall=d["recall"],
+                f1=d["f1"],
+                n_gt=d["n_gt"],
+                n_pred=d["n_pred"],
+            )
+            for d in metrics["per_class"]
+        ]
+
+        return EvaluationResult(
+            model_id=model_id,
+            dataset="user_dataset",
+            n_images=len(samples),
+            ap50=metrics["map50"],
+            map50_95=metrics["map50_95"],
+            precision=metrics["precision"],
+            recall=metrics["recall"],
+            f1=metrics["f1"],
+            per_class=per_class,
+            latency_p50_ms=round(lat_p50, 2),
+            latency_p95_ms=round(lat_p95, 2),
+            n_no_detection=n_no_det,
+            n_classes_with_gt=metrics["n_classes_with_gt"],
+            device=str(device),
+            status="ok",
+        )
+
+    except ImportError:
+        from visionservex.runtime.evaluation import EvaluationResult
+
+        return EvaluationResult(
+            model_id=model_id,
+            dataset="user_dataset",
+            n_images=0,
+            ap50=0.0,
+            map50_95=0.0,
+            precision=0.0,
+            recall=0.0,
+            f1=0.0,
+            status="skip",
+            error="ultralytics not installed; pip install ultralytics",
+        )
+    except Exception as exc:
+        from visionservex.runtime.evaluation import EvaluationResult
+
+        return EvaluationResult(
+            model_id=model_id,
+            dataset="user_dataset",
+            n_images=0,
+            ap50=0.0,
+            map50_95=0.0,
+            precision=0.0,
+            recall=0.0,
+            f1=0.0,
+            status="error",
+            error=str(exc)[:200],
+        )
+
+
+# ---------------------------------------------------------------------------
+# Non-detection benchmark stubs (honest roadmap)
+# ---------------------------------------------------------------------------
+
+_NOT_IMPLEMENTED_TPLS: dict[str, dict] = {
+    "segmentation": {
+        "task": "instance segmentation",
+        "annotation_format": "COCO JSON with 'segmentation' field (polygon or RLE masks)",
+        "recommended_dataset": "COCO val2017 (5000 images), COCO-128-seg",
+        "metrics": ["mask AP50", "mask AP50:95", "box AP50", "boundary IoU"],
+        "models": ["rfdetr-seg-small", "rfdetr-seg-medium", "oneformer-swin-large"],
+        "roadmap": "v1.4.0 — mask IoU matching and COCO evaluator integration planned.",
+    },
+    "classification": {
+        "task": "image classification",
+        "annotation_format": "folder structure (class_name/img.jpg) or CSV (path,label)",
+        "recommended_dataset": "ImageNet-1k val set (50000 images), custom classification dataset",
+        "metrics": ["top-1 accuracy", "top-5 accuracy", "confusion matrix", "per-class recall"],
+        "models": ["swinv2-tiny", "swinv2-base", "swinv2-large"],
+        "roadmap": "v1.4.0 — classification evaluator planned.",
+    },
+    "open-vocab": {
+        "task": "open-vocabulary detection",
+        "annotation_format": "COCO JSON with category names matching prompt",
+        "recommended_dataset": "LVIS v1 val (19809 images), COCO val2017 zero-shot",
+        "metrics": [
+            "AP50 (class-aware)",
+            "AP rare/common/frequent (LVIS)",
+            "prompt-conditioned AP",
+        ],
+        "models": ["grounding-dino-swin-b", "grounding-dino-tiny"],
+        "roadmap": "v1.4.0 — zero-shot AP evaluation with prompt templates planned.",
+    },
+    "pose": {
+        "task": "pose estimation (keypoints)",
+        "annotation_format": "COCO JSON with 'keypoints' field",
+        "recommended_dataset": "COCO val2017 person keypoints",
+        "metrics": ["OKS AP50", "OKS AP50:95", "per-keypoint PCK"],
+        "models": ["rtmpose-s", "rtmpose-m", "rtmpose-l"],
+        "roadmap": "v1.4.0 — OKS AP evaluation planned when RTMPose native path is wired.",
+    },
+    "obb": {
+        "task": "oriented bounding box detection",
+        "annotation_format": "DOTA format (8-point polygon per box) or COCO-OBB JSON",
+        "recommended_dataset": "DOTA v1.0 val, HRSC2016",
+        "metrics": ["rotated IoU AP50", "rotated IoU AP50:95"],
+        "models": ["rtmdet-r-s", "rtmdet-r2-s"],
+        "roadmap": "v1.4.0 — rotated IoU matching planned when RTMDet-R native path is wired.",
+    },
+}
+
+
+def _benchmark_not_implemented(task_key: str, json_: bool) -> None:
+    info = _NOT_IMPLEMENTED_TPLS.get(task_key, {})
+    payload = {
+        "status": "BENCHMARK_NOT_IMPLEMENTED",
+        "task": info.get("task", task_key),
+        "message": f"The {task_key} benchmark evaluator is not yet implemented in VisionServeX.",
+        "annotation_format": info.get("annotation_format", "see task-specific format"),
+        "recommended_dataset": info.get("recommended_dataset", "N/A"),
+        "metrics": info.get("metrics", []),
+        "models": info.get("models", []),
+        "roadmap": info.get("roadmap", "roadmap TBD"),
+        "detection_note": (
+            "Detection AP/mAP is implemented: use 'visionservex benchmark benchmark-competitiveness "
+            "--dataset yolo:<path>'"
+        ),
+    }
+    if json_:
+        import json as _json
+
+        typer.echo(_json.dumps(payload, indent=2))
+    else:
+        from rich.panel import Panel
+
+        console.print(
+            Panel.fit(
+                f"[yellow]BENCHMARK_NOT_IMPLEMENTED: {task_key}[/yellow]",
+                border_style="yellow",
+            )
+        )
+        console.print(f"Task: {payload['task']}")
+        console.print(f"Annotation format: {payload['annotation_format']}")
+        console.print(f"Recommended dataset: {payload['recommended_dataset']}")
+        console.print(f"Planned metrics: {', '.join(payload['metrics'])}")
+        console.print(f"Expected models: {', '.join(payload['models'])}")
+        console.print(f"Roadmap: {payload['roadmap']}")
+        console.print(
+            "\n[dim]Note: Detection AP/mAP IS implemented. "
+            "Run: visionservex benchmark benchmark-competitiveness --dataset yolo:<path>[/dim]"
+        )
+    raise typer.Exit(2)
+
+
+@app.command(
+    "benchmark-segmentation",
+    help="[PLANNED v1.4] Segmentation benchmark — returns BENCHMARK_NOT_IMPLEMENTED.",
+)
+def benchmark_segmentation(json_: bool = typer.Option(False, "--json")) -> None:
+    """Honest stub: segmentation AP benchmark is roadmap item for v1.4."""
+    _benchmark_not_implemented("segmentation", json_)
+
+
+@app.command(
+    "benchmark-classification",
+    help="[PLANNED v1.4] Classification benchmark — returns BENCHMARK_NOT_IMPLEMENTED.",
+)
+def benchmark_classification(json_: bool = typer.Option(False, "--json")) -> None:
+    """Honest stub: classification top-k benchmark is roadmap item for v1.4."""
+    _benchmark_not_implemented("classification", json_)
+
+
+@app.command(
+    "benchmark-open-vocab",
+    help="[PLANNED v1.4] Open-vocabulary detection benchmark — returns BENCHMARK_NOT_IMPLEMENTED.",
+)
+def benchmark_open_vocab(json_: bool = typer.Option(False, "--json")) -> None:
+    """Honest stub: zero-shot AP benchmark is roadmap item for v1.4."""
+    _benchmark_not_implemented("open-vocab", json_)
+
+
+@app.command(
+    "benchmark-pose",
+    help="[PLANNED v1.4] Pose estimation (OKS AP) benchmark — returns BENCHMARK_NOT_IMPLEMENTED.",
+)
+def benchmark_pose(json_: bool = typer.Option(False, "--json")) -> None:
+    """Honest stub: OKS AP benchmark is roadmap item for v1.4."""
+    _benchmark_not_implemented("pose", json_)
+
+
+@app.command(
+    "benchmark-obb",
+    help="[PLANNED v1.4] Oriented bounding box benchmark — returns BENCHMARK_NOT_IMPLEMENTED.",
+)
+def benchmark_obb(json_: bool = typer.Option(False, "--json")) -> None:
+    """Honest stub: rotated IoU AP benchmark is roadmap item for v1.4."""
+    _benchmark_not_implemented("obb", json_)
 
 
 __all__ = ["app"]
