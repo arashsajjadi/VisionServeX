@@ -7,6 +7,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-05-16
+
+### Real-execution gates: PatchCore, ByteTrack, OC-SORT, Torchreid, four HF models; sidecar scripts; OpenMMLab Python 3.13 blocker documented
+
+This release moves the v2.6 “wired/mocked” paths into real-package smoke
+verification on the host. Five paths run end-to-end against the actual
+upstream libraries; two paths (OpenMMLab, MaskDINO) ship executable
+sidecar scripts because their toolchains are not installable in this
+project's primary Python 3.13 + setuptools >= 72 environment.
+
+#### Real-execution results (verified 2026-05-16)
+
+| Gate | Result | Evidence |
+|------|--------|----------|
+| Anomalib PatchCore train+predict | PASS | anomalib 2.4.2 in `/tmp/vsx-anomaly-venv`; trained 24.9M params, coreset selection, predict returned `pred_score=1.0` on synthetic defect |
+| ByteTrack adapter (bytetracker 0.3.2) | PASS | `tracker-smoke --tracker bytetrack`: 2 unique tracks across 3 frames |
+| OC-SORT adapter (ocsort 0.0.2) | PASS | `tracker-smoke --tracker ocsort`: 2 unique tracks across 3 frames |
+| Torchreid OSNet (torchreid 0.2.5) | PASS | `osnet_x1_0_imagenet.pth` pulled from `kaiyangzhou/osnet`; 512-d L2-normalized embeddings |
+| HF DINOv2 base real embed | PASS | 768-d, 104.5 ms, CUDA |
+| HF OWLv2 base patch16 real | PASS | open-vocab "person, car", 259.8 ms |
+| HF SigLIP2 base real embed | PASS | 768-d, 133.0 ms |
+| HF Grounding DINO tiny real | PASS | 377.6 ms |
+| MedSAM HF real segment | PASS | IoU=0.934 on prompt |
+| OpenMMLab smoke | BLOCKED | mmcv 2.2.0 source build imports `pkg_resources`, broken on setuptools≥72 and Python 3.13; executable conda recipe in `scripts/run_openmmlab_smoke.sh` |
+| MaskDINO smoke | BLOCKED | Detectron2 + repo clone required; sidecar emits `CHECKPOINT_REQUIRED` until user supplies `CKPT=` |
+
+#### Runtime + adapter changes
+
+- `runtime/trackers.py` adapters now handle the actual 0.x upstream APIs:
+  bytetracker / ocsort expect `update(torch.Tensor[6cols], frame_idx)` and
+  return `ndarray[x1,y1,x2,y2,track_id,class_id,score]`. The adapter tries
+  three call styles in order (`frame_idx`, `img_size`, raw) and surfaces a
+  structured `*_API_UNSUPPORTED` error if all fail.
+- `runtime/reid.py` looks up `FeatureExtractor` at both `torchreid.utils`
+  and `torchreid.reid.utils` so torchreid 0.2.5 imports cleanly. `extract()`
+  now coerces PIL.Image → numpy because the real Torchreid extractor
+  refuses PIL inputs.
+- `integrations/anomalib_adapter.py` builds `Folder` with the 2.x
+  `name=` field and `root + normal_dir` split (fixing a path-concatenation
+  bug), drops `max_epochs` when Engine 2.x rejects it, and resolves the
+  most recent `.ckpt` for `predict()`.
+
+#### CLI
+
+- `visionservex video-search tracker-smoke --tracker {simple-iou,bytetrack,ocsort}`
+  runs a tracker adapter end-to-end against a 3-frame synthetic sequence
+  (or a JSON file) and writes normalized tracks.
+
+#### Sidecar scripts (executable)
+
+- `scripts/run_anomaly_smoke.sh` — venv + anomalib install + adapter
+  train/predict.
+- `scripts/run_openmmlab_smoke.sh` — conda Python 3.10 + openmim
+  recipe; pins `setuptools<72` to keep `pkg_resources` available for the
+  mmcv source build.
+- `scripts/run_maskdino_smoke.sh` — Detectron2 + MaskDINO clone +
+  upstream demo runner; refuses to invent a checkpoint URL and exits with
+  `CHECKPOINT_REQUIRED` if `CKPT` env var is unset.
+
+#### Tests
+
+- `tests/test_v270.py` (new) covers tracker-smoke CLI, anomalib 2.x
+  Folder dispatch, torchreid dual-layout lookup, sidecar scripts ship
+  executable, and the MaskDINO sidecar refuses missing checkpoints.
+
 ## [2.6.0] - 2026-05-16
 
 ### OC-SORT adapter; OSNet/Torchreid ReID; OpenMMLab model-card + real-checkpoint metadata; MaskDINO sidecar; medical license tiers; SAM3 login-help

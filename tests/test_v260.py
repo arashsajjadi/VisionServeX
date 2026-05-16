@@ -487,7 +487,9 @@ def test_manifest_rtdetrv4_carries_paper_url():
 
 
 @pytest.mark.fast
-def test_version_is_260():
+def test_version_is_at_least_260():
+    """Version pin: 2.6.0 introduced these features; v2.7+ must not regress them."""
     import visionservex
 
-    assert visionservex.__version__ == "2.6.0"
+    parts = tuple(int(p) for p in visionservex.__version__.split(".")[:3])
+    assert parts >= (2, 6, 0), f"version {visionservex.__version__} < 2.6.0"

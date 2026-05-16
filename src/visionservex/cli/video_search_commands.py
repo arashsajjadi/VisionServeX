@@ -658,3 +658,139 @@ def reid_smoke(
         print(json.dumps(payload, indent=2))
         return
     console.print(f"[green]OK[/green] {reid}: shape={payload['embedding_shape']}")
+
+
+# ---------------------------------------------------------------------------
+# tracker-smoke — run a tracker adapter against synthetic / JSON detections
+# ---------------------------------------------------------------------------
+
+
+@app.command("tracker-smoke")
+def tracker_smoke(
+    tracker: str = typer.Option(
+        "bytetrack",
+        "--tracker",
+        help="Tracker backend: bytetrack, ocsort, simple-iou.",
+    ),
+    detections: Path = typer.Option(
+        None,
+        "--detections",
+        help=(
+            "JSON file with `frames`: a list of frames, each "
+            '`{"detections": [[x1,y1,x2,y2,score,label], ...]}`. '
+            "If omitted, a 3-frame synthetic sequence is used."
+        ),
+    ),
+    out: Path = typer.Option(None, "--out", help="JSON output path for normalized tracks."),
+    img_h: int = typer.Option(640, "--img-h"),
+    img_w: int = typer.Option(640, "--img-w"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Run a tracker adapter end-to-end against a small detection sequence.
+
+    Reports the actual installed package version and the resulting tracks
+    so users can verify the adapter routes to the real upstream code.
+    """
+    from visionservex.runtime.trackers import (
+        TrackerAPIUnsupportedError,
+        TrackerUnavailableError,
+        build_tracker,
+    )
+
+    if detections is not None and detections.exists():
+        seq = json.loads(detections.read_text())
+        frames = seq.get("frames", [])
+    else:
+        frames = [
+            {
+                "detections": [
+                    [10.0, 20.0, 100.0, 200.0, 0.9, "person"],
+                    [30.0, 40.0, 200.0, 300.0, 0.8, "person"],
+                ],
+            },
+            {
+                "detections": [
+                    [12.0, 22.0, 102.0, 202.0, 0.92, "person"],
+                    [33.0, 41.0, 201.0, 302.0, 0.78, "person"],
+                ],
+            },
+            {
+                "detections": [
+                    [14.0, 24.0, 104.0, 204.0, 0.94, "person"],
+                    [36.0, 42.0, 202.0, 304.0, 0.76, "person"],
+                ],
+            },
+        ]
+
+    try:
+        adapter = build_tracker(tracker)
+    except TrackerUnavailableError as exc:
+        payload = exc.to_dict()
+        if json_:
+            print(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[red]{exc.code}[/red]: {exc.name}")
+            console.print(f"  install: {exc.install}")
+        raise typer.Exit(3)
+
+    if adapter is None:
+        from visionservex.runtime.simple_tracker import SimpleIoUTracker
+
+        adapter = SimpleIoUTracker()
+
+    track_rows: list[dict] = []
+    try:
+        for frame_idx, frame in enumerate(frames):
+            dets_in = [
+                (
+                    (float(d[0]), float(d[1]), float(d[2]), float(d[3])),
+                    float(d[4]),
+                    str(d[5]) if len(d) > 5 else "object",
+                )
+                for d in frame.get("detections", [])
+            ]
+            kwargs: dict = {
+                "frame_idx": frame_idx,
+                "timestamp_s": frame_idx * (1.0 / 25.0),
+            }
+            try:
+                tracks = adapter.update(dets_in, img_size=(img_h, img_w), **kwargs)
+            except TypeError:
+                tracks = adapter.update(dets_in, **kwargs)
+            for tb in tracks:
+                track_rows.append(
+                    {
+                        "frame_idx": tb.frame_idx,
+                        "timestamp_s": tb.timestamp_s,
+                        "track_id": tb.track_id,
+                        "box": list(tb.box),
+                        "score": tb.score,
+                        "label": tb.label,
+                    }
+                )
+    except TrackerAPIUnsupportedError as exc:
+        payload = exc.to_dict()
+        if json_:
+            print(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[red]{exc.code}[/red]: {exc.name}")
+        raise typer.Exit(4)
+
+    payload = {
+        "code": "OK",
+        "tracker": tracker,
+        "frames": len(frames),
+        "tracks": track_rows,
+        "n_tracks": len({row["track_id"] for row in track_rows}),
+    }
+    if out is not None:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2))
+        payload["out"] = str(out)
+    if json_:
+        print(json.dumps(payload, indent=2))
+        return
+    console.print(
+        f"[green]OK[/green] {tracker}: {len(track_rows)} track rows across {len(frames)} frames"
+        f" ({payload['n_tracks']} unique tracks)"
+    )

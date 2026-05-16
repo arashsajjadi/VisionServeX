@@ -136,21 +136,46 @@ class PatchCoreAdapter:
             from anomalib.models import Patchcore  # type: ignore
 
             model_instance = Patchcore()
-            # Folder API differs between versions — try both
+            # anomalib's Folder uses ``root`` as the parent dir and
+            # ``normal_dir`` as a path relative to that root. Splitting the
+            # caller-supplied ``data_dir`` avoids the double-prefix bug.
+            data_dir_resolved = data_dir.resolve()
+            folder_root = str(data_dir_resolved.parent)
+            normal_relative = data_dir_resolved.name
+            # anomalib 2.x Folder requires a `name` field. 1.x has
+            # `task="classification"` and no `name`. Try 2.x first.
             try:
                 dm = Folder(
-                    root=str(data_dir),
-                    normal_dir="good",
-                    abnormal_dir=None,
-                    task="classification",
+                    name="visionservex-anomaly",
+                    root=folder_root,
+                    normal_dir=normal_relative,
+                    train_batch_size=4,
+                    eval_batch_size=4,
+                    num_workers=0,
                 )
             except TypeError:
-                dm = Folder(root=str(data_dir), normal_dir=str(data_dir))
-            engine = Engine(max_epochs=max_epochs, default_root_dir=str(out_dir))
+                try:
+                    dm = Folder(
+                        root=folder_root,
+                        normal_dir=normal_relative,
+                        task="classification",
+                    )
+                except TypeError:
+                    dm = Folder(root=folder_root, normal_dir=normal_relative)
+
+            # anomalib 2.x Engine drops max_epochs — Lightning Trainer kwarg.
+            try:
+                engine = Engine(
+                    default_root_dir=str(out_dir),
+                    max_epochs=max_epochs,
+                )
+            except TypeError:
+                engine = Engine(default_root_dir=str(out_dir))
             engine.fit(model=model_instance, datamodule=dm)
             return {
                 "status": "trained",
                 "engine": "anomalib.Engine",
+                "anomalib_version": detect_anomalib_version(),
                 "out_dir": str(out_dir),
             }
         except ImportError as exc:
@@ -218,12 +243,48 @@ class PatchCoreAdapter:
 
             model_instance = Patchcore()
             engine = Engine(default_root_dir=str(model_dir))
-            result = engine.predict(model=model_instance, dataset=[str(image_path)])
+
+            # anomalib 2.x: pass `data_path=` to engine.predict and load the
+            # most recent .ckpt the train step wrote. 1.x accepts a path list.
+            ckpt = self._latest_checkpoint(model_dir)
+            try:
+                result = engine.predict(
+                    model=model_instance,
+                    data_path=str(image_path),
+                    ckpt_path=str(ckpt) if ckpt else None,
+                    return_predictions=True,
+                )
+            except TypeError:
+                result = engine.predict(
+                    model=model_instance,
+                    dataset=[str(image_path)],
+                    ckpt_path=str(ckpt) if ckpt else None,
+                )
+
             out: dict[str, Any] = {
                 "status": "predicted",
                 "engine": "anomalib.Engine",
+                "anomalib_version": detect_anomalib_version(),
                 "image_path": str(image_path),
+                "ckpt_path": str(ckpt) if ckpt else None,
             }
+            # Try to extract one scalar anomaly score per image.
+            if result:
+                try:
+                    first = result[0]
+                    if isinstance(first, list):
+                        first = first[0] if first else None
+                    score = getattr(first, "pred_score", None)
+                    if score is None and isinstance(first, dict):
+                        score = first.get("pred_score") or first.get("anomaly_score")
+                    if score is not None:
+                        try:
+                            out["pred_score"] = float(score)
+                        except (TypeError, ValueError):
+                            out["pred_score_repr"] = repr(score)[:80]
+                except (IndexError, AttributeError):
+                    pass
+
             if heatmap_out and result:
                 out["heatmap_out"] = str(heatmap_out)
             return out
@@ -245,6 +306,16 @@ class PatchCoreAdapter:
             if cli_result is not None:
                 return cli_result
             return {"status": "error", "error": str(exc)[:300]}
+
+    @staticmethod
+    def _latest_checkpoint(model_dir: Path) -> Path | None:
+        """Return the most recently-modified .ckpt under ``model_dir``."""
+        candidates = sorted(
+            Path(model_dir).rglob("*.ckpt"),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
+        return candidates[0] if candidates else None
 
     def _try_cli_predict(self, image_path: Path) -> dict[str, Any] | None:
         """Attempt anomalib CLI prediction. Returns result dict or None."""

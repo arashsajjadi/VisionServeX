@@ -181,6 +181,115 @@ def build_tracker(name: str, **kwargs: Any) -> Any:
 # ---------------------------------------------------------------------------
 
 
+def _detections_to_tensor_or_array(
+    detections: list[tuple[tuple[float, float, float, float], float, str]],
+    *,
+    n_cols: int,
+    as_torch: bool,
+):
+    """Convert detections to the form an upstream tracker expects.
+
+    bytetracker 0.3.x and ocsort 0.0.x both require a torch.Tensor with
+    columns ``[x1, y1, x2, y2, score, class_id]`` (6). Newer versions may
+    accept a 5-column ndarray. ``n_cols`` and ``as_torch`` let callers
+    pick.
+    """
+    import numpy as np
+
+    if n_cols == 6:
+        rows = [[b[0], b[1], b[2], b[3], s, 0.0] for (b, s, _lbl) in detections]
+    else:
+        rows = [[b[0], b[1], b[2], b[3], s] for (b, s, _lbl) in detections]
+    arr = np.asarray(rows, dtype=np.float32)
+    if as_torch:
+        try:
+            import torch  # type: ignore
+
+            return torch.from_numpy(arr)
+        except ImportError:
+            return arr
+    return arr
+
+
+def _parse_tracker_output(
+    tracked: Any,
+    detections: list[tuple[tuple[float, float, float, float], float, str]],
+    *,
+    frame_idx: int,
+    timestamp_s: float,
+):
+    """Normalize a tracker's return value to a list of TrackBox.
+
+    Handles two real-world shapes:
+
+    1. ``ndarray`` rows ``[x1, y1, x2, y2, track_id, class_id, score]`` —
+       used by bytetracker 0.3.x and ocsort 0.0.x.
+    2. List of objects with ``.track_id`` and ``.tlbr`` — used by some
+       newer ByteTrack forks.
+    """
+    from visionservex.runtime.simple_tracker import TrackBox
+
+    results: list[Any] = []
+
+    # Case A: ndarray-like with rows.
+    try:
+        rows = list(tracked)
+    except TypeError:
+        return results
+    if not rows:
+        return results
+
+    label_lookup = [det[2] if len(det) > 2 else "object" for det in detections]
+    default_label = label_lookup[0] if label_lookup else "object"
+
+    for row in rows:
+        # Branch 1: ndarray / list-of-floats row.
+        try:
+            iter_len = len(row)
+        except TypeError:
+            iter_len = 0
+        if iter_len >= 5 and not hasattr(row, "track_id"):
+            try:
+                x1 = float(row[0])
+                y1 = float(row[1])
+                x2 = float(row[2])
+                y2 = float(row[3])
+                tid = int(row[4])
+                score = float(row[6]) if iter_len >= 7 else 0.9
+            except (IndexError, TypeError, ValueError):
+                continue
+            results.append(
+                TrackBox(
+                    track_id=tid,
+                    box=(x1, y1, x2, y2),
+                    score=score,
+                    label=default_label,
+                    frame_idx=frame_idx,
+                    timestamp_s=timestamp_s,
+                )
+            )
+            continue
+        # Branch 2: object with .track_id / .tlbr.
+        if hasattr(row, "track_id") and hasattr(row, "tlbr"):
+            try:
+                tid = int(row.track_id)
+                tlbr = row.tlbr
+                score = float(getattr(row, "score", 0.9))
+            except (AttributeError, TypeError, ValueError):
+                continue
+            results.append(
+                TrackBox(
+                    track_id=tid,
+                    box=(float(tlbr[0]), float(tlbr[1]), float(tlbr[2]), float(tlbr[3])),
+                    score=score,
+                    label=default_label,
+                    frame_idx=frame_idx,
+                    timestamp_s=timestamp_s,
+                )
+            )
+    return results
+
+
 class _ByteTrackAdapter:
     """Wrap the upstream bytetracker package to a uniform interface."""
 
@@ -200,20 +309,27 @@ class _ByteTrackAdapter:
             match_thresh = kwargs.get("match_thresh", 0.8)
             mot20 = False
 
+        self._call_style = "frame_idx"  # bytetracker 0.3.x: update(dets, frame_idx)
         try:
-            self._tracker = BYTETracker(_Args(), frame_rate=kwargs.get("frame_rate", 30))
+            # Real installed bytetracker 0.3.2 uses BYTETracker() no-arg ctor.
+            self._tracker = BYTETracker()
         except TypeError:
             try:
-                self._tracker = BYTETracker(_Args())
-            except Exception as exc:  # pragma: no cover - hard to reach
-                import bytetracker as _bt  # type: ignore
+                self._tracker = BYTETracker(_Args(), frame_rate=kwargs.get("frame_rate", 30))
+                self._call_style = "img_size"
+            except TypeError:
+                try:
+                    self._tracker = BYTETracker(_Args())
+                    self._call_style = "raw"
+                except Exception as exc:
+                    import bytetracker as _bt  # type: ignore
 
-                raise TrackerAPIUnsupportedError(
-                    "bytetrack",
-                    "BYTETRACK_API_UNSUPPORTED",
-                    getattr(_bt, "__version__", None),
-                    [a for a in dir(_bt) if not a.startswith("_")][:20],
-                ) from exc
+                    raise TrackerAPIUnsupportedError(
+                        "bytetrack",
+                        "BYTETRACK_API_UNSUPPORTED",
+                        getattr(_bt, "__version__", None),
+                        [a for a in dir(_bt) if not a.startswith("_")][:20],
+                    ) from exc
         self._frame_count = 0
 
     def update(
@@ -224,47 +340,43 @@ class _ByteTrackAdapter:
         timestamp_s: float = 0.0,
         img_size: tuple[int, int] = (1080, 1920),
     ) -> list[Any]:
-        import numpy as np
-
-        from visionservex.runtime.simple_tracker import TrackBox
-
         if not detections:
             self._frame_count += 1
             return []
 
-        dets_arr = np.asarray(
-            [[b[0], b[1], b[2], b[3], s] for (b, s, _lbl) in detections],
-            dtype=np.float32,
-        )
-        try:
-            tracked = self._tracker.update(
-                dets_arr,
-                img_size=img_size,
-                img_info=img_size,
-            )
-        except TypeError:
-            tracked = self._tracker.update(dets_arr)
-        self._frame_count += 1
-
-        results: list[Any] = []
-        for t, det in zip(tracked, detections, strict=False):
+        # bytetracker 0.3.x: 6-col torch.Tensor + frame_idx.
+        for n_cols, as_torch, call_kind in (
+            (6, True, "frame_idx"),
+            (5, False, "img_size"),
+            (5, False, "raw"),
+        ):
+            dets = _detections_to_tensor_or_array(detections, n_cols=n_cols, as_torch=as_torch)
             try:
-                tid = int(t.track_id)
-                tlbr = t.tlbr
-                score = float(getattr(t, "score", det[1]))
-            except AttributeError:
-                continue
-            results.append(
-                TrackBox(
-                    track_id=tid,
-                    box=(float(tlbr[0]), float(tlbr[1]), float(tlbr[2]), float(tlbr[3])),
-                    score=score,
-                    label=det[2] if len(det) > 2 else "object",
+                if call_kind == "frame_idx":
+                    tracked = self._tracker.update(dets, frame_idx)
+                elif call_kind == "img_size":
+                    tracked = self._tracker.update(dets, img_size=img_size, img_info=img_size)
+                else:
+                    tracked = self._tracker.update(dets)
+                self._frame_count += 1
+                return _parse_tracker_output(
+                    tracked,
+                    detections,
                     frame_idx=frame_idx,
                     timestamp_s=timestamp_s,
                 )
-            )
-        return results
+            except (TypeError, IndexError, AttributeError):
+                continue
+
+        # All call styles failed — surface the API mismatch.
+        import bytetracker as _bt  # type: ignore
+
+        raise TrackerAPIUnsupportedError(
+            "bytetrack",
+            "BYTETRACK_API_UNSUPPORTED",
+            getattr(_bt, "__version__", None),
+            [a for a in dir(_bt) if not a.startswith("_")][:20],
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -275,17 +387,14 @@ class _ByteTrackAdapter:
 class _OCSortAdapter:
     """Wrap the upstream ocsort package to a uniform interface.
 
-    OC-SORT's ``update`` signature is roughly::
-
-        update(dets, img_info=(H, W), img_size=(H, W))
-
-    where ``dets`` is an ndarray ``[[x1, y1, x2, y2, score], ...]``.
+    Real ocsort 0.0.2 wants ``update(torch_tensor_6cols, frame_idx)`` and
+    returns ``ndarray[ [x1, y1, x2, y2, track_id, class_id, score], ... ]``.
+    Some newer forks expose ``update(dets, img_info, img_size)`` — both are
+    tried below.
     """
 
     def __init__(self, **kwargs: Any) -> None:
         try:
-            # Both ``from ocsort.ocsort import OCSort`` and
-            # ``from ocsort import OCSort`` appear in the wild. Try both.
             try:
                 from ocsort.ocsort import OCSort  # type: ignore
             except ImportError:
@@ -297,13 +406,16 @@ class _OCSortAdapter:
                 _INSTALL_HINTS["ocsort"],
             ) from exc
 
+        # ocsort 0.0.2 silently fails on min_hits=3 with one detection;
+        # fall back to a lower min_hits if the caller didn't override.
+        ctor_kwargs = {
+            "det_thresh": kwargs.get("det_thresh", 0.3),
+            "max_age": kwargs.get("max_age", 30),
+            "min_hits": kwargs.get("min_hits", 1),
+            "iou_threshold": kwargs.get("iou_threshold", 0.3),
+        }
         try:
-            self._tracker = OCSort(
-                det_thresh=kwargs.get("det_thresh", 0.6),
-                max_age=kwargs.get("max_age", 30),
-                min_hits=kwargs.get("min_hits", 3),
-                iou_threshold=kwargs.get("iou_threshold", 0.3),
-            )
+            self._tracker = OCSort(**ctor_kwargs)
         except TypeError as exc:
             import ocsort as _oc  # type: ignore
 
@@ -323,68 +435,41 @@ class _OCSortAdapter:
         timestamp_s: float = 0.0,
         img_size: tuple[int, int] = (1080, 1920),
     ) -> list[Any]:
-        import numpy as np
-
-        from visionservex.runtime.simple_tracker import TrackBox
-
         if not detections:
             self._frame_count += 1
             return []
 
-        dets_arr = np.asarray(
-            [[b[0], b[1], b[2], b[3], s] for (b, s, _lbl) in detections],
-            dtype=np.float32,
-        )
-        try:
-            tracked = self._tracker.update(
-                dets_arr,
-                img_info=img_size,
-                img_size=img_size,
-            )
-        except TypeError:
+        for n_cols, as_torch, call_kind in (
+            (6, True, "frame_idx"),
+            (5, False, "img_size"),
+            (5, False, "raw"),
+        ):
+            dets = _detections_to_tensor_or_array(detections, n_cols=n_cols, as_torch=as_torch)
             try:
-                tracked = self._tracker.update(dets_arr)
-            except Exception as exc:
-                import ocsort as _oc  # type: ignore
-
-                raise TrackerAPIUnsupportedError(
-                    "ocsort",
-                    "OCSORT_API_UNSUPPORTED",
-                    getattr(_oc, "__version__", None),
-                    [a for a in dir(_oc) if not a.startswith("_")][:20],
-                ) from exc
-        self._frame_count += 1
-
-        results: list[Any] = []
-        # OC-SORT returns ndarray rows [x1, y1, x2, y2, track_id, ...].
-        try:
-            rows = list(tracked)
-        except TypeError:
-            rows = []
-        for row, det in zip(rows, detections, strict=False):
-            try:
-                x1, y1, x2, y2, tid = (
-                    float(row[0]),
-                    float(row[1]),
-                    float(row[2]),
-                    float(row[3]),
-                    int(row[4]),
-                )
-            except (IndexError, ValueError, TypeError):
-                continue
-            score = float(det[1])
-            label = det[2] if len(det) > 2 else "object"
-            results.append(
-                TrackBox(
-                    track_id=tid,
-                    box=(x1, y1, x2, y2),
-                    score=score,
-                    label=label,
+                if call_kind == "frame_idx":
+                    tracked = self._tracker.update(dets, frame_idx)
+                elif call_kind == "img_size":
+                    tracked = self._tracker.update(dets, img_info=img_size, img_size=img_size)
+                else:
+                    tracked = self._tracker.update(dets)
+                self._frame_count += 1
+                return _parse_tracker_output(
+                    tracked,
+                    detections,
                     frame_idx=frame_idx,
                     timestamp_s=timestamp_s,
                 )
-            )
-        return results
+            except (TypeError, IndexError, AttributeError):
+                continue
+
+        import ocsort as _oc  # type: ignore
+
+        raise TrackerAPIUnsupportedError(
+            "ocsort",
+            "OCSORT_API_UNSUPPORTED",
+            getattr(_oc, "__version__", None),
+            [a for a in dir(_oc) if not a.startswith("_")][:20],
+        )
 
 
 __all__ = [

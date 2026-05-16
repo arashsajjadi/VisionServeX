@@ -169,14 +169,21 @@ class _TorchreidOSNetAdapter:
         device: str = "cpu",
         model_name: str = "osnet_x1_0",
     ) -> None:
-        try:
-            from torchreid.utils import FeatureExtractor  # type: ignore
-        except ImportError as exc:  # pragma: no cover - probed earlier
+        # torchreid 0.2.5 ships FeatureExtractor at torchreid.reid.utils;
+        # newer / legacy installs expose it at torchreid.utils. Try both.
+        FeatureExtractor = None  # type: ignore[assignment]
+        for path in ("torchreid.utils", "torchreid.reid.utils"):
+            try:
+                FeatureExtractor = __import__(path, fromlist=["FeatureExtractor"]).FeatureExtractor
+                break
+            except (ImportError, AttributeError):
+                continue
+        if FeatureExtractor is None:  # pragma: no cover - probed earlier
             raise ReIDUnavailableError(
                 "osnet",
                 "TORCHREID_REQUIRED",
                 _INSTALL_HINTS["osnet"],
-            ) from exc
+            )
 
         # Torchreid requires a local checkpoint. Tell the user clearly when it
         # is missing — silently downloading would surprise users on machines
@@ -209,11 +216,26 @@ class _TorchreidOSNetAdapter:
             ) from exc
 
     def extract(self, images: list[Any]) -> Any:
-        """Return an ndarray of shape (N, dim) of L2-normalized embeddings."""
+        """Return an ndarray of shape (N, dim) of L2-normalized embeddings.
+
+        ``images`` may contain strings, numpy arrays, or PIL.Image objects.
+        Torchreid's FeatureExtractor accepts only strings or numpy arrays,
+        so PIL.Image inputs are converted in-place.
+        """
         import numpy as np
 
-        feats = self._extractor(images)
-        # FeatureExtractor returns a torch.Tensor (N, D); convert to numpy.
+        normalized_images: list[Any] = []
+        for img in images:
+            if isinstance(img, str):
+                normalized_images.append(img)
+                continue
+            if isinstance(img, np.ndarray):
+                normalized_images.append(img)
+                continue
+            # PIL.Image or anything else with a numpy conversion path.
+            normalized_images.append(np.asarray(img))
+
+        feats = self._extractor(normalized_images)
         try:
             arr = feats.detach().cpu().numpy()
         except AttributeError:
