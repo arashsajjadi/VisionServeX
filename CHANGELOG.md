@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-05-16
+
+### Patch — fast-CI compat for test_v210 transformers import
+
+`test_florence2_unsupported_env_gives_recipe` imported `transformers` directly at function body level. Fast CI omits `[hf]`, so torch/transformers are not installed, causing `ModuleNotFoundError`. Fixed with `try/except ImportError` — tests the recipe content statically, and only patches the version when transformers is available.
+
 ## [2.1.0] - 2026-05-16
 
 ### OWL-ViT, CLIP, SigLIP, ConvNeXtV2, MedSAM wired; Florence-2 [florence2] extra; Anomalib real Engine call; surveillance non-empty smoke

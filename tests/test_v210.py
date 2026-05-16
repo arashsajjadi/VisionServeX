@@ -143,20 +143,26 @@ def test_florence2_doctor_returns_version_info():
 @pytest.mark.fast
 def test_florence2_unsupported_env_gives_recipe():
     """When transformers >= 5.0, doctor must return the exact setup recipe."""
-    import transformers as _tr
-
     from visionservex.cli.florence2_commands import _SETUP_RECIPE, _check_transformers_version
 
-    orig = _tr.__version__
+    assert "conda create" in _SETUP_RECIPE
+    assert "florence2" in _SETUP_RECIPE
+
+    # Only patch transformers version if it's actually installed
     try:
+        import transformers as _tr
+
+        orig = _tr.__version__
         _tr.__version__ = "5.9.0"
-        compatible, ver = _check_transformers_version()
-        assert not compatible
-        assert ver == "5.9.0"
-        assert "conda create" in _SETUP_RECIPE
-        assert "florence2" in _SETUP_RECIPE
-    finally:
-        _tr.__version__ = orig
+        try:
+            compatible, ver = _check_transformers_version()
+            assert not compatible
+            assert ver == "5.9.0"
+        finally:
+            _tr.__version__ = orig
+    except ImportError:
+        # transformers not installed in fast CI — just test the recipe content
+        pass
 
 
 # ---------------------------------------------------------------------------
