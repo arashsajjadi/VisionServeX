@@ -47,8 +47,10 @@ RUN pip install --no-deps -e .
 RUN pip install pydantic pydantic-settings typer rich pillow PyYAML httpx tenacity click psutil
 
 # Detectron2 from source — required for the custom CUDA ops.
+# torch must be installed before building Detectron2 because its setup.py imports torch.
+# The base image pytorch/pytorch:2.0.1-cuda11.7-cudnn8-devel already provides torch 2.0.1.
 RUN pip install "fvcore>=0.1.5" "iopath>=0.1.9" opencv-python-headless pycocotools
-RUN pip install "git+https://github.com/facebookresearch/detectron2.git"
+RUN pip install --no-build-isolation "git+https://github.com/facebookresearch/detectron2.git"
 
 # Clone MaskDINO at a pinned commit and install requirements.
 RUN git clone --depth 1 https://github.com/IDEA-Research/MaskDINO /opt/MaskDINO

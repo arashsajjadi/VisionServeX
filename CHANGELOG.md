@@ -7,6 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.13.0] - 2026-05-17
+
+### Docker Dockerfile fixes; seg alias; audit validate; notebook manifest consumption script; audit colab_mode correctness
+
+This release resolves the GHCR Docker build failures from v2.12.0 and
+adds the final CLI polish needed before v3.0.0.
+
+#### Why v2.13.0 and not v3.0.0
+
+v3 requires GHCR images to be pushed and optional-extras CI to be green.
+The GHCR workflow failed for two reasons in v2.12.0:
+1. `pytorch/pytorch:1.13.0-cuda11.7-cudnn8-runtime` was removed from
+   Docker Hub (fixed: now uses `1.13.1-cuda11.6-cudnn8-runtime`).
+2. Detectron2 source build fails because `setup.py` imports `torch` but
+   the pip build isolation sandbox has no torch (fixed: `--no-build-
+   isolation` so the ambient torch from the base image is visible).
+
+Local GHCR push is still blocked by token scope (`write:packages` not
+present). The GHA `publish-sidecars.yml` workflow is expected to push
+after this release is published.
+
+#### New features
+
+- `visionservex seg MODEL IMAGE ...` — short alias for
+  `visionservex segment`. The canonical command remains `segment`; `seg`
+  is a Jupyter/Colab convenience shortcut.
+- `visionservex audit validate [--audit-dir DIR] [--json]` — validates
+  all docs/audit artifacts: JSON valid, manifest keys present, every
+  model has notebook_section, non-detection models are not
+  Ultralytics-comparable, blocker codes present, CSV columns correct.
+  Returns `VALID` / `INVALID` with a list of issues.
+- `scripts/test_notebook_manifest_consumption.py` — bridge script that
+  proves the manifest can drive an external client: model counts, quick
+  models, eligible UC models, expected blockers, no gated/non-core model
+  flagged for default auto-run.
+
+#### Bug fixes
+
+- `audit/builder.py`: auth-required models (`requires_auth=True`) and
+  sidecar/unavailable models now force `recommended_colab_mode="sidecar"`
+  instead of inheriting the default "balanced" or "quick" that would
+  make them appear auto-runnable in a notebook.
+- `docker/mmrotate-legacy/Dockerfile`: base image changed from
+  `pytorch/pytorch:1.13.0-cuda11.7-cudnn8-runtime` (removed from Docker
+  Hub) to `pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime` (still
+  available). mmcv download index updated to `cu116/torch1.13.0`.
+- `docker/maskdino/Dockerfile`: Detectron2 source build now uses
+  `pip install --no-build-isolation` so `torch` from the base image is
+  visible during setup.py evaluation.
+- `scripts/build_mmrotate_legacy_sidecar.sh`: comment updated to
+  reflect new base image torch version.
+
+#### Tests
+
+- `tests/test_v2130.py` (new): seg alias, audit validate VALID verdict,
+  notebook manifest consumption PASS, Dockerfile base image fixes,
+  manifest colab_mode correctness for gated models.
+
 ## [2.12.0] - 2026-05-16
 
 ### Audit infrastructure: notebook manifest, model inventory, benchmark plan, Ultralytics comparison plan, license CLI, model-zoo blockers --all

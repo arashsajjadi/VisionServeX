@@ -12,8 +12,8 @@
 # build can take 20+ minutes and pulls ~6 GB of CUDA wheels):
 #   python      3.8
 #   setuptools  < 72
-#   torch       1.13.0+cu117
-#   torchvision 0.14.0
+#   torch       1.13.1+cu116  (1.13.0-cu117 image was removed from Docker Hub)
+#   torchvision 0.14.1
 #   mmcv-full   1.7.2
 #   mmdet       2.28.2
 #   mmrotate    0.3.4
@@ -26,7 +26,9 @@
 #     openmmlab smoke-test oriented-rcnn \
 #       --image examples/images/aerial.jpg --device cpu --out /tmp/out.json
 
-FROM pytorch/pytorch:1.13.0-cuda11.7-cudnn8-runtime
+# pytorch:1.13.0-cuda11.7 was removed from Docker Hub; 1.13.1-cuda11.6 is the
+# closest available official image and is compatible with mmcv-full 1.7.2.
+FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -50,7 +52,7 @@ RUN pip install pydantic pydantic-settings typer rich pillow PyYAML httpx tenaci
 
 # Legacy MMRotate stack — never combine with the mmcv 2.x sidecar image.
 RUN mim install "mmcv-full==1.7.2" \
-        -f https://download.openmmlab.com/mmcv/dist/cu117/torch1.13.0/index.html && \
+        -f https://download.openmmlab.com/mmcv/dist/cu116/torch1.13.0/index.html && \
     mim install "mmdet==2.28.2" && \
     pip install "mmrotate==0.3.4"
 

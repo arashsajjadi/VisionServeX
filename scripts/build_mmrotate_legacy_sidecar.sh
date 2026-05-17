@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Build the legacy MMRotate sidecar (mmcv-full 1.7 / mmdet 2.x / mmrotate
-# 0.3.4 on torch 1.13.0+cu117). The build is intentionally separate from
+# 0.3.4 on torch 1.13.1+cu116). The build is intentionally separate from
 # the v2.9 OpenMMLab sidecar so the two trees never collide.
 
 set -euo pipefail

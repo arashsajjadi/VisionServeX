@@ -2543,3 +2543,29 @@ def benchmark_embeddings_top(
             )
         else:
             console.print(f"  [dim]{payload.get('note', '')}[/dim]")
+
+
+@app.command(
+    "seg",
+    help=(
+        "Short alias for `visionservex segment` — canonical command is `segment`. "
+        "Added for convenience; `segment` is preferred in scripts and docs."
+    ),
+)
+def seg_alias(
+    model_id: str,
+    input_path: Path,
+    conf: float = typer.Option(0.25, "--conf", "--threshold"),
+    device: str | None = typer.Option(None, "--device"),
+    save_image: Path | None = typer.Option(None, "--save-image"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Short alias for `visionservex segment`."""
+    segment_alias(
+        model_id=model_id,
+        input_path=input_path,
+        conf=conf,
+        device=device,
+        save_image=save_image,
+        json_=json_,
+    )

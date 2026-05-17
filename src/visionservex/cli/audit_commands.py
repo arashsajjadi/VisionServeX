@@ -154,3 +154,100 @@ def bundle(
 
 
 __all__ = ["app"]
+
+
+@app.command("validate")
+def validate_cmd(
+    audit_dir: Path = typer.Option(Path("docs/audit"), "--audit-dir"),
+    out: Path = typer.Option(None, "--out"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Validate all audit artifacts for schema consistency and notebook-safety."""
+    import csv as _csv
+
+    issues: list[str] = []
+    passed: list[str] = []
+
+    # Check JSON validity
+    for fname in audit_dir.glob("*.json"):
+        try:
+            json.loads(fname.read_text())
+            passed.append(f"JSON valid: {fname.name}")
+        except json.JSONDecodeError as exc:
+            issues.append(f"INVALID_JSON: {fname.name} — {exc}")
+
+    # Required keys in notebook manifest
+    manifest_path = audit_dir / "visionservex_notebook_input_manifest.json"
+    if manifest_path.exists():
+        manifest = json.loads(manifest_path.read_text())
+        required_keys = [
+            "package",
+            "families",
+            "models",
+            "commands",
+            "benchmark_groups",
+            "ultralytics_comparison",
+            "expected_blockers",
+            "sidecars",
+            "optional_extras",
+            "license_risks",
+            "notebook_sections",
+        ]
+        for key in required_keys:
+            if key not in manifest:
+                issues.append(f"MANIFEST_MISSING_KEY: {key}")
+            else:
+                passed.append(f"manifest_key: {key}")
+
+        # Model-level checks
+        embedding_families = {"dinov2", "clip", "siglip", "siglip2"}
+        for m in manifest.get("models", []):
+            if not m.get("notebook_section"):
+                issues.append(f"MODEL_MISSING_SECTION: {m.get('model_id')}")
+            if m.get("eligible_for_ultralytics_comparison"):
+                fam = m.get("family", "")
+                if m.get("task") not in ("detect",) or fam in embedding_families:
+                    issues.append(
+                        f"INVALID_UC_ELIGIBLE: {m.get('model_id')} "
+                        f"task={m.get('task')} family={fam}"
+                    )
+
+        # Expected blocker codes
+        for b in manifest.get("expected_blockers", []):
+            if not b.get("code"):
+                issues.append(f"BLOCKER_MISSING_CODE: {b}")
+
+    # CSV column check
+    csv_path = audit_dir / "visionservex_model_test_matrix.csv"
+    if csv_path.exists():
+        with open(csv_path) as f:
+            reader = _csv.DictReader(f)
+            fieldnames = reader.fieldnames or []
+        for col in ("model_id", "family", "eligible_for_ultralytics_comparison", "smoke_command"):
+            if col not in fieldnames:
+                issues.append(f"CSV_MISSING_COLUMN: {col}")
+            else:
+                passed.append(f"csv_col: {col}")
+
+    payload = {
+        "audit_dir": str(audit_dir),
+        "n_passed": len(passed),
+        "n_issues": len(issues),
+        "issues": issues,
+        "verdict": "VALID" if not issues else "INVALID",
+    }
+
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2))
+
+    if json_:
+        typer.echo(json.dumps(payload, indent=2))
+        return
+
+    color = "green" if not issues else "red"
+    console.print(
+        f"[{color}]{payload['verdict']}[/{color}] — {len(passed)} passed, {len(issues)} issues"
+    )
+    for iss in issues:
+        console.print(f"  ✗ {iss}")

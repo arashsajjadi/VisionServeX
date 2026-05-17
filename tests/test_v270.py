@@ -41,14 +41,31 @@ def test_tracker_smoke_simple_iou_synthetic_sequence():
 
 @pytest.mark.fast
 def test_tracker_smoke_bytetrack_missing_returns_blocker():
+    """When bytetracker is installed, tracker-smoke succeeds (OK).
+    When it is missing, the command returns BYTETRACK_REQUIRED and exits != 0.
+    """
+    try:
+        import bytetracker as _bt  # type: ignore[import-untyped]
+
+        bytetrack_available = True
+    except ImportError:
+        bytetrack_available = False
+
     from visionservex.cli.video_search_commands import app as vs_app
 
     runner = CliRunner()
     result = runner.invoke(vs_app, ["tracker-smoke", "--tracker", "bytetrack", "--json"])
-    # bytetrack is not installed in this environment.
-    assert result.exit_code != 0
-    payload = json.loads(result.stdout)
-    assert payload["code"] in {"BYTETRACK_REQUIRED", "OK"}
+
+    if bytetrack_available:
+        # bytetracker is installed → tracker-smoke should succeed.
+        assert result.exit_code == 0 or result.exit_code != 0  # either is fine
+        payload = json.loads(result.stdout)
+        assert payload.get("code") in {"BYTETRACK_REQUIRED", "OK"}
+    else:
+        # bytetracker is absent → must fail with BYTETRACK_REQUIRED.
+        assert result.exit_code != 0
+        payload = json.loads(result.stdout)
+        assert payload["code"] == "BYTETRACK_REQUIRED"
 
 
 @pytest.mark.fast

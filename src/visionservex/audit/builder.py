@@ -454,7 +454,15 @@ def _model_row(registry_entry: Any, load_matrix_row: dict[str, Any] | None) -> d
         "expected_result_type": "ok" if mode == "core_load" else "structured_blocker",
         "parser_requirements": _parser_requirements(e.task or ""),
         "resource_profile": resource_profile,
-        "recommended_colab_mode": _get_meta(fam, "colab_mode", "balanced"),
+        # Override: auth-required and sidecar models must not default to quick/balanced.
+        "recommended_colab_mode": (
+            "sidecar"
+            if (
+                mode in ("gated_auth_validate", "sidecar_validate", "unavailable_blocker_validate")
+                or bool(getattr(e, "requires_auth", False))
+            )
+            else _get_meta(fam, "colab_mode", "balanced")
+        ),
         "notes": (e.notes or "")[:200],
     }
 

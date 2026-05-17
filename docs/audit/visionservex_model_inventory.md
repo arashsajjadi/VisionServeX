@@ -1,7 +1,7 @@
 # VisionServeX Model Inventory
 
 Generated: 2026-05-16  
-Package: 2.11.0  
+Package: 2.12.0  
 Total models: 113
 
 | Model | Family | Task | Mode | Colab | Smoke Command |
@@ -19,10 +19,10 @@ Total models: 113
 | swinv2-large | swinv2 | classify | core_load | quick | `visionservex classify swinv2-large <image> --top-k 5` |
 | swinv2-small | swinv2 | classify | core_load | quick | `visionservex classify swinv2-small <image> --top-k 5` |
 | swinv2-tiny | swinv2 | classify | core_load | quick | `visionservex classify swinv2-tiny <image> --top-k 5` |
-| deim-m | deim | detect | unavailable_blocker_validate | balanced | `visionservex detect deim-m <image>` |
-| deim-s | deim | detect | unavailable_blocker_validate | balanced | `visionservex detect deim-s <image>` |
-| deimv2-m | deim | detect | unavailable_blocker_validate | balanced | `visionservex detect deimv2-m <image>` |
-| deimv2-s | deim | detect | unavailable_blocker_validate | balanced | `visionservex detect deimv2-s <image>` |
+| deim-m | deim | detect | unavailable_blocker_validate | sidecar | `visionservex detect deim-m <image>` |
+| deim-s | deim | detect | unavailable_blocker_validate | sidecar | `visionservex detect deim-s <image>` |
+| deimv2-m | deim | detect | unavailable_blocker_validate | sidecar | `visionservex detect deimv2-m <image>` |
+| deimv2-s | deim | detect | unavailable_blocker_validate | sidecar | `visionservex detect deimv2-s <image>` |
 | dfine-l | dfine | detect | core_load | balanced | `visionservex detect dfine-l <image>` |
 | dfine-l-coco | dfine | detect | core_load | balanced | `visionservex detect dfine-l-coco <image>` |
 | dfine-l-o365-coco | dfine | detect | core_load | balanced | `visionservex detect dfine-l-o365-coco <image>` |
@@ -81,8 +81,8 @@ Total models: 113
 | rtmdet-r2-m | rtmdet | obb | sidecar_validate | sidecar | `visionservex openmmlab smoke-test rtmdet-r2-m --device cpu --image <image>` |
 | rtmdet-r2-s | rtmdet | obb | sidecar_validate | sidecar | `visionservex openmmlab smoke-test rtmdet-r2-s --device cpu --image <image>` |
 | rtmdet-r2-t | rtmdet | obb | sidecar_validate | sidecar | `visionservex openmmlab smoke-test rtmdet-r2-t --device cpu --image <image>` |
-| grounding-dino-1.5 | grounding-dino | open_vocab_detect | gated_auth_validate | quick | `visionservex model info grounding-dino-1.5` |
-| grounding-dino-1.6 | grounding-dino | open_vocab_detect | gated_auth_validate | quick | `visionservex model info grounding-dino-1.6` |
+| grounding-dino-1.5 | grounding-dino | open_vocab_detect | gated_auth_validate | sidecar | `visionservex model info grounding-dino-1.5` |
+| grounding-dino-1.6 | grounding-dino | open_vocab_detect | gated_auth_validate | sidecar | `visionservex model info grounding-dino-1.6` |
 | grounding-dino-swin-b | grounding-dino | open_vocab_detect | core_load | quick | `visionservex model info grounding-dino-swin-b` |
 | grounding-dino-swin-t | grounding-dino | open_vocab_detect | core_load | quick | `visionservex model info grounding-dino-swin-t` |
 | grounding-dino-tiny | grounding-dino | open_vocab_detect | core_load | quick | `visionservex model info grounding-dino-tiny` |
@@ -103,11 +103,11 @@ Total models: 113
 | oneformer-convnext-large | oneformer | segment | core_load | balanced | `visionservex segment oneformer-convnext-large <image>` |
 | oneformer-dinat-large | oneformer | segment | core_load | balanced | `visionservex segment oneformer-dinat-large <image>` |
 | oneformer-swin-large | oneformer | segment | core_load | balanced | `visionservex segment oneformer-swin-large <image>` |
-| rfdetr-seg-2xlarge | rfdetr | segment | unavailable_blocker_validate | balanced | `visionservex segment rfdetr-seg-2xlarge <image>` |
-| rfdetr-seg-large | rfdetr | segment | unavailable_blocker_validate | balanced | `visionservex segment rfdetr-seg-large <image>` |
+| rfdetr-seg-2xlarge | rfdetr | segment | unavailable_blocker_validate | sidecar | `visionservex segment rfdetr-seg-2xlarge <image>` |
+| rfdetr-seg-large | rfdetr | segment | unavailable_blocker_validate | sidecar | `visionservex segment rfdetr-seg-large <image>` |
 | rfdetr-seg-medium | rfdetr | segment | core_load | balanced | `visionservex segment rfdetr-seg-medium <image>` |
 | rfdetr-seg-nano | rfdetr | segment | core_load | balanced | `visionservex segment rfdetr-seg-nano <image>` |
 | rfdetr-seg-small | rfdetr | segment | core_load | balanced | `visionservex segment rfdetr-seg-small <image>` |
-| rfdetr-seg-xlarge | rfdetr | segment | unavailable_blocker_validate | balanced | `visionservex segment rfdetr-seg-xlarge <image>` |
+| rfdetr-seg-xlarge | rfdetr | segment | unavailable_blocker_validate | sidecar | `visionservex segment rfdetr-seg-xlarge <image>` |
 | florence-2-base | florence-2 | vlm | core_load | balanced | `visionservex florence2 smoke-test florence-2-base <image> --task caption` |
 | florence-2-large | florence-2 | vlm | core_load | balanced | `visionservex florence2 smoke-test florence-2-large <image> --task caption` |

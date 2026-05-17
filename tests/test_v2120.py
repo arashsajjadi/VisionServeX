@@ -231,7 +231,8 @@ def test_notebook_manifest_json_is_parseable():
 
 
 @pytest.mark.fast
-def test_version_is_2120():
+def test_version_is_at_least_2120():
     import visionservex
 
-    assert visionservex.__version__ == "2.12.0"
+    parts = tuple(int(p) for p in visionservex.__version__.split(".")[:3])
+    assert parts >= (2, 12, 0)

@@ -1,7 +1,7 @@
 {
   "package": {
     "name": "VisionServeX",
-    "version": "2.11.0",
+    "version": "2.12.0",
     "commit": "45bbf4c",
     "audit_date": "2026-05-16",
     "cli_audit_status": "23/23 PASS",
@@ -669,7 +669,7 @@
         "max_allowed_ram_gb": 8.0,
         "max_allowed_vram_gb": 6.0
       },
-      "recommended_colab_mode": "balanced",
+      "recommended_colab_mode": "sidecar",
       "notes": "DEIM Medium. Not yet wired."
     },
     {
@@ -712,7 +712,7 @@
         "max_allowed_ram_gb": 8.0,
         "max_allowed_vram_gb": 4.0
       },
-      "recommended_colab_mode": "balanced",
+      "recommended_colab_mode": "sidecar",
       "notes": "DEIM (Detection with Enriched Information Module). Claimed strong COCO AP. Requires custom integration. Not yet wired."
     },
     {
@@ -755,7 +755,7 @@
         "max_allowed_ram_gb": 8.0,
         "max_allowed_vram_gb": 6.0
       },
-      "recommended_colab_mode": "balanced",
+      "recommended_colab_mode": "sidecar",
       "notes": "DEIMv2 Medium. Not yet wired."
     },
     {
@@ -798,7 +798,7 @@
         "max_allowed_ram_gb": 8.0,
         "max_allowed_vram_gb": 4.0
       },
-      "recommended_colab_mode": "balanced",
+      "recommended_colab_mode": "sidecar",
       "notes": "DEIMv2 (improved DEIM architecture). Claimed competitive COCO mAP. No HF path confirmed. Not yet wired."
     },
     {
@@ -3487,7 +3487,7 @@
         "max_allowed_ram_gb": 8.0,
         "max_allowed_vram_gb": 4.0
       },
-      "recommended_colab_mode": "quick",
+      "recommended_colab_mode": "sidecar",
       "notes": ""
     },
     {
@@ -3530,7 +3530,7 @@
         "max_allowed_ram_gb": 8.0,
         "max_allowed_vram_gb": 4.0
       },
-      "recommended_colab_mode": "quick",
+      "recommended_colab_mode": "sidecar",
       "notes": "API-gated by IDEA-Research. Weights not openly downloadable. Requires upstream API token. VisionServeX does not call external APIs without admin-configured token."
     },
     {
@@ -4562,7 +4562,7 @@
         "max_allowed_ram_gb": 8.0,
         "max_allowed_vram_gb": 16.0
       },
-      "recommended_colab_mode": "balanced",
+      "recommended_colab_mode": "sidecar",
       "notes": "2XL RF-DETR-Seg variant; not yet wired. Requires 16+ GB VRAM. Expert use only."
     },
     {
@@ -4605,7 +4605,7 @@
         "max_allowed_ram_gb": 8.0,
         "max_allowed_vram_gb": 6.0
       },
-      "recommended_colab_mode": "balanced",
+      "recommended_colab_mode": "sidecar",
       "notes": "Larger RF-DETR-Seg variant; not yet wired in this build. Use rfdetr-seg-nano/small/medium for verified inference."
     },
     {
@@ -4777,7 +4777,7 @@
         "max_allowed_ram_gb": 8.0,
         "max_allowed_vram_gb": 10.0
       },
-      "recommended_colab_mode": "balanced",
+      "recommended_colab_mode": "sidecar",
       "notes": "XL RF-DETR-Seg variant; not yet wired. Requires 10+ GB VRAM. Use rfdetr-seg-nano/small for CPU-capable inference."
     },
     {
