@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.13.1] - 2026-05-17
+
+### Patch: Docker Dockerfile package fix for Ubuntu 22.04 + test import fix
+
+Patch-only release on top of v2.13.0 with two Dockerfile fixes needed
+for the GHA `publish-sidecars.yml` workflow to pass.
+
+- `docker/openmmlab/Dockerfile` + `docker/mmrotate-legacy/Dockerfile`:
+  removed `libjpeg-turbo8 libpng16-16 libwebp7 libtiff5` which do not
+  exist on Ubuntu 22.04 (the base image is Ubuntu 22.04 since torch 2.1.0).
+  These packages were not needed for the actual OpenMMLab operations.
+- Same Dockerfiles: added `bash -c "apt-get update -qq || (sleep 5 && ...)"` 
+  retry wrapper in case of transient GHA mirror failures.
+- `tests/test_v270.py`: replaced try/import bytetracker with
+  `importlib.util.find_spec` (ruff-compatible approach for probing optional
+  deps without import side effects).
+
+Note: GHCR images are still not available because the pip installs inside
+the heavy images fail in CI runners (mmcv/torch environment issues). This
+is documented in docs/release_readiness/v3.0.0.md. v3.0.0 release remains
+gated on GHCR push succeeding.
+
 ## [2.13.0] - 2026-05-17
 
 ### Docker Dockerfile fixes; seg alias; audit validate; notebook manifest consumption script; audit colab_mode correctness

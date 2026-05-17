@@ -106,7 +106,8 @@ def test_maskdino_dockerfile_uses_no_build_isolation():
 
 
 @pytest.mark.fast
-def test_version_is_2130():
+def test_version_is_at_least_2130():
     import visionservex
 
-    assert visionservex.__version__ == "2.13.0"
+    parts = tuple(int(p) for p in visionservex.__version__.split(".")[:3])
+    assert parts >= (2, 13, 0)
