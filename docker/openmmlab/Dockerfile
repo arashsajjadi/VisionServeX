@@ -36,7 +36,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 # OS deps
 RUN bash -c "apt-get update -qq || (sleep 5 && apt-get update -qq)" && apt-get install -y --no-install-recommends \
-    ca-certificates libjpeg-turbo8 libpng16-16 libwebp7 libtiff5 \
+    ca-certificates \
     git wget build-essential && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
