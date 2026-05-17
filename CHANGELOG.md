@@ -7,6 +7,81 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.12.0] - 2026-05-16
+
+### Audit infrastructure: notebook manifest, model inventory, benchmark plan, Ultralytics comparison plan, license CLI, model-zoo blockers --all
+
+This release creates a complete machine-readable and human-readable audit
+package that serves as source-of-truth for future Colab notebooks. It
+adds a new `audit` CLI subapp, a `license` subapp, and expands the
+`model-zoo blockers` command.
+
+#### New CLI subapps
+
+- `visionservex audit` (new subapp):
+  - `export-model-inventory [--out FILE]` — full model inventory with 20
+    notebook eligibility flags per model (detection AP, Ultralytics
+    comparison, classification benchmark, segmentation metric, embedding
+    demo, medical demo, agriculture demo, anomaly demo, surveillance demo,
+    sidecar, auth, etc.).
+  - `export-feature-inventory [--out FILE]` — capabilities by
+    notebook section.
+  - `export-command-inventory [--out FILE]` — every public CLI command
+    with `help_status`, `safe_in_colab`, `requires_*` flags.
+  - `export-notebook-manifest [--out FILE]` — complete notebook input
+    manifest (113 models, 27 families, 13 sections, benchmark groups,
+    Ultralytics comparison block, expected blockers, sidecars, optional
+    extras, license risks).
+  - `export-benchmark-plan [--out FILE]` — 13-group benchmark plan
+    in markdown.
+  - `export-ultralytics-plan [--out FILE]` — JSON comparison plan with
+    19 eligible VisionServeX models, caveats, and not-eligible list.
+  - `bundle [--out-dir DIR]` — write all 10 audit artifacts at once.
+- `visionservex license` (new subapp):
+  - `audit [--json]` — run a full license risk audit; returns structured
+    JSON with `n_entries`, `risk_summary`, and `core_safe_verdict`.
+  - `table` — alias for `audit`.
+- `visionservex model-zoo blockers --all` — new flag; emits all 9
+  certified-blocker records as a JSON array.
+
+#### Generated audit artifacts (committed to docs/audit/)
+
+| Artifact | Size |
+|----------|------|
+| `visionservex_model_inventory.json` | 113 models |
+| `visionservex_model_inventory.md` | markdown table |
+| `visionservex_feature_inventory.json` | 14 capabilities |
+| `visionservex_command_inventory.json` | 24 commands |
+| `visionservex_notebook_input_manifest.json` | full manifest |
+| `visionservex_notebook_input_manifest.md` | markdown summary |
+| `visionservex_benchmark_plan.md` | 13 benchmark groups |
+| `visionservex_ultralytics_comparison_plan.json` | 19 eligible models |
+| `visionservex_ultralytics_comparison_plan.md` | markdown version |
+| `visionservex_expected_blockers.md` | 7 structured blockers |
+| `visionservex_model_test_matrix.csv` | 113 rows, 19 columns |
+
+#### Notebook eligibility rules (enforced by tests)
+
+- Only closed-set detection models carry
+  `eligible_for_ultralytics_comparison=True`.
+- Embedding families (dinov2, clip, siglip, siglip2) always carry
+  `eligible_for_ultralytics_comparison=False`.
+- Every model has exactly one `notebook_section`.
+- GPL/AGPL models in the license table have `route=do_not_add`.
+
+#### Source: `src/visionservex/audit/`
+
+The `audit` module is importable without typer/rich — the builder
+functions live in `audit/builder.py` and the CLI in
+`cli/audit_commands.py`.
+
+#### Tests
+
+- `tests/test_v2120.py` (new): 12 tests covering model inventory schema,
+  manifest schema, eligibility invariants, bundle artifact creation, CSV
+  columns, license GPL-not-in-core, blockers --all flag, docs/audit
+  directory populated.
+
 ## [2.11.0] - 2026-05-16
 
 ### v3.0.0 pre-release infrastructure: load-matrix-run, Docker GHCR workflow, cli-audit, clean-install script, CI fixes

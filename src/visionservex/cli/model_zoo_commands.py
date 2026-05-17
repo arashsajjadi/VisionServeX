@@ -620,6 +620,9 @@ CERTIFIED_BLOCKERS: dict[str, dict] = {
 @app.command("blockers")
 def blockers_cmd(
     family: str = typer.Option("", "--family"),
+    all_: bool = typer.Option(
+        False, "--all", help="Emit all certified blockers (no family filter)."
+    ),
     refresh: bool = typer.Option(
         False,
         "--refresh",
@@ -635,6 +638,24 @@ def blockers_cmd(
     missing piece, future unblock condition, blocker certainty).
     """
     from visionservex.model_zoo import SOURCE_MANIFEST
+
+    # --all: emit every certified blocker as a JSON array.
+    if all_:
+        payload_all = [{"family": fam, **cert} for fam, cert in CERTIFIED_BLOCKERS.items()]
+        text = json.dumps(payload_all, indent=2)
+        if out is not None:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(text)
+        if json_ or out is not None:
+            print(text)
+        else:
+            for cert in payload_all:
+                console.print(
+                    f"[bold]{cert['family']}[/bold]  "
+                    f"status={cert.get('status')}  "
+                    f"certainty={cert.get('blocker_certainty')}%"
+                )
+        return
 
     if refresh and family:
         cert = CERTIFIED_BLOCKERS.get(family.lower())

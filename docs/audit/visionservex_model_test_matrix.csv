@@ -1,0 +1,114 @@
+model_id,family,task,expected_load_mode,eligible_for_detection_ap,eligible_for_ultralytics_comparison,eligible_for_classification_benchmark,eligible_for_segmentation_metric,eligible_for_embedding_demo,eligible_for_medical_demo,eligible_for_agriculture_demo,eligible_for_anomaly_demo,eligible_for_surveillance_demo,requires_sidecar,requires_auth,license_risk,expected_blocker_code,recommended_colab_mode,smoke_command
+convnextv2-base,convnextv2,classify,core_load,False,False,True,False,False,False,False,False,False,False,False,none,,quick,visionservex classify convnextv2-base <image> --top-k 5
+convnextv2-large,convnextv2,classify,core_load,False,False,True,False,False,False,False,False,False,False,False,none,,quick,visionservex classify convnextv2-large <image> --top-k 5
+convnextv2-tiny,convnextv2,classify,core_load,False,False,True,False,False,False,False,False,False,False,False,none,,quick,visionservex classify convnextv2-tiny <image> --top-k 5
+internimage-b,internimage,classify,sidecar_validate,False,False,True,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex classify internimage-b <image> --top-k 5
+internimage-h,internimage,classify,sidecar_validate,False,False,True,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex classify internimage-h <image> --top-k 5
+internimage-l,internimage,classify,sidecar_validate,False,False,True,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex classify internimage-l <image> --top-k 5
+internimage-s,internimage,classify,sidecar_validate,False,False,True,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex classify internimage-s <image> --top-k 5
+internimage-t,internimage,classify,sidecar_validate,False,False,True,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex classify internimage-t <image> --top-k 5
+maxvit-tiny-tf-224,maxvit,classify,core_load,False,False,True,False,False,False,False,False,False,False,False,none,,quick,visionservex classify maxvit-tiny-tf-224 <image> --top-k 5
+mock-classify,mock,classify,core_load,False,False,True,False,False,False,False,False,False,False,False,none,,quick,visionservex classify mock-classify <image> --top-k 5
+swinv2-base,swinv2,classify,core_load,False,False,True,False,False,False,False,False,False,False,False,none,,quick,visionservex classify swinv2-base <image> --top-k 5
+swinv2-large,swinv2,classify,core_load,False,False,True,False,False,False,False,False,False,False,False,none,,quick,visionservex classify swinv2-large <image> --top-k 5
+swinv2-small,swinv2,classify,core_load,False,False,True,False,False,False,False,False,False,False,False,none,,quick,visionservex classify swinv2-small <image> --top-k 5
+swinv2-tiny,swinv2,classify,core_load,False,False,True,False,False,False,False,False,False,False,False,none,,quick,visionservex classify swinv2-tiny <image> --top-k 5
+deim-m,deim,detect,unavailable_blocker_validate,True,True,False,False,False,False,False,False,False,False,False,none,UNAVAILABLE_WITH_REASON,balanced,visionservex detect deim-m <image>
+deim-s,deim,detect,unavailable_blocker_validate,True,True,False,False,False,False,False,False,False,False,False,none,UNAVAILABLE_WITH_REASON,balanced,visionservex detect deim-s <image>
+deimv2-m,deim,detect,unavailable_blocker_validate,True,True,False,False,False,False,False,False,False,False,False,none,UNAVAILABLE_WITH_REASON,balanced,visionservex detect deimv2-m <image>
+deimv2-s,deim,detect,unavailable_blocker_validate,True,True,False,False,False,False,False,False,False,False,False,none,UNAVAILABLE_WITH_REASON,balanced,visionservex detect deimv2-s <image>
+dfine-l,dfine,detect,core_load,True,True,False,False,False,False,False,False,False,False,False,none,,balanced,visionservex detect dfine-l <image>
+dfine-l-coco,dfine,detect,core_load,True,True,False,False,False,False,False,False,False,False,False,none,,balanced,visionservex detect dfine-l-coco <image>
+dfine-l-o365-coco,dfine,detect,core_load,True,True,False,False,False,False,False,False,False,False,False,none,,balanced,visionservex detect dfine-l-o365-coco <image>
+dfine-m,dfine,detect,core_load,True,True,False,False,False,False,False,False,False,False,False,none,,balanced,visionservex detect dfine-m <image>
+dfine-m-coco,dfine,detect,core_load,True,True,False,False,False,False,False,False,False,False,False,none,,balanced,visionservex detect dfine-m-coco <image>
+dfine-m-o365-coco,dfine,detect,core_load,True,True,False,False,False,False,False,False,False,False,False,none,,balanced,visionservex detect dfine-m-o365-coco <image>
+dfine-n,dfine,detect,core_load,True,True,False,False,False,False,False,False,False,False,False,none,,balanced,visionservex detect dfine-n <image>
+dfine-n-coco,dfine,detect,core_load,True,True,False,False,False,False,False,False,False,False,False,none,,balanced,visionservex detect dfine-n-coco <image>
+dfine-s,dfine,detect,core_load,True,True,False,False,False,False,False,False,False,False,False,none,,balanced,visionservex detect dfine-s <image>
+dfine-s-coco,dfine,detect,core_load,True,True,False,False,False,False,False,False,False,False,False,none,,balanced,visionservex detect dfine-s-coco <image>
+dfine-s-o365-coco,dfine,detect,core_load,True,True,False,False,False,False,False,False,False,False,False,none,,balanced,visionservex detect dfine-s-o365-coco <image>
+dfine-x,dfine,detect,core_load,True,True,False,False,False,False,False,False,False,False,False,none,,balanced,visionservex detect dfine-x <image>
+dfine-x-coco,dfine,detect,core_load,True,True,False,False,False,False,False,False,False,False,False,none,,balanced,visionservex detect dfine-x-coco <image>
+dfine-x-o365-coco,dfine,detect,core_load,True,True,False,False,False,False,False,False,False,False,False,none,,balanced,visionservex detect dfine-x-o365-coco <image>
+mock-detect,mock,detect,core_load,True,False,False,False,False,False,False,False,False,False,False,none,,quick,visionservex detect mock-detect <image>
+rfdetr-base,rfdetr,detect,core_load,True,True,True,True,False,False,False,False,False,False,False,none,,balanced,visionservex detect rfdetr-base <image>
+rfdetr-large,rfdetr,detect,core_load,True,True,True,True,False,False,False,False,False,False,False,none,,balanced,visionservex detect rfdetr-large <image>
+rfdetr-medium,rfdetr,detect,core_load,True,True,True,True,False,False,False,False,False,False,False,none,,balanced,visionservex detect rfdetr-medium <image>
+rfdetr-nano,rfdetr,detect,core_load,True,True,True,True,False,False,False,False,False,False,False,none,,balanced,visionservex detect rfdetr-nano <image>
+rfdetr-small,rfdetr,detect,core_load,True,True,True,True,False,False,False,False,False,False,False,none,,balanced,visionservex detect rfdetr-small <image>
+rtdetrv4-l,rtdetrv4,detect,unavailable_blocker_validate,True,True,False,False,False,False,False,False,False,False,False,none,UNAVAILABLE_WITH_REASON,sidecar,visionservex detect rtdetrv4-l <image>
+rtdetrv4-m,rtdetrv4,detect,unavailable_blocker_validate,True,True,False,False,False,False,False,False,False,False,False,none,UNAVAILABLE_WITH_REASON,sidecar,visionservex detect rtdetrv4-m <image>
+rtdetrv4-s,rtdetrv4,detect,unavailable_blocker_validate,True,True,False,False,False,False,False,False,False,False,False,none,UNAVAILABLE_WITH_REASON,sidecar,visionservex detect rtdetrv4-s <image>
+rtdetrv4-x,rtdetrv4,detect,unavailable_blocker_validate,True,True,False,False,False,False,False,False,False,False,False,none,UNAVAILABLE_WITH_REASON,sidecar,visionservex detect rtdetrv4-x <image>
+clip-vit-base-patch32,clip,embed,core_load,False,False,False,False,True,False,False,False,False,False,False,none,,quick,visionservex embed clip-vit-base-patch32 <image> --out <out.npy>
+clip-vit-large-patch14,clip,embed,core_load,False,False,False,False,True,False,False,False,False,False,False,none,,quick,visionservex embed clip-vit-large-patch14 <image> --out <out.npy>
+dinov2-base,dinov2,embed,core_load,False,False,False,False,True,False,False,False,False,False,False,none,,quick,visionservex embed dinov2-base <image> --out <out.npy>
+dinov2-giant,dinov2,embed,core_load,False,False,False,False,True,False,False,False,False,False,False,none,,quick,visionservex embed dinov2-giant <image> --out <out.npy>
+dinov2-large,dinov2,embed,core_load,False,False,False,False,True,False,False,False,False,False,False,none,,quick,visionservex embed dinov2-large <image> --out <out.npy>
+dinov2-small,dinov2,embed,core_load,False,False,False,False,True,False,False,False,False,False,False,none,,quick,visionservex embed dinov2-small <image> --out <out.npy>
+siglip-base-patch16-224,siglip,embed,core_load,False,False,False,False,True,False,False,False,False,False,False,none,,quick,visionservex embed siglip-base-patch16-224 <image> --out <out.npy>
+siglip2-base-patch16-224,siglip2,embed,core_load,False,False,False,False,True,False,False,False,False,False,False,none,,quick,visionservex embed siglip2-base-patch16-224 <image> --out <out.npy>
+siglip2-large-patch16-256,siglip2,embed,core_load,False,False,False,False,True,False,False,False,False,False,False,none,,quick,visionservex embed siglip2-large-patch16-256 <image> --out <out.npy>
+siglip2-so400m-patch14-384,siglip2,embed,core_load,False,False,False,False,True,False,False,False,False,False,False,none,,quick,visionservex embed siglip2-so400m-patch14-384 <image> --out <out.npy>
+mock-foundation-segment,mock,foundation_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,quick,visionservex model info mock-foundation-segment
+medsam,sam,foundation_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,quick,"visionservex sam-family smoke-test medsam <image> --box 10,20,100,200"
+sam-vit-base,sam,foundation_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,quick,"visionservex sam-family smoke-test sam-vit-base <image> --box 10,20,100,200"
+sam-vit-huge,sam,foundation_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,quick,"visionservex sam-family smoke-test sam-vit-huge <image> --box 10,20,100,200"
+sam-vit-large,sam,foundation_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,quick,"visionservex sam-family smoke-test sam-vit-large <image> --box 10,20,100,200"
+sam2-hiera-base-plus,sam2,foundation_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,balanced,"visionservex sam-family smoke-test sam2-hiera-base-plus <image> --box 10,20,100,200"
+sam2-hiera-large,sam2,foundation_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,balanced,"visionservex sam-family smoke-test sam2-hiera-large <image> --box 10,20,100,200"
+sam2-hiera-small,sam2,foundation_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,balanced,"visionservex sam-family smoke-test sam2-hiera-small <image> --box 10,20,100,200"
+sam2-hiera-tiny,sam2,foundation_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,balanced,"visionservex sam-family smoke-test sam2-hiera-tiny <image> --box 10,20,100,200"
+sam2.1-hiera-base-plus,sam2.1,foundation_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,balanced,"visionservex sam-family smoke-test sam2.1-hiera-base-plus <image> --box 10,20,100,200"
+sam2.1-hiera-large,sam2.1,foundation_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,balanced,"visionservex sam-family smoke-test sam2.1-hiera-large <image> --box 10,20,100,200"
+sam2.1-hiera-small,sam2.1,foundation_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,balanced,"visionservex sam-family smoke-test sam2.1-hiera-small <image> --box 10,20,100,200"
+sam2.1-hiera-tiny,sam2.1,foundation_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,balanced,"visionservex sam-family smoke-test sam2.1-hiera-tiny <image> --box 10,20,100,200"
+sam3-base,sam3,foundation_segment,gated_auth_validate,False,False,False,True,False,False,False,False,False,False,True,none,GATED_HF_AUTH_REQUIRED,sidecar,visionservex sam-family login-help sam3-base
+grounded-sam,grounded-sam,grounded_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,balanced,visionservex model info grounded-sam
+grounded-sam2,grounded-sam,grounded_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,balanced,visionservex model info grounded-sam2
+mock-grounded-segment,mock,grounded_segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,quick,visionservex model info mock-grounded-segment
+seem-davit-d3,seem,grounded_segment,unavailable_blocker_validate,False,False,False,True,False,False,False,False,False,False,False,none,UNAVAILABLE_WITH_REASON,sidecar,visionservex model info seem-davit-d3
+seem-focal-t,seem,grounded_segment,unavailable_blocker_validate,False,False,False,True,False,False,False,False,False,False,False,none,UNAVAILABLE_WITH_REASON,sidecar,visionservex model info seem-focal-t
+mock-obb,mock,obb,core_load,False,False,False,False,False,False,False,False,False,False,False,none,,quick,visionservex openmmlab smoke-test mock-obb --device cpu --image <image>
+rtmdet-r-l,rtmdet,obb,sidecar_validate,True,False,False,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex openmmlab smoke-test rtmdet-r-l --device cpu --image <image>
+rtmdet-r-m,rtmdet,obb,sidecar_validate,True,False,False,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex openmmlab smoke-test rtmdet-r-m --device cpu --image <image>
+rtmdet-r-s,rtmdet,obb,sidecar_validate,True,False,False,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex openmmlab smoke-test rtmdet-r-s --device cpu --image <image>
+rtmdet-r-t,rtmdet,obb,sidecar_validate,True,False,False,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex openmmlab smoke-test rtmdet-r-t --device cpu --image <image>
+rtmdet-r2-l,rtmdet,obb,sidecar_validate,True,False,False,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex openmmlab smoke-test rtmdet-r2-l --device cpu --image <image>
+rtmdet-r2-m,rtmdet,obb,sidecar_validate,True,False,False,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex openmmlab smoke-test rtmdet-r2-m --device cpu --image <image>
+rtmdet-r2-s,rtmdet,obb,sidecar_validate,True,False,False,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex openmmlab smoke-test rtmdet-r2-s --device cpu --image <image>
+rtmdet-r2-t,rtmdet,obb,sidecar_validate,True,False,False,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex openmmlab smoke-test rtmdet-r2-t --device cpu --image <image>
+grounding-dino-1.5,grounding-dino,open_vocab_detect,gated_auth_validate,True,False,False,False,False,False,False,False,False,False,True,none,GATED_HF_AUTH_REQUIRED,quick,visionservex model info grounding-dino-1.5
+grounding-dino-1.6,grounding-dino,open_vocab_detect,gated_auth_validate,True,False,False,False,False,False,False,False,False,False,True,none,GATED_HF_AUTH_REQUIRED,quick,visionservex model info grounding-dino-1.6
+grounding-dino-swin-b,grounding-dino,open_vocab_detect,core_load,True,False,False,False,False,False,False,False,False,False,False,none,,quick,visionservex model info grounding-dino-swin-b
+grounding-dino-swin-t,grounding-dino,open_vocab_detect,core_load,True,False,False,False,False,False,False,False,False,False,False,none,,quick,visionservex model info grounding-dino-swin-t
+grounding-dino-tiny,grounding-dino,open_vocab_detect,core_load,True,False,False,False,False,False,False,False,False,False,False,none,,quick,visionservex model info grounding-dino-tiny
+mock-open-vocab,mock,open_vocab_detect,core_load,False,False,False,False,False,False,False,False,False,False,False,none,,quick,visionservex model info mock-open-vocab
+owlv2-base-patch16,owlv2,open_vocab_detect,core_load,False,False,False,False,False,False,False,False,False,False,False,none,,quick,visionservex model info owlv2-base-patch16
+owlv2-large-patch14,owlv2,open_vocab_detect,core_load,False,False,False,False,False,False,False,False,False,False,False,none,,quick,visionservex model info owlv2-large-patch14
+owlvit-base-patch32,owlvit,open_vocab_detect,core_load,False,False,False,False,False,False,False,False,False,False,False,none,,quick,visionservex model info owlvit-base-patch32
+owlvit-large-patch14,owlvit,open_vocab_detect,core_load,False,False,False,False,False,False,False,False,False,False,False,none,,quick,visionservex model info owlvit-large-patch14
+mock-pose,mock,pose,core_load,False,False,False,False,False,False,False,False,False,False,False,none,,quick,visionservex openmmlab smoke-test mock-pose --device cpu --image <image>
+rtmpose-l,rtmpose,pose,sidecar_validate,False,False,False,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex openmmlab smoke-test rtmpose-l --device cpu --image <image>
+rtmpose-l-384x288,rtmpose,pose,sidecar_validate,False,False,False,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex openmmlab smoke-test rtmpose-l-384x288 --device cpu --image <image>
+rtmpose-m,rtmpose,pose,sidecar_validate,False,False,False,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex openmmlab smoke-test rtmpose-m --device cpu --image <image>
+rtmpose-m-384x288,rtmpose,pose,sidecar_validate,False,False,False,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex openmmlab smoke-test rtmpose-m-384x288 --device cpu --image <image>
+rtmpose-s,rtmpose,pose,sidecar_validate,False,False,False,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex openmmlab smoke-test rtmpose-s --device cpu --image <image>
+rtmpose-t,rtmpose,pose,sidecar_validate,False,False,False,False,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex openmmlab smoke-test rtmpose-t --device cpu --image <image>
+co-dino-inst-vit-l-coco,co-dino,segment,sidecar_validate,False,False,False,True,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex segment co-dino-inst-vit-l-coco <image>
+co-dino-inst-vit-l-lvis,co-dino,segment,sidecar_validate,False,False,False,True,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex segment co-dino-inst-vit-l-lvis <image>
+maskdino-r50-coco,maskdino,segment,sidecar_validate,False,False,False,True,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex maskdino validate maskdino-r50-coco
+maskdino-r50-panoptic,maskdino,segment,sidecar_validate,False,False,False,True,False,False,False,False,False,True,False,none,SIDECAR_REQUIRED,sidecar,visionservex maskdino validate maskdino-r50-panoptic
+mock-segment,mock,segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,quick,visionservex segment mock-segment <image>
+oneformer-convnext-large,oneformer,segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,balanced,visionservex segment oneformer-convnext-large <image>
+oneformer-dinat-large,oneformer,segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,balanced,visionservex segment oneformer-dinat-large <image>
+oneformer-swin-large,oneformer,segment,core_load,False,False,False,True,False,False,False,False,False,False,False,none,,balanced,visionservex segment oneformer-swin-large <image>
+rfdetr-seg-2xlarge,rfdetr,segment,unavailable_blocker_validate,True,False,True,True,False,False,False,False,False,False,False,none,UNAVAILABLE_WITH_REASON,balanced,visionservex segment rfdetr-seg-2xlarge <image>
+rfdetr-seg-large,rfdetr,segment,unavailable_blocker_validate,True,False,True,True,False,False,False,False,False,False,False,none,UNAVAILABLE_WITH_REASON,balanced,visionservex segment rfdetr-seg-large <image>
+rfdetr-seg-medium,rfdetr,segment,core_load,True,False,True,True,False,False,False,False,False,False,False,none,,balanced,visionservex segment rfdetr-seg-medium <image>
+rfdetr-seg-nano,rfdetr,segment,core_load,True,False,True,True,False,False,False,False,False,False,False,none,,balanced,visionservex segment rfdetr-seg-nano <image>
+rfdetr-seg-small,rfdetr,segment,core_load,True,False,True,True,False,False,False,False,False,False,False,none,,balanced,visionservex segment rfdetr-seg-small <image>
+rfdetr-seg-xlarge,rfdetr,segment,unavailable_blocker_validate,True,False,True,True,False,False,False,False,False,False,False,none,UNAVAILABLE_WITH_REASON,balanced,visionservex segment rfdetr-seg-xlarge <image>
+florence-2-base,florence-2,vlm,core_load,False,False,False,False,True,False,False,False,False,False,False,none,,balanced,visionservex florence2 smoke-test florence-2-base <image> --task caption
+florence-2-large,florence-2,vlm,core_load,False,False,False,False,True,False,False,False,False,False,False,none,,balanced,visionservex florence2 smoke-test florence-2-large <image> --task caption

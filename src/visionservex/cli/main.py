@@ -26,6 +26,7 @@ from visionservex.cli import (
     aerial_commands,
     agriculture_commands,
     anomaly_commands,
+    audit_commands,
     benchmark_anomaly_cmd,
     benchmark_classification,
     benchmark_commands,
@@ -41,6 +42,7 @@ from visionservex.cli import (
     florence2_commands,
     gateway_commands,
     gpu_commands,
+    license_commands,
     maskdino_commands,
     medical_commands,
     model_card_commands,
@@ -133,6 +135,8 @@ app.add_typer(video_search_commands.app, name="video-search")
 app.add_typer(benchmark_open_vocab.app, name="benchmark-open-vocab", invoke_without_command=True)
 app.add_typer(agriculture_commands.app, name="agriculture")
 app.add_typer(aerial_commands.app, name="aerial")
+app.add_typer(audit_commands.app, name="audit")
+app.add_typer(license_commands.app, name="license")
 app.add_typer(florence2_commands.app, name="florence2")
 app.add_typer(sam_family_commands.app, name="sam-family")
 app.add_typer(

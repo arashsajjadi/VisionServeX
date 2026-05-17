@@ -256,7 +256,8 @@ def test_optional_extras_tracking_job_installs_pytest():
 
 
 @pytest.mark.fast
-def test_version_is_2110():
+def test_version_is_at_least_2110():
     import visionservex
 
-    assert visionservex.__version__ == "2.11.0"
+    parts = tuple(int(p) for p in visionservex.__version__.split(".")[:3])
+    assert parts >= (2, 11, 0)

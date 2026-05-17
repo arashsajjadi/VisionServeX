@@ -1,0 +1,232 @@
+{
+  "eligible_visionservex_models": [
+    {
+      "model_id": "dfine-l",
+      "family": "dfine",
+      "task": "detect",
+      "smoke_command": "visionservex detect dfine-l <image>",
+      "benchmark_command": "visionservex val dfine-l --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "dfine-l-coco",
+      "family": "dfine",
+      "task": "detect",
+      "smoke_command": "visionservex detect dfine-l-coco <image>",
+      "benchmark_command": "visionservex val dfine-l-coco --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "dfine-l-o365-coco",
+      "family": "dfine",
+      "task": "detect",
+      "smoke_command": "visionservex detect dfine-l-o365-coco <image>",
+      "benchmark_command": "visionservex val dfine-l-o365-coco --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "dfine-m",
+      "family": "dfine",
+      "task": "detect",
+      "smoke_command": "visionservex detect dfine-m <image>",
+      "benchmark_command": "visionservex val dfine-m --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "dfine-m-coco",
+      "family": "dfine",
+      "task": "detect",
+      "smoke_command": "visionservex detect dfine-m-coco <image>",
+      "benchmark_command": "visionservex val dfine-m-coco --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "dfine-m-o365-coco",
+      "family": "dfine",
+      "task": "detect",
+      "smoke_command": "visionservex detect dfine-m-o365-coco <image>",
+      "benchmark_command": "visionservex val dfine-m-o365-coco --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "dfine-n",
+      "family": "dfine",
+      "task": "detect",
+      "smoke_command": "visionservex detect dfine-n <image>",
+      "benchmark_command": "visionservex val dfine-n --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "dfine-n-coco",
+      "family": "dfine",
+      "task": "detect",
+      "smoke_command": "visionservex detect dfine-n-coco <image>",
+      "benchmark_command": "visionservex val dfine-n-coco --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "dfine-s",
+      "family": "dfine",
+      "task": "detect",
+      "smoke_command": "visionservex detect dfine-s <image>",
+      "benchmark_command": "visionservex val dfine-s --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "dfine-s-coco",
+      "family": "dfine",
+      "task": "detect",
+      "smoke_command": "visionservex detect dfine-s-coco <image>",
+      "benchmark_command": "visionservex val dfine-s-coco --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "dfine-s-o365-coco",
+      "family": "dfine",
+      "task": "detect",
+      "smoke_command": "visionservex detect dfine-s-o365-coco <image>",
+      "benchmark_command": "visionservex val dfine-s-o365-coco --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "dfine-x",
+      "family": "dfine",
+      "task": "detect",
+      "smoke_command": "visionservex detect dfine-x <image>",
+      "benchmark_command": "visionservex val dfine-x --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "dfine-x-coco",
+      "family": "dfine",
+      "task": "detect",
+      "smoke_command": "visionservex detect dfine-x-coco <image>",
+      "benchmark_command": "visionservex val dfine-x-coco --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "dfine-x-o365-coco",
+      "family": "dfine",
+      "task": "detect",
+      "smoke_command": "visionservex detect dfine-x-o365-coco <image>",
+      "benchmark_command": "visionservex val dfine-x-o365-coco --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "rfdetr-base",
+      "family": "rfdetr",
+      "task": "detect",
+      "smoke_command": "visionservex detect rfdetr-base <image>",
+      "benchmark_command": "visionservex val rfdetr-base --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "rfdetr-large",
+      "family": "rfdetr",
+      "task": "detect",
+      "smoke_command": "visionservex detect rfdetr-large <image>",
+      "benchmark_command": "visionservex val rfdetr-large --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "rfdetr-medium",
+      "family": "rfdetr",
+      "task": "detect",
+      "smoke_command": "visionservex detect rfdetr-medium <image>",
+      "benchmark_command": "visionservex val rfdetr-medium --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "rfdetr-nano",
+      "family": "rfdetr",
+      "task": "detect",
+      "smoke_command": "visionservex detect rfdetr-nano <image>",
+      "benchmark_command": "visionservex val rfdetr-nano --dataset yolo:<coco_dir> --max-images 128"
+    },
+    {
+      "model_id": "rfdetr-small",
+      "family": "rfdetr",
+      "task": "detect",
+      "smoke_command": "visionservex detect rfdetr-small <image>",
+      "benchmark_command": "visionservex val rfdetr-small --dataset yolo:<coco_dir> --max-images 128"
+    }
+  ],
+  "ultralytics_baselines": [
+    "yolo11n",
+    "yolo11s"
+  ],
+  "optional_ultralytics_baselines": [
+    "yolo11m",
+    "yolo11l"
+  ],
+  "datasets": [
+    {
+      "id": "coco128-100",
+      "images": 100,
+      "description": "COCO128 subset, balanced quick test"
+    },
+    {
+      "id": "coco_val500",
+      "images": 500,
+      "description": "COCO val2017 subset, opt-in"
+    },
+    {
+      "id": "coco_val_full",
+      "images": 5000,
+      "description": "Full COCO val2017, heavy opt-in"
+    }
+  ],
+  "metrics": [
+    "AP50",
+    "mAP50_95",
+    "precision",
+    "recall",
+    "latency_ms_median",
+    "latency_ms_p95",
+    "imgs_per_sec",
+    "peak_ram_mb"
+  ],
+  "not_eligible": [
+    {
+      "reason": "Not closed-set detection",
+      "families": [
+        "dinov2",
+        "clip",
+        "siglip",
+        "siglip2"
+      ]
+    },
+    {
+      "reason": "Promptable segmentation",
+      "families": [
+        "sam",
+        "sam2",
+        "sam2.1",
+        "medsam"
+      ]
+    },
+    {
+      "reason": "Medical",
+      "families": [
+        "medsam2",
+        "totalsegmentator",
+        "nnunet"
+      ]
+    },
+    {
+      "reason": "Anomaly detection",
+      "families": [
+        "anomalib"
+      ]
+    },
+    {
+      "reason": "Pose estimation",
+      "families": [
+        "rtmpose"
+      ]
+    },
+    {
+      "reason": "OBB",
+      "families": [
+        "rtmdet",
+        "oriented-rcnn"
+      ]
+    },
+    {
+      "reason": "AGPL excluded",
+      "models": [
+        "fastsam-s",
+        "fastsam-x"
+      ]
+    }
+  ],
+  "caveats": [
+    "100-image COCO128 subset is not SOTA proof",
+    "Prompt-based/open-vocab models are not directly comparable without closed-set config",
+    "VisionServeX honesty policy: if YOLO wins, the report says so",
+    "VisionServeX value is multi-family platform breadth, not single-task COCO leaderboard"
+  ]
+}
