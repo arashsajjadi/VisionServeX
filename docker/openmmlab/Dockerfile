@@ -35,7 +35,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     VISIONSERVEX_CACHE_DIR=/cache/visionservex
 
 # OS deps
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN bash -c "apt-get update -qq || (sleep 5 && apt-get update -qq)" && apt-get install -y --no-install-recommends \
     ca-certificates libjpeg-turbo8 libpng16-16 libwebp7 libtiff5 \
     git wget build-essential && rm -rf /var/lib/apt/lists/*
 

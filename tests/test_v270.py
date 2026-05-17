@@ -44,12 +44,9 @@ def test_tracker_smoke_bytetrack_missing_returns_blocker():
     """When bytetracker is installed, tracker-smoke succeeds (OK).
     When it is missing, the command returns BYTETRACK_REQUIRED and exits != 0.
     """
-    try:
-        import bytetracker as _bt  # type: ignore[import-untyped]
+    import importlib
 
-        bytetrack_available = True
-    except ImportError:
-        bytetrack_available = False
+    bytetrack_available = importlib.util.find_spec("bytetracker") is not None
 
     from visionservex.cli.video_search_commands import app as vs_app
 

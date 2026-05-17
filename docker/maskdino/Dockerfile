@@ -31,7 +31,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     VISIONSERVEX_CACHE_DIR=/cache/visionservex
 
 # OS deps including build tools needed for Detectron2 custom ops.
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN bash -c "apt-get update -qq || (sleep 5 && apt-get update -qq)" && apt-get install -y --no-install-recommends \
     ca-certificates git wget build-essential ninja-build \
     libgl1-mesa-glx libglib2.0-0 && \
     rm -rf /var/lib/apt/lists/*
