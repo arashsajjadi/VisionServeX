@@ -1,0 +1,70 @@
+{
+  "manifest_path": "docs/audit/visionservex_notebook_input_manifest.json",
+  "n_models": 5,
+  "n_pass": 5,
+  "n_fail": 0,
+  "n_skip": 0,
+  "models": [
+    {
+      "model_id": "convnextv2-base",
+      "family": "convnextv2",
+      "task": "classify",
+      "notebook_section": "classification",
+      "registry_status": "FOUND",
+      "command_synth": "OK",
+      "smoke_command": "visionservex classify convnextv2-base <image> --top-k 5",
+      "eligible_for_ultralytics_comparison": false,
+      "verdict": "PASS",
+      "notes": "license=Apache-2.0"
+    },
+    {
+      "model_id": "convnextv2-large",
+      "family": "convnextv2",
+      "task": "classify",
+      "notebook_section": "classification",
+      "registry_status": "FOUND",
+      "command_synth": "OK",
+      "smoke_command": "visionservex classify convnextv2-large <image> --top-k 5",
+      "eligible_for_ultralytics_comparison": false,
+      "verdict": "PASS",
+      "notes": "license=Apache-2.0"
+    },
+    {
+      "model_id": "convnextv2-tiny",
+      "family": "convnextv2",
+      "task": "classify",
+      "notebook_section": "classification",
+      "registry_status": "FOUND",
+      "command_synth": "OK",
+      "smoke_command": "visionservex classify convnextv2-tiny <image> --top-k 5",
+      "eligible_for_ultralytics_comparison": false,
+      "verdict": "PASS",
+      "notes": "license=Apache-2.0"
+    },
+    {
+      "model_id": "internimage-b",
+      "family": "internimage",
+      "task": "classify",
+      "notebook_section": "openmmlab_sidecar",
+      "registry_status": "FOUND",
+      "command_synth": "OK",
+      "smoke_command": "visionservex classify internimage-b <image> --top-k 5",
+      "eligible_for_ultralytics_comparison": false,
+      "verdict": "PASS",
+      "notes": "license=MIT"
+    },
+    {
+      "model_id": "internimage-h",
+      "family": "internimage",
+      "task": "classify",
+      "notebook_section": "openmmlab_sidecar",
+      "registry_status": "FOUND",
+      "command_synth": "OK",
+      "smoke_command": "visionservex classify internimage-h <image> --top-k 5",
+      "eligible_for_ultralytics_comparison": false,
+      "verdict": "PASS",
+      "notes": "license=MIT"
+    }
+  ],
+  "verdict": "PASS"
+}

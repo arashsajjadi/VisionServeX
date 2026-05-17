@@ -25,11 +25,13 @@ from visionservex import __version__
 from visionservex.cli import (
     aerial_commands,
     agriculture_commands,
+    annotate_commands,
     anomaly_commands,
     audit_commands,
     benchmark_anomaly_cmd,
     benchmark_classification,
     benchmark_commands,
+    benchmark_detection_cmd,
     benchmark_open_vocab,
     benchmark_surveillance,
     capabilities_commands,
@@ -37,12 +39,14 @@ from visionservex.cli import (
     dev_commands,
     domain_zoo_commands,
     downloads_commands,
+    draw_commands,
     embedding_commands,
     expert_commands,
     florence2_commands,
     gateway_commands,
     gpu_commands,
     license_commands,
+    live_commands,
     maskdino_commands,
     medical_commands,
     model_card_commands,
@@ -145,6 +149,15 @@ app.add_typer(
 app.add_typer(benchmark_anomaly_cmd.app, name="benchmark-anomaly", invoke_without_command=True)
 app.add_typer(
     benchmark_surveillance.app, name="benchmark-surveillance-search", invoke_without_command=True
+)
+app.add_typer(draw_commands.app, name="draw")
+app.add_typer(annotate_commands.app, name="annotate")
+app.add_typer(live_commands.app, name="live", invoke_without_command=True)
+app.add_typer(
+    benchmark_detection_cmd.app_det, name="benchmark-detection", invoke_without_command=True
+)
+app.add_typer(
+    benchmark_detection_cmd.app_ult, name="benchmark-ultralytics", invoke_without_command=True
 )
 
 # Top-level embedding aliases for Ultralytics-style ergonomics

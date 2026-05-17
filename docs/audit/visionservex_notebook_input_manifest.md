@@ -1,6 +1,6 @@
 # VisionServeX Notebook Input Manifest
 
-Version: 2.12.0  
+Version: 2.13.1  
 Audit date: 2026-05-16  
 Models: 113  
 Families: 27

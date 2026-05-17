@@ -359,6 +359,75 @@ _ANOMALY_FAMILIES = {"anomalib"}
 _SURVEILLANCE_FAMILIES = {"bytetrack", "osnet"}
 
 
+_OVERLAY_BY_TASK: dict[str, str] = {
+    "detect": "boxes",
+    "open_vocab_detect": "boxes",
+    "segment": "masks",
+    "foundation_segment": "masks",
+    "grounded_segment": "masks",
+    "pose": "pose",
+    "obb": "obb",
+    "track": "tracks",
+    "classify": "classification_text",
+    "embed": "embedding_none",
+    "feature": "embedding_none",
+    "vlm": "classification_text",
+}
+
+_DRAW_SUBCMD_BY_OVERLAY: dict[str, str] = {
+    "boxes": "draw image",
+    "masks": "draw segment",
+    "pose": "draw pose",
+    "obb": "draw obb",
+    "tracks": "draw tracks",
+    "classification_text": "draw image",
+    "embedding_none": "",
+}
+
+_LIVE_VIDEO_TASKS: set[str] = {
+    "detect",
+    "open_vocab_detect",
+    "segment",
+    "foundation_segment",
+    "grounded_segment",
+    "pose",
+    "obb",
+    "track",
+    "classify",
+}
+
+
+def _overlay_meta(task: str, family: str) -> dict[str, Any]:
+    """Compute draw_command / live_supported / video_supported / overlay_type."""
+    overlay = _OVERLAY_BY_TASK.get(task, "boxes" if "yolo" in family else "embedding_none")
+    draw_sub = _DRAW_SUBCMD_BY_OVERLAY.get(overlay, "")
+    draw_cmd = (
+        f"visionservex {draw_sub} --image <image> --pred <pred.json> --out <out.jpg>"
+        if draw_sub else ""
+    )
+    live_supported = task in _LIVE_VIDEO_TASKS
+    video_supported = live_supported
+    # Rough FPS class — coarse, never claimed as measured.
+    if family in {"yolo", "yolov8", "yolov11", "yolo11", "rtmdet"}:
+        fps_class = "realtime"
+    elif family in {"dfine", "rfdetr", "owlvit", "groundingdino"}:
+        fps_class = "near-realtime"
+    elif family in {"sam", "sam2", "sam21", "sam3"}:
+        fps_class = "interactive"
+    elif task in ("embed", "feature", "vlm"):
+        fps_class = "batch"
+    else:
+        fps_class = "interactive"
+    return {
+        "draw_command": draw_cmd,
+        "live_supported": live_supported,
+        "video_supported": video_supported,
+        "expected_overlay_type": overlay,
+        "recommended_live_source": "0" if live_supported else None,
+        "expected_fps_class": fps_class,
+    }
+
+
 def _model_row(registry_entry: Any, load_matrix_row: dict[str, Any] | None) -> dict[str, Any]:
     e = registry_entry
     fam = (e.family or "").lower()
@@ -422,6 +491,7 @@ def _model_row(registry_entry: Any, load_matrix_row: dict[str, Any] | None) -> d
         }
         section = task_section_map.get(e.task, "other")
 
+    overlay = _overlay_meta(e.task or "", fam)
     return {
         "model_id": e.id,
         "display_name": e.id.replace("-", " ").title(),
@@ -435,6 +505,12 @@ def _model_row(registry_entry: Any, load_matrix_row: dict[str, Any] | None) -> d
         "load_command": load_cmd,
         "smoke_command": smoke_cmd,
         "benchmark_command": bench_cmd,
+        "draw_command": overlay["draw_command"],
+        "live_supported": overlay["live_supported"],
+        "video_supported": overlay["video_supported"],
+        "expected_overlay_type": overlay["expected_overlay_type"],
+        "recommended_live_source": overlay["recommended_live_source"],
+        "expected_fps_class": overlay["expected_fps_class"],
         "notebook_section": section,
         "eligible_for_detection_ap": eligible_detection,
         "eligible_for_ultralytics_comparison": eligible_ultralytics,

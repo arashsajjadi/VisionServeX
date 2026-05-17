@@ -1,0 +1,6 @@
+model_id,family,task,notebook_section,registry_status,command_synth,smoke_command,eligible_for_ultralytics_comparison,verdict,notes
+convnextv2-base,convnextv2,classify,classification,FOUND,OK,visionservex classify convnextv2-base <image> --top-k 5,False,PASS,license=Apache-2.0
+convnextv2-large,convnextv2,classify,classification,FOUND,OK,visionservex classify convnextv2-large <image> --top-k 5,False,PASS,license=Apache-2.0
+convnextv2-tiny,convnextv2,classify,classification,FOUND,OK,visionservex classify convnextv2-tiny <image> --top-k 5,False,PASS,license=Apache-2.0
+internimage-b,internimage,classify,openmmlab_sidecar,FOUND,OK,visionservex classify internimage-b <image> --top-k 5,False,PASS,license=MIT
+internimage-h,internimage,classify,openmmlab_sidecar,FOUND,OK,visionservex classify internimage-h <image> --top-k 5,False,PASS,license=MIT

@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.14.0] - 2026-05-17
+
+### Added: Package-level visualization, live inference, annotate CLI
+
+This release introduces first-class visualization and live-video infrastructure
+so the upcoming end-to-end notebook does not have to reimplement drawing.
+
+**New package APIs**:
+
+- `visionservex.visualization` — `draw_detections`, `draw_ground_truth`,
+  `draw_prediction_comparison`, `draw_segmentation_masks`, `draw_pose`,
+  `draw_obb`, `draw_tracks`, `draw_video_frame`, `annotate_image` (router).
+- `visionservex.runtime.video_io` — `VideoSource`, `VideoFrame`,
+  `open_video_source(...)`, `make_synthetic_video(...)`. Supports webcam
+  integer, local video (.mp4/.mov/.avi/.mkv), RTSP/HTTP/MJPEG URL, image
+  folder/glob. OpenCV loaded lazily.
+- `visionservex.runtime.live` — `LiveConfig`, `LiveResult`, `run_live(...)`,
+  `summarize_live(...)`. Single-model load, per-frame JSONL output,
+  median/p95 latency reporting, dry-run mode for headless CI.
+
+**New CLI subapps**:
+
+- `visionservex draw image|gt|compare|segment|pose|obb|tracks` — renders
+  prediction JSON onto an image.
+- `visionservex annotate image|video|frames` — renders single image, video
+  frames, or a folder using JSON/JSONL payloads.
+- `visionservex live --source 0|<file>|<rtsp> --model ... --task ...` —
+  webcam/video/RTSP streaming inference with `--dry-run`, `--display`,
+  `--out`, `--json-out`, `--max-frames`, `--target-fps`, `--show-fps`.
+- `visionservex audit syntax-debug` — iterates every model in the notebook
+  manifest, validates registry lookup + canonical command synth, writes
+  JSON + CSV report. Does NOT load weights.
+- `visionservex benchmark-detection --model ... --dataset yolo:<path>` —
+  AP50/AP75/mAP50:95 + latency p50/p95 wrapper.
+- `visionservex benchmark-ultralytics --model ... --yolo yolo11n
+  --dataset yolo:<path>` — same dataset, head-to-head vs Ultralytics
+  baseline. Both refuse synthetic mode (no labelled GT, no AP).
+
+**Manifest additions**:
+
+The notebook manifest now records per-model `draw_command`, `live_supported`,
+`video_supported`, `expected_overlay_type`, `recommended_live_source`, and
+`expected_fps_class` so notebook authors can route models to the correct
+overlay function without per-model special cases.
+
+**Constraints upheld**:
+
+- No fake predictions, no fake FPS claims, no fake webcam success in CI.
+- benchmark-detection/benchmark-ultralytics reject synthetic mode because
+  AP without ground truth would be dishonest.
+- `live --dry-run` does not load the model and does not open hardware.
+
 ## [2.13.1] - 2026-05-17
 
 ### Patch: Docker Dockerfile package fix for Ubuntu 22.04 + test import fix

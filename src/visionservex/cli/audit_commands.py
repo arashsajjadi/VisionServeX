@@ -153,9 +153,6 @@ def bundle(
     typer.echo(json.dumps({"n_artifacts": len(written), "artifacts": written}, indent=2))
 
 
-__all__ = ["app"]
-
-
 @app.command("validate")
 def validate_cmd(
     audit_dir: Path = typer.Option(Path("docs/audit"), "--audit-dir"),
@@ -251,3 +248,142 @@ def validate_cmd(
     )
     for iss in issues:
         console.print(f"  ✗ {iss}")
+
+
+@app.command("syntax-debug")
+def syntax_debug(
+    out: Path = typer.Option(
+        Path("docs/audit/visionservex_syntax_debug_report.json"),
+        "--out",
+    ),
+    csv_out: Path = typer.Option(
+        Path("docs/audit/visionservex_syntax_debug_report.csv"),
+        "--csv-out",
+    ),
+    limit: int | None = typer.Option(None, "--limit", help="Only iterate first N models"),
+    only_family: str | None = typer.Option(None, "--only-family"),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Run a structural smoke per manifest model: registry lookup + canonical command synth.
+
+    This does NOT load weights or run inference. It iterates the notebook
+    manifest, validates that each model_id exists in the registry, checks the
+    canonical smoke command synthesis works, and writes a per-model status
+    report to ``docs/audit/visionservex_syntax_debug_report.{json,csv}``.
+    """
+    import csv as _csv
+
+    from visionservex.registry import default_registry
+
+    manifest_path = Path("docs/audit/visionservex_notebook_input_manifest.json")
+    if not manifest_path.exists():
+        payload = {"verdict": "MANIFEST_MISSING", "manifest_path": str(manifest_path)}
+        if json_:
+            typer.echo(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[red]MANIFEST_MISSING:[/red] {manifest_path}")
+        raise typer.Exit(code=2)
+
+    manifest = json.loads(manifest_path.read_text())
+    models = manifest.get("models", [])
+    if only_family:
+        models = [m for m in models if m.get("family") == only_family]
+    if limit:
+        models = models[:limit]
+
+    registry = default_registry()
+    rows: list[dict] = []
+    n_pass = n_fail = n_skip = 0
+    for m in models:
+        model_id = m.get("model_id", "")
+        family = m.get("family", "")
+        task = m.get("task", "")
+        notebook_section = m.get("notebook_section", "")
+        smoke_command = m.get("smoke_command") or ""
+        eligible_uc = bool(m.get("eligible_for_ultralytics_comparison"))
+
+        row: dict = {
+            "model_id": model_id,
+            "family": family,
+            "task": task,
+            "notebook_section": notebook_section,
+            "registry_status": "",
+            "command_synth": "",
+            "smoke_command": smoke_command,
+            "eligible_for_ultralytics_comparison": eligible_uc,
+            "verdict": "",
+            "notes": "",
+        }
+
+        # Registry lookup
+        try:
+            spec = registry.get(model_id)
+            row["registry_status"] = "FOUND"
+            row["notes"] = f"license={getattr(spec, 'license', '?')}"
+        except Exception as exc:
+            row["registry_status"] = "NOT_FOUND"
+            row["verdict"] = "FAIL"
+            row["notes"] = str(exc)[:120]
+            rows.append(row)
+            n_fail += 1
+            continue
+
+        # Command synthesis check (must be non-empty, must start with `visionservex `)
+        if not smoke_command or not smoke_command.startswith("visionservex "):
+            row["command_synth"] = "BAD"
+            row["verdict"] = "FAIL"
+            row["notes"] = "smoke_command missing or malformed"
+            rows.append(row)
+            n_fail += 1
+            continue
+
+        row["command_synth"] = "OK"
+        row["verdict"] = "PASS"
+        rows.append(row)
+        n_pass += 1
+
+    payload = {
+        "manifest_path": str(manifest_path),
+        "n_models": len(rows),
+        "n_pass": n_pass,
+        "n_fail": n_fail,
+        "n_skip": n_skip,
+        "models": rows,
+        "verdict": "PASS" if n_fail == 0 else "FAIL",
+    }
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, indent=2))
+
+    csv_out.parent.mkdir(parents=True, exist_ok=True)
+    if rows:
+        with open(csv_out, "w", newline="", encoding="utf-8") as fh:
+            writer = _csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
+            writer.writeheader()
+            writer.writerows(rows)
+
+    if json_:
+        typer.echo(
+            json.dumps(
+                {
+                    "verdict": payload["verdict"],
+                    "n_models": payload["n_models"],
+                    "n_pass": n_pass,
+                    "n_fail": n_fail,
+                    "out": str(out),
+                    "csv_out": str(csv_out),
+                },
+                indent=2,
+            )
+        )
+        return
+
+    color = "green" if n_fail == 0 else "red"
+    console.print(
+        f"[{color}]{payload['verdict']}[/{color}] — {n_pass}/{len(rows)} pass, {n_fail} fail"
+    )
+    console.print(f"  → {out}")
+    console.print(f"  → {csv_out}")
+
+
+__all__ = ["app"]
