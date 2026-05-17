@@ -20,7 +20,9 @@ from PIL import Image, ImageDraw, ImageFont
 # ─── Color helpers ──────────────────────────────────────────────────────────
 
 
-def _deterministic_color(key: str | int, *, saturation: float = 0.85, value: float = 0.95) -> tuple[int, int, int]:
+def _deterministic_color(
+    key: str | int, *, saturation: float = 0.85, value: float = 0.95
+) -> tuple[int, int, int]:
     """Deterministic RGB color from a string/int key (HSV → RGB).
 
     Same key always returns the same color so repeated calls across frames
@@ -37,8 +39,12 @@ def _deterministic_color(key: str | int, *, saturation: float = 0.85, value: flo
     t = v * (1 - (1 - f) * s)
     i %= 6
     r, g, b = {
-        0: (v, t, p), 1: (q, v, p), 2: (p, v, t),
-        3: (p, q, v), 4: (t, p, v), 5: (v, p, q),
+        0: (v, t, p),
+        1: (q, v, p),
+        2: (p, v, t),
+        3: (p, q, v),
+        4: (t, p, v),
+        5: (v, p, q),
     }[i]
     return (int(r * 255), int(g * 255), int(b * 255))
 
@@ -148,12 +154,22 @@ def _extract_xyxy(box: Any) -> tuple[float, float, float, float] | None:
                 return None
         if "xmin" in box and "ymin" in box:
             try:
-                return float(box["xmin"]), float(box["ymin"]), float(box["xmax"]), float(box["ymax"])
+                return (
+                    float(box["xmin"]),
+                    float(box["ymin"]),
+                    float(box["xmax"]),
+                    float(box["ymax"]),
+                )
             except (TypeError, KeyError, ValueError):
                 return None
         if "left" in box and "top" in box:
             try:
-                return float(box["left"]), float(box["top"]), float(box["right"]), float(box["bottom"])
+                return (
+                    float(box["left"]),
+                    float(box["top"]),
+                    float(box["right"]),
+                    float(box["bottom"]),
+                )
             except (TypeError, KeyError, ValueError):
                 return None
     if isinstance(box, (list, tuple)) and len(box) == 4:
@@ -182,7 +198,7 @@ def draw_ground_truth(
     img = _ensure_image(image)
     draw = ImageDraw.Draw(img)
     font = _load_font(font_size)
-    for gt in (ground_truth or []):
+    for gt in ground_truth or []:
         box = _extract_xyxy(gt.get("box") or gt.get("xyxy") or gt.get("bbox"))
         if box is None:
             continue
@@ -205,7 +221,9 @@ def draw_prediction_comparison(
     """Draw ground truth (green) and predictions (per-class colors) overlaid."""
     img = _ensure_image(image)
     img = draw_ground_truth(img, ground_truth, line_width=line_width, font_size=font_size)
-    img = draw_detections(img, predictions, line_width=line_width, font_size=font_size, show_no_predictions=False)
+    img = draw_detections(
+        img, predictions, line_width=line_width, font_size=font_size, show_no_predictions=False
+    )
     return img
 
 
@@ -276,7 +294,9 @@ def draw_segmentation_masks(
             if m.get("box")
         ]
         if det_list:
-            img_rgb = draw_detections(img_rgb, det_list, font_size=font_size, show_no_predictions=False)
+            img_rgb = draw_detections(
+                img_rgb, det_list, font_size=font_size, show_no_predictions=False
+            )
     return img_rgb
 
 
@@ -284,10 +304,22 @@ def draw_segmentation_masks(
 
 
 _COCO_SKELETON = [
-    (5, 7), (7, 9), (6, 8), (8, 10),  # arms
-    (11, 13), (13, 15), (12, 14), (14, 16),  # legs
-    (5, 6), (11, 12), (5, 11), (6, 12),  # torso
-    (0, 1), (0, 2), (1, 3), (2, 4),  # head
+    (5, 7),
+    (7, 9),
+    (6, 8),
+    (8, 10),  # arms
+    (11, 13),
+    (13, 15),
+    (12, 14),
+    (14, 16),  # legs
+    (5, 6),
+    (11, 12),
+    (5, 11),
+    (6, 12),  # torso
+    (0, 1),
+    (0, 2),
+    (1, 3),
+    (2, 4),  # head
 ]
 
 
@@ -345,8 +377,11 @@ def draw_pose(
         # Draw keypoints
         for x, y, s in kps:
             if s >= kpt_threshold:
-                draw.ellipse([x - kpt_radius, y - kpt_radius, x + kpt_radius, y + kpt_radius],
-                              fill=color, outline=color)
+                draw.ellipse(
+                    [x - kpt_radius, y - kpt_radius, x + kpt_radius, y + kpt_radius],
+                    fill=color,
+                    outline=color,
+                )
 
         # Optional bbox
         box = _extract_xyxy(person.get("bbox") or person.get("box"))
@@ -376,7 +411,7 @@ def draw_obb(
     draw = ImageDraw.Draw(img)
     font = _load_font(font_size)
 
-    for obb in (oriented_boxes or []):
+    for obb in oriented_boxes or []:
         try:
             xc = float(obb["x_center"])
             yc = float(obb["y_center"])
@@ -437,7 +472,7 @@ def draw_tracks(
     draw = ImageDraw.Draw(img)
     font = _load_font(font_size)
 
-    for tb in (tracks or []):
+    for tb in tracks or []:
         box = _extract_xyxy(tb.get("box") or tb.get("xyxy"))
         if box is None:
             continue
@@ -484,8 +519,13 @@ def draw_video_frame(
     if payload.get("masks"):
         img = draw_segmentation_masks(img, payload["masks"], font_size=font_size)
     if payload.get("detections"):
-        img = draw_detections(img, payload["detections"], font_size=font_size, line_width=line_width,
-                              show_no_predictions=False)
+        img = draw_detections(
+            img,
+            payload["detections"],
+            font_size=font_size,
+            line_width=line_width,
+            show_no_predictions=False,
+        )
     if payload.get("tracks"):
         img = draw_tracks(img, payload["tracks"], font_size=font_size, line_width=line_width)
     if payload.get("pose"):
@@ -538,21 +578,31 @@ def annotate_image(
         return img
     if task == "obb" or payload.get("oriented_boxes"):
         return draw_obb(
-            image, payload.get("oriented_boxes"),
-            font_size=font_size, line_width=line_width,
-            hide_labels=hide_labels, hide_conf=hide_conf,
+            image,
+            payload.get("oriented_boxes"),
+            font_size=font_size,
+            line_width=line_width,
+            hide_labels=hide_labels,
+            hide_conf=hide_conf,
         )
     if task == "pose" or payload.get("persons"):
         return draw_pose(image, payload.get("persons"), line_width=line_width)
     if task in ("segment", "foundation_segment") or payload.get("masks"):
         return draw_segmentation_masks(
-            image, payload.get("masks"), font_size=font_size, alpha=mask_alpha,
+            image,
+            payload.get("masks"),
+            font_size=font_size,
+            alpha=mask_alpha,
         )
     if payload.get("tracks"):
         return draw_tracks(image, payload["tracks"], font_size=font_size, line_width=line_width)
     return draw_detections(
-        image, payload.get("detections") or [], font_size=font_size, line_width=line_width,
-        hide_labels=hide_labels, hide_conf=hide_conf,
+        image,
+        payload.get("detections") or [],
+        font_size=font_size,
+        line_width=line_width,
+        hide_labels=hide_labels,
+        hide_conf=hide_conf,
     )
 
 

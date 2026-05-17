@@ -190,14 +190,20 @@ def run_live(config: LiveConfig) -> Iterator[dict[str, Any]]:
             t0 = time.time()
             try:
                 kwargs: dict[str, Any] = {}
-                if config.task in ("open-vocab", "open_vocab", "open_vocab_detect") and config.prompt:
+                if (
+                    config.task in ("open-vocab", "open_vocab", "open_vocab_detect")
+                    and config.prompt
+                ):
                     kwargs["prompt"] = config.prompt
                 result = model.predict(frame.image, **kwargs)
                 runtime_ms = (time.time() - t0) * 1000.0
                 inference_ms_list.append(runtime_ms)
                 payload = _per_frame_payload(
-                    result, frame_index=frame.frame_index, time_sec=frame.time_sec,
-                    runtime_ms=runtime_ms, config=config,
+                    result,
+                    frame_index=frame.frame_index,
+                    time_sec=frame.time_sec,
+                    runtime_ms=runtime_ms,
+                    config=config,
                 )
             except Exception as exc:  # pragma: no cover - per-frame error
                 payload = {

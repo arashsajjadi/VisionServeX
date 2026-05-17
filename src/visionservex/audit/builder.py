@@ -403,7 +403,8 @@ def _overlay_meta(task: str, family: str) -> dict[str, Any]:
     draw_sub = _DRAW_SUBCMD_BY_OVERLAY.get(overlay, "")
     draw_cmd = (
         f"visionservex {draw_sub} --image <image> --pred <pred.json> --out <out.jpg>"
-        if draw_sub else ""
+        if draw_sub
+        else ""
     )
     live_supported = task in _LIVE_VIDEO_TASKS
     video_supported = live_supported

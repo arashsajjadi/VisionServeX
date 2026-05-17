@@ -26,9 +26,13 @@ console = Console()
 
 @app.callback(invoke_without_command=True)
 def live(
-    source: str = typer.Option(..., "--source", help="0/1 webcam, mp4/avi/mkv/mov, rtsp://, http://, folder, glob"),
+    source: str = typer.Option(
+        ..., "--source", help="0/1 webcam, mp4/avi/mkv/mov, rtsp://, http://, folder, glob"
+    ),
     model: str = typer.Option(..., "--model", help="Model id from the VisionServeX registry"),
-    task: str = typer.Option("detect", "--task", help="detect|segment|classify|open-vocab|pose|obb|track"),
+    task: str = typer.Option(
+        "detect", "--task", help="detect|segment|classify|open-vocab|pose|obb|track"
+    ),
     prompt: str | None = typer.Option(None, "--prompt", help="Open-vocab prompt (text classes)"),
     device: str = typer.Option("auto", "--device"),
     confidence: float = typer.Option(0.25, "--conf"),
@@ -106,7 +110,9 @@ def live(
                 if output_json:
                     typer.echo(json.dumps(payload, indent=2))
                 else:
-                    console.print(f"[green]DRY_RUN_OK[/green] source={source} model={model} task={task}")
+                    console.print(
+                        f"[green]DRY_RUN_OK[/green] source={source} model={model} task={task}"
+                    )
                 return
 
             if payload.get("errors"):

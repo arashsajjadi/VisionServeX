@@ -43,7 +43,7 @@ class VideoSourceOpenFailedError(Exception):
 class VideoFrame:
     frame_index: int
     time_sec: float
-    image: Any   # PIL.Image
+    image: Any  # PIL.Image
     width: int
     height: int
     source: str
@@ -207,7 +207,8 @@ def open_video_source(
             paths = sorted(glob.glob(src))
         else:
             paths = sorted(
-                p for p in (str(x) for x in Path(src).iterdir())
+                p
+                for p in (str(x) for x in Path(src).iterdir())
                 if p.lower().endswith((".jpg", ".jpeg", ".png", ".bmp", ".webp"))
             )
         if not paths and not dry_run:
@@ -273,17 +274,18 @@ def make_synthetic_video(
             for k in range(objects):
                 x = int((i * 7 + k * 80) % (width - 80))
                 y = int((50 + k * 60) % (height - 60))
-                img[y:y + 60, x:x + 80] = (60 + k * 40, 200 - k * 40, 100)
+                img[y : y + 60, x : x + 80] = (60 + k * 40, 200 - k * 40, 100)
             cv2.imwrite(str(seq_dir / f"frame_{i:04d}.png"), img)
         return seq_dir
 
     for i in range(frames):
         import numpy as np
+
         img = np.full((height, width, 3), 32, dtype=np.uint8)
         for k in range(objects):
             x = int((i * 7 + k * 80) % (width - 80))
             y = int((50 + k * 60) % (height - 60))
-            img[y:y + 60, x:x + 80] = (60 + k * 40, 200 - k * 40, 100)
+            img[y : y + 60, x : x + 80] = (60 + k * 40, 200 - k * 40, 100)
         writer.write(img)
     writer.release()
     return out

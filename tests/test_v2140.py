@@ -76,8 +76,20 @@ def test_cli_live_dry_run_json() -> None:
     from visionservex.cli.main import app
 
     runner = CliRunner()
-    result = runner.invoke(app, ["live", "--source", "0", "--model", "dfine-s-o365-coco",
-                                  "--task", "detect", "--dry-run", "--json"])
+    result = runner.invoke(
+        app,
+        [
+            "live",
+            "--source",
+            "0",
+            "--model",
+            "dfine-s-o365-coco",
+            "--task",
+            "detect",
+            "--dry-run",
+            "--json",
+        ],
+    )
     assert result.exit_code == 0, result.output
     payload = json.loads(result.output)
     assert payload["code"] == "DRY_RUN_OK"
@@ -88,16 +100,25 @@ def test_cli_draw_image(tmp_path: Path) -> None:
 
     img_path = _make_image(tmp_path / "in.jpg")
     pred_path = tmp_path / "pred.json"
-    pred_path.write_text(json.dumps(
-        {"detections": [{"box": [10, 10, 80, 80], "score": 0.7, "class_name": "obj"}]}
-    ))
+    pred_path.write_text(
+        json.dumps({"detections": [{"box": [10, 10, 80, 80], "score": 0.7, "class_name": "obj"}]})
+    )
     out_path = tmp_path / "out.jpg"
 
     runner = CliRunner()
-    result = runner.invoke(app, [
-        "draw", "image", "--image", str(img_path),
-        "--pred", str(pred_path), "--out", str(out_path),
-    ])
+    result = runner.invoke(
+        app,
+        [
+            "draw",
+            "image",
+            "--image",
+            str(img_path),
+            "--pred",
+            str(pred_path),
+            "--out",
+            str(out_path),
+        ],
+    )
     assert result.exit_code == 0, result.output
     assert out_path.exists()
 
@@ -107,17 +128,30 @@ def test_cli_annotate_image(tmp_path: Path) -> None:
 
     img_path = _make_image(tmp_path / "in.jpg")
     pred_path = tmp_path / "pred.json"
-    pred_path.write_text(json.dumps({
-        "task": "detect",
-        "detections": [{"box": [10, 10, 80, 80], "score": 0.7, "class_name": "obj"}],
-    }))
+    pred_path.write_text(
+        json.dumps(
+            {
+                "task": "detect",
+                "detections": [{"box": [10, 10, 80, 80], "score": 0.7, "class_name": "obj"}],
+            }
+        )
+    )
     out_path = tmp_path / "out.jpg"
 
     runner = CliRunner()
-    result = runner.invoke(app, [
-        "annotate", "image", "--image", str(img_path),
-        "--pred", str(pred_path), "--out", str(out_path),
-    ])
+    result = runner.invoke(
+        app,
+        [
+            "annotate",
+            "image",
+            "--image",
+            str(img_path),
+            "--pred",
+            str(pred_path),
+            "--out",
+            str(out_path),
+        ],
+    )
     assert result.exit_code == 0, result.output
     assert out_path.exists()
 
@@ -128,10 +162,20 @@ def test_cli_audit_syntax_debug(tmp_path: Path) -> None:
     out_json = tmp_path / "syntax.json"
     out_csv = tmp_path / "syntax.csv"
     runner = CliRunner()
-    result = runner.invoke(app, [
-        "audit", "syntax-debug", "--limit", "10",
-        "--out", str(out_json), "--csv-out", str(out_csv), "--json",
-    ])
+    result = runner.invoke(
+        app,
+        [
+            "audit",
+            "syntax-debug",
+            "--limit",
+            "10",
+            "--out",
+            str(out_json),
+            "--csv-out",
+            str(out_csv),
+            "--json",
+        ],
+    )
     assert result.exit_code == 0, result.output
     body = json.loads(result.output)
     assert body["n_models"] >= 1
@@ -145,8 +189,14 @@ def test_manifest_has_live_fields() -> None:
     if not manifest_path.exists():
         pytest.skip("manifest not regenerated")
     manifest = json.loads(manifest_path.read_text())
-    keys = {"draw_command", "live_supported", "video_supported",
-            "expected_overlay_type", "recommended_live_source", "expected_fps_class"}
+    keys = {
+        "draw_command",
+        "live_supported",
+        "video_supported",
+        "expected_overlay_type",
+        "recommended_live_source",
+        "expected_fps_class",
+    }
     for m in manifest["models"][:5]:
         assert keys.issubset(m.keys()), f"missing keys in {m.get('model_id')}: {keys - m.keys()}"
 
@@ -156,10 +206,16 @@ def test_benchmark_detection_requires_dataset() -> None:
     from visionservex.cli.main import app
 
     runner = CliRunner()
-    result = runner.invoke(app, [
-        "benchmark-detection", "--model", "dfine-s-o365-coco",
-        "--dataset", "synthetic",
-    ])
+    result = runner.invoke(
+        app,
+        [
+            "benchmark-detection",
+            "--model",
+            "dfine-s-o365-coco",
+            "--dataset",
+            "synthetic",
+        ],
+    )
     assert result.exit_code == 2
     assert "labelled dataset" in result.output.lower() or "labeled" in result.output.lower()
 

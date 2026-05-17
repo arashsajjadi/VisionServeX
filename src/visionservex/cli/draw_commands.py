@@ -21,7 +21,9 @@ def _load_pred(pred_path: Path) -> dict:
     return json.loads(pred_path.read_text())
 
 
-def _yolo_labels_to_gt(labels_path: Path, image_path: Path, names: list[str] | None = None) -> list[dict]:
+def _yolo_labels_to_gt(
+    labels_path: Path, image_path: Path, names: list[str] | None = None
+) -> list[dict]:
     """Convert YOLO-format label file to ground-truth list."""
     from PIL import Image
 
@@ -62,8 +64,12 @@ def draw_image(
     payload = _load_pred(pred)
     dets = payload.get("detections", []) if isinstance(payload, dict) else payload
     img = draw_detections(
-        image, dets, line_width=line_width, font_size=font_size,
-        hide_labels=hide_labels, hide_conf=hide_conf,
+        image,
+        dets,
+        line_width=line_width,
+        font_size=font_size,
+        hide_labels=hide_labels,
+        hide_conf=hide_conf,
     )
     out.parent.mkdir(parents=True, exist_ok=True)
     img.save(out)
@@ -86,19 +92,86 @@ def draw_gt(
     if names == "coco":
         # Minimal COCO 80 names for ground-truth labelling
         name_list = [
-            "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train",
-            "truck", "boat", "traffic light", "fire hydrant", "stop sign",
-            "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep",
-            "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella",
-            "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard",
-            "sports ball", "kite", "baseball bat", "baseball glove", "skateboard",
-            "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork",
-            "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange",
-            "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair",
-            "couch", "potted plant", "bed", "dining table", "toilet", "tv",
-            "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave",
-            "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase",
-            "scissors", "teddy bear", "hair drier", "toothbrush",
+            "person",
+            "bicycle",
+            "car",
+            "motorcycle",
+            "airplane",
+            "bus",
+            "train",
+            "truck",
+            "boat",
+            "traffic light",
+            "fire hydrant",
+            "stop sign",
+            "parking meter",
+            "bench",
+            "bird",
+            "cat",
+            "dog",
+            "horse",
+            "sheep",
+            "cow",
+            "elephant",
+            "bear",
+            "zebra",
+            "giraffe",
+            "backpack",
+            "umbrella",
+            "handbag",
+            "tie",
+            "suitcase",
+            "frisbee",
+            "skis",
+            "snowboard",
+            "sports ball",
+            "kite",
+            "baseball bat",
+            "baseball glove",
+            "skateboard",
+            "surfboard",
+            "tennis racket",
+            "bottle",
+            "wine glass",
+            "cup",
+            "fork",
+            "knife",
+            "spoon",
+            "bowl",
+            "banana",
+            "apple",
+            "sandwich",
+            "orange",
+            "broccoli",
+            "carrot",
+            "hot dog",
+            "pizza",
+            "donut",
+            "cake",
+            "chair",
+            "couch",
+            "potted plant",
+            "bed",
+            "dining table",
+            "toilet",
+            "tv",
+            "laptop",
+            "mouse",
+            "remote",
+            "keyboard",
+            "cell phone",
+            "microwave",
+            "oven",
+            "toaster",
+            "sink",
+            "refrigerator",
+            "book",
+            "clock",
+            "vase",
+            "scissors",
+            "teddy bear",
+            "hair drier",
+            "toothbrush",
         ]
     elif Path(names).exists():
         name_list = [n.strip() for n in Path(names).read_text().splitlines() if n.strip()]

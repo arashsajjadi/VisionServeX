@@ -53,9 +53,13 @@ def annotate_image_cmd(
 
     payload = json.loads(pred.read_text(encoding="utf-8"))
     img = do_annotate(
-        image, payload,
-        line_width=line_width, font_size=font_size, mask_alpha=mask_alpha,
-        hide_labels=hide_labels, hide_conf=hide_conf,
+        image,
+        payload,
+        line_width=line_width,
+        font_size=font_size,
+        mask_alpha=mask_alpha,
+        hide_labels=hide_labels,
+        hide_conf=hide_conf,
     )
     out.parent.mkdir(parents=True, exist_ok=True)
     img.save(out)
@@ -80,16 +84,20 @@ def annotate_frames_cmd(
     by_index = {p.get("frame_index"): p for p in items if "frame_index" in p}
 
     img_paths = sorted(
-        p for p in frames_dir.iterdir()
+        p
+        for p in frames_dir.iterdir()
         if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
     )
     n_done = 0
     for idx, img_path in enumerate(img_paths):
         payload = by_index.get(idx, {})
         annotated = do_annotate(
-            img_path, payload,
-            line_width=line_width, mask_alpha=mask_alpha,
-            hide_labels=hide_labels, hide_conf=hide_conf,
+            img_path,
+            payload,
+            line_width=line_width,
+            mask_alpha=mask_alpha,
+            hide_labels=hide_labels,
+            hide_conf=hide_conf,
         )
         annotated.save(out_dir / img_path.name)
         n_done += 1
@@ -149,8 +157,10 @@ def annotate_video_cmd(
             pil_img = Image.fromarray(rgb)
             payload = by_index.get(frame_index, {})
             annotated = do_annotate(
-                pil_img, payload,
-                line_width=line_width, mask_alpha=mask_alpha,
+                pil_img,
+                payload,
+                line_width=line_width,
+                mask_alpha=mask_alpha,
             )
             bgr = np.array(annotated)[:, :, ::-1]
             writer.write(bgr)
