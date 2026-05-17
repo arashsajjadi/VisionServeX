@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import importlib
 import json
+from pathlib import Path
 
 import typer
 from rich.console import Console
@@ -243,36 +244,54 @@ def doctor_cmd(json_: bool = typer.Option(False, "--json")) -> None:
 def validate_cmd(
     model_id: str = typer.Argument(...),
     checkpoint: str = typer.Option("", "--checkpoint", help="Local path to MaskDINO checkpoint."),
+    fmt: str = typer.Option("text", "--format", help="Output format: text or json."),
+    out: Path | None = typer.Option(None, "--out", help="Write structured JSON to this path."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     meta = _MASKDINO_MODELS.get(model_id)
     if meta is None:
-        payload = {
+        payload: dict = {
+            "model_id": model_id,
+            "status": "failed",
             "code": "CONFIG_REQUIRED",
             "message": f"Unknown model {model_id!r}.",
+            "install_command": "",
+            "docs": "",
+            "warnings": [],
+            "errors": [f"Unknown model {model_id!r}"],
             "available": sorted(_MASKDINO_MODELS),
         }
-        _emit(payload, json_)
+        if out:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(payload, indent=2))
+        _emit(payload, json_ or fmt == "json")
         raise typer.Exit(2)
 
     checkpoint_present = bool(checkpoint) and __import__("os").path.exists(checkpoint)
     detectron2_ok = _probe("detectron2")
 
-    payload: dict = {
+    payload = {
         "model_id": model_id,
         **meta,
         "detectron2_installed": detectron2_ok,
         "checkpoint": checkpoint or None,
         "checkpoint_present": checkpoint_present,
+        "warnings": [],
+        "errors": [],
     }
     if not detectron2_ok:
         payload.update(
             {
-                "status": "error",
+                "status": "expected_blocker",
+                "code": "DETECTRON2_REQUIRED",
                 "structured_error_code": "DETECTRON2_REQUIRED",
                 "message": (
                     "Detectron2 is not installed. MaskDINO requires Detectron2's custom CUDA ops."
                 ),
+                "install_command": (
+                    "pip install 'git+https://github.com/facebookresearch/detectron2.git'"
+                ),
+                "docs": "https://github.com/facebookresearch/detectron2",
                 "fix": (
                     "pip install 'git+https://github.com/facebookresearch/detectron2.git' "
                     "(or visionservex maskdino create-env)"
@@ -282,9 +301,12 @@ def validate_cmd(
     elif not checkpoint_present:
         payload.update(
             {
-                "status": "error",
+                "status": "expected_blocker",
+                "code": "CHECKPOINT_REQUIRED",
                 "structured_error_code": "CHECKPOINT_REQUIRED",
                 "message": "MaskDINO checkpoint is required.",
+                "install_command": f"wget {meta.get('checkpoint_url', '')}",
+                "docs": meta.get("release_page", ""),
                 "checkpoint_url": meta.get("checkpoint_url"),
                 "release_page": meta.get("release_page"),
                 "fix": (
@@ -295,9 +317,15 @@ def validate_cmd(
         )
     else:
         payload["status"] = "ok"
+        payload["code"] = ""
         payload["message"] = "Detectron2 + MaskDINO checkpoint present."
+        payload["install_command"] = ""
+        payload["docs"] = ""
 
-    _emit(payload, json_)
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2))
+    _emit(payload, json_ or fmt == "json")
 
 
 @app.command("smoke-test")

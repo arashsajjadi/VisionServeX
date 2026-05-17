@@ -1,7 +1,7 @@
 {
   "package": {
     "name": "VisionServeX",
-    "version": "2.13.1",
+    "version": "2.14.0",
     "commit": "45bbf4c",
     "audit_date": "2026-05-16",
     "cli_audit_status": "23/23 PASS",

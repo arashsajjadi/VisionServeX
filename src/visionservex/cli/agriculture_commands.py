@@ -27,7 +27,11 @@ console = Console()
 
 
 @app.command("doctor")
-def doctor(json_: bool = typer.Option(False, "--json")) -> None:
+def doctor(
+    fmt: str = typer.Option("text", "--format", help="Output format: text or json."),
+    out: Path = typer.Option(None, "--out", help="Write JSON output to this path."),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
     """Check which agriculture-domain components are available."""
     import importlib
 
@@ -46,7 +50,10 @@ def doctor(json_: bool = typer.Option(False, "--json")) -> None:
         except ImportError:
             rows.append({"component": name, "status": "not_available"})
     payload = {"components": rows}
-    if json_:
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2))
+    if json_ or fmt == "json":
         print(json.dumps(payload, indent=2))
         return
     table = Table(title="Agriculture components", show_header=True)
@@ -108,6 +115,7 @@ def prompt_detect(
     detector: str = typer.Option("owlv2-base-patch16", "--detector"),
     threshold: float = typer.Option(0.15, "--threshold"),
     out: Path = typer.Option(None, "--out"),
+    draw: Path = typer.Option(None, "--draw", help="Save annotated image to this path."),
     auto_pull: bool = typer.Option(False, "--auto-pull"),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
@@ -124,7 +132,17 @@ def prompt_detect(
     result = m.predict(img, prompt=prompt, threshold=threshold)
     payload = result.to_dict()
     if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(payload, indent=2))
+    if draw:
+        try:
+            from visionservex.visualization import annotate_image as _annotate
+
+            annotated = _annotate(image, payload)
+            draw.parent.mkdir(parents=True, exist_ok=True)
+            annotated.save(draw)
+        except Exception as exc:
+            console.print(f"[yellow]DRAW_FAILED: {exc}[/yellow]")
     if json_:
         print(json.dumps(payload, indent=2))
         return
@@ -139,6 +157,7 @@ def prompt_segment(
     prompt: str = typer.Option("weed", "--prompt"),
     detector: str = typer.Option("owlv2-base-patch16", "--detector"),
     out: Path = typer.Option(None, "--out"),
+    draw: Path = typer.Option(None, "--draw", help="Save annotated image to this path."),
     auto_pull: bool = typer.Option(False, "--auto-pull"),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
@@ -153,6 +172,7 @@ def prompt_segment(
         detector=detector,
         threshold=0.15,
         out=out,
+        draw=draw,
         auto_pull=auto_pull,
         json_=json_,
     )

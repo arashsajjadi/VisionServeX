@@ -298,6 +298,8 @@ def login_help_cmd(
 @app.command("validate")
 def validate_cmd(
     model_id: str = typer.Argument(...),
+    fmt: str = typer.Option("text", "--format", help="Output format: text or json."),
+    out: Path | None = typer.Option(None, "--out", help="Write structured JSON to this path."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Structured validation of a SAM-family model's dependencies / gated status."""
@@ -305,11 +307,20 @@ def validate_cmd(
 
     src = get_model_source(model_id)
     if src is None:
-        payload = {
+        payload: dict = {
+            "model_id": model_id,
+            "status": "expected_blocker",
             "code": "MODEL_NOT_FOUND",
             "message": f"Model {model_id!r} not in SOURCE_MANIFEST.",
+            "install_command": "",
+            "docs": "",
+            "warnings": [],
+            "errors": [],
         }
-        if json_:
+        if out:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(payload, indent=2))
+        if json_ or fmt == "json":
             print(json.dumps(payload, indent=2))
         else:
             console.print(f"[red]MODEL_NOT_FOUND[/red]: {payload['message']}")
@@ -326,15 +337,29 @@ def validate_cmd(
         "install_command": src.install_command,
         "official_repo": src.official_repo,
         "hf_repo": src.hf_repo,
+        "warnings": [],
+        "errors": [],
     }
     if src.family in {"sam3"} or "sam3" in model_id:
         payload["code"] = "GATED_HF_AUTH_REQUIRED"
+        payload["status"] = "expected_blocker"
+        payload["message"] = "SAM 3/3.1 requires HuggingFace gated access."
+        payload["docs"] = "visionservex sam-family login-help sam3.1"
         payload["fix"] = "visionservex sam-family login-help sam3.1"
     elif not src.runnable_in_visionservex:
         payload["code"] = "MODEL_NOT_RUNNABLE"
+        payload["status"] = "expected_blocker"
+        payload["message"] = f"Model {model_id!r} is not runnable in VisionServeX core."
+        payload["docs"] = src.official_repo or ""
     else:
         payload["code"] = "OK"
-    if json_:
+        payload["status"] = "ok"
+        payload["message"] = f"Model {model_id!r} is available."
+        payload["docs"] = src.official_repo or ""
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2))
+    if json_ or fmt == "json":
         print(json.dumps(payload, indent=2))
         return
     console.print(f"[bold]{model_id}[/bold] — {payload['code']}")

@@ -1,7 +1,7 @@
 # VisionServeX Model Inventory
 
 Generated: 2026-05-16  
-Package: 2.13.1  
+Package: 2.14.0  
 Total models: 113
 
 | Model | Family | Task | Mode | Colab | Smoke Command |

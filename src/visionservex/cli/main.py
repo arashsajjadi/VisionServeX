@@ -2088,6 +2088,12 @@ def detect_alias(
     device: str | None = typer.Option(None, "--device"),
     save_image: Path | None = typer.Option(None, "--save-image"),
     save_json: Path | None = typer.Option(None, "--save-json"),
+    out: Path | None = typer.Option(
+        None, "--out", help="Save result JSON (notebook alias for --save-json)."
+    ),
+    draw: Path | None = typer.Option(
+        None, "--draw", help="Save annotated image (notebook alias for --save-image)."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Ultralytics-like detect alias. Equivalent to: visionservex predict MODEL IMAGE."""
@@ -2095,8 +2101,8 @@ def detect_alias(
         model_id=model_id,
         input_path=input_path,
         save=None,
-        save_json=save_json,
-        save_image=save_image,
+        save_json=out or save_json,
+        save_image=draw or save_image,
         prompt=None,
         device=device,
         precision=None,
@@ -2189,6 +2195,12 @@ def open_vocab_alias(
     conf: float = typer.Option(0.25, "--conf", "--threshold"),
     device: str | None = typer.Option(None, "--device"),
     save_image: Path | None = typer.Option(None, "--save-image"),
+    out: Path | None = typer.Option(
+        None, "--out", help="Save result JSON (notebook alias for --save-json)."
+    ),
+    draw: Path | None = typer.Option(
+        None, "--draw", help="Save annotated image (notebook alias for --save-image)."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Open-vocabulary detection: visionservex open-vocab MODEL IMAGE --prompt 'cat,dog'."""
@@ -2196,8 +2208,8 @@ def open_vocab_alias(
         model_id=model_id,
         input_path=input_path,
         save=None,
-        save_json=None,
-        save_image=save_image,
+        save_json=out,
+        save_image=draw or save_image,
         prompt=prompt,
         device=device,
         precision=None,

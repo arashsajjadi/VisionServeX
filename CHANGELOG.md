@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.15.0] - 2026-05-16
+
+### Fixed: Notebook/CLI contract compatibility (v16 Colab audit)
+
+This release fixes every CLI mismatch found during the v16 Colab notebook audit.
+No model behavior was changed; only command option surfaces were corrected.
+
+**CLI contract fixes**:
+
+- `visionservex detect` — adds `--out` (alias for `--save-json`) and `--draw`
+  (alias for `--save-image`) to match the notebook-generated command form.
+- `visionservex open-vocab` — adds `--out` (JSON output) and `--draw` (image
+  output) so notebook calls succeed without option errors.
+- `visionservex annotate image` — supports a second mode: `--model MODEL_ID
+  --task TASK --json-out PATH` for inference-then-annotate. The original
+  `--pred PRED_JSON` mode is preserved. `--pred` is now optional.
+- `visionservex annotate video` — supports `--model MODEL_ID --task TASK
+  --json-out PATH --max-frames N --tracker NAME` for inference-mode video
+  annotation. Original `--jsonl` mode is preserved.
+- `visionservex audit syntax-debug` — adds `--manifest`, `--image`,
+  `--draw-dir`, `--all`, `--resource-guard`, `--max-models-per-family`.
+  Output JSON now emits the v2 schema with `status`, `summary`, and `rows`.
+- `visionservex medical validate` — adds `--format json` and `--out PATH`.
+  Unknown model returns structured JSON with `UNKNOWN_MEDICAL_MODEL` code.
+- `visionservex medical segment` — adds `--draw PATH` for mask overlay output.
+- `visionservex medical monai list-bundles` — adds `--format json` and `--out`.
+- `visionservex agriculture doctor` — adds `--format json` and `--out PATH`.
+- `visionservex agriculture prompt-detect` — adds `--draw PATH`.
+- `visionservex agriculture prompt-segment` — adds `--draw PATH`.
+- `visionservex openmmlab validate` — adds `--format json` and `--out PATH`.
+  Emits canonical `status/code/message/install_command` fields.
+- `visionservex maskdino validate` — adds `--format json` and `--out PATH`.
+  Emits canonical blocker schema for `DETECTRON2_REQUIRED` / `CHECKPOINT_REQUIRED`.
+- `visionservex sam-family validate` — adds `--format json` and `--out PATH`.
+  Emits canonical schema for `GATED_HF_AUTH_REQUIRED` / `MODEL_NOT_RUNNABLE`.
+
+**Tests**:
+- `tests/test_v2150.py` — 27 new tests covering every notebook-facing command
+  option contract, canonical JSON output schema, and no-raw-traceback contract.
+
 ## [2.14.0] - 2026-05-17
 
 ### Added: Package-level visualization, live inference, annotate CLI

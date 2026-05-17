@@ -250,18 +250,45 @@ def recommend(
 @app.command("validate")
 def validate(
     model_id: str = typer.Argument(..., help=f"Medical model: {', '.join(MEDICAL_MODELS)}"),
+    fmt: str = typer.Option("text", "--format", help="Output format: text or json."),
+    out: Path | None = typer.Option(None, "--out", help="Write structured JSON to this path."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Verify whether a medical model's dependencies are available."""
     if model_id not in MEDICAL_MODELS:
-        console.print(
-            f"[red]Unknown medical model {model_id!r}.[/red] Options: {list(MEDICAL_MODELS)}"
-        )
+        err_payload = {
+            "model_id": model_id,
+            "status": "failed",
+            "code": "UNKNOWN_MEDICAL_MODEL",
+            "message": f"Unknown medical model {model_id!r}. Options: {list(MEDICAL_MODELS)}",
+            "install_command": "",
+            "docs": "",
+            "warnings": [],
+            "errors": [f"Unknown medical model {model_id!r}"],
+        }
+        if out:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(err_payload, indent=2))
+        if json_ or fmt == "json":
+            print(json.dumps(err_payload, indent=2))
+        else:
+            console.print(
+                f"[red]Unknown medical model {model_id!r}.[/red] Options: {list(MEDICAL_MODELS)}"
+            )
         raise typer.Exit(2)
     info = MEDICAL_MODELS[model_id]
     missing = _missing(info)
+    status = "ok" if not missing else "expected_blocker"
     payload = {
         "model_id": model_id,
+        "status": status,
+        "code": "" if not missing else (info.structured_error_code or "DEPENDENCY_REQUIRED"),
+        "message": "" if not missing else f"Missing: {missing}",
+        "install_command": "; ".join(info.install) if missing else "",
+        "docs": info.upstream,
+        "warnings": [],
+        "errors": [],
+        # extended fields
         "installed": not missing,
         "required_modules": list(info.required_modules),
         "missing_modules": missing,
@@ -271,7 +298,10 @@ def validate(
         "license_note": info.license_note,
         "disclaimer": DISCLAIMER,
     }
-    if json_:
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2))
+    if json_ or fmt == "json":
         print(json.dumps(payload, indent=2))
         return
     if missing:
@@ -292,6 +322,7 @@ def segment(
     ),
     point: str = typer.Option("", "--point", help="Point prompt 'x,y' for MedSAM-style models."),
     out: Path = typer.Option(..., "--out", help="Output directory."),
+    draw: Path = typer.Option(None, "--draw", help="Save mask overlay image to this path."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Run medical segmentation. Returns structured errors if deps missing."""
@@ -331,6 +362,7 @@ def segment(
             input=input,
             boxes_raw=box,
             out=out,
+            draw=draw,
             json_=json_,
         )
         return
@@ -431,6 +463,7 @@ def _segment_medsam(
     input: Path,
     boxes_raw: list[str],
     out: Path,
+    draw: Path | None = None,
     json_: bool,
 ) -> None:
     """Run MedSAM inference using the SAM HF engine. Saves mask PNG + metadata JSON."""
@@ -523,6 +556,22 @@ def _segment_medsam(
     meta_path = out / "medsam_metadata.json"
     meta_path.write_text(json_mod.dumps(payload, indent=2))
 
+    if draw and masks_saved:
+        try:
+            import numpy as np
+
+            base = Image.open(input).convert("RGB")
+            overlay = np.array(base).copy()
+            for m_info in masks_saved:
+                mp = m_info.get("mask_path")
+                if mp:
+                    mask_arr = np.array(Image.open(mp).convert("L")) > 127
+                    overlay[mask_arr] = overlay[mask_arr] * 0.5 + np.array([0, 200, 50]) * 0.5
+            draw.parent.mkdir(parents=True, exist_ok=True)
+            Image.fromarray(overlay.astype(np.uint8)).save(draw)
+        except Exception as exc:
+            console.print(f"[yellow]DRAW_FAILED: {exc}[/yellow]")
+
     if json_:
         print(json_mod.dumps(payload, indent=2))
         return
@@ -577,17 +626,29 @@ monai_app = typer.Typer(help="MONAI medical framework helpers.", no_args_is_help
 
 
 @monai_app.command("list-bundles")
-def monai_list_bundles(json_: bool = typer.Option(False, "--json")) -> None:
+def monai_list_bundles(
+    fmt: str = typer.Option("text", "--format", help="Output format: text or json."),
+    out: Path | None = typer.Option(None, "--out", help="Write JSON output to this path."),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
     """List installed MONAI Model Zoo bundles (requires `pip install monai`)."""
     if not _module_present("monai"):
-        payload = {
+        payload: dict = {
+            "status": "expected_blocker",
             "code": "MONAI_REQUIRED",
             "message": "monai is not installed.",
-            "fix": "pip install monai",
+            "install_command": "pip install monai",
+            "docs": "",
+            "warnings": [],
+            "errors": [],
         }
-        print(json.dumps(payload, indent=2)) if json_ else console.print(
-            f"[yellow]{payload['code']}[/yellow] — {payload['fix']}"
-        )
+        if out:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(payload, indent=2))
+        if json_ or fmt == "json":
+            print(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[yellow]{payload['code']}[/yellow] — {payload['install_command']}")
         raise typer.Exit(3)
     try:
         from monai.bundle import get_all_bundles_list  # type: ignore
@@ -595,15 +656,28 @@ def monai_list_bundles(json_: bool = typer.Option(False, "--json")) -> None:
         bundles = get_all_bundles_list()
     except Exception as exc:  # pragma: no cover - real env
         payload = {
+            "status": "failed",
             "code": "MONAI_API_ERROR",
             "message": str(exc)[:200],
+            "install_command": "",
+            "docs": "",
+            "warnings": [],
+            "errors": [str(exc)[:200]],
         }
-        print(json.dumps(payload, indent=2)) if json_ else console.print(
-            f"[red]{payload['code']}[/red] — {payload['message']}"
-        )
+        if out:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(payload, indent=2))
+        if json_ or fmt == "json":
+            print(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[red]{payload['code']}[/red] — {payload['message']}")
         raise typer.Exit(4) from exc
-    if json_:
-        print(json.dumps(bundles, indent=2))
+    result_payload = {"status": "ok", "code": "", "bundles": bundles, "warnings": [], "errors": []}
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(result_payload, indent=2))
+    if json_ or fmt == "json":
+        print(json.dumps(result_payload, indent=2))
         return
     for b in bundles:
         console.print(f"  - {b}")

@@ -924,17 +924,33 @@ def validate_cmd(
     model_id: str = typer.Argument(
         ..., help="Model ID, e.g. rtmpose-s, rtmdet-r2-s, co-dino-inst-vit-l-coco"
     ),
+    fmt: str = typer.Option("text", "--format", help="Output format: text or json."),
+    out: Path | None = typer.Option(None, "--out", help="Write structured JSON to this path."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Validate that the required modules are installed and the checkpoint is cached.
 
     Does NOT load the model into memory.
     """
-    from pathlib import Path  # noqa: F401  (Path used in inner helper)
-
     payload = _validate_openmmlab_model(model_id)
-    if json_:
-        typer.echo(json.dumps(payload, indent=2))
+    # Emit canonical blocker/ok fields
+    canonical = {
+        "model_id": model_id,
+        "status": payload.get("status", "failed"),
+        "code": payload.get("structured_error_code")
+        or ("ok" if payload.get("status") == "ok" else "UNKNOWN"),
+        "message": payload.get("message", ""),
+        "install_command": payload.get("fix", "") if isinstance(payload.get("fix"), str) else "",
+        "docs": "",
+        "warnings": [],
+        "errors": [],
+        **payload,
+    }
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(canonical, indent=2))
+    if json_ or fmt == "json":
+        typer.echo(json.dumps(canonical, indent=2))
         return
 
     color = "green" if payload["status"] == "ok" else "yellow"
