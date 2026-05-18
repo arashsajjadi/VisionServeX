@@ -7,6 +7,115 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.19.0] - 2026-05-17
+
+### Fixed: CLI hardening + notebook v22 + pre-v3 gate report
+
+Pre-v3 hardening pass. This release closes every notebook-facing CLI
+failure exposed by the v21 audit and rebuilds the notebook into a v22
+that can drive a defensible pre-v3 candidate report.
+
+**Phase 1 — package CLI hardening (the v21 audit's hit-list)**
+
+- `visionservex --version` / `visionservex -V` now print the package
+  version (was `No such option '--version'`).
+- New registry alias layer (`registry/registry.py::_USER_FACING_ALIASES`):
+  `maxvit` → `maxvit-tiny-tf-224`, `swinv2` → `swinv2-tiny`,
+  `convnextv2` → `convnextv2-tiny`, `dinov2` → `dinov2-base`,
+  `siglip`/`siglip2` → `siglip2-base-patch16-224`,
+  `clip` → `clip-vit-base-patch32`. `default_registry().get()` and
+  `has()` honour the map so `visionservex classify maxvit IMAGE`
+  resolves cleanly instead of returning `MODEL_NOT_FOUND`.
+- `visionservex segment MODEL IMAGE` accepts `--box X1,Y1,X2,Y2 / --point
+  X,Y / --out / --draw / --format` (was a `Usage:` error).
+- `visionservex sam-family smoke-test MODEL IMAGE` accepts
+  `--out / --draw / --format`; structured payload is always written
+  even on the not-runnable branch, and `expected_blocker` exits 0 (was
+  exit-3 → classified as failure).
+- `visionservex medical monai list-bundles` returns
+  `status=expected_blocker, code=MONAI_REQUIRED` with exit-0 when
+  `monai` isn't installed (was exit-3 → `failed_runtime`).
+- New `visionservex plot` placeholder returns structured
+  `BENCHMARK_NOT_IMPLEMENTED` with `recommended_alternatives`
+  (was `No such command`).
+- `runtime/result_classifier.py::EXPECTED_BLOCKER_CODES` expanded with
+  `MONAI_REQUIRED`, `NIFTI_REQUIRED`, `BOX_PROMPTS_REQUIRED`,
+  `LABELS_REQUIRED_FOR_METRICS`, `DOTA_OR_OBB_LABELS_REQUIRED`,
+  `AERIAL_LABELS_REQUIRED`, `GT_TRACKS_OR_QUERY_LABELS_REQUIRED`,
+  `GT_MASKS_REQUIRED`, `BENCHMARK_NOT_IMPLEMENTED`,
+  `TASK_NOT_SUPPORTED`, `SHARED_MODEL_CONCURRENCY_NOT_SUPPORTED`,
+  `CONCURRENCY_RESOURCE_BLOCKED`.
+- `benchmark-detection --format json` JSON adds
+  `requested_benchmark_size`, `n_images_available`, `n_images_selected`,
+  `n_images_evaluated_max`, `dataset_size_truthful` so a `balanced=400`
+  notebook run against COCO128 cannot falsely claim 400 evaluated.
+
+**Phase 2-9 — Notebook v22**
+
+- `VISION_SERVEX_VERSION = "2.19.0"`, `NOTEBOOK_VERSION = "v22"`,
+  output path `visionservex_v22_run`, install pins `==2.19.0`.
+- All hardcoded `v19 Final Audit Report` / `v20 ...` titles replaced
+  with the `{NOTEBOOK_VERSION}`-driven string.
+- New v22 cell **replaces** the old v21 cell (no orphaned domain
+  validity logic at the wrong end of the notebook). It:
+  - Forces `MAX_IMAGES = BENCHMARK_SIZE_MAP[BENCHMARK_SIZE]` from the
+    central policy table; default `balanced=400`.
+  - Writes `reports/run_provenance.json` with the source notebook
+    version, target package version, runtime package version
+    (`python -c "import visionservex; print(__version__)"`), CLI
+    `--version` output, output root, timestamp, and a `version_match`
+    flag. Prints a `[WARN]` line if source ≠ runtime — the case the
+    v21 evidence exposed when the install was actually v2.16.0 while
+    source claimed v2.18.0.
+  - Calls every domain dataset validator:
+    `dataset validate-medical / -agriculture / -aerial / -anomaly /
+    -surveillance`. `dataset_is_domain_correct` now comes from the
+    validator's actual status, not from candidate-CLI success.
+  - Calls the real `visionservex benchmark-concurrency --models
+    dfine-s-o365-coco --concurrency 1,2 --request-mode shared-model
+    --require-gpu --sample-gpu` when COCO128 is available, writes
+    `reports/concurrency_benchmark_dfine_s.json` and the summary CSV.
+    Falls through cleanly when GPU/dataset isn't available.
+  - Calls `debug-output rfdetr-small` and writes
+    `reports/rfdetr_mapping_diagnostics.csv` with
+    `label_mapping_fixed` / `official_category_id_detected` /
+    `contiguous_class_id_detected` columns.
+  - Writes `reports/domain_scientific_validity_matrix.csv` /
+    `.json` from validator outputs (not candidate-CLI success).
+    Includes a dedicated `concurrency_serving` row that
+    explicitly says "serving / not accuracy".
+  - Writes `reports/null_output_audit.csv` listing every matrix row
+    that is missing a critical field.
+  - Writes `reports/pre_v3_gate_report.csv` with 14 gates:
+    `detection_clean_benchmark_valid`, `rfdetr_mapping_fixed`,
+    `dfine_valid`, `benchmark_size_truthful`,
+    `null_output_audit_clean`, `domain_validity_matrix_clean`,
+    `concurrency_report_generated`, `package_tests_pass`,
+    `notebook_run_completed`, `ghcr_sidecar_published`,
+    `optional_extras_workflow`, `docs_clean`,
+    `pypi_release_verified`, `version_match`.
+- The legacy `MAX_IMAGES = 100` was replaced by the
+  `BENCHMARK_SIZE_MAP` policy block.
+
+**Phase 10 — Tests**
+
+- New `tests/test_cli_hardening_v2190.py` (15 tests):
+  `--version`/`-V`, registry alias map, segment/`sam-family smoke-test`
+  v2.19 flags, `plot` placeholder, `medical monai list-bundles`
+  expected_blocker, result_classifier coverage of new codes.
+- Full quick suite: 1054 tests (up from 1039 in v2.18.0), 0 failed.
+- `ruff check .` + `ruff format --check .` clean.
+- `python -m build` + `python -m twine check dist/*` PASSED for both.
+
+**What is NOT yet pre-v3 ready (the gate report stays honest)**
+
+- GHCR sidecar publish still requires off-host build.
+- 400-image COCO benchmark is policy-driven but the actual dataset
+  (COCO128) only has 128 images; the notebook reports the truthful
+  `available=128, evaluated=128` rather than faking 400.
+- `separate-process` concurrency, real medical/aerial/surveillance
+  benchmarks (with GT) — all still v2.20+ work.
+
 ## [2.18.0] - 2026-05-17
 
 ### Fixed: RF-DETR class-mapping bug + domain benchmark routing + concurrency

@@ -86,6 +86,23 @@ class RegistryError(LookupError):
     """Raised when a registry lookup or registration fails."""
 
 
+# v2.19.0: short / common model id aliases that resolve to canonical registry
+# entries. The notebook (and ergonomic users) often type a family name
+# (``maxvit``) without the exact checkpoint suffix; without an alias layer
+# this returns MODEL_NOT_FOUND. Aliases are intentionally minimal — they
+# only cover well-known short forms that already have a single obvious
+# canonical entry.
+_USER_FACING_ALIASES: dict[str, str] = {
+    "maxvit": "maxvit-tiny-tf-224",
+    "swinv2": "swinv2-tiny",
+    "convnextv2": "convnextv2-tiny",
+    "dinov2": "dinov2-base",
+    "siglip": "siglip2-base-patch16-224",
+    "siglip2": "siglip2-base-patch16-224",
+    "clip": "clip-vit-base-patch32",
+}
+
+
 class ModelEntry(BaseModel):
     """Machine-readable metadata about a model.
 
@@ -247,16 +264,23 @@ class ModelRegistry:
 
     def get(self, model_id: str) -> ModelEntry:
         with self._lock:
-            try:
+            if model_id in self._entries:
                 return self._entries[model_id]
-            except KeyError as exc:
-                raise RegistryError(
-                    f"unknown model {model_id!r}. Run `visionservex list-models` to see options."
-                ) from exc
+            # v2.19.0: friendly registry-level aliases for commonly-typed
+            # short forms that don't have full entries.
+            alias = _USER_FACING_ALIASES.get(model_id)
+            if alias is not None and alias in self._entries:
+                return self._entries[alias]
+            raise RegistryError(
+                f"unknown model {model_id!r}. Run `visionservex list-models` to see options."
+            )
 
     def has(self, model_id: str) -> bool:
         with self._lock:
-            return model_id in self._entries
+            if model_id in self._entries:
+                return True
+            alias = _USER_FACING_ALIASES.get(model_id)
+            return alias is not None and alias in self._entries
 
     def list(
         self,

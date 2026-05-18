@@ -206,6 +206,13 @@ def _die(
     raise typer.Exit(exit_code)
 
 
+def _version_callback(value: bool) -> None:
+    """Print version and exit. Honors `visionservex --version`."""
+    if value:
+        typer.echo(f"VisionServeX {__version__}")
+        raise typer.Exit(0)
+
+
 @app.callback()
 def _global(
     debug: bool = typer.Option(False, "--debug", help="Enable verbose logs and stack traces."),
@@ -213,6 +220,14 @@ def _global(
         None,
         "--config",
         help="Path to a YAML config file (also honored via VISIONSERVEX_CONFIG_FILE).",
+    ),
+    version: bool = typer.Option(
+        False,
+        "--version",
+        "-V",
+        callback=_version_callback,
+        is_eager=True,
+        help="Show the VisionServeX version and exit.",
     ),
 ) -> None:
     """Top-level options."""
@@ -2259,27 +2274,50 @@ def segment_alias(
     conf: float = typer.Option(0.25, "--conf", "--threshold"),
     device: str | None = typer.Option(None, "--device"),
     save_image: Path | None = typer.Option(None, "--save-image"),
+    out: Path | None = typer.Option(
+        None, "--out", help="v2.19.0: notebook alias — save result JSON to this path."
+    ),
+    draw: Path | None = typer.Option(
+        None, "--draw", help="v2.19.0: notebook alias for --save-image."
+    ),
+    box: str | None = typer.Option(
+        None, "--box", help="Box prompt x1,y1,x2,y2 for SAM-style models."
+    ),
+    point: str | None = typer.Option(
+        None, "--point", help="Point prompt x,y for SAM-style models."
+    ),
+    fmt: str = typer.Option(
+        "text", "--format", help="Output format: text or json (notebook contract)."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
-    """Ultralytics-like segment alias."""
+    """Ultralytics-like segment alias.
+
+    v2.19.0: accepts ``--box``, ``--point``, ``--out``, ``--draw``, ``--format``
+    so the notebook command form
+    ``visionservex segment sam2-hiera-tiny IMAGE --box X1,Y1,X2,Y2 --out OUT.json --draw OUT.jpg --format json``
+    parses cleanly. If the model is not a segmentation model, ``predict`` will
+    surface a structured ``MODEL_NOT_SUPPORTED_FOR_SEGMENT`` error rather than
+    a typer Usage error.
+    """
     predict(
         model_id=model_id,
         input_path=input_path,
         save=None,
-        save_json=None,
-        save_image=save_image,
+        save_json=out,
+        save_image=draw or save_image,
         prompt=None,
         device=device,
         precision=None,
         top_k=None,
         threshold=conf,
-        point=None,
-        box=None,
+        point=point,
+        box=box,
         task=None,
         timeout=None,
         auto_pull=False,
         no_auto_pull=False,
-        json_=json_,
+        json_=(json_ or fmt == "json"),
         debug=False,
     )
 
@@ -2367,6 +2405,47 @@ def open_vocab_alias(
         json_=json_,
         debug=False,
     )
+
+
+@app.command(
+    "plot",
+    help=(
+        "v2.19.0: placeholder. VisionServeX has no `plot` command yet; the notebook "
+        "should call `benchmark report-clean` / `dev concurrency-profile` and "
+        "render plots locally with matplotlib."
+    ),
+)
+def plot_placeholder(
+    out: Path | None = typer.Option(None, "--out"),
+    fmt: str = typer.Option("text", "--format"),
+) -> None:
+    """Structured BENCHMARK_NOT_IMPLEMENTED so notebooks stop seeing `No such command`."""
+    import json as _json
+
+    payload = {
+        "status": "expected_blocker",
+        "code": "BENCHMARK_NOT_IMPLEMENTED",
+        "command": "plot",
+        "message": (
+            "VisionServeX does not ship a CLI plot generator. Use "
+            "`benchmark report-clean` for the leaderboard / excluded CSV, "
+            "`dev concurrency-profile` for the concurrency JSON, and render "
+            "matplotlib plots from the saved CSVs."
+        ),
+        "recommended_alternatives": [
+            "visionservex benchmark report-clean --input X.json --leaderboard L.csv --excluded E.csv",
+            "visionservex dev concurrency-profile --format json --out cprofile.json",
+            "visionservex audit bundle --out-dir AUDIT_DIR",
+        ],
+        "roadmap": "v2.20+: ship a thin `visionservex plot leaderboard|concurrency` wrapper.",
+    }
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(_json.dumps(payload, indent=2))
+    if fmt == "json":
+        typer.echo(_json.dumps(payload, indent=2))
+        return
+    console.print(f"[yellow]{payload['code']}[/yellow] — {payload['message']}")
 
 
 @app.command(

@@ -649,7 +649,8 @@ def monai_list_bundles(
             print(json.dumps(payload, indent=2))
         else:
             console.print(f"[yellow]{payload['code']}[/yellow] — {payload['install_command']}")
-        raise typer.Exit(3)
+        # v2.19.0: expected_blocker exits 0 (matches sam-family validate / anomaly doctor).
+        return
     try:
         from monai.bundle import get_all_bundles_list  # type: ignore
 

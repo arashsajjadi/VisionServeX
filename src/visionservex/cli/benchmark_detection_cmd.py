@@ -303,11 +303,21 @@ def _run_v217_persistent_benchmark(
             else:
                 console.print(f"[red]{row['code']}[/red] {row['errors'][:1]}")
 
+    # v2.19.0: report the truthful image-count breakdown so the notebook
+    # doesn't fake "400 images evaluated" when only N were available.
+    n_available = len(samples)
+    n_selected = min(max_images, n_available)
+    n_evaluated_actual = max((r.get("n_images_evaluated", 0) or 0) for r in rows) if rows else 0
     summary = {
         "benchmark_type": "persistent_detection_v2170",
         "dataset": dataset_name,
         "n_models": len(model_ids),
         "n_images_per_model_requested": max_images,
+        "requested_benchmark_size": max_images,
+        "n_images_available": n_available,
+        "n_images_selected": n_selected,
+        "n_images_evaluated_max": n_evaluated_actual,
+        "dataset_size_truthful": n_evaluated_actual == n_selected,
         "device_requested": device,
         "require_gpu": require_gpu,
         "sample_gpu": sample_gpu,

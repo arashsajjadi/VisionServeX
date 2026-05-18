@@ -413,28 +413,46 @@ def smoke_test_cmd(
         "--box",
         help="Box prompt 'x1,y1,x2,y2'.",
     ),
+    out: Path | None = typer.Option(None, "--out", help="v2.19.0: save result JSON to this path."),
+    draw: Path | None = typer.Option(
+        None, "--draw", help="v2.19.0: save annotated image to this path."
+    ),
+    fmt: str = typer.Option(
+        "text", "--format", help="Output format: text or json (notebook contract)."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Smoke-test a SAM model: run inference if runnable, else return structured error."""
     from visionservex.model_zoo import get_model_source
 
+    json_mode = json_ or fmt == "json"
+
+    def _emit_payload(payload: dict, exit_code: int = 0) -> None:
+        if out is not None:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(payload, indent=2))
+        if json_mode:
+            print(json.dumps(payload, indent=2))
+        if exit_code:
+            raise typer.Exit(exit_code)
+
     src = get_model_source(model_id)
     if src is None:
         err = {
             "code": "MODEL_NOT_FOUND",
+            "status": "expected_blocker",
             "message": f"Model {model_id!r} not found in SOURCE_MANIFEST.",
             "fix": "Run 'visionservex sam-family list' to see available models.",
         }
-        if json_:
-            print(json.dumps(err, indent=2))
-        else:
+        if not json_mode:
             console.print(f"[red]MODEL_NOT_FOUND[/red]: {err['message']}")
-        raise typer.Exit(1)
+        _emit_payload(err, exit_code=1)
 
     if not src.runnable_in_visionservex:
         fam_info = _SAM_FAMILIES.get(src.family, {})
         err = {
             "code": "MODEL_NOT_RUNNABLE",
+            "status": "expected_blocker",
             "message": f"Model {model_id!r} is not runnable in this build.",
             "recommended_action": src.recommended_action,
             "known_blockers": src.known_blockers,
@@ -445,26 +463,26 @@ def smoke_test_cmd(
                 else "See known_blockers for details."
             ),
         }
-        if json_:
-            print(json.dumps(err, indent=2))
-        else:
+        if not json_mode:
             console.print(f"[yellow]MODEL_NOT_RUNNABLE[/yellow]: {err['message']}")
             for b in src.known_blockers:
                 console.print(f"  blocker: {b}")
             console.print(f"  action:  {src.recommended_action}")
-        raise typer.Exit(3)
+        # v2.19.0: expected_blocker exits 0 (matches sam-family validate).
+        _emit_payload(err, exit_code=0)
+        return
 
     if not image.exists():
         err = {
             "code": "INPUT_NOT_FOUND",
+            "status": "failed",
             "message": f"Image not found: {image}",
             "fix": f"Check path: {image}",
         }
-        if json_:
-            print(json.dumps(err, indent=2))
-        else:
+        if not json_mode:
             console.print(f"[red]INPUT_NOT_FOUND[/red]: {err['message']}")
-        raise typer.Exit(3)
+        _emit_payload(err, exit_code=3)
+        return
 
     # Parse box
     boxes = None
@@ -477,14 +495,14 @@ def smoke_test_cmd(
         except ValueError as exc:
             err = {
                 "code": "INPUT_SCHEMA_ERROR",
+                "status": "failed",
                 "message": f"Invalid box format {box!r}: {exc}",
                 "fix": "Use --box x1,y1,x2,y2",
             }
-            if json_:
-                print(json.dumps(err, indent=2))
-            else:
+            if not json_mode:
                 console.print(f"[red]INPUT_SCHEMA_ERROR[/red]: {err['message']}")
-            raise typer.Exit(3)
+            _emit_payload(err, exit_code=3)
+            return
 
     # Run inference
     try:
@@ -498,30 +516,38 @@ def smoke_test_cmd(
         if boxes:
             predict_kwargs["boxes"] = boxes
         result = model.predict(pil_image, **predict_kwargs)
+        n_segments = len(getattr(result, "segments", []) or [])
         payload = {
             "model_id": model_id,
             "image": str(image),
             "box": box or None,
             "status": "ok",
-            "n_segments": len(getattr(result, "segments", []) or []),
+            "code": "OK",
+            "n_segments": n_segments,
             "family": src.family,
         }
-        if json_:
-            print(json.dumps(payload, indent=2))
-            return
-        console.print(f"[green]smoke-test passed[/green]: {model_id}")
-        console.print(f"  segments: {payload['n_segments']}")
+        # v2.19.0: optional --draw overlay
+        if draw is not None and hasattr(result, "save_image"):
+            try:
+                draw.parent.mkdir(parents=True, exist_ok=True)
+                result.save_image(draw)
+                payload["draw_path"] = str(draw)
+            except Exception as draw_exc:
+                payload.setdefault("warnings", []).append(f"draw_failed: {draw_exc!s:.120}")
+        if not json_mode:
+            console.print(f"[green]smoke-test passed[/green]: {model_id}")
+            console.print(f"  segments: {n_segments}")
+        _emit_payload(payload)
     except Exception as exc:
         err = {
             "code": "SMOKE_TEST_ERROR",
+            "status": "failed",
             "message": str(exc)[:300],
             "fix": "Check transformers version and HF cache.",
         }
-        if json_:
-            print(json.dumps(err, indent=2))
-        else:
+        if not json_mode:
             console.print(f"[red]SMOKE_TEST_ERROR[/red]: {err['message']}")
-        raise typer.Exit(4)
+        _emit_payload(err, exit_code=4)
 
 
 __all__ = ["app"]
