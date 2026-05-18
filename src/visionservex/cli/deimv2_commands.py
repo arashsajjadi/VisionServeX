@@ -122,19 +122,25 @@ def create_env_cmd(
         "--timeout-s",
         help="Per-command timeout (default 1800s = 30 min).",
     ),
+    profile: str = typer.Option(
+        "",
+        "--profile",
+        help=(
+            "Runtime profile: deimv2-cu124-stable (default), deimv2-blackwell-nightly, "
+            "deimv2-cpu-proof, deimv2-a100-l4-fallback. Blackwell-nightly uses the "
+            "PyTorch cu128 nightly index so RTX 5080 sm_120 is supported."
+        ),
+    ),
     out: Path | None = typer.Option(None, "--out"),
     fmt: str = typer.Option("text", "--format"),
 ) -> None:
-    """v2.23.0: plan (default) or execute creation of the DEIMv2 sidecar conda env.
-
-    The default ``--dry-run`` returns the exact commands that would be run
-    (conda create + git clone + pip install). Use ``--execute`` only after
-    auditing them.
-    """
+    """v2.23.0+: plan (default) or execute creation of the DEIMv2 sidecar conda env."""
     from visionservex.sidecars import SidecarConfig, SidecarManager
 
     cfg = SidecarConfig(timeout_s=timeout_s)
-    payload = SidecarManager().create("deimv2", dry_run=dry_run, config=cfg)
+    payload = SidecarManager().create(
+        "deimv2", dry_run=dry_run, config=cfg, profile=(profile or None)
+    )
     _emit(payload, out=out, fmt=fmt)
 
 

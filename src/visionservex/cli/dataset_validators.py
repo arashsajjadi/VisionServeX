@@ -673,6 +673,31 @@ def validate_surveillance(
 # ---------------------------------------------------------------------------
 
 
+@app.command("validate-domain")
+def validate_domain_cmd(
+    domain: str = typer.Argument(
+        ...,
+        help="medical | agriculture | aerial | industrial | anomaly | surveillance | video-search | pose | panoptic",
+    ),
+    path: Path = typer.Option(..., "--path", help="Dataset folder to validate."),
+    task: str = typer.Option(..., "--task", help="Task within the domain (e.g. 2d-box, hbb, obb)."),
+    out: Path | None = typer.Option(None, "--out"),
+    fmt: str = typer.Option("text", "--format"),
+) -> None:
+    """v2.25.0: unified domain-dataset validator backed by DOMAIN_REGISTRY.
+
+    Replaces the per-domain validate-* commands' need for ad-hoc args by
+    routing through the canonical specifications in
+    :mod:`visionservex.datasets.domain_registry`.
+    """
+    from visionservex.datasets.domain_registry import validate_domain_path
+
+    # Allow "anomaly" alias → "industrial".
+    domain_norm = "industrial" if domain == "anomaly" else domain.replace("-", "_")
+    payload = validate_domain_path(domain_norm, task, path)
+    _emit(payload, out=out, fmt=fmt)
+
+
 _COCO_VAL2017_IMG_URL = "http://images.cocodataset.org/zips/val2017.zip"
 _COCO_VAL2017_ANN_URL = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
 _DEFAULT_COCO_CACHE = Path.home() / ".cache" / "visionservex" / "datasets" / "coco_val2017"

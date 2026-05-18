@@ -66,6 +66,7 @@ def create_cmd(
     timeout_s: int = typer.Option(
         1800, "--timeout-s", help="Per-command timeout (default 1800s = 30 min)."
     ),
+    profile: str = typer.Option("", "--profile", help="Runtime profile (see SIDECAR_PROFILES)."),
     out: Path | None = typer.Option(None, "--out"),
     fmt: str = typer.Option("text", "--format"),
 ) -> None:
@@ -73,7 +74,7 @@ def create_cmd(
     from visionservex.sidecars import SidecarConfig, SidecarManager
 
     cfg = SidecarConfig(timeout_s=timeout_s)
-    payload = SidecarManager().create(name, dry_run=dry_run, config=cfg)
+    payload = SidecarManager().create(name, dry_run=dry_run, config=cfg, profile=(profile or None))
     _emit(payload, out=out, fmt=fmt)
 
 

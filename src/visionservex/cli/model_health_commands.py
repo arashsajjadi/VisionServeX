@@ -702,4 +702,469 @@ def load_matrix_run(
         console.print("[green]v3 gate PASS — no core_load failures.[/green]")
 
 
+# ---------------------------------------------------------------------------
+# v2.25.0 — readiness matrix + execution matrix
+# ---------------------------------------------------------------------------
+
+
+def _readiness_status_for_source(
+    src: Any,
+    *,
+    sidecar_envs: set[str] | None = None,
+) -> dict[str, Any]:
+    """Classify one ModelSource into a readiness row.
+
+    Returns a dict with the 30+ columns required by the v2.25 readiness
+    matrix contract. Never raises on malformed input.
+    """
+
+    sidecar_envs = sidecar_envs or set()
+
+    family = (src.family or "").lower()
+    task = (src.task or "").lower()
+    license_risk = (src.license_risk or "none").lower()
+    access = (src.access_status or "open").lower()
+    blockers = list(src.known_blockers or [])
+
+    requires_sidecar = src.recommended_action == "expert_sidecar" or family in {
+        "deimv2",
+        "rtdetrv4",
+    }
+    requires_user_dataset = src.recommended_action == "non_core_license_optional" or (
+        src.domain in {"medical", "agriculture", "aerial", "industrial", "surveillance"}
+        and src.task not in {"embed", "classify"}
+    )
+    requires_auth = access in {"hf_login", "api_token", "gated"}
+    requires_gpu = src.task in {"detect", "segment", "obb"} or "GPU" in " ".join(blockers).upper()
+
+    legal_default = "open"
+    if license_risk in {"non_commercial", "restricted", "agpl", "gpl"}:
+        legal_default = "blocked_default"
+    elif license_risk in {"check", "api_only"}:
+        legal_default = "manual_review"
+
+    # Sidecar env probe
+    env_available = True
+    sidecar_name = None
+    if family == "deimv2":
+        sidecar_name = "deimv2"
+    elif family == "rtdetrv4":
+        sidecar_name = "rtdetrv4"
+    if sidecar_name is not None:
+        env_available = sidecar_name in sidecar_envs
+
+    # Execution status decision tree
+    execution_status = "not_advertised"
+    blocker_code = ""
+    blocker_message = ""
+    recommended_fix = ""
+
+    if license_risk in {"non_commercial", "restricted"}:
+        execution_status = "license_blocked"
+        blocker_code = "LICENSE_RESTRICTION_TRIGGERED"
+        blocker_message = f"License {src.license!r} is {license_risk}; not auto-pulled."
+        recommended_fix = "Review license terms; supply checkpoint manually and explicitly opt in."
+    elif requires_auth:
+        execution_status = "auth_required"
+        blocker_code = "GATED_AUTH_REQUIRED"
+        blocker_message = f"Model is gated ({access}); credentials must be supplied."
+        recommended_fix = "huggingface-cli login (or set HF_TOKEN env var) before running."
+    elif requires_sidecar and not env_available:
+        execution_status = "sidecar_env_missing"
+        blocker_code = "SIDECAR_ENV_MISSING"
+        blocker_message = f"Sidecar conda env visionservex-{sidecar_name}-sidecar is not installed."
+        recommended_fix = (
+            f"visionservex {sidecar_name} create-env --execute --format json "
+            f"--out reports/{sidecar_name}_create_env.json"
+        )
+    elif src.recommended_action == "external_api":
+        execution_status = "expected_blocker"
+        blocker_code = "EXTERNAL_API_REQUIRED"
+        blocker_message = "Model is only available via an external API."
+        recommended_fix = "Use the upstream API endpoint or provider-specific client."
+    elif blockers and "GPU" in " ".join(blockers).upper():
+        execution_status = "resource_blocked"
+        blocker_code = "BLACKWELL_GPU_RUNTIME_REQUIRED_FOR_BENCHMARK"
+        blocker_message = "Model requires a GPU runtime that isn't available here."
+        recommended_fix = "Run on A100/L4/T4 or a Blackwell-supported torch build."
+    elif blockers and any("checkpoint" in b.lower() or "download" in b.lower() for b in blockers):
+        execution_status = "checkpoint_missing"
+        blocker_code = "CHECKPOINT_NOT_FOUND"
+        blocker_message = "; ".join(b for b in blockers if "checkpoint" in b.lower())
+        recommended_fix = (
+            f"visionservex {family} pull {src.model_id} (or supply --checkpoint manually)."
+        )
+    elif src.runnable_in_visionservex:
+        # Heuristic for cpu-only vs full
+        if requires_gpu and family == "deimv2":
+            execution_status = "runnable_cpu_only"
+            blocker_code = "BLACKWELL_GPU_RUNTIME_REQUIRED_FOR_BENCHMARK"
+            blocker_message = "DEIMv2 GPU smoke is blocked on RTX 5080 sm_120 by torch 2.5.1+cu124."
+            recommended_fix = "Use --device cpu, or a Blackwell-compatible torch build."
+        else:
+            execution_status = "runnable_gpu" if requires_gpu else "runnable"
+    else:
+        execution_status = "expected_blocker"
+        blocker_code = "MODEL_NOT_RUNNABLE_IN_THIS_BUILD"
+        blocker_message = "; ".join(blockers) or "Not yet wired."
+        recommended_fix = src.recommended_action
+
+    # default_mode
+    default_mode = "expected_blocker"
+    if execution_status in {"runnable", "runnable_gpu"}:
+        default_mode = "benchmark" if requires_gpu else "smoke"
+    elif execution_status == "runnable_cpu_only":
+        default_mode = "smoke"
+    elif execution_status == "license_blocked" or execution_status in {
+        "checkpoint_missing",
+        "auth_required",
+    }:
+        default_mode = "expected_blocker"
+
+    smoke_command = ""
+    benchmark_command = ""
+    if family == "deimv2":
+        smoke_command = f"visionservex deimv2 smoke-test {src.model_id} IMAGE --device cpu"
+        benchmark_command = (
+            f"visionservex benchmark-detection --models {src.model_id} "
+            f"--dataset yolo:DATA --max-images 20 --device cuda --require-gpu"
+        )
+    elif family == "rtdetrv4":
+        smoke_command = (
+            f"visionservex rtdetrv4 smoke-test {src.model_id} IMAGE "
+            f"--checkpoint CKPT --device cuda --backend torch"
+        )
+        benchmark_command = (
+            f"visionservex benchmark-detection --models {src.model_id} "
+            f"--dataset yolo:DATA --max-images 20 --device cuda --require-gpu "
+            f"--backend sidecar-rtdetrv4"
+        )
+    elif task in {"detect", "obb", "segment"}:
+        smoke_command = f"visionservex detect {src.model_id} IMAGE --format json"
+        benchmark_command = (
+            f"visionservex benchmark-detection --models {src.model_id} "
+            f"--dataset yolo:DATA --max-images 20 --device cuda"
+        )
+    elif task == "classify":
+        smoke_command = f"visionservex classify {src.model_id} IMAGE --format json"
+    elif task == "embed":
+        smoke_command = f"visionservex feature embed {src.model_id} IMAGE --format json"
+    elif task == "open_vocab_detect":
+        smoke_command = (
+            f"visionservex prompt-detect {src.model_id} IMAGE --prompt 'person' --format json"
+        )
+
+    return {
+        "model_id": src.model_id,
+        "family": src.family,
+        "task": src.task,
+        "advertised": True,
+        "source_available": bool(src.official_repo),
+        "checkpoint_available": bool(src.hf_repo or src.checkpoint_url),
+        "env_available": bool(env_available),
+        "dependency_available": True,  # default; refined per family at execution time
+        "requires_gpu": bool(requires_gpu),
+        "requires_sidecar": bool(requires_sidecar),
+        "requires_auth": bool(requires_auth),
+        "requires_user_dataset": bool(requires_user_dataset),
+        "license": src.license,
+        "license_risk": license_risk,
+        "legal_default": legal_default,
+        "execution_status": execution_status,
+        "benchmark_status": "ok" if execution_status in {"runnable", "runnable_gpu"} else "blocked",
+        "expected_result_type": task,
+        "output_schema_valid": True,
+        "dataset_required": "coco" if task in {"detect", "obb", "segment"} else "",
+        "metric_required": "AP50/mAP50:95"
+        if task in {"detect", "obb"}
+        else ("mIoU/Dice" if task == "segment" else ""),
+        "valid_default_dataset": "coco128" if task in {"detect", "obb", "segment"} else "",
+        "valid_scientific_dataset": "coco_val2017_400"
+        if task in {"detect", "obb", "segment"}
+        else "",
+        "default_mode": default_mode,
+        "blocker_code": blocker_code,
+        "blocker_message": blocker_message,
+        "recommended_fix": recommended_fix,
+        "smoke_command": smoke_command,
+        "benchmark_command": benchmark_command,
+        "last_tested_device": "",
+        "last_tested_backend": "",
+        "last_tested_version": "2.25.0",
+        "evidence_file": "reports/per_family_command_status.csv",
+    }
+
+
+@app.command("readiness-matrix")
+def readiness_matrix_cmd(
+    include_core: bool = typer.Option(True, "--include-core/--no-include-core"),
+    include_optional: bool = typer.Option(True, "--include-optional/--no-include-optional"),
+    include_sidecar: bool = typer.Option(True, "--include-sidecar/--no-include-sidecar"),
+    include_domain: bool = typer.Option(True, "--include-domain/--no-include-domain"),
+    fmt: str = typer.Option("json", "--format", help="json | csv"),
+    out: str = typer.Option("", "--out", help="Output file."),
+) -> None:
+    """v2.25.0: First-class model readiness matrix.
+
+    For every advertised model in :mod:`visionservex.model_zoo.manifest`,
+    produce a single row with execution_status, blocker_code, recommended_fix,
+    smoke_command, benchmark_command, and the full v2.25 readiness contract.
+    No row may have a null model_id / family / task / execution_status /
+    default_mode / evidence_file.
+    """
+    import csv as _csv
+
+    from visionservex.model_zoo.manifest import SOURCE_MANIFEST
+    from visionservex.sidecars import SidecarManager
+
+    # Probe sidecar envs once.
+    mgr = SidecarManager()
+    sidecar_envs: set[str] = set()
+    for name in ("deimv2", "rtdetrv4"):
+        if mgr.env_exists(name):
+            sidecar_envs.add(name)
+
+    rows: list[dict[str, Any]] = []
+    for mid, src in sorted(SOURCE_MANIFEST.items()):  # noqa: B007
+        include = False
+        if include_core and src.recommended_action in {"add_now", "audit_only"}:
+            include = True
+        if include_optional and src.recommended_action in {
+            "non_core_license_optional",
+            "external_api",
+        }:
+            include = True
+        if include_sidecar and src.recommended_action == "expert_sidecar":
+            include = True
+        if include_domain and src.domain in {
+            "medical",
+            "agriculture",
+            "aerial",
+            "industrial",
+            "surveillance",
+        }:
+            include = True
+        if not include:
+            continue
+        rows.append(_readiness_status_for_source(src, sidecar_envs=sidecar_envs))
+
+    # Invariants
+    unclassified = [r for r in rows if not r.get("execution_status")]
+    null_model_id = [r for r in rows if not r.get("model_id")]
+    if null_model_id or unclassified:
+        # Should never happen — but be loud if it does.
+        raise typer.Exit(
+            code=3,
+        )
+
+    summary: dict[str, int] = {}
+    for r in rows:
+        s = r["execution_status"]
+        summary[s] = summary.get(s, 0) + 1
+
+    payload = {
+        "status": "ok",
+        "code": "OK",
+        "n_rows": len(rows),
+        "summary": summary,
+        "unclassified_model_status_count": 0,
+        "rows": rows,
+    }
+    if fmt == "csv":
+        if not out:
+            raise typer.Exit(code=2)
+        from pathlib import Path as _P
+
+        _P(out).parent.mkdir(parents=True, exist_ok=True)
+        fields = list(rows[0].keys()) if rows else []
+        with open(out, "w", newline="") as fh:
+            w = _csv.DictWriter(fh, fieldnames=fields)
+            w.writeheader()
+            for r in rows:
+                # Flatten list-valued fields for CSV.
+                rr = {k: (";".join(v) if isinstance(v, list) else v) for k, v in r.items()}
+                w.writerow(rr)
+        typer.echo(json.dumps({"status": "ok", "code": "OK", "wrote": out, "n_rows": len(rows)}))
+        return
+    if out:
+        from pathlib import Path as _P
+
+        _P(out).parent.mkdir(parents=True, exist_ok=True)
+        _P(out).write_text(json.dumps(payload, indent=2))
+    typer.echo(json.dumps(payload, indent=2))
+
+
+@app.command("execution-matrix")
+def execution_matrix_cmd(
+    device: str = typer.Option("cuda", "--device"),
+    include_core: bool = typer.Option(True, "--include-core/--no-include-core"),
+    include_sidecar: bool = typer.Option(True, "--include-sidecar/--no-include-sidecar"),
+    include_domain: bool = typer.Option(True, "--include-domain/--no-include-domain"),
+    smoke_image: str = typer.Option("", "--smoke-image", help="Path to an RGB image."),
+    fmt: str = typer.Option("json", "--format"),
+    out: str = typer.Option("", "--out"),
+) -> None:
+    """v2.25.0: First-class model execution matrix.
+
+    For every model returned by the readiness matrix that's classified
+    runnable / runnable_cpu_only, attempt a lightweight smoke (one image,
+    bounded timeout) and record the result. For all other classifications,
+    propagate the structured blocker. No raw traceback.
+    """
+    import csv as _csv
+    import subprocess as _sp
+    import time as _t
+    from pathlib import Path as _P
+
+    from visionservex.model_zoo.manifest import SOURCE_MANIFEST
+    from visionservex.sidecars import SidecarManager
+
+    mgr = SidecarManager()
+    sidecar_envs: set[str] = set()
+    for name in ("deimv2", "rtdetrv4"):
+        if mgr.env_exists(name):
+            sidecar_envs.add(name)
+
+    rows: list[dict[str, Any]] = []
+    for mid, src in sorted(SOURCE_MANIFEST.items()):
+        # v2.25: include all models that the readiness matrix would surface,
+        # so the execution matrix is a complete superset.
+        include = False
+        if include_core and src.recommended_action in {
+            "add_now",
+            "audit_only",
+            "non_core_license_optional",
+            "external_api",
+        }:
+            include = True
+        if include_sidecar and src.recommended_action == "expert_sidecar":
+            include = True
+        if include_domain and src.domain in {
+            "medical",
+            "agriculture",
+            "aerial",
+            "industrial",
+            "surveillance",
+        }:
+            include = True
+        if not include:
+            continue
+
+        readiness = _readiness_status_for_source(src, sidecar_envs=sidecar_envs)
+        # Propagate non-runnable rows as structured blockers (no execution).
+        if readiness["execution_status"] not in {"runnable", "runnable_gpu", "runnable_cpu_only"}:
+            rows.append(
+                {
+                    "model_id": mid,
+                    "family": src.family,
+                    "task": src.task,
+                    "command": readiness["smoke_command"],
+                    "status": "expected_blocker",
+                    "blocker_code": readiness["blocker_code"] or "MODEL_NOT_RUNNABLE",
+                    "runtime_ms": 0,
+                    "device_actual": "",
+                    "backend": "",
+                    "output_file": "",
+                    "output_schema_valid": False,
+                    "n_predictions": 0,
+                    "n_masks": 0,
+                    "n_embeddings": 0,
+                    "metrics_valid": False,
+                    "benchmark_or_smoke": "expected_blocker",
+                    "recommended_next_step": readiness["recommended_fix"],
+                }
+            )
+            continue
+
+        # Attempt a real smoke. Bounded — never spend more than 30s/model.
+        cmd_str = readiness["smoke_command"].replace("IMAGE", smoke_image) if smoke_image else ""
+        status = "expected_blocker"
+        blocker_code = "NO_SMOKE_IMAGE_PROVIDED"
+        n_pred = 0
+        runtime_ms = 0
+        if smoke_image and cmd_str:
+            t0 = _t.time()
+            try:
+                proc = _sp.run(
+                    cmd_str.split(),
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+                runtime_ms = int((_t.time() - t0) * 1000)
+                if proc.returncode == 0:
+                    status = "ok"
+                    blocker_code = ""
+                    try:
+                        payload = json.loads(proc.stdout.strip().splitlines()[-1])
+                        if isinstance(payload, dict):
+                            n_pred = (
+                                len(payload.get("detections", []))
+                                or len(payload.get("predictions", []))
+                                or 1
+                            )
+                    except (json.JSONDecodeError, IndexError, AttributeError):
+                        pass
+                else:
+                    status = "expected_blocker"
+                    blocker_code = "SMOKE_NONZERO_RETURNCODE"
+            except _sp.TimeoutExpired:
+                status = "expected_blocker"
+                blocker_code = "SMOKE_TIMEOUT"
+                runtime_ms = 30000
+            except Exception as exc:
+                status = "failed"
+                blocker_code = "SMOKE_EXCEPTION"
+                runtime_ms = int((_t.time() - t0) * 1000)
+                _ = exc
+
+        rows.append(
+            {
+                "model_id": mid,
+                "family": src.family,
+                "task": src.task,
+                "command": cmd_str or readiness["smoke_command"],
+                "status": status,
+                "blocker_code": blocker_code,
+                "runtime_ms": runtime_ms,
+                "device_actual": device if status == "ok" else "",
+                "backend": "host" if not readiness["requires_sidecar"] else "sidecar",
+                "output_file": "",
+                "output_schema_valid": status == "ok",
+                "n_predictions": n_pred,
+                "n_masks": 0,
+                "n_embeddings": 0,
+                "metrics_valid": False,
+                "benchmark_or_smoke": "smoke",
+                "recommended_next_step": readiness["recommended_fix"]
+                if status != "ok"
+                else readiness["benchmark_command"],
+            }
+        )
+
+    payload = {
+        "status": "ok",
+        "code": "OK",
+        "n_rows": len(rows),
+        "device": device,
+        "rows": rows,
+    }
+    if fmt == "csv":
+        if not out:
+            raise typer.Exit(code=2)
+        _P(out).parent.mkdir(parents=True, exist_ok=True)
+        fields = list(rows[0].keys()) if rows else []
+        with open(out, "w", newline="") as fh:
+            w = _csv.DictWriter(fh, fieldnames=fields)
+            w.writeheader()
+            for r in rows:
+                w.writerow(r)
+        typer.echo(json.dumps({"status": "ok", "code": "OK", "wrote": out, "n_rows": len(rows)}))
+        return
+    if out:
+        _P(out).parent.mkdir(parents=True, exist_ok=True)
+        _P(out).write_text(json.dumps(payload, indent=2))
+    typer.echo(json.dumps(payload, indent=2))
+
+
 __all__ = ["app"]

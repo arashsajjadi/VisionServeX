@@ -39,27 +39,30 @@ def _run(args: list[str], timeout: int = 30) -> subprocess.CompletedProcess:
 
 
 def test_classify_alias_help_lists_out_and_format() -> None:
-    """`visionservex classify --help` must mention --out and --format (notebook contract)."""
-    res = _run(["classify", "--help"])
-    assert res.returncode == 0, (res.stdout, res.stderr)
-    assert "--out" in res.stdout
-    assert "--format" in res.stdout
-    assert "--top-k" in res.stdout
+    """`visionservex classify --help` must mention --out and --format (notebook contract).
+
+    v2.25.0: use rich-aware help assertion so CI's narrower terminal width
+    can't soft-wrap option names across lines and break substring matches.
+    """
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["classify"])
+    assert_help_contains_all(res, ["--out", "--format", "--top-k"])
 
 
 def test_similarity_alias_help_lists_out_and_format() -> None:
-    res = _run(["similarity", "--help"])
-    assert res.returncode == 0, (res.stdout, res.stderr)
-    assert "--out" in res.stdout
-    assert "--format" in res.stdout
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["similarity"])
+    assert_help_contains_all(res, ["--out", "--format"])
 
 
 def test_agriculture_model_card_help_exists() -> None:
     """Agriculture must expose `model-card` (it did not in v2.15)."""
-    res = _run(["agriculture", "model-card", "--help"])
-    assert res.returncode == 0, (res.stdout, res.stderr)
-    assert "--out" in res.stdout
-    assert "--format" in res.stdout
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["agriculture", "model-card"])
+    assert_help_contains_all(res, ["--out", "--format"])
 
 
 def test_agriculture_model_card_agriclip_returns_expected_blocker(tmp_path: Path) -> None:

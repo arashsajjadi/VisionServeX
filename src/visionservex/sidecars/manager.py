@@ -33,10 +33,12 @@ from typing import Any
 
 __all__ = [
     "SIDECAR_BLOCKER_CODES",
+    "SIDECAR_PROFILES",
     "SidecarConfig",
     "SidecarExecResult",
     "SidecarManager",
     "SidecarSpec",
+    "apply_sidecar_profile",
 ]
 
 
@@ -187,6 +189,92 @@ class SidecarExecResult:
 # Canonical sidecar specs
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# v2.25.0: runtime profiles for sidecars
+# ---------------------------------------------------------------------------
+
+# Profile name → spec field overrides. Use ``apply_sidecar_profile`` to
+# materialize a SidecarSpec with the profile applied.
+SIDECAR_PROFILES: dict[str, dict[str, Any]] = {
+    "deimv2-cu124-stable": {
+        "torch_version": "2.5.1",
+        "torchvision_version": "0.20.1",
+        "cuda_channel": "cu124",
+        "_index_url_override": "",
+        "_extra_pip_index_url": "",
+    },
+    "deimv2-blackwell-nightly": {
+        # PyTorch cu128 nightlies support sm_120 (Blackwell). Wheels live at
+        # https://download.pytorch.org/whl/nightly/cu128 . The DEIMv2 upstream
+        # requirements pin torch==2.5.1; this profile relaxes that pin.
+        "torch_version": "",  # let nightly choose
+        "torchvision_version": "",
+        "cuda_channel": "nightly/cu128",
+        "_index_url_override": "https://download.pytorch.org/whl/nightly/cu128",
+        "_extra_pip_index_url": "",
+    },
+    "deimv2-cpu-proof": {
+        "torch_version": "2.5.1",
+        "torchvision_version": "0.20.1",
+        "cuda_channel": "cpu",
+        "_index_url_override": "https://download.pytorch.org/whl/cpu",
+        "_extra_pip_index_url": "",
+    },
+    "deimv2-a100-l4-fallback": {
+        "torch_version": "2.5.1",
+        "torchvision_version": "0.20.1",
+        "cuda_channel": "cu124",
+        "_index_url_override": "",
+        "_extra_pip_index_url": "",
+    },
+    # RT-DETRv4 has no strict torch pin in requirements.txt, so the profile
+    # set mirrors DEIMv2 but with rtdetrv4 sidecar name.
+    "rtdetrv4-cu124-stable": {
+        "torch_version": "2.5.1",
+        "torchvision_version": "0.20.1",
+        "cuda_channel": "cu124",
+        "_index_url_override": "",
+        "_extra_pip_index_url": "",
+    },
+    "rtdetrv4-blackwell-nightly": {
+        "torch_version": "",
+        "torchvision_version": "",
+        "cuda_channel": "nightly/cu128",
+        "_index_url_override": "https://download.pytorch.org/whl/nightly/cu128",
+        "_extra_pip_index_url": "",
+    },
+}
+
+
+def apply_sidecar_profile(spec: SidecarSpec, profile: str | None) -> SidecarSpec:
+    """Return a copy of ``spec`` with profile fields overridden.
+
+    Profile entries that explicitly set a field to ``""`` (empty string) are
+    treated as "unpin" — the resulting spec will use unpinned latest, not
+    fall back to the upstream pin. Profile entries that omit a field
+    inherit the spec value.
+
+    If ``profile`` is empty or unknown, returns ``spec`` unchanged.
+    """
+    if not profile or profile not in SIDECAR_PROFILES:
+        return spec
+    overrides = SIDECAR_PROFILES[profile]
+    return SidecarSpec(
+        name=spec.name,
+        description=f"{spec.description} [profile: {profile}]",
+        python_version=spec.python_version,
+        torch_version=overrides.get("torch_version", spec.torch_version),
+        torchvision_version=overrides.get("torchvision_version", spec.torchvision_version),
+        cuda_channel=overrides.get("cuda_channel", spec.cuda_channel) or spec.cuda_channel,
+        upstream_repo=spec.upstream_repo,
+        upstream_branch=spec.upstream_branch,
+        pip_extras=list(spec.pip_extras),
+        custom_ops=list(spec.custom_ops),
+        license=spec.license,
+        notes=spec.notes + f" Profile={profile}.",
+    )
+
+
 _SIDECAR_SPECS: dict[str, SidecarSpec] = {
     "deimv2": SidecarSpec(
         name="deimv2",
@@ -260,9 +348,9 @@ class SidecarManager:
     def conda_available() -> bool:
         return shutil.which("conda") is not None or shutil.which("mamba") is not None
 
-    def env_exists(self, name: str) -> bool:
-        """Return True if a conda env named ``visionservex-<name>-sidecar`` exists."""
-        env_name = f"visionservex-{name}-sidecar"
+    def env_exists(self, name: str, *, profile: str | None = None) -> bool:
+        """Return True if the conda env for this sidecar (and optional profile) exists."""
+        env_name = self.env_name(name, profile=profile)
         if not self.conda_available():
             return False
         try:
@@ -277,24 +365,72 @@ class SidecarManager:
         except Exception:
             return False
 
-    def plan_create(self, spec: SidecarSpec) -> list[str]:
-        """Return the ordered list of shell commands that would create the env."""
-        env_name = f"visionservex-{spec.name}-sidecar"
+    def plan_create(self, spec: SidecarSpec, *, profile: str | None = None) -> list[str]:
+        """Return the ordered list of shell commands that would create the env.
+
+        If ``profile`` is set, the env name gets a profile suffix so different
+        profiles do not clobber each other (e.g.
+        ``visionservex-deimv2-blackwell-nightly-sidecar``).
+
+        For unpinned-torch profiles (empty ``torch_version``, used by the
+        Blackwell nightly track), torch is installed LAST so the upstream
+        ``requirements.txt`` cannot revert it.
+        """
+        env_name = self.env_name(spec.name, profile=profile)
         repo_dir = spec.install_root
-        index_url = f"https://download.pytorch.org/whl/{spec.cuda_channel}"
-        cmds = [
-            f"conda create -n {env_name} python={spec.python_version} -y",
-            f"git clone -b {spec.upstream_branch} {spec.upstream_repo} {repo_dir}",
-            (
+        if profile and profile in SIDECAR_PROFILES:
+            index_url = (
+                SIDECAR_PROFILES[profile].get("_index_url_override")
+                or f"https://download.pytorch.org/whl/{spec.cuda_channel}"
+            )
+        else:
+            index_url = f"https://download.pytorch.org/whl/{spec.cuda_channel}"
+
+        if spec.torch_version and spec.torchvision_version:
+            torch_install = (
                 f"conda run -n {env_name} pip install "
                 f"torch=={spec.torch_version} torchvision=={spec.torchvision_version} "
                 f"--index-url {index_url}"
-            ),
-            f"conda run -n {env_name} pip install -r {repo_dir}/requirements.txt",
+            )
+            torch_last = False
+        elif spec.torch_version:
+            torch_install = (
+                f"conda run -n {env_name} pip install "
+                f"torch=={spec.torch_version} --index-url {index_url}"
+            )
+            torch_last = False
+        else:
+            # Empty torch version → install latest pre-release after requirements,
+            # so requirements.txt's torch pin doesn't downgrade us.
+            torch_install = (
+                f"conda run -n {env_name} pip install --pre --upgrade "
+                f"torch torchvision --index-url {index_url}"
+            )
+            torch_last = True
+
+        cmds: list[str] = [
+            f"conda create -n {env_name} python={spec.python_version} -y",
+            f"git clone -b {spec.upstream_branch} {spec.upstream_repo} {repo_dir}",
         ]
+        if not torch_last:
+            cmds.append(torch_install)
+            cmds.append(f"conda run -n {env_name} pip install -r {repo_dir}/requirements.txt")
+        else:
+            # Requirements first (may install torch 2.5.1 from requirements.txt),
+            # then nightly torch with --upgrade to override.
+            cmds.append(f"conda run -n {env_name} pip install -r {repo_dir}/requirements.txt")
+            cmds.append(torch_install)
         if spec.pip_extras:
             cmds.append(f"conda run -n {env_name} pip install " + " ".join(spec.pip_extras))
         return cmds
+
+    @staticmethod
+    def env_name(name: str, *, profile: str | None = None) -> str:
+        """Return the conda env name for a sidecar, optionally profile-suffixed."""
+        if profile and profile != f"{name}-cu124-stable":
+            # Use profile name as suffix so blackwell envs are separate.
+            return f"visionservex-{profile}-sidecar"
+        return f"visionservex-{name}-sidecar"
 
     def doctor(self, name: str) -> dict[str, Any]:
         """Probe the sidecar environment without modifying anything."""
@@ -331,7 +467,12 @@ class SidecarManager:
         }
 
     def create(
-        self, name: str, *, dry_run: bool = True, config: SidecarConfig | None = None
+        self,
+        name: str,
+        *,
+        dry_run: bool = True,
+        config: SidecarConfig | None = None,
+        profile: str | None = None,
     ) -> dict[str, Any]:
         """Plan or execute sidecar creation.
 
@@ -347,16 +488,20 @@ class SidecarManager:
                 "message": f"Unknown sidecar spec {name!r}.",
             }
         cfg = config or SidecarConfig()
-        cmds = self.plan_create(spec)
+        if profile:
+            spec = apply_sidecar_profile(spec, profile)
+        cmds = self.plan_create(spec, profile=profile)
         if dry_run:
             return {
                 "status": "ok",
                 "code": "DRY_RUN",
                 "sidecar": name,
+                "profile": profile or "",
                 "spec": spec.to_dict(),
                 "planned_commands": cmds,
                 "install_root": str(spec.install_root),
                 "install_root_source": _install_root_source(),
+                "env_name": self.env_name(name, profile=profile),
                 "message": (
                     "Dry-run only. To execute, rerun with --execute (requires conda + ~20 GB disk)."
                 ),

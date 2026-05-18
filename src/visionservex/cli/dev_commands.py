@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 import typer
 from rich.console import Console
@@ -494,6 +495,88 @@ def make_synthetic_video_cmd(
         "size_bytes": out.stat().st_size,
     }
     typer.echo(_json.dumps(payload, indent=2))
+
+
+@app.command("cuda-compatibility")
+def cuda_compatibility_cmd(
+    out: Path = typer.Option(None, "--out"),
+    fmt: str = typer.Option("text", "--format"),
+) -> None:
+    """v2.25.0: report GPU compute capability vs the installed torch's supported archs.
+
+    Detects Blackwell sm_120 (RTX 5080 / 5090) and recommends a runtime
+    profile. Emits a structured blocker code when the GPU is unsupported by
+    the current torch build.
+    """
+    import json as _json
+
+    payload: dict[str, Any] = {
+        "status": "ok",
+        "code": "OK",
+        "gpu_name": "",
+        "compute_capability": [],
+        "torch_version": "",
+        "torch_cuda_version": "",
+        "supported_arch_list": [],
+        "blackwell_detected": False,
+        "current_torch_supports_gpu": True,
+        "recommended_runtime": "host",
+        "recommended_action": "",
+        "blocker_code": "",
+    }
+    try:
+        import torch
+
+        payload["torch_version"] = torch.__version__
+        payload["torch_cuda_version"] = (
+            torch.version.cuda or ""
+            if hasattr(torch, "version") and hasattr(torch.version, "cuda")
+            else ""
+        )
+        if torch.cuda.is_available():
+            cap = torch.cuda.get_device_capability(0)
+            payload["gpu_name"] = torch.cuda.get_device_name(0)
+            payload["compute_capability"] = list(cap)
+            try:
+                payload["supported_arch_list"] = list(torch.cuda.get_arch_list())
+            except Exception:
+                payload["supported_arch_list"] = []
+            sm = f"sm_{cap[0]}{cap[1]}"
+            payload["blackwell_detected"] = cap[0] >= 12
+            if payload["supported_arch_list"] and sm not in payload["supported_arch_list"]:
+                payload["current_torch_supports_gpu"] = False
+                payload["status"] = "expected_blocker"
+                payload["code"] = "BLACKWELL_SM120_TORCH_INCOMPATIBLE"
+                payload["blocker_code"] = "BLACKWELL_SM120_TORCH_INCOMPATIBLE"
+                payload["recommended_runtime"] = "sidecar:deimv2-blackwell-nightly"
+                payload["recommended_action"] = (
+                    f"torch {payload['torch_version']} supports archs {payload['supported_arch_list']}; "
+                    f"GPU is {sm}. Use a Blackwell-compatible torch nightly (cu126+) or run on CPU/A100/L4/T4."
+                )
+        else:
+            payload["status"] = "expected_blocker"
+            payload["code"] = "CUDA_UNAVAILABLE"
+            payload["blocker_code"] = "CUDA_UNAVAILABLE"
+            payload["recommended_runtime"] = "cpu"
+            payload["recommended_action"] = "No CUDA device detected; run with --device cpu."
+    except ImportError as exc:
+        payload["status"] = "failed"
+        payload["code"] = "TORCH_NOT_INSTALLED"
+        payload["blocker_code"] = "TORCH_NOT_INSTALLED"
+        payload["recommended_action"] = f"pip install torch ({exc})"
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(_json.dumps(payload, indent=2))
+    if fmt == "json":
+        typer.echo(_json.dumps(payload, indent=2))
+        return
+    console.print(f"[bold]CUDA compatibility[/bold] -> {payload['status']} ({payload['code']})")
+    console.print(f"  gpu: {payload['gpu_name'] or '(none)'}")
+    console.print(f"  cc:  {payload['compute_capability']}")
+    console.print(f"  torch: {payload['torch_version']}")
+    console.print(f"  archs: {payload['supported_arch_list']}")
+    if payload["recommended_action"]:
+        console.print(f"  fix: {payload['recommended_action']}")
 
 
 @app.command("gpu-profile")

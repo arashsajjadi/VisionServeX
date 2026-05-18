@@ -269,18 +269,20 @@ def _vsx_cmd() -> list[str]:
 
 
 def test_benchmark_detection_help_lists_v217_flags() -> None:
-    res = subprocess.run(
-        [*_vsx_cmd(), "benchmark-detection", "--help"],
-        capture_output=True,
-        text=True,
-        timeout=15,
+    """v2.25.0: rich-aware help assertion (CI terminal can soft-wrap flag names)."""
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["benchmark-detection"])
+    assert_help_contains_all(
+        res,
+        [
+            "--require-gpu",
+            "--sample-gpu",
+            "--models",
+            "--include-mocks",
+            "--include-aliases",
+        ],
     )
-    assert res.returncode == 0
-    assert "--require-gpu" in res.stdout
-    assert "--sample-gpu" in res.stdout
-    assert "--models" in res.stdout
-    assert "--include-mocks" in res.stdout
-    assert "--include-aliases" in res.stdout
 
 
 def test_benchmark_detection_rejects_only_mocks(tmp_path: Path) -> None:

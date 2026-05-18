@@ -142,6 +142,11 @@ def create_env_cmd(
         "--timeout-s",
         help="Per-command timeout (default 1800s = 30 min).",
     ),
+    profile: str = typer.Option(
+        "",
+        "--profile",
+        help="rtdetrv4-cu124-stable (default) | rtdetrv4-blackwell-nightly",
+    ),
     out: Path | None = typer.Option(None, "--out"),
     fmt: str = typer.Option("text", "--format"),
 ) -> None:
@@ -149,17 +154,37 @@ def create_env_cmd(
     from visionservex.sidecars import SidecarConfig, SidecarManager
 
     cfg = SidecarConfig(timeout_s=timeout_s)
-    payload = SidecarManager().create("rtdetrv4", dry_run=dry_run, config=cfg)
+    payload = SidecarManager().create(
+        "rtdetrv4", dry_run=dry_run, config=cfg, profile=(profile or None)
+    )
     _emit(payload, out=out, fmt=fmt)
 
 
 @app.command("pull")
 def pull_cmd(
     model_id: str = typer.Argument("rtdetrv4-s"),
+    method: str = typer.Option(
+        "manual",
+        "--method",
+        help="auto | gdown | direct-url | manual",
+    ),
     out: Path | None = typer.Option(None, "--out"),
     fmt: str = typer.Option("text", "--format"),
+    timeout_s: int = typer.Option(900, "--timeout-s"),
 ) -> None:
-    """Return the exact gdown command for an RT-DETRv4 Google Drive checkpoint."""
+    """v2.25.0: pull an RT-DETRv4 checkpoint via gdown (default: manual).
+
+    With ``--method auto`` (or ``gdown``) we attempt the actual Google Drive
+    fetch. On success the checkpoint is cached under
+    ``~/.cache/visionservex/sidecars/rtdetrv4/checkpoints/<model_id>.pth``
+    and the report carries ``status=ok``. If ``gdown`` is missing or the
+    fetch fails, we fall back to ``CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP``
+    with the exact command the user can run.
+    """
+    import shutil as _sh
+    import subprocess as _sp
+    import time as _t
+
     info = RTDETRV4_CHECKPOINTS.get(model_id)
     if info is None:
         payload = {
@@ -170,27 +195,155 @@ def pull_cmd(
         }
         _emit(payload, out=out, fmt=fmt)
         return
+
     gid = info["gdrive_id"]
-    payload = {
+    cache_root = Path.home() / ".cache" / "visionservex" / "sidecars" / "rtdetrv4" / "checkpoints"
+    cache_root.mkdir(parents=True, exist_ok=True)
+    cache_path = cache_root / f"{model_id}.pth"
+
+    manual_payload = {
         "status": "expected_blocker",
         "code": "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP",
         "model_id": model_id,
+        "method_used": "manual",
         "config": info["config"],
+        "checkpoint_source": "google_drive",
         "gdrive_id": gid,
-        "gdown_command": f"gdown --id {gid} -O ~/.cache/visionservex/sidecars/rtdetrv4/checkpoints/{model_id}.pth",
+        "gdown_command": f"gdown --id {gid} -O {cache_path}",
+        "manual_command": f"gdown --id {gid} -O {cache_path}",
+        "cache_path": str(cache_path),
         "reported_AP": info["reported_AP"],
         "reported_AP50": info.get("reported_AP50"),
         "reported_latency_ms": info["reported_latency_ms"],
-        "additional_pretrain": info.get("additional_pretrain", None),
+        "additional_pretrain": info.get("additional_pretrain"),
         "upstream_repo": RTDETRV4_UPSTREAM_REPO,
         "license": RTDETRV4_LICENSE,
         "message": (
-            f"RT-DETRv4 checkpoints are distributed via Google Drive. Install `gdown` "
-            f"and run: gdown --id {gid} -O <path>. The configs and inference scripts "
-            f"are in {RTDETRV4_UPSTREAM_REPO} (clone via `visionservex rtdetrv4 create-env`)."
+            f"RT-DETRv4 checkpoints are distributed via Google Drive. "
+            f"Install `gdown` then run: gdown --id {gid} -O {cache_path}."
         ),
     }
-    _emit(payload, out=out, fmt=fmt)
+
+    # If the cache already exists, short-circuit with status=ok.
+    if cache_path.exists() and cache_path.stat().st_size > 0:
+        ok_payload = dict(manual_payload)
+        ok_payload.update(
+            status="ok",
+            code="OK",
+            method_used="cache_hit",
+            size_bytes=cache_path.stat().st_size,
+            message=f"Checkpoint already at {cache_path}.",
+        )
+        _emit(ok_payload, out=out, fmt=fmt)
+        return
+
+    if method == "manual":
+        _emit(manual_payload, out=out, fmt=fmt)
+        return
+
+    if method in {"auto", "gdown"}:
+        if _sh.which("gdown") is None:
+            # Try inside the rtdetrv4 sidecar env where gdown might be installed
+            # alongside other extras.
+            ok = False
+            from visionservex.sidecars import SidecarManager
+
+            if SidecarManager().env_exists("rtdetrv4"):
+                t0 = _t.time()
+                try:
+                    proc = _sp.run(
+                        [
+                            "conda",
+                            "run",
+                            "-n",
+                            "visionservex-rtdetrv4-sidecar",
+                            "python",
+                            "-c",
+                            (
+                                "import sys, gdown; "
+                                f"gdown.download(id={gid!r}, output={str(cache_path)!r}, "
+                                "quiet=True)"
+                            ),
+                        ],
+                        capture_output=True,
+                        text=True,
+                        timeout=timeout_s,
+                    )
+                    if proc.returncode == 0 and cache_path.exists():
+                        ok = True
+                    else:
+                        stderr_tail = (proc.stderr or "")[-500:]
+                except Exception as exc:
+                    stderr_tail = repr(exc)[:500]
+                runtime_s = _t.time() - t0
+                if ok:
+                    ok_payload = dict(manual_payload)
+                    ok_payload.update(
+                        status="ok",
+                        code="OK",
+                        method_used="gdown_via_sidecar",
+                        size_bytes=cache_path.stat().st_size,
+                        runtime_s=round(runtime_s, 2),
+                        message=f"Downloaded via sidecar gdown -> {cache_path}.",
+                    )
+                    _emit(ok_payload, out=out, fmt=fmt)
+                    return
+                manual_payload["sidecar_gdown_stderr"] = stderr_tail
+            manual_payload["gdown_in_host_path"] = False
+            manual_payload["code"] = "CHECKPOINT_DOWNLOAD_FAILED"
+            manual_payload["status"] = "expected_blocker"
+            manual_payload["message"] = (
+                "gdown not on host PATH. Install it (`pip install gdown`) or run the "
+                f"manual command: gdown --id {gid} -O {cache_path}."
+            )
+            _emit(manual_payload, out=out, fmt=fmt)
+            return
+
+        # gdown is on host PATH — try fetching directly. gdown >=6 no longer
+        # accepts --id; the modern form takes the URL or id as a positional arg.
+        t0 = _t.time()
+        try:
+            proc = _sp.run(
+                ["gdown", "-O", str(cache_path), f"https://drive.google.com/uc?id={gid}"],
+                capture_output=True,
+                text=True,
+                timeout=timeout_s,
+            )
+            runtime_s = _t.time() - t0
+            if proc.returncode == 0 and cache_path.exists() and cache_path.stat().st_size > 0:
+                ok_payload = dict(manual_payload)
+                ok_payload.update(
+                    status="ok",
+                    code="OK",
+                    method_used="gdown_host",
+                    size_bytes=cache_path.stat().st_size,
+                    runtime_s=round(runtime_s, 2),
+                    message=f"Downloaded via host gdown -> {cache_path}.",
+                )
+                _emit(ok_payload, out=out, fmt=fmt)
+                return
+            manual_payload["code"] = "CHECKPOINT_DOWNLOAD_FAILED"
+            manual_payload["status"] = "expected_blocker"
+            manual_payload["stderr_tail"] = (proc.stderr or "")[-500:]
+            manual_payload["returncode"] = proc.returncode
+            manual_payload["message"] = (
+                f"gdown failed (rc={proc.returncode}). Most likely Google Drive's "
+                "abuse filter; supply --checkpoint <path> to smoke-test instead."
+            )
+            _emit(manual_payload, out=out, fmt=fmt)
+            return
+        except _sp.TimeoutExpired:
+            manual_payload["code"] = "CHECKPOINT_DOWNLOAD_FAILED"
+            manual_payload["status"] = "expected_blocker"
+            manual_payload["message"] = f"gdown timed out after {timeout_s}s."
+            _emit(manual_payload, out=out, fmt=fmt)
+            return
+
+    # Unknown method
+    manual_payload["status"] = "failed"
+    manual_payload["code"] = "INVALID_METHOD"
+    manual_payload["message"] = f"Unknown --method {method!r}; use auto|gdown|manual."
+    _emit(manual_payload, out=out, fmt=fmt)
 
 
 @app.command("smoke-test")
@@ -199,6 +352,14 @@ def smoke_test_cmd(
     image: Path = typer.Argument(..., help="Image path."),
     device: str = typer.Option("cuda", "--device"),
     backend: str = typer.Option("torch", "--backend", help="torch | onnxruntime | tensorrt"),
+    checkpoint: Path | None = typer.Option(
+        None,
+        "--checkpoint",
+        help=(
+            "v2.25.0: user-supplied checkpoint .pth path. If omitted, looks under "
+            "~/.cache/visionservex/sidecars/rtdetrv4/checkpoints/<model_id>.pth."
+        ),
+    ),
     out: Path | None = typer.Option(None, "--out"),
     fmt: str = typer.Option("text", "--format"),
     draw: Path | None = typer.Option(None, "--draw"),
@@ -273,31 +434,157 @@ def smoke_test_cmd(
         )
         return
 
-    # The sidecar env is ready. The actual inference call would be:
-    #   conda run -n visionservex-rtdetrv4-sidecar python tools/inference/torch_inf.py \
-    #     -c CONFIG -r CHECKPOINT --input IMAGE --device cuda:0
-    # We emit the planned command rather than executing here, because v2.23
-    # ships infrastructure; the user's GPU session runs the actual smoke.
-    payload = {
-        "status": "expected_blocker",
-        "code": "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP",
-        "model_id": model_id,
-        "image": str(image),
-        "device": device,
-        "backend": backend,
-        "config": info["config"],
-        "planned_command": (
-            f"conda run -n visionservex-rtdetrv4-sidecar python "
-            f"tools/inference/torch_inf.py -c {info['config']} "
-            f"-r ~/.cache/visionservex/sidecars/rtdetrv4/checkpoints/{model_id}.pth "
-            f"--input {image} --device cuda:0"
-        ),
-        "message": (
-            "Sidecar env is ready. Checkpoint download still requires gdown; run "
-            f"`visionservex rtdetrv4 pull {model_id}` for the exact command."
-        ),
-    }
-    _emit(payload, out=out, fmt=fmt)
+    # v2.25.0: Run the smoke for real when a checkpoint is supplied / cached.
+    import subprocess as _sp
+    import time as _t
+
+    ckpt_path = checkpoint or (
+        Path.home()
+        / ".cache"
+        / "visionservex"
+        / "sidecars"
+        / "rtdetrv4"
+        / "checkpoints"
+        / f"{model_id}.pth"
+    )
+    if not ckpt_path.exists():
+        _emit(
+            {
+                "status": "expected_blocker",
+                "code": "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP",
+                "model_id": model_id,
+                "image": str(image),
+                "device": device,
+                "backend": backend,
+                "checkpoint_searched": str(ckpt_path),
+                "manual_command": (
+                    f"gdown --id {info['gdrive_id']} -O {ckpt_path}  # or supply --checkpoint"
+                ),
+                "message": (
+                    f"No checkpoint at {ckpt_path}. Run "
+                    f"`visionservex rtdetrv4 pull {model_id} --method auto` "
+                    f"or supply --checkpoint <path>."
+                ),
+            },
+            out=out,
+            fmt=fmt,
+        )
+        return
+
+    repo_root = Path.home() / ".cache" / "visionservex" / "sidecars" / "rtdetrv4"
+    config_path = repo_root / info["config"]
+    if not config_path.exists():
+        _emit(
+            {
+                "status": "expected_blocker",
+                "code": "CONFIG_NOT_FOUND",
+                "model_id": model_id,
+                "config_searched": str(config_path),
+                "message": (
+                    f"Config {config_path} not found. Re-run create-env to ensure "
+                    "the upstream repo is cloned."
+                ),
+            },
+            out=out,
+            fmt=fmt,
+        )
+        return
+
+    cuda_str = "cuda:0" if device.startswith("cuda") else "cpu"
+    cmd = [
+        "conda",
+        "run",
+        "-n",
+        "visionservex-rtdetrv4-sidecar",
+        "python",
+        str(repo_root / "tools" / "inference" / "torch_inf.py"),
+        "-c",
+        str(config_path),
+        "-r",
+        str(ckpt_path),
+        "--input",
+        str(image),
+        "--device",
+        cuda_str,
+    ]
+    t0 = _t.time()
+    try:
+        proc = _sp.run(cmd, capture_output=True, text=True, timeout=120, cwd=str(repo_root))
+    except _sp.TimeoutExpired:
+        _emit(
+            {
+                "status": "failed",
+                "code": "SIDECAR_TIMEOUT",
+                "model_id": model_id,
+                "command": cmd,
+                "message": "RT-DETRv4 smoke timed out after 120s.",
+            },
+            out=out,
+            fmt=fmt,
+        )
+        return
+    runtime_s = _t.time() - t0
+
+    stderr_tail = (proc.stderr or "")[-1000:]
+    # Detect Blackwell sm_120 incompatibility on the stderr.
+    if proc.returncode != 0 and "no kernel image is available" in stderr_tail.lower():
+        _emit(
+            {
+                "status": "expected_blocker",
+                "code": "BLACKWELL_SM120_TORCH_INCOMPATIBLE",
+                "model_id": model_id,
+                "image": str(image),
+                "device": device,
+                "checkpoint": str(ckpt_path),
+                "config": str(config_path),
+                "runtime_s": round(runtime_s, 2),
+                "stderr_tail": stderr_tail,
+                "message": (
+                    "RT-DETRv4 sidecar torch does not support this GPU's compute "
+                    "capability. Re-create the env with "
+                    "`--profile rtdetrv4-blackwell-nightly`."
+                ),
+            },
+            out=out,
+            fmt=fmt,
+        )
+        return
+    if proc.returncode != 0:
+        _emit(
+            {
+                "status": "failed",
+                "code": "SIDECAR_COMMAND_FAILED",
+                "model_id": model_id,
+                "image": str(image),
+                "device": device,
+                "checkpoint": str(ckpt_path),
+                "config": str(config_path),
+                "returncode": proc.returncode,
+                "runtime_s": round(runtime_s, 2),
+                "stderr_tail": stderr_tail,
+            },
+            out=out,
+            fmt=fmt,
+        )
+        return
+
+    _emit(
+        {
+            "status": "ok",
+            "code": "OK",
+            "model_id": model_id,
+            "image": str(image),
+            "device": device,
+            "backend": backend,
+            "checkpoint": str(ckpt_path),
+            "config": str(config_path),
+            "runtime_s": round(runtime_s, 2),
+            "stdout_tail": (proc.stdout or "")[-400:],
+            "message": "RT-DETRv4 smoke-test produced an inference result.",
+        },
+        out=out,
+        fmt=fmt,
+    )
 
 
 __all__ = ["app"]
