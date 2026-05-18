@@ -2210,6 +2210,160 @@ models:
   model_category: experimental_sota
   unavailable_reason: Custom loader required from official repo. Checkpoint availability not verified.
   notes: DEIMv2 Medium. Not yet wired.
+- id: deimv2-atto
+  display_name: DEIMv2 (Atto) [experimental]
+  task: detect
+  family: deim
+  backend: pytorch
+  engine: _stub
+  license: Apache-2.0
+  license_uncertain: true
+  upstream_url: https://github.com/ShiqiYu/DEIM
+  download_type: not_available
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: stub
+  supported_devices:
+  - cuda
+  - cpu
+  supported_precisions:
+  - fp16
+  minimum_vram_gb: 1.5
+  recommended_vram_gb: 3.0
+  difficulty: expert
+  status: experimental
+  model_category: experimental_sota
+  unavailable_reason: DEIMv2 atto custom loader required from official repo. Checkpoint not yet on HF.
+  notes: DEIMv2 Atto (smallest tier). Not yet wired in v2.21.
+- id: deimv2-femto
+  display_name: DEIMv2 (Femto) [experimental]
+  task: detect
+  family: deim
+  backend: pytorch
+  engine: _stub
+  license: Apache-2.0
+  license_uncertain: true
+  upstream_url: https://github.com/ShiqiYu/DEIM
+  download_type: not_available
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: stub
+  supported_devices:
+  - cuda
+  - cpu
+  supported_precisions:
+  - fp16
+  minimum_vram_gb: 1.5
+  recommended_vram_gb: 3.0
+  difficulty: expert
+  status: experimental
+  model_category: experimental_sota
+  unavailable_reason: DEIMv2 femto custom loader required from official repo.
+  notes: DEIMv2 Femto. Not yet wired in v2.21.
+- id: deimv2-pico
+  display_name: DEIMv2 (Pico) [experimental]
+  task: detect
+  family: deim
+  backend: pytorch
+  engine: _stub
+  license: Apache-2.0
+  license_uncertain: true
+  upstream_url: https://github.com/ShiqiYu/DEIM
+  download_type: not_available
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: stub
+  supported_devices:
+  - cuda
+  - cpu
+  supported_precisions:
+  - fp16
+  minimum_vram_gb: 2.0
+  recommended_vram_gb: 4.0
+  difficulty: expert
+  status: experimental
+  model_category: experimental_sota
+  unavailable_reason: DEIMv2 pico custom loader required from official repo.
+  notes: DEIMv2 Pico. Not yet wired in v2.21.
+- id: deimv2-n
+  display_name: DEIMv2 (Nano) [experimental]
+  task: detect
+  family: deim
+  backend: pytorch
+  engine: _stub
+  license: Apache-2.0
+  license_uncertain: true
+  upstream_url: https://github.com/ShiqiYu/DEIM
+  download_type: not_available
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: stub
+  supported_devices:
+  - cuda
+  - cpu
+  supported_precisions:
+  - fp16
+  minimum_vram_gb: 2.5
+  recommended_vram_gb: 5.0
+  difficulty: expert
+  status: experimental
+  model_category: experimental_sota
+  unavailable_reason: DEIMv2 nano custom loader required from official repo.
+  notes: DEIMv2 Nano. Not yet wired in v2.21.
+- id: deimv2-l
+  display_name: DEIMv2 (Large) [experimental]
+  task: detect
+  family: deim
+  backend: pytorch
+  engine: _stub
+  license: Apache-2.0
+  license_uncertain: true
+  upstream_url: https://github.com/ShiqiYu/DEIM
+  download_type: not_available
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: stub
+  supported_devices:
+  - cuda
+  supported_precisions:
+  - fp16
+  minimum_vram_gb: 8.0
+  recommended_vram_gb: 14.0
+  difficulty: expert
+  status: experimental
+  model_category: experimental_sota
+  unavailable_reason: DEIMv2 large custom loader required from official repo.
+  notes: DEIMv2 Large. High-priority accuracy candidate. Not yet wired in v2.21.
+- id: deimv2-x
+  display_name: DEIMv2 (XLarge) [experimental]
+  task: detect
+  family: deim
+  backend: pytorch
+  engine: _stub
+  license: Apache-2.0
+  license_uncertain: true
+  upstream_url: https://github.com/ShiqiYu/DEIM
+  download_type: not_available
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: hf
+  implementation_status: stub
+  supported_devices:
+  - cuda
+  supported_precisions:
+  - fp16
+  minimum_vram_gb: 12.0
+  recommended_vram_gb: 16.0
+  difficulty: expert
+  status: experimental
+  model_category: experimental_sota
+  unavailable_reason: DEIMv2 XLarge custom loader required from official repo. Highest-priority target to challenge YOLO11x.
+  notes: DEIMv2 XLarge. Research target COCO AP ~57.8 / latency ~13.75ms. Not yet wired in v2.21; would require custom loader.
 - id: rtdetrv4-s
   display_name: RT-DETRv4 (Small) [experimental]
   task: detect

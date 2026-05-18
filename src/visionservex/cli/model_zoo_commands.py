@@ -19,6 +19,10 @@ app = typer.Typer(help="Source-grounded model manifest commands.")
 def sources_cmd(
     runnable_only: bool = typer.Option(False, "--runnable-only"),
     domain: str | None = typer.Option(None, "--domain"),
+    model: str | None = typer.Option(None, "--model", help="v2.21.0: filter by model_id."),
+    family: str | None = typer.Option(None, "--family", help="v2.21.0: filter by family."),
+    out: Path | None = typer.Option(None, "--out", help="v2.21.0: write JSON to this path."),
+    fmt: str = typer.Option("text", "--format", help="v2.21.0: text or json (notebook contract)."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     from visionservex.model_zoo import SOURCE_MANIFEST
@@ -28,9 +32,18 @@ def sources_cmd(
         entries = [e for e in entries if e.runnable_in_visionservex]
     if domain:
         entries = [e for e in entries if e.domain.lower() == domain.lower()]
+    if model:
+        entries = [e for e in entries if e.model_id == model]
+    if family:
+        entries = [e for e in entries if e.family.lower() == family.lower()]
 
-    if json_:
-        typer.echo(json.dumps([e.to_dict() for e in entries], indent=2))
+    payload = [e.to_dict() for e in entries]
+    if out is not None:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2))
+
+    if json_ or fmt == "json":
+        typer.echo(json.dumps(payload, indent=2))
         return
 
     table = Table(title=f"Model sources ({len(entries)})")

@@ -173,10 +173,19 @@ def test_section_12_failure_shape_does_not_crash() -> None:
     assert "model" in df_seg.columns
 
 
-def test_v23_marker_is_present_in_notebook() -> None:
-    """The notebook must carry the v23 marker (so we know the patches landed)."""
+def test_v23_schema_utility_marker_is_present_in_notebook() -> None:
+    """The notebook must keep the v23 schema utility marker across later releases."""
     nb = json.loads(NB_PATH.read_text())
     text = " ".join("".join(c["source"]) for c in nb["cells"])
+    # Schema utility cell is the durable artifact; it persists across v23/v24/...
     assert "v23 SCHEMA NORMALIZATION UTILITY" in text
-    assert 'VISION_SERVEX_VERSION = "2.20.0"' in text
-    assert 'NOTEBOOK_VERSION = "v23"' in text
+    # Version markers move with each release; just assert they exist and are >= 2.20.
+    import re
+
+    ver_match = re.search(r'VISION_SERVEX_VERSION\s*=\s*"(\d+)\.(\d+)\.(\d+)"', text)
+    assert ver_match, "VISION_SERVEX_VERSION constant missing"
+    major, minor, _patch = (int(x) for x in ver_match.groups())
+    assert (major, minor) >= (2, 20), (major, minor)
+    nb_match = re.search(r'NOTEBOOK_VERSION\s*=\s*"v(\d+)"', text)
+    assert nb_match, "NOTEBOOK_VERSION constant missing"
+    assert int(nb_match.group(1)) >= 23

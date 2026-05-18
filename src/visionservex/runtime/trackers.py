@@ -132,13 +132,38 @@ def list_trackers() -> dict[str, dict[str, Any]]:
     return out
 
 
+_TRACKER_NAME_ALIASES: dict[str, str] = {
+    # v2.21.0: normalise hyphen / underscore / case variants the notebook uses.
+    "oc-sort": "ocsort",
+    "ocsort": "ocsort",
+    "oc_sort": "ocsort",
+    "OC-SORT": "ocsort",
+    "OCSORT": "ocsort",
+    "byte-track": "bytetrack",
+    "byte_track": "bytetrack",
+    "ByteTrack": "bytetrack",
+    "bytetracker": "bytetrack",
+    "deep-sort": "deepsort",
+    "deep_sort": "deepsort",
+    "DeepSORT": "deepsort",
+    "simple-iou": "simple-iou",
+    "simple_iou": "simple-iou",
+}
+
+
 def build_tracker(name: str, **kwargs: Any) -> Any:
     """Build a tracker adapter instance.
 
     Returns ``None`` for simple-iou so callers can use SimpleIoUTracker
     directly. Raises TrackerUnavailableError when an optional package is
     missing.
+
+    v2.21.0: accepts common aliases (``oc-sort``, ``OC-SORT``, ``oc_sort``,
+    ``ByteTrack``, ``bytetracker``, …) and normalises to the canonical name.
     """
+    # Normalise alias variants first.
+    name = _TRACKER_NAME_ALIASES.get(name, name)
+
     if name in ("simple-iou", "simple_iou", ""):
         return None
     if name == "deepsort":

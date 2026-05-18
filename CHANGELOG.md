@@ -7,6 +7,96 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.21.0] - 2026-05-17
+
+### Fixed: blocker classifier + DEIMv2 registry + tracker aliases + notebook v24
+
+Pre-v3 hardening release. Closes the misclassified `failed_runtime`
+rows the v23 notebook surfaced for tracker and domain-blocker commands,
+adds the missing DEIMv2 family entries, and ships notebook v24 with the
+`model-zoo sources --family` audit and the updated pre-v3 gate report.
+
+**Phase 2A — Registry: DEIMv2 family completion**
+
+The registry previously had only `deimv2-s` and `deimv2-m`. v2.21 adds
+the 6 missing variants the Deep Research Audit identified as candidates
+to challenge `yolo11x.pt`:
+
+- `deimv2-atto`, `deimv2-femto`, `deimv2-pico`, `deimv2-n`,
+  `deimv2-l`, `deimv2-x` — all `implementation_status: stub`,
+  `model_category: experimental_sota`, structured
+  `unavailable_reason: "DEIMv2 ... custom loader required from official
+  repo"`.
+- `deimv2-x` is flagged as the highest-priority accuracy candidate
+  (research target COCO AP ~57.8 / latency ~13.75 ms).
+- Engine wiring is **not** in this release — the entries are
+  registry-only structured blockers so downstream notebooks can audit
+  them through `model-zoo sources --family deimv2`. Real DEIMv2
+  inference is v2.22+ work.
+
+**Phase 2B — Blocker classifier**
+
+`runtime/result_classifier.py::EXPECTED_BLOCKER_CODES` now knows the
+codes that v23 mis-bucketed as `failed_runtime`:
+
+- `BYTETRACK_REQUIRED`, `TORCHREID_REQUIRED`, `OCSORT_REQUIRED`.
+- `TOTAL_SEGMENTATOR_REQUIRED`, `TOTALSEGMENTATOR_REQUIRED`,
+  `NNUNET_REQUIRED`, `MEDSAM2_REQUIRED`.
+- `OPENMMLAB_REQUIRED`, `DETECTRON2_REQUIRED`, `MMDET_REQUIRED`,
+  `MMROTATE_REQUIRED`, `MMSEGMENTATION_REQUIRED`.
+- `DEIM_REQUIRED`, `DEIMV2_REQUIRED`, `RTDETRV4_REQUIRED`,
+  `RFDETR_PLUS_LICENSE_BLOCKED`, `NON_CORE_LICENSE_OPT_IN_REQUIRED`.
+- Generic source-audit blockers: `MODEL_SOURCE_NOT_AVAILABLE`,
+  `MODEL_NOT_RUNNABLE_IN_THIS_BUILD`.
+
+**Phase 2C — `model-zoo sources` filters**
+
+`visionservex model-zoo sources --family X --format json --out PATH` and
+`--model X --format json --out PATH` (was list-all-only). The notebook
+v24 cell now exports per-family CSVs for `deimv2`, `rtdetrv4`, `dfine`,
+`rfdetr`, `sam3`, `medsam`.
+
+**Phase 2D — Tracker alias normalisation**
+
+`runtime/trackers.py::build_tracker` now accepts the common alias forms
+the v23 notebook used (`oc-sort`, `OC-SORT`, `oc_sort`, `byte-track`,
+`ByteTrack`, `bytetracker`, `deep-sort`, `simple_iou`). Internal
+canonical names unchanged. The v23 `TRACKER_UNKNOWN` failure on
+`oc-sort` is gone.
+
+**Phase 3 — Notebook v24**
+
+- `VISION_SERVEX_VERSION = "2.21.0"`, `NOTEBOOK_VERSION = "v24"`,
+  `visionservex_v24_run` path.
+- Stale "after v19 cleaning" / "after v20 cleaning" strings replaced
+  with `{NOTEBOOK_VERSION}`-driven text.
+- New v24 cell writes `reports/model_zoo_sources_{deimv2, rtdetrv4,
+  dfine, rfdetr, sam3, medsam}.csv` and refreshes
+  `reports/pre_v3_gate_report.csv` with: `deimv2_status_clear`,
+  `rtdetrv4_status_clear`, `structured_blockers_classified`,
+  `tracker_aliases_fixed`, `maxvit_resolves_via_alias`,
+  `large_dataset_policy_truthful`, `no_non_core_auto_pull`,
+  `concurrency_report_human_readable`, `v3_ready=fail` (honest until
+  GHCR + a larger labelled dataset land).
+
+**Phase 4 — Tests**
+
+- 12 new tests in `tests/test_v2210.py` covering DEIMv2 registry,
+  classifier codes, `model-zoo sources` filters, tracker aliases.
+- Full quick suite: 1076 tests pass (up from 1064 in v2.20.0); 0 failed.
+- `ruff check .` + `ruff format --check .` clean.
+- `python -m build` + `python -m twine check dist/*` PASSED.
+
+**Honest scope**
+
+- This release does NOT execute the full 53-cell notebook end-to-end
+  (1-2 hours of GPU + GB downloads, resource-guard freeze policy
+  applies). The notebook v24 changes are static + tested.
+- DEIMv2 / RT-DETRv4 inference wiring is NOT in this release;
+  registry-level structured blockers only.
+- Current best VSX remains `dfine-x-o365-coco` (mAP50:95 ≈ 0.605 on
+  COCO128). `yolo11x.pt` still wins (mAP50:95 ≈ 0.634).
+
 ## [2.20.0] - 2026-05-17
 
 ### Fixed: notebook v23 schema normalization (KeyError: 'model' crash)

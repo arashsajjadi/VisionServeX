@@ -97,6 +97,28 @@ EXPECTED_BLOCKER_CODES = frozenset(
         "ANOMALIB_REQUIRED",
         "MONAI_REQUIRED",  # v2.19.0
         "NIFTI_REQUIRED",  # v2.19.0
+        # v2.21.0: structured blockers surfaced by the v23 notebook run that
+        # were previously mis-bucketed as failed_runtime.
+        "BYTETRACK_REQUIRED",
+        "TORCHREID_REQUIRED",
+        "OCSORT_REQUIRED",
+        "TOTAL_SEGMENTATOR_REQUIRED",
+        "TOTALSEGMENTATOR_REQUIRED",
+        "NNUNET_REQUIRED",
+        "OPENMMLAB_REQUIRED",
+        "DETECTRON2_REQUIRED",
+        "MMDET_REQUIRED",
+        "MMROTATE_REQUIRED",
+        "MMSEGMENTATION_REQUIRED",
+        "MEDSAM2_REQUIRED",
+        "DEIM_REQUIRED",
+        "DEIMV2_REQUIRED",
+        "RTDETRV4_REQUIRED",
+        "RFDETR_PLUS_LICENSE_BLOCKED",
+        "NON_CORE_LICENSE_OPT_IN_REQUIRED",
+        # generic source-audit blockers
+        "MODEL_SOURCE_NOT_AVAILABLE",
+        "MODEL_NOT_RUNNABLE_IN_THIS_BUILD",
         "BOX_PROMPTS_REQUIRED",  # v2.19.0
         "LABELS_REQUIRED_FOR_METRICS",  # v2.19.0
         "DOTA_OR_OBB_LABELS_REQUIRED",  # v2.19.0
