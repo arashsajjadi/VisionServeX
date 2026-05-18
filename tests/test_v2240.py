@@ -183,9 +183,7 @@ def test_deimv2_normalize_class_id_out_of_range() -> None:
     from visionservex.sidecars import normalize_deimv2_output
 
     # class_id=999 must mark class_name="unknown" without raising.
-    r = normalize_deimv2_output(
-        {"boxes": [[1, 1, 10, 10]], "scores": [0.6], "labels": [999]}
-    )
+    r = normalize_deimv2_output({"boxes": [[1, 1, 10, 10]], "scores": [0.6], "labels": [999]})
     assert r["rows"][0]["class_name"] == "unknown"
 
 
@@ -287,9 +285,7 @@ def test_coco_val2017_allow_download_flag_parses(tmp_path: Path, monkeypatch) ->
         with zipfile.ZipFile(target, "w") as zf:
             zf.writestr("placeholder.txt", "placeholder")
 
-    monkeypatch.setattr(
-        "urllib.request.urlretrieve", _fake_urlretrieve, raising=True
-    )
+    monkeypatch.setattr("urllib.request.urlretrieve", _fake_urlretrieve, raising=True)
 
     coco_root = tmp_path / "coco"
     out = dv._download_coco_val2017(coco_root)

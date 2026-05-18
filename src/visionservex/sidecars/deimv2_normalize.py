@@ -28,8 +28,10 @@ upstream.
 
 from __future__ import annotations
 
+import contextlib
 import math
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from visionservex.data.coco_mapping import (
     COCO80_CONTIGUOUS_LABELS,
@@ -37,8 +39,8 @@ from visionservex.data.coco_mapping import (
 )
 
 __all__ = [
-    "normalize_deimv2_output",
     "DEIMV2_CANONICAL_FIELDS",
+    "normalize_deimv2_output",
 ]
 
 DEIMV2_CANONICAL_FIELDS: tuple[str, ...] = (
@@ -55,15 +57,11 @@ def _to_python(obj: Any) -> Any:
     if obj is None:
         return None
     if hasattr(obj, "detach"):
-        try:
+        with contextlib.suppress(Exception):
             obj = obj.detach().cpu().numpy()
-        except Exception:
-            pass
     if hasattr(obj, "tolist"):
-        try:
+        with contextlib.suppress(Exception):
             return obj.tolist()
-        except Exception:
-            pass
     return obj
 
 
@@ -131,9 +129,7 @@ def _from_split_dict(payload: dict[str, Any]) -> tuple[list[dict[str, Any]], int
     return out, n_invalid
 
 
-def normalize_deimv2_output(
-    raw: Any, *, image_id: int | str | None = None
-) -> dict[str, Any]:
+def normalize_deimv2_output(raw: Any, *, image_id: int | str | None = None) -> dict[str, Any]:
     """Normalize DEIMv2 raw output into a canonical detection payload.
 
     Returns
@@ -188,8 +184,7 @@ def normalize_deimv2_output(
 
     # Shape C: list of per-detection [x1,y1,x2,y2,score,class_id]
     if isinstance(raw, list) and (
-        not raw
-        or (isinstance(raw[0], (list, tuple)) and len(raw[0]) >= 6)
+        not raw or (isinstance(raw[0], (list, tuple)) and len(raw[0]) >= 6)
     ):
         rows, n_invalid = _from_concat_n6(raw)
         return {

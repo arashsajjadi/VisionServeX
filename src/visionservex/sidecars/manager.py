@@ -460,8 +460,10 @@ class SidecarManager:
                 if res.returncode != 0:
                     blocker = _blocker_for(cmd)
                     # GIT_CLONE_FAILED when the dir already exists is benign — surface it cleanly.
-                    if blocker == "GIT_CLONE_FAILED" and install_root.exists() and any(
-                        install_root.iterdir()
+                    if (
+                        blocker == "GIT_CLONE_FAILED"
+                        and install_root.exists()
+                        and any(install_root.iterdir())
                     ):
                         executed[-1]["note"] = (
                             "Install root already populated; continuing without reclone."

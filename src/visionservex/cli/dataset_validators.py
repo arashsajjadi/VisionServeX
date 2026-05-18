@@ -875,8 +875,7 @@ def prepare_coco_val2017_subset(
                 status="failed",
                 code="COCO_VAL2017_DOWNLOAD_FAILED",
                 message=(
-                    "Download reported ok but expected layout is still missing under "
-                    f"{coco_root}."
+                    f"Download reported ok but expected layout is still missing under {coco_root}."
                 ),
             )
             _write_and_exit(payload)

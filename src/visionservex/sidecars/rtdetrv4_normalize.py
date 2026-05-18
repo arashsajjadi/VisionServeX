@@ -21,8 +21,10 @@ Invariants:
 
 from __future__ import annotations
 
+import contextlib
 import math
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from visionservex.data.coco_mapping import (
     COCO80_CONTIGUOUS_LABELS,
@@ -30,8 +32,8 @@ from visionservex.data.coco_mapping import (
 )
 
 __all__ = [
-    "normalize_rtdetrv4_output",
     "RTDETRV4_CANONICAL_FIELDS",
+    "normalize_rtdetrv4_output",
 ]
 
 RTDETRV4_CANONICAL_FIELDS: tuple[str, ...] = (
@@ -47,15 +49,11 @@ def _to_python(obj: Any) -> Any:
     if obj is None:
         return None
     if hasattr(obj, "detach"):
-        try:
+        with contextlib.suppress(Exception):
             obj = obj.detach().cpu().numpy()
-        except Exception:
-            pass
     if hasattr(obj, "tolist"):
-        try:
+        with contextlib.suppress(Exception):
             return obj.tolist()
-        except Exception:
-            pass
     return obj
 
 
