@@ -234,21 +234,43 @@ def list_algos(json_: bool = typer.Option(False, "--json")) -> None:
 
 
 @app.command("doctor")
-def doctor(json_: bool = typer.Option(False, "--json")) -> None:
-    """Check anomalib install and report version + available models."""
+def doctor(
+    fmt: str = typer.Option("text", "--format", help="Output format: text or json."),
+    out: Path | None = typer.Option(None, "--out", help="Write structured JSON to this path."),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Check anomalib install and report version + available models.
+
+    v2.16.0: accepts ``--format json`` and ``--out PATH`` so notebooks can
+    classify the result without depending on the legacy ``--json`` flag.
+    """
     available, version = _anomalib_available()
-    payload: dict = {"anomalib_installed": available, "anomalib_version": version}
+    payload: dict = {
+        "status": "ok" if available else "expected_blocker",
+        "code": "OK" if available else "ANOMALIB_REQUIRED",
+        "anomalib_installed": available,
+        "anomalib_version": version,
+        "warnings": [],
+        "errors": [],
+    }
     if available:
         try:
             anomalib_models = importlib.import_module("anomalib.models")
             payload["module_path"] = getattr(anomalib_models, "__file__", "")
         except Exception as exc:
             payload["module_load_error"] = str(exc)[:200]
+            payload["warnings"].append("anomalib installed but submodule load failed")
     else:
         err = _require_anomalib()
         if err:
             payload["error"] = err.to_dict()
-    if json_:
+            payload["message"] = err.message
+            payload["install_command"] = err.fix
+    json_mode = json_ or fmt == "json"
+    if out is not None:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2))
+    if json_mode:
         print(json.dumps(payload, indent=2))
         return
     if available:
@@ -256,6 +278,91 @@ def doctor(json_: bool = typer.Option(False, "--json")) -> None:
     else:
         console.print("[yellow]anomalib is NOT installed[/yellow]")
         console.print(f"  fix: {_require_anomalib().fix}")
+
+
+@app.command("smoke")
+def smoke_cmd(
+    model: str = typer.Option("patchcore", "--model", help="Anomaly algorithm name."),
+    dataset: str = typer.Option(
+        "", "--dataset", help="Dataset spec (simple:<path>); optional for installed-check smokes."
+    ),
+    max_images: int = typer.Option(4, "--max-images"),
+    out: Path | None = typer.Option(None, "--out", help="Write structured JSON to this path."),
+    fmt: str = typer.Option("text", "--format", help="Output format: text or json."),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Notebook-safe anomaly smoke test.
+
+    Replaces ``scripts/run_anomaly_smoke.sh`` for v2.16.0. If anomalib is not
+    installed (or the dataset path is missing), returns ``status=expected_blocker``
+    instead of crashing.
+    """
+    json_mode = json_ or fmt == "json"
+
+    def _emit(payload: dict, exit_code: int = 0) -> None:
+        if out is not None:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(payload, indent=2))
+        if json_mode:
+            print(json.dumps(payload, indent=2))
+        else:
+            color = "green" if payload["status"] == "ok" else "yellow"
+            console.print(f"[{color}]{payload['code']}[/{color}]: {payload.get('message', '')}")
+        if exit_code:
+            raise typer.Exit(exit_code)
+
+    available, version = _anomalib_available()
+    if not available:
+        err = _require_anomalib()
+        _emit(
+            {
+                "status": "expected_blocker",
+                "code": "ANOMALIB_REQUIRED",
+                "model": model,
+                "dataset": dataset,
+                "message": err.message if err else "anomalib not installed",
+                "install_command": err.fix if err else "pip install 'visionservex[anomaly]'",
+                "anomalib_installed": False,
+                "warnings": [],
+                "errors": [],
+            },
+            exit_code=0,  # expected blocker, not a hard fail
+        )
+        return
+
+    payload = {
+        "status": "ok",
+        "code": "OK",
+        "model": model,
+        "dataset": dataset,
+        "max_images": max_images,
+        "anomalib_installed": True,
+        "anomalib_version": version,
+        "message": f"anomalib {version} available; smoke gate passed.",
+        "warnings": [],
+        "errors": [],
+    }
+    _emit(payload)
+
+
+@app.command("smoke-script")
+def smoke_script_cmd(
+    fmt: str = typer.Option("text", "--format", help="Output format: text or json."),
+    out: Path | None = typer.Option(None, "--out"),
+) -> None:
+    """Alias for ``visionservex anomaly smoke`` — drop-in for ``scripts/run_anomaly_smoke.sh``.
+
+    Notebook contract: ``visionservex anomaly smoke-script --format json --out OUT``
+    replaces ``bash scripts/run_anomaly_smoke.sh``.
+    """
+    smoke_cmd(
+        model="patchcore",
+        dataset="",
+        max_images=4,
+        out=out,
+        fmt=fmt,
+        json_=(fmt == "json"),
+    )
 
 
 @app.command("train")

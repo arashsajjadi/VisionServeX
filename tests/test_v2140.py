@@ -220,7 +220,10 @@ def test_benchmark_detection_requires_dataset() -> None:
     assert "labelled dataset" in result.output.lower() or "labeled" in result.output.lower()
 
 
-def test_version_is_2_14_0() -> None:
+def test_version_is_at_least_2_14_0() -> None:
+    """The v2.14.0 surface must remain present in every later release."""
     import visionservex
 
-    assert visionservex.__version__ == "2.14.0"
+    parts = visionservex.__version__.split(".")
+    major, minor = int(parts[0]), int(parts[1])
+    assert (major, minor) >= (2, 14), visionservex.__version__

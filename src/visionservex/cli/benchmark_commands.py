@@ -1598,4 +1598,98 @@ def benchmark_obb(json_: bool = typer.Option(False, "--json")) -> None:
     _benchmark_not_implemented("obb", json_)
 
 
+@app.command(
+    "report-clean",
+    help="v2.16.0: filter a benchmark JSON to a clean detection leaderboard.",
+)
+def benchmark_report_clean(
+    input_path: Path = typer.Option(..., "--input", help="Benchmark JSON to filter."),
+    out: Path = typer.Option(..., "--out", help="Clean report JSON output path."),
+    leaderboard: Path = typer.Option(
+        None, "--leaderboard", help="Optional clean leaderboard CSV output path."
+    ),
+    excluded: Path = typer.Option(
+        None, "--excluded", help="Optional excluded-rows CSV output path."
+    ),
+    fmt: str = typer.Option("text", "--format", help="Output format: text or json."),
+    min_full_eval_images: int = typer.Option(
+        100, "--min-full-eval-images", help="Min n_images_evaluated for a row to count as full."
+    ),
+    require_full_evaluation: bool = typer.Option(
+        True,
+        "--require-full-evaluation/--allow-partial-evaluation",
+        help="Whether rows without scope=full_N are excluded (default True).",
+    ),
+) -> None:
+    """Filter a raw benchmark JSON into a leaderboard with explicit exclusions.
+
+    Excluded reasons: MOCK_MODEL, ALIAS_DUPLICATE, DIAGNOSTIC_ONLY,
+    NOT_DETECTION_TASK, EXPECTED_BLOCKER, MISSING_METRICS, NAN_METRICS,
+    NOT_FULL_EVALUATION, SIDECAR_NOT_RUN, UNAVAILABLE.
+    """
+    import json as _json
+
+    from visionservex.runtime.leaderboard import (
+        split_leaderboard,
+        write_clean_leaderboard_csv,
+        write_excluded_csv,
+    )
+
+    if not input_path.exists():
+        console.print(f"[red]Input not found: {input_path}[/red]")
+        raise typer.Exit(2)
+
+    payload = _json.loads(input_path.read_text())
+    # Accept a list of rows or an object with a 'models' / 'results' field.
+    if isinstance(payload, list):
+        rows = payload
+    elif isinstance(payload, dict):
+        rows = payload.get("models") or payload.get("results") or payload.get("rows") or []
+        if not isinstance(rows, list):
+            rows = []
+    else:
+        rows = []
+
+    clean, excluded_rows = split_leaderboard(
+        rows,
+        min_full_eval_images=min_full_eval_images,
+        require_full_evaluation=require_full_evaluation,
+    )
+
+    summary = {
+        "input": str(input_path),
+        "n_input": len(rows),
+        "n_clean": len(clean),
+        "n_excluded": len(excluded_rows),
+        "excluded_by_reason": _excluded_counts(excluded_rows),
+        "clean": clean,
+        "excluded": excluded_rows,
+    }
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(_json.dumps(summary, indent=2, default=str))
+
+    if leaderboard is not None:
+        write_clean_leaderboard_csv(clean, leaderboard)
+    if excluded is not None:
+        write_excluded_csv(excluded_rows, excluded)
+
+    if fmt == "json":
+        typer.echo(_json.dumps(summary, indent=2, default=str))
+        return
+
+    console.print(
+        f"[bold]Clean leaderboard:[/bold] {len(clean)} rows; {len(excluded_rows)} excluded."
+    )
+    for reason, count in summary["excluded_by_reason"].items():
+        console.print(f"  excluded[{reason}] = {count}")
+
+
+def _excluded_counts(rows: list[dict]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for r in rows:
+        reason = r.get("excluded_reason", "UNKNOWN")
+        counts[reason] = counts.get(reason, 0) + 1
+    return dict(sorted(counts.items()))
+
+
 __all__ = ["app"]

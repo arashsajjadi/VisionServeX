@@ -67,6 +67,102 @@ def doctor(
     console.print(table)
 
 
+_AGRICULTURE_MODELS = {
+    "agriclip": {
+        "display_name": "AgriCLIP",
+        "family": "agriclip",
+        "task": "embed",
+        "license": "MIT (research)",
+        "license_risk": "low_research_only",
+        "runnable_in_visionservex": False,
+        "official_repo": "https://github.com/umair1221/AgriCLIP",
+        "hf_repo": "umair1221/AgriCLIP",
+        "install_command": "# sidecar — see official_repo for inference setup",
+        "recommended_action": "use as research reference; for production use SigLIP2 or DINOv2",
+        "code": "SIDECAR_REQUIRED",
+        "status": "expected_blocker",
+        "message": "AgriCLIP is a research checkpoint distributed via the official repo. "
+        "VisionServeX wires DINOv2/SigLIP2 instead for production agriculture embeddings.",
+        "known_blockers": [
+            "no PyPI distribution",
+            "research-only license terms",
+            "no standardised checkpoint endpoint",
+        ],
+    },
+    "scold": {
+        "display_name": "SCOLD",
+        "family": "scold",
+        "task": "embed",
+        "license": "MIT (research)",
+        "license_risk": "low_research_only",
+        "runnable_in_visionservex": False,
+        "official_repo": "https://huggingface.co/enalis/scold",
+        "hf_repo": "enalis/scold",
+        "install_command": "# sidecar — see HF model card",
+        "recommended_action": "use as research reference; for production use SigLIP2 or DINOv2",
+        "code": "SIDECAR_REQUIRED",
+        "status": "expected_blocker",
+        "message": "SCOLD is a research embedding model with custom loading code. "
+        "VisionServeX wires DINOv2/SigLIP2 instead for production agriculture embeddings.",
+        "known_blockers": [
+            "custom loading code",
+            "research-only license terms",
+        ],
+    },
+}
+
+
+@app.command("model-card")
+def model_card_cmd(
+    model_id: str = typer.Argument(..., help="Agriculture model: agriclip, scold."),
+    fmt: str = typer.Option("text", "--format", help="Output format: text or json."),
+    out: Path = typer.Option(None, "--out", help="Write structured JSON to this path."),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Show a structured model card for an agriculture-domain model.
+
+    Notebook contract: `visionservex agriculture model-card agriclip --format json --out PATH`.
+    For non-agriculture models, use the top-level `visionservex model-card show`.
+    """
+    info = _AGRICULTURE_MODELS.get(model_id.lower())
+    if info is None:
+        payload = {
+            "status": "failed",
+            "code": "UNKNOWN_AGRICULTURE_MODEL",
+            "model_id": model_id,
+            "message": f"Unknown agriculture model {model_id!r}. "
+            f"Options: {sorted(_AGRICULTURE_MODELS)}",
+            "warnings": [],
+            "errors": [f"Unknown agriculture model {model_id!r}"],
+        }
+        if out:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(payload, indent=2))
+        if json_ or fmt == "json":
+            print(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[red]UNKNOWN_AGRICULTURE_MODEL[/red]: {payload['message']}")
+        raise typer.Exit(2)
+
+    payload = {
+        "model_id": model_id,
+        "warnings": [],
+        "errors": [],
+        **info,
+    }
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2))
+    if json_ or fmt == "json":
+        print(json.dumps(payload, indent=2))
+        return
+    console.print(f"[bold]{payload['display_name']}[/bold] — {payload['code']}")
+    for key in ("license", "license_risk", "recommended_action", "official_repo"):
+        console.print(f"  {key}: {payload[key]}")
+    for b in payload["known_blockers"]:
+        console.print(f"  blocker: {b}")
+
+
 @app.command("recommend")
 def recommend(
     goal: str = typer.Option(

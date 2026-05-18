@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-2.15.0-informational.svg" alt="v2.15.0">
+  <img src="https://img.shields.io/badge/version-2.16.0-informational.svg" alt="v2.16.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -518,6 +518,15 @@ VisionServeX includes a resource guard that prevents RAM/VRAM/disk exhaustion du
 # Show current resources (RAM, VRAM, CPU, disk, processes)
 visionservex dev resources
 
+# Classify the active GPU into a canonical profile (cpu_only / t4_colab /
+# l4_colab / a100_colab / h100_colab / desktop_16gb_fast / desktop_24gb_fast /
+# desktop_32gb_plus / unknown_cuda). Recognises consumer RTX cards by name,
+# so an RTX 5080 is desktop_16gb_fast, not t4_colab.
+visionservex dev gpu-profile --format json --out /tmp/gpu_profile.json
+
+# Make a tiny synthetic MP4 for annotate-video smoke tests
+visionservex dev make-synthetic-video --out /tmp/vsx_synthetic.mp4 --frames 30
+
 # Run quick tests (no real model, no GPU, no download) — < 60 s
 visionservex dev test quick
 
@@ -545,6 +554,33 @@ visionservex models health --runnable-only
 ```
 
 A pytest lockfile at `/tmp/visionservex_pytest.lock` prevents concurrent test runs. Default budgets: 8 GB free RAM, 2 GB free VRAM, 10 GB free disk. See [AGENT_RULES.md](AGENT_RULES.md) and [docs/agent_safety.md](docs/agent_safety.md).
+
+### Benchmark report hygiene
+
+Detection benchmark JSON often mixes mock models, alias duplicates, diagnostic-only rows, and expected-blocker rows. The `benchmark report-clean` command splits a raw run into a publishable leaderboard and an audit-grade excluded-rows file with explicit reasons (`MOCK_MODEL`, `ALIAS_DUPLICATE`, `DIAGNOSTIC_ONLY`, `NOT_DETECTION_TASK`, `EXPECTED_BLOCKER`, `MISSING_METRICS`, `NAN_METRICS`, `NOT_FULL_EVALUATION`, …):
+
+```bash
+visionservex benchmark report-clean \
+  --input /tmp/vsx_detection_benchmark.json \
+  --out /tmp/vsx_detection_clean_report.json \
+  --leaderboard /tmp/vsx_detection_leaderboard.csv \
+  --excluded /tmp/vsx_detection_excluded.csv \
+  --format json
+```
+
+Aliases such as `dfine-s`, `dfine-s-coco`, and `dfine-s-o365-coco` are collapsed to a single canonical row (`canonical_model_id` + `is_alias` + `alias_of` metadata).
+
+### Notebook-safe smoke commands (no repo-local scripts required)
+
+```bash
+visionservex anomaly doctor --format json --out /tmp/anomaly_doctor.json
+visionservex anomaly smoke --model patchcore --format json --out /tmp/anomaly_smoke.json
+visionservex video-search smoke --format json --out /tmp/video_search_smoke.json
+visionservex annotate video --model mock-detect --video in.mp4 --task detect \
+  --out out.mp4 --result-json /tmp/annotate_result.json --json --max-frames 10
+```
+
+Each command emits a structured payload with `status` ∈ {`ok`, `expected_blocker`, `failed`} and a canonical `code` so notebooks can classify results without parsing free-form stderr.
 
 ---
 

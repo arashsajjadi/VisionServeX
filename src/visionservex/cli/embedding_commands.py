@@ -105,6 +105,12 @@ def similarity_cmd(
     image_a: Path,
     image_b: Path,
     device: str = typer.Option("auto", "--device"),
+    out: Path | None = typer.Option(
+        None, "--out", help="Save similarity result JSON to this path."
+    ),
+    fmt: str = typer.Option(
+        "text", "--format", help="Output format: text or json (notebook contract)."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     from PIL import Image as _PIL
@@ -118,7 +124,19 @@ def similarity_cmd(
         r_b = model.predict(_PIL.open(image_b).convert("RGB"))
 
     if not (isinstance(r_a, EmbeddingResult) and isinstance(r_b, EmbeddingResult)):
-        console.print(f"[red]error:[/red] {model_id} does not return embeddings")
+        payload = {
+            "status": "failed",
+            "code": "MODEL_NOT_EMBEDDING",
+            "message": f"{model_id} does not return embeddings",
+            "model_id": model_id,
+        }
+        if out:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(payload, indent=2))
+        if json_ or fmt == "json":
+            typer.echo(json.dumps(payload, indent=2))
+        else:
+            console.print(f"[red]error:[/red] {model_id} does not return embeddings")
         raise typer.Exit(1)
 
     sim = cosine_similarity(r_a.embedding, r_b.embedding)
@@ -129,8 +147,13 @@ def similarity_cmd(
         cosine_similarity=round(sim, 6),
         embedding_dim=r_a.embedding_dim,
     )
-    if json_:
-        typer.echo(json.dumps(result.to_dict(), indent=2))
+    payload = result.to_dict()
+    payload["status"] = "ok"
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2))
+    if json_ or fmt == "json":
+        typer.echo(json.dumps(payload, indent=2))
     else:
         console.print(
             f"[bold]Cosine similarity:[/bold] {sim:.4f}  "

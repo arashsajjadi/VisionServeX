@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "visionservex"
-version = "2.15.0"
+version = "2.16.0"
 description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -170,7 +170,7 @@ target-version = "py310"
 src = ["src", "tests"]
 # Notebooks are user-facing copy-paste examples; their style is set by Colab,
 # not by our linter (free-form imports per cell, etc.).
-extend-exclude = ["examples/colab/*.ipynb"]
+extend-exclude = ["examples/colab/*.ipynb", "notebook/*.ipynb"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "RUF", "SIM", "C4"]

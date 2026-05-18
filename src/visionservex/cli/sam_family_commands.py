@@ -307,7 +307,42 @@ def validate_cmd(
 
     src = get_model_source(model_id)
     if src is None:
-        payload: dict = {
+        # v2.16.0: SAM3 / SAM3.1 IDs that aren't in the manifest are still
+        # the gated-auth blocker the user already understands. Returning
+        # MODEL_NOT_FOUND with exit-2 caused the notebook to misclassify
+        # `sam3.1` as a hard failure instead of an expected_blocker.
+        lid = model_id.lower()
+        if "sam3" in lid or "sam-3" in lid:
+            payload = {
+                "model_id": model_id,
+                "family": "sam3",
+                "status": "expected_blocker",
+                "code": "GATED_HF_AUTH_REQUIRED",
+                "message": (
+                    f"{model_id!r} is a gated SAM3-family checkpoint. "
+                    "VisionServeX does not auto-pull gated weights."
+                ),
+                "install_command": "",
+                "docs": "visionservex sam-family login-help sam3.1",
+                "fix": "visionservex sam-family login-help sam3.1",
+                "known_blockers": [
+                    "HuggingFace gated access required",
+                    "VisionServeX will not bypass HF auth",
+                ],
+                "warnings": [],
+                "errors": [],
+            }
+            if out:
+                out.parent.mkdir(parents=True, exist_ok=True)
+                out.write_text(json.dumps(payload, indent=2))
+            if json_ or fmt == "json":
+                print(json.dumps(payload, indent=2))
+            else:
+                console.print(f"[yellow]{payload['code']}[/yellow]: {payload['message']}")
+            # Exit 0 — expected blocker is not a failure for CI.
+            return
+
+        payload = {
             "model_id": model_id,
             "status": "expected_blocker",
             "code": "MODEL_NOT_FOUND",

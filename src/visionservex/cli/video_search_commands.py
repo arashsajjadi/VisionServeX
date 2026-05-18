@@ -601,43 +601,63 @@ def reid_smoke(
         "--model-path",
         help="Path to ReID checkpoint (e.g. osnet_x1_0_imagenet.pth).",
     ),
+    out: Path | None = typer.Option(None, "--out", help="Save result JSON to this path."),
+    fmt: str = typer.Option(
+        "text", "--format", help="Output format: text or json (notebook contract)."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Quick smoke-test for a ReID backend: extract one embedding."""
     from visionservex.runtime.reid import ReIDUnavailableError, build_reid_extractor
 
-    if not image.exists():
-        payload = {
-            "code": "INPUT_NOT_FOUND",
-            "message": f"Image not found: {image}",
-            "fix": f"Check path: {image}",
-        }
-        if json_:
+    json_mode = json_ or fmt == "json"
+
+    def _emit(payload: dict, exit_code: int = 0) -> None:
+        if out is not None:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(payload, indent=2))
+        if json_mode:
             print(json.dumps(payload, indent=2))
         else:
-            console.print(f"[red]{payload['code']}[/red]: {payload['message']}")
-        raise typer.Exit(2)
+            code = payload.get("code", "OK")
+            colour = "green" if payload.get("status") == "ok" else "red"
+            console.print(f"[{colour}]{code}[/{colour}]: {payload.get('message', '')}")
+        if exit_code:
+            raise typer.Exit(exit_code)
+
+    if not image.exists():
+        _emit(
+            {
+                "status": "failed",
+                "code": "INPUT_NOT_FOUND",
+                "message": f"Image not found: {image}",
+                "fix": f"Check path: {image}",
+                "reid": reid,
+                "image": str(image),
+            },
+            exit_code=2,
+        )
+        return
 
     try:
         extractor = build_reid_extractor(reid, model_path=model_path or None)
     except ReIDUnavailableError as exc:
         payload = exc.to_dict()
-        if json_:
-            print(json.dumps(payload, indent=2))
-        else:
-            console.print(f"[red]{exc.code}[/red]: {exc.name}")
-            console.print(f"  install: {exc.install}")
-        raise typer.Exit(3)
+        payload.setdefault("status", "expected_blocker")
+        payload.setdefault("reid", reid)
+        _emit(payload, exit_code=3)
+        return
 
     if extractor is None:
-        payload = {
-            "code": "REID_UNAVAILABLE",
-            "message": f"{reid!r} is built-in cosine; nothing to smoke-test.",
-        }
-        if json_:
-            print(json.dumps(payload, indent=2))
-        else:
-            console.print(payload["message"])
+        _emit(
+            {
+                "status": "ok",
+                "code": "REID_UNAVAILABLE",
+                "message": f"{reid!r} is built-in cosine; nothing to smoke-test.",
+                "reid": reid,
+            },
+            exit_code=0,
+        )
         return
 
     try:
@@ -647,17 +667,18 @@ def reid_smoke(
 
     img = _Image.open(str(image)).convert("RGB")
     feats = extractor.extract([img])
-    payload = {
-        "code": "OK",
-        "reid": reid,
-        "image": str(image),
-        "embedding_shape": list(getattr(feats, "shape", [len(feats)])),
-        "first_dims": [float(x) for x in list(getattr(feats, "reshape", lambda *_: feats)(-1))[:5]],
-    }
-    if json_:
-        print(json.dumps(payload, indent=2))
-        return
-    console.print(f"[green]OK[/green] {reid}: shape={payload['embedding_shape']}")
+    _emit(
+        {
+            "status": "ok",
+            "code": "OK",
+            "reid": reid,
+            "image": str(image),
+            "embedding_shape": list(getattr(feats, "shape", [len(feats)])),
+            "first_dims": [
+                float(x) for x in list(getattr(feats, "reshape", lambda *_: feats)(-1))[:5]
+            ],
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -684,6 +705,9 @@ def tracker_smoke(
     out: Path = typer.Option(None, "--out", help="JSON output path for normalized tracks."),
     img_h: int = typer.Option(640, "--img-h"),
     img_w: int = typer.Option(640, "--img-w"),
+    fmt: str = typer.Option(
+        "text", "--format", help="Output format: text or json (notebook contract)."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Run a tracker adapter end-to-end against a small detection sequence.
@@ -691,6 +715,7 @@ def tracker_smoke(
     Reports the actual installed package version and the resulting tracks
     so users can verify the adapter routes to the real upstream code.
     """
+    json_mode = json_ or fmt == "json"
     from visionservex.runtime.trackers import (
         TrackerAPIUnsupportedError,
         TrackerUnavailableError,
@@ -726,7 +751,12 @@ def tracker_smoke(
         adapter = build_tracker(tracker)
     except TrackerUnavailableError as exc:
         payload = exc.to_dict()
-        if json_:
+        payload.setdefault("status", "expected_blocker")
+        payload.setdefault("tracker", tracker)
+        if out is not None:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(payload, indent=2))
+        if json_mode:
             print(json.dumps(payload, indent=2))
         else:
             console.print(f"[red]{exc.code}[/red]: {exc.name}")
@@ -770,13 +800,19 @@ def tracker_smoke(
                 )
     except TrackerAPIUnsupportedError as exc:
         payload = exc.to_dict()
-        if json_:
+        payload.setdefault("status", "expected_blocker")
+        payload.setdefault("tracker", tracker)
+        if out is not None:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(payload, indent=2))
+        if json_mode:
             print(json.dumps(payload, indent=2))
         else:
             console.print(f"[red]{exc.code}[/red]: {exc.name}")
         raise typer.Exit(4)
 
     payload = {
+        "status": "ok",
         "code": "OK",
         "tracker": tracker,
         "frames": len(frames),
@@ -787,10 +823,62 @@ def tracker_smoke(
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(payload, indent=2))
         payload["out"] = str(out)
-    if json_:
+    if json_mode:
         print(json.dumps(payload, indent=2))
         return
     console.print(
         f"[green]OK[/green] {tracker}: {len(track_rows)} track rows across {len(frames)} frames"
         f" ({payload['n_tracks']} unique tracks)"
     )
+
+
+# ---------------------------------------------------------------------------
+# smoke — aggregate availability check (v2.16.0, replaces scripts/run_video_search_smoke.sh)
+# ---------------------------------------------------------------------------
+
+
+@app.command("smoke")
+def smoke_cmd(
+    out: Path | None = typer.Option(None, "--out", help="Write structured JSON to this path."),
+    fmt: str = typer.Option("text", "--format", help="Output format: text or json."),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Notebook-safe video-search smoke: probe trackers/ReID availability without checkpoints.
+
+    Replaces ``scripts/run_video_search_smoke.sh``. Always returns a structured
+    payload describing which backends are usable in the current environment.
+    """
+    json_mode = json_ or fmt == "json"
+
+    tracker_rows = []
+    for name in ("bytetrack", "ocsort", "simple-iou"):
+        tracker_rows.append({"name": name, "installed": _probe_tracker(name)})
+
+    reid_rows = []
+    for name in ("osnet", "torchreid", "cosine"):
+        reid_rows.append({"name": name, "installed": _probe_reid(name)})
+
+    any_real = any(r["installed"] for r in tracker_rows + reid_rows)
+    payload = {
+        "status": "ok" if any_real else "expected_blocker",
+        "code": "OK" if any_real else "VIDEO_SEARCH_BACKENDS_MISSING",
+        "trackers": tracker_rows,
+        "reid": reid_rows,
+        "message": (
+            "At least one tracker/reid backend is installed."
+            if any_real
+            else "No tracker/reid backend installed; install one of: bytetracker, ocsort, torchreid."
+        ),
+        "warnings": [],
+        "errors": [],
+    }
+    if out is not None:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2))
+    if json_mode:
+        print(json.dumps(payload, indent=2))
+        return
+    console.print(f"[bold]video-search smoke:[/bold] {payload['code']}")
+    for r in tracker_rows + reid_rows:
+        flag = "[green]yes[/green]" if r["installed"] else "[dim]no[/dim]"
+        console.print(f"  {r['name']}: {flag}")

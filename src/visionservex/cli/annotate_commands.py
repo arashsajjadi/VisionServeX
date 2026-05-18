@@ -44,7 +44,7 @@ def _load_jsonl(path: Path) -> list[dict]:
 
 def _run_inference(model_id: str, image_path: Path, task: str | None, prompt: str | None) -> dict:
     """Run inference using the VisionServeX predict pipeline and return the result dict."""
-    from visionservex.core.runner import load_model
+    from visionservex.core.model import VisionModel
 
     kwargs: dict = {}
     if task:
@@ -52,7 +52,7 @@ def _run_inference(model_id: str, image_path: Path, task: str | None, prompt: st
     if prompt:
         kwargs["prompt"] = prompt
 
-    model = load_model(model_id, auto_pull=False)
+    model = VisionModel(model_id, auto_pull=False)
     result = model.predict(image_path, **kwargs)
     if hasattr(result, "to_dict"):
         return result.to_dict()
@@ -198,6 +198,11 @@ def annotate_video_cmd(
     json_out: Path | None = typer.Option(
         None, "--json-out", help="Save per-frame JSONL predictions."
     ),
+    result_json: Path | None = typer.Option(
+        None,
+        "--result-json",
+        help="v2.16.0: write a single top-level annotation result JSON (status/code/stage).",
+    ),
     max_frames: int | None = typer.Option(
         None, "--max-frames", help="Stop after this many frames."
     ),
@@ -207,36 +212,130 @@ def annotate_video_cmd(
     line_width: int = typer.Option(2, "--line-width"),
     mask_alpha: float = typer.Option(0.45, "--mask-alpha"),
     fps: float = typer.Option(0.0, "--fps", help="Override output FPS (0 = autodetect from input)"),
+    json_: bool = typer.Option(False, "--json", help="Emit structured result JSON on stdout."),
 ) -> None:
     """Annotate every frame of a video using JSONL payloads or live inference, and write to MP4.
 
     Two modes:
       --jsonl frames.jsonl  → annotate from existing predictions (original mode)
       --model MODEL_ID      → run per-frame inference then annotate (notebook mode)
+
+    v2.16.0: the command always emits a structured result with
+    ``status``/``code``/``stage``/``message`` so the notebook never sees
+    `ok=False` with an empty error.
     """
+
+    def _result(
+        status: str,
+        code: str,
+        message: str,
+        *,
+        stage: str = "",
+        frames_read: int = 0,
+        frames_processed: int = 0,
+        warnings: list[str] | None = None,
+        errors: list[str] | None = None,
+    ) -> dict:
+        payload = {
+            "status": status,
+            "code": code,
+            "message": message,
+            "stage": stage,
+            "video": str(video) if video else "",
+            "frames_read": frames_read,
+            "frames_processed": frames_processed,
+            "output_video": str(out),
+            "json_out": str(json_out) if json_out else "",
+            "output_video_exists": Path(out).exists() if out else False,
+            "json_out_exists": Path(json_out).exists() if json_out and json_out.exists() else False,
+            "warnings": list(warnings or []),
+            "errors": list(errors or []),
+        }
+        return payload
+
+    def _emit(payload: dict, exit_code: int = 0) -> None:
+        if result_json is not None:
+            result_json.parent.mkdir(parents=True, exist_ok=True)
+            result_json.write_text(json.dumps(payload, indent=2))
+        if json_:
+            print(json.dumps(payload, indent=2))
+        else:
+            color = "green" if payload["status"] == "ok" else "yellow"
+            console.print(
+                f"[{color}]{payload['code']}[/{color}]: {payload['message']} "
+                f"(stage={payload['stage'] or 'done'})"
+            )
+        if exit_code:
+            raise typer.Exit(code=exit_code)
+
     if video is None:
-        console.print("[red]ERROR: --video is required[/red]")
-        raise typer.Exit(code=2)
+        _emit(
+            _result(
+                "failed",
+                "VIDEO_ARG_REQUIRED",
+                "--video is required",
+                stage="ARG_PARSE",
+                errors=["--video is required"],
+            ),
+            exit_code=2,
+        )
+        return
     if model is None and jsonl is None:
-        console.print("[red]ERROR: provide either --model MODEL_ID or --jsonl PRED_JSONL[/red]")
-        raise typer.Exit(code=2)
+        _emit(
+            _result(
+                "failed",
+                "PREDICTION_SOURCE_REQUIRED",
+                "Provide either --model MODEL_ID or --jsonl PRED_JSONL",
+                stage="ARG_PARSE",
+                errors=["--model or --jsonl required"],
+            ),
+            exit_code=2,
+        )
+        return
     if model is not None and jsonl is not None:
-        console.print("[red]ERROR: --model and --jsonl are mutually exclusive[/red]")
-        raise typer.Exit(code=2)
+        _emit(
+            _result(
+                "failed",
+                "EXCLUSIVE_FLAGS",
+                "--model and --jsonl are mutually exclusive",
+                stage="ARG_PARSE",
+                errors=["mutually exclusive"],
+            ),
+            exit_code=2,
+        )
+        return
 
     try:
         import cv2  # type: ignore
         import numpy as np
     except ImportError as exc:
-        console.print(f"[red]opencv-python-headless required: {exc}[/red]")
+        _emit(
+            _result(
+                "expected_blocker",
+                "OPENCV_REQUIRED",
+                f"opencv-python-headless required: {exc}",
+                stage="IMPORT",
+                errors=[str(exc)],
+            ),
+            exit_code=2,
+        )
         raise typer.Exit(code=2) from exc
 
     from visionservex.visualization import annotate_image as do_annotate
 
     cap = cv2.VideoCapture(str(video))
     if not cap.isOpened():
-        console.print(f"[red]VIDEO_SOURCE_OPEN_FAILED: {video}[/red]")
-        raise typer.Exit(code=2)
+        _emit(
+            _result(
+                "failed",
+                "VIDEO_OPEN_FAILED",
+                f"Could not open video: {video}",
+                stage="VIDEO_OPEN",
+                errors=[f"VideoCapture failed for {video}"],
+            ),
+            exit_code=2,
+        )
+        return
 
     in_fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
     w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) or 0)
@@ -248,8 +347,17 @@ def annotate_video_cmd(
     writer = cv2.VideoWriter(str(out), fourcc, out_fps, (w, h))
     if not writer.isOpened():
         cap.release()
-        console.print("[red]VIDEO_WRITER_FAILED[/red]")
-        raise typer.Exit(code=2)
+        _emit(
+            _result(
+                "failed",
+                "VIDEO_WRITER_FAILED",
+                "Could not open output video writer (codec/path/permissions issue).",
+                stage="VIDEO_WRITE",
+                errors=["VideoWriter failed"],
+            ),
+            exit_code=2,
+        )
+        return
 
     from PIL import Image
 
@@ -264,27 +372,28 @@ def annotate_video_cmd(
     infer_model = None
     if model is not None:
         try:
-            from visionservex.core.runner import load_model as _load_model
+            from visionservex.core.model import VisionModel as _VisionModel
 
-            infer_model = _load_model(model, auto_pull=False)
+            infer_model = _VisionModel(model, auto_pull=False)
         except Exception as exc:
             cap.release()
             writer.release()
-            structured = {
-                "status": "expected_blocker",
-                "code": "MODEL_LOAD_FAILED",
-                "message": str(exc),
-                "model_id": model,
-            }
-            if json_out:
-                json_out.parent.mkdir(parents=True, exist_ok=True)
-                json_out.write_text(json.dumps(structured, indent=2))
-            console.print(f"[yellow]MODEL_LOAD_FAILED: {exc}[/yellow]")
-            raise typer.Exit(code=1) from exc
+            _emit(
+                _result(
+                    "expected_blocker",
+                    "MODEL_LOAD_FAILED",
+                    f"Could not load model {model!r}: {exc}",
+                    stage="MODEL_LOAD",
+                    errors=[str(exc)],
+                ),
+                exit_code=1,
+            )
+            return
 
     jsonl_lines: list[str] = []
     frame_index = 0
     written = 0
+    inference_errors: list[str] = []
     try:
         while True:
             if max_frames is not None and frame_index >= max_frames:
@@ -308,8 +417,9 @@ def annotate_video_cmd(
                         if hasattr(result, "to_dict")
                         else (result if isinstance(result, dict) else {"raw": str(result)})
                     )
-                except Exception:
+                except Exception as exc:
                     payload = {}
+                    inference_errors.append(f"frame {frame_index}: {exc}")
                 payload["frame_index"] = frame_index
             else:
                 payload = by_index.get(frame_index, {})
@@ -335,7 +445,26 @@ def annotate_video_cmd(
         json_out.parent.mkdir(parents=True, exist_ok=True)
         json_out.write_text("\n".join(jsonl_lines) + "\n")
 
-    console.print(f"[green]annotated {written} frames → {out}[/green]")
+    # First few inference errors are surfaced as warnings, not failures —
+    # the video itself was still annotated.
+    warnings_list = inference_errors[:5]
+    status = "ok"
+    code = "OK"
+    if written == 0:
+        status = "failed"
+        code = "NO_FRAMES_PROCESSED"
+    _emit(
+        _result(
+            status,
+            code,
+            f"Annotated {written} frame(s) → {out}",
+            stage="done",
+            frames_read=frame_index,
+            frames_processed=written,
+            warnings=warnings_list,
+        ),
+        exit_code=0 if status == "ok" else 1,
+    )
 
 
 __all__ = ["app"]

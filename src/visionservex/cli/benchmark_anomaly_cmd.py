@@ -153,9 +153,15 @@ def benchmark_anomaly(
     max_images: int = typer.Option(50, "--max-images"),
     out: Path = typer.Option(None, "--out"),
     report_md: Path = typer.Option(None, "--report-md", help="Write Markdown report."),
+    fmt: str = typer.Option(
+        "text", "--format", help="Output format: text or json (notebook contract)."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Benchmark anomaly detection. Use --model mock-anomaly to run without [anomaly] installed."""
+    # v2.16.0: --format json behaves like --json (notebook contract).
+    if fmt == "json":
+        json_ = True
     import importlib
     import time
 

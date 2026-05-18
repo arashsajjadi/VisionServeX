@@ -2162,14 +2162,26 @@ def classify_alias(
     input_path: Path,
     top_k: int = typer.Option(5, "--top-k"),
     device: str | None = typer.Option(None, "--device"),
+    out: Path | None = typer.Option(
+        None, "--out", help="Save result JSON (notebook alias for --save-json)."
+    ),
+    fmt: str = typer.Option(
+        "text", "--format", help="Output format: text or json (notebook contract)."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
-    """Ultralytics-like classify alias."""
+    """Ultralytics-like classify alias.
+
+    v2.16.0: `--out PATH` and `--format json` are accepted to match the
+    notebook contract (`visionservex classify swinv2-tiny img.jpg --top-k 5
+    --out /tmp/x.json --format json`). They behave the same as the predict
+    --save-json/--json flags.
+    """
     predict(
         model_id=model_id,
         input_path=input_path,
         save=None,
-        save_json=None,
+        save_json=out,
         save_image=None,
         prompt=None,
         device=device,
@@ -2182,7 +2194,7 @@ def classify_alias(
         timeout=None,
         auto_pull=False,
         no_auto_pull=False,
-        json_=json_,
+        json_=(json_ or fmt == "json"),
         debug=False,
     )
 
@@ -2358,12 +2370,31 @@ def similarity_top_alias(
     image_a: Path,
     image_b: Path,
     device: str = typer.Option("auto", "--device"),
+    out: Path | None = typer.Option(
+        None, "--out", help="Save similarity result JSON to this path."
+    ),
+    fmt: str = typer.Option(
+        "text", "--format", help="Output format: text or json (notebook contract)."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
-    """Top-level alias for `visionservex feature similarity`."""
+    """Top-level alias for `visionservex feature similarity`.
+
+    v2.16.0: accepts `--out PATH` and `--format json` so the notebook command
+    `visionservex similarity siglip2-base-patch16-224 a.jpg b.jpg --out
+    /tmp/sim.json --format json` works.
+    """
     from visionservex.cli.embedding_commands import similarity_cmd
 
-    similarity_cmd(model_id, image_a, image_b, device=device, json_=json_)
+    similarity_cmd(
+        model_id,
+        image_a,
+        image_b,
+        device=device,
+        out=out,
+        fmt=fmt,
+        json_=json_,
+    )
 
 
 @app.command("index", help="Build an embedding search index.")

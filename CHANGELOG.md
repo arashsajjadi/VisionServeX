@@ -7,6 +7,124 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.16.0] - 2026-05-17
+
+### Fixed: Notebook v16 package-side audit (no notebook edits)
+
+This is a **package-only** release that fixes the bugs the v16 Colab notebook
+exposed when running on an RTX 5080. The notebook is not modified — only
+the package side. After installing `visionservex==2.16.0`, rerunning the
+notebook will produce a scientifically valid leaderboard.
+
+**Phase 1 — GPU profile (`runtime/gpu_profile.py`)**:
+
+- New `visionservex dev gpu-profile --format json --out PATH` CLI emits a
+  canonical profile (`cpu_only` / `t4_colab` / `l4_colab` / `a100_colab` /
+  `h100_colab` / `desktop_16gb_fast` / `desktop_24gb_fast` /
+  `desktop_32gb_plus` / `unknown_cuda`).
+- Classification is name-first then VRAM, so RTX 5080 / RTX 4080 are
+  `desktop_16gb_fast` (the v15 notebook bucketed RTX 5080 as `t4_colab`).
+- 14 unit tests in `tests/test_gpu_profile_v2160.py` pin every profile.
+
+**Phase 6 — CLI contract fixes (notebook regressions)**:
+
+- `visionservex classify MODEL IMG` now accepts `--out PATH` and
+  `--format json` (notebook used these and got a "no such option" error).
+- `visionservex similarity MODEL A B` now accepts `--out` and `--format`.
+- `visionservex agriculture model-card MODEL` is **new** — the notebook
+  called it but the subcommand didn't exist. Returns structured
+  `SIDECAR_REQUIRED` for `agriclip` and `scold`.
+- `visionservex video-search tracker-smoke` and `reid-smoke` now accept
+  `--format json` (previously only `--json`).
+- `visionservex benchmark-anomaly` accepts `--format json`.
+- `visionservex sam-family validate sam3.1` now returns
+  `status=expected_blocker, code=GATED_HF_AUTH_REQUIRED` with exit 0,
+  even though `sam3.1` is not in the SOURCE_MANIFEST (was: `MODEL_NOT_FOUND`
+  exit 2, which the notebook scored as a hard failure).
+
+**Phase 7/8 — Leaderboard purity + alias canonicalization
+(`runtime/leaderboard.py`)**:
+
+- New module assigns `canonical_model_id`, `is_alias`, `alias_of`,
+  `backend_family`, `model_size_key`, `benchmark_group`, and
+  `evaluation_scope` to every benchmark row. D-FINE and RF-DETR family
+  aliases (`dfine-s`, `dfine-s-coco`, `dfine-n`, `rfdetr-small-coco`, …)
+  collapse to a single canonical row.
+- New `visionservex benchmark report-clean --input X.json --out clean.json
+  --leaderboard L.csv --excluded E.csv --format json` CLI emits an
+  audit-grade leaderboard with explicit `excluded_reason` codes:
+  `MOCK_MODEL`, `ALIAS_DUPLICATE`, `DIAGNOSTIC_ONLY`, `NOT_DETECTION_TASK`,
+  `EXPECTED_BLOCKER`, `MISSING_METRICS`, `NAN_METRICS`,
+  `NOT_FULL_EVALUATION`, `SIDECAR_NOT_RUN`, `UNAVAILABLE`.
+- 14 unit tests in `tests/test_leaderboard_purity_v2160.py` prove mocks,
+  diagnostics, aliases, NaN metrics, and expected-blocker rows never reach
+  the clean leaderboard.
+
+**Phase 9 — Warning / stderr classification
+(`runtime/result_classifier.py`)**:
+
+- New `classify_command_result(returncode, stdout, stderr, ...)` returns
+  one of `ok_clean`, `ok_with_warning`, `expected_blocker`, `failed_usage`,
+  `failed_runtime`, `failed_output_missing`, `failed_json_parse`. Harmless
+  HuggingFace `chat_template` / 404 preprocessor warnings no longer count
+  as failures. 13 unit tests in `tests/test_warning_classification_v2160.py`.
+
+**Phase 10 — annotate-video diagnostics**:
+
+- `visionservex annotate video` always emits a structured result with
+  `status`/`code`/`stage`/`message`/`frames_read`/`frames_processed`. New
+  `--result-json PATH` writes the result to disk; `--json` emits on stdout.
+  Failure stages are: `ARG_PARSE`, `IMPORT`, `VIDEO_OPEN`, `MODEL_LOAD`,
+  `VIDEO_WRITE`, `done`. The v15 "ok=False with empty error" case is
+  impossible by construction.
+- Also fixes a pre-existing v2.14/v2.15 bug where annotate-video referenced
+  the non-existent `visionservex.core.runner.load_model`. It now uses
+  `VisionModel(model_id)` directly.
+- 4 tests in `tests/test_annotate_video_v2160.py`.
+
+**Phase 11 — Expected blocker codes**:
+
+- `sam-family validate` for any `sam3*` ID returns `expected_blocker` /
+  `GATED_HF_AUTH_REQUIRED` with exit-0 (was `MODEL_NOT_FOUND` exit-2).
+- `agriculture model-card agriclip` and `scold` return `SIDECAR_REQUIRED`.
+
+**Phase 12 — Package CLI equivalents for repo-local scripts**:
+
+- New `visionservex dev make-synthetic-video --out OUT --frames N --fps F`
+  emits a tiny MP4 — drop-in replacement for any `make_synthetic_video.sh`.
+- New `visionservex anomaly smoke --model patchcore --format json --out PATH`
+  and `visionservex anomaly smoke-script` — drop-ins for
+  `scripts/run_anomaly_smoke.sh`. Both honour structured `expected_blocker`
+  when `anomalib` is not installed.
+- New `visionservex video-search smoke --format json --out PATH` — probes
+  installed trackers / ReID backends and emits structured JSON.
+- `visionservex anomaly doctor` now accepts `--format` / `--out`.
+- 4 tests in `tests/test_no_repo_scripts_v2160.py`.
+
+**Phase 2/3 — Evaluator framework (no real model runs)**:
+
+- 7 unit tests in `tests/test_evaluator_framework_v2160.py` pin the
+  `DetectionEvaluator` behaviour on perfect/empty/wrong-class/duplicate
+  predictions and verify mAP50:95 is computed correctly. Empirical
+  RF-DETR / D-FINE / COCO128 validation (load-once benchmark, RF-DETR
+  class-aware AP debug, D-FINE post-process inspection) is pending the
+  notebook rerun against `visionservex==2.16.0` on the user's RTX 5080.
+  This release lands the **plumbing** for those validations; the real
+  100-image GPU runs are a notebook task, not a package test.
+
+**What is NOT yet validated empirically** (and the v16 notebook rerun will
+tell us):
+
+- Whether the persistent load-once benchmark architecture actually fixes
+  the seconds-per-image latency reported for D-FINE / RF-DETR.
+- Whether RF-DETR near-zero class-aware AP is a class-mapping bug or
+  a real model-quality issue.
+- Whether D-FINE's exactly-1800 / exactly-300 prediction-count patterns
+  come from a fixed top-k that should be made configurable.
+
+**Tests**: 6 new test files / 56 new tests, plus 1 fixed (stale version
+assertion in `test_v2140.py` made forward-compatible).
+
 ## [2.15.0] - 2026-05-16
 
 ### Fixed: Notebook/CLI contract compatibility (v16 Colab audit)

@@ -406,6 +406,99 @@ def disk_report() -> None:
     console.print(table)
 
 
+@app.command("make-synthetic-video")
+def make_synthetic_video_cmd(
+    out: Path = typer.Option(..., "--out", help="Output MP4 path."),
+    frames: int = typer.Option(30, "--frames", help="Number of frames."),
+    width: int = typer.Option(640, "--width"),
+    height: int = typer.Option(480, "--height"),
+    fps: float = typer.Option(25.0, "--fps"),
+) -> None:
+    """Generate a tiny synthetic MP4 — useful for `annotate video` smoke tests.
+
+    Notebook contract: replaces any need for `scripts/make_synthetic_video.sh`.
+    """
+    import json as _json
+
+    try:
+        import cv2
+        import numpy as np
+    except ImportError as exc:
+        payload = {
+            "status": "expected_blocker",
+            "code": "OPENCV_REQUIRED",
+            "message": f"opencv-python-headless required: {exc}",
+        }
+        typer.echo(_json.dumps(payload, indent=2))
+        raise typer.Exit(2) from exc
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    writer = cv2.VideoWriter(str(out), fourcc, fps, (width, height))
+    if not writer.isOpened():
+        payload = {
+            "status": "failed",
+            "code": "VIDEO_WRITER_FAILED",
+            "message": "Could not open output writer",
+        }
+        typer.echo(_json.dumps(payload, indent=2))
+        raise typer.Exit(2)
+    for i in range(frames):
+        frame = np.zeros((height, width, 3), dtype=np.uint8)
+        # Moving coloured square so the video is non-trivial.
+        x = int((i / max(frames - 1, 1)) * (width - 100))
+        y = int((i / max(frames - 1, 1)) * (height - 100))
+        frame[y : y + 100, x : x + 100] = [50 + (i * 5) % 200, 80, 200]
+        writer.write(frame)
+    writer.release()
+    payload = {
+        "status": "ok",
+        "code": "OK",
+        "output_video": str(out),
+        "frames": frames,
+        "width": width,
+        "height": height,
+        "fps": fps,
+        "size_bytes": out.stat().st_size,
+    }
+    typer.echo(_json.dumps(payload, indent=2))
+
+
+@app.command("gpu-profile")
+def gpu_profile_cmd(
+    out: Path = typer.Option(None, "--out", help="Write structured JSON to this path."),
+    fmt: str = typer.Option("text", "--format", help="Output format: text or json."),
+    json_: bool = typer.Option(False, "--json"),
+) -> None:
+    """Classify the active GPU into a profile (cpu_only/t4_colab/l4_colab/a100_colab/h100_colab/desktop_16gb_fast/desktop_24gb_fast/desktop_32gb_plus/unknown_cuda).
+
+    Fixes the v2.15 notebook bug where RTX 5080 was bucketed as t4_colab.
+    """
+    import json as _json
+
+    from visionservex.runtime.gpu_profile import detect_gpu_profile
+
+    profile = detect_gpu_profile().to_dict()
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(_json.dumps(profile, indent=2))
+    if json_ or fmt == "json":
+        typer.echo(_json.dumps(profile, indent=2))
+        return
+    console.print(f"[bold]GPU profile:[/bold] {profile['profile']}")
+    console.print(f"  name: {profile['gpu_name'] or '(none)'}")
+    console.print(f"  cuda_available: {profile['cuda_available']}")
+    console.print(f"  total_vram_gb: {profile['total_vram_gb']:.2f}")
+    console.print(
+        f"  workers (small/medium/heavy): "
+        f"{profile['recommended_small_workers']}/"
+        f"{profile['recommended_medium_workers']}/"
+        f"{profile['recommended_heavy_workers']}"
+    )
+    for note in profile["notes"]:
+        console.print(f"  note: {note}")
+
+
 @app.command("cli-audit")
 def cli_audit(
     out: Path = typer.Option(None, "--out"),
