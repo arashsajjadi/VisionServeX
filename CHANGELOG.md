@@ -7,6 +7,146 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.18.0] - 2026-05-17
+
+### Fixed: RF-DETR class-mapping bug + domain benchmark routing + concurrency
+
+This release closes the headline RF-DETR class-mapping bug that v2.17
+surfaced, ships explicit per-domain benchmark routing so the notebook
+can stop using COCO AP for non-detection tasks, and adds a
+resource-aware concurrency layer.
+
+**Phase 1 — RF-DETR class mapping (engine fix)**
+
+The v17 probe reported `class_aware_AP50 = 0.005` and
+`class_agnostic_AP50 = 0.854` for `rfdetr-small`. The 0.85 gap proved the
+engine was returning official COCO category ids (1..90 with gaps) and
+the label lookup was using a contiguous 0..79 table — every label was
+wrong by an offset.
+
+- New `data/coco_mapping.py`: canonical `COCO80_CONTIGUOUS_LABELS` (80
+  entries), `COCO_OFFICIAL_TO_CONTIGUOUS` (80 entries), reverse map,
+  `is_official_id_set()` heuristic (any id > 79 implies official),
+  `remap_official_to_contiguous()` returning
+  `(contiguous_id, label, mapping_source)`.
+- `engines/rfdetr.py::_sv_to_detections` and `_sv_to_segments` now
+  detect official-id mode and remap before assembling Detection /
+  Segment objects. The rfdetr-supplied `dets.data["class_name"]` field
+  is ignored when official ids are detected because it is itself derived
+  from the wrong contiguous lookup.
+- `debug-output` for RF-DETR rows now emits `label_mapping_fixed: true`
+  and `class_name_mapping_source: coco_official_to_contiguous`.
+
+**RTX 5080 re-probe after the fix** (20 COCO128 images, `--device cuda
+--require-gpu --sample-gpu`):
+
+| | v2.17 (pre-fix) | v2.18 (post-fix) |
+|---|---|---|
+| RF-DETR class-aware AP50 | 0.0047 | **0.8036** |
+| RF-DETR mAP50:95 | 0.0025 | **0.7098** |
+| class-aware vs class-agnostic gap | 0.85 | **0.05** |
+| images_per_second | 99.19 | 95.13 |
+| load_count | 1 | 1 |
+
+D-FINE-S still healthy (AP50 ≈ 0.83). The fix is purely additive — no
+existing test broke.
+
+**Phase 2 — Domain benchmark candidates CLI**
+
+- `visionservex domain-zoo benchmark-candidates --domain {medical |
+  agriculture | aerial | industrial | surveillance | segmentation}
+  --format json --out PATH`.
+- Each row carries `dataset_required`, `accepted_dataset_formats`,
+  `metrics_supported`, `metrics_not_supported_without_gt`,
+  `benchmark_status` (`metric_ready | smoke_only | demo_only |
+  validate_only | expected_blocker`), and `expected_blocker_code`.
+
+**Phase 3 — Domain dataset validators CLI**
+
+- `visionservex dataset validate-{medical, agriculture, aerial,
+  anomaly, surveillance} --path DIR --format json --out PATH`.
+- Each validator emits a uniform envelope: `status / dataset_type /
+  n_images / n_videos / n_labels / n_masks / metrics_possible /
+  metrics_blocked / blocker_code / remediation / details`.
+- Honest blocker codes: `NIFTI_REQUIRED`, `BOX_PROMPTS_REQUIRED`,
+  `LABELS_REQUIRED_FOR_METRICS`, `DOTA_OR_OBB_LABELS_REQUIRED`,
+  `NORMAL_IMAGES_REQUIRED`, `TEST_IMAGES_REQUIRED`,
+  `GT_TRACKS_OR_QUERY_LABELS_REQUIRED`, `NO_MEDIA_FOUND`,
+  `PATH_NOT_FOUND`.
+
+**Phase 4 — Domain benchmark commands**
+
+- `visionservex benchmark-medical` — structured
+  `BENCHMARK_NOT_IMPLEMENTED` with the required dataset shape and v2.19
+  roadmap. Optionally inspects the supplied dataset via the validator.
+- `visionservex benchmark-agriculture` — auto-routes to
+  `benchmark-detection` when YOLO labels are present
+  (`ROUTED_TO_DETECTION`), otherwise `LABELS_REQUIRED_FOR_METRICS`.
+- `visionservex benchmark-aerial` — `--dataset-type dota` returns
+  `DOTA_OR_OBB_LABELS_REQUIRED`; `generic-yolo` routes to detection
+  when labels are present.
+- `visionservex benchmark-surveillance` — `BENCHMARK_NOT_IMPLEMENTED`
+  with required dataset shape; `NO_MEDIA_FOUND` when source is missing.
+- `visionservex benchmark-anomaly` already existed and is unchanged.
+
+No domain command returns null. No domain command claims COCO AP for
+a non-detection task.
+
+**Phase A — Concurrency**
+
+- New `runtime/concurrency.py` and `visionservex dev concurrency-profile
+  --format json --out PATH`. Maps each `gpu_profile` (from
+  `runtime/gpu_profile.py`) to recommended worker counts:
+  | profile | small / medium / heavy | max concurrent requests |
+  | --- | --- | --- |
+  | `h100_colab`, `desktop_32gb_plus`, `a100_colab` | 4 / 2 / 1 | 8 |
+  | `desktop_24gb_fast` | 3 / 2 / 1 | 4 |
+  | `desktop_16gb_fast`, `l4_colab` | 2 / 1 / 1 | 2 |
+  | `t4_colab` | 1 / 1 / 1 | 2 |
+  | `cpu_only` | 1 / 1 / 1 | 1 |
+- New `visionservex benchmark-concurrency --dataset yolo:DIR --models X
+  --concurrency 1,2 --request-mode shared-model --require-gpu
+  --sample-gpu`. Loads the model once, dispatches concurrent requests
+  through a thread pool, reports `throughput_req_per_sec`,
+  `latency_ms_p50/p95/p99`, `vram_peak_gb`, `gpu_utilization_mean`.
+- `--request-mode separate-process` returns the structured
+  `SHARED_MODEL_CONCURRENCY_NOT_SUPPORTED` blocker (v2.19 roadmap).
+- On the RTX 5080: `dev concurrency-profile` reports
+  `desktop_16gb_fast`, small=2, medium=1, heavy=1,
+  `max_safe_concurrent_requests=2`.
+
+**Phase 5 — Notebook v21**
+
+- `VISION_SERVEX_VERSION = "2.18.0"`, `NOTEBOOK_VERSION = "v21"`,
+  output path `visionservex_v21_run`.
+- New `BENCHMARK_SIZE` config: `"smoke"=20`, `"quick"=100`,
+  `"balanced"=400` (default), `"paper"=full validation subset`.
+- New v21 cell calls `domain-zoo benchmark-candidates` for every
+  domain, runs `debug-output rfdetr-small` to confirm
+  `label_mapping_fixed=True`, and writes:
+  `reports/domain_scientific_validity_matrix.csv`,
+  `reports/rfdetr_mapping_diagnostics.csv`,
+  `reports/concurrency_profile.json`, `reports/null_output_audit.csv`.
+
+**Phase 6/7 — Tests**
+
+- `test_rfdetr_mapping_v2180.py` (15 tests): COCO mapping table,
+  engine remap, evaluator class-aware AP after remap.
+- `test_domain_benchmark_v2180.py` (21 tests): domain candidates per
+  domain, dataset validators per domain, domain benchmark commands
+  return structured non-null payloads, concurrency profile shape,
+  concurrency benchmark with mock-detect.
+- Full quick suite: 1039 tests pass (up from 1003 in v2.17.0).
+- `ruff check .` + `ruff format --check .` clean.
+- `python -m build` + `python -m twine check dist/*` PASSED.
+
+**What is NOT yet fixed (v2.19+ targets)**
+
+- Real medical/aerial/surveillance benchmarks with full GT metrics
+  (validators + structured `BENCHMARK_NOT_IMPLEMENTED` for now).
+- `separate-process` concurrency (multi-process VRAM isolation).
+- Native OBB evaluator for DOTA-style aerial datasets.
+
 ## [2.17.0] - 2026-05-17
 
 ### Fixed: package benchmark routing + RTX 5080 notebook validation

@@ -31,12 +31,15 @@ from visionservex.cli import (
     benchmark_anomaly_cmd,
     benchmark_classification,
     benchmark_commands,
+    benchmark_concurrency_cmd,
     benchmark_detection_cmd,
     benchmark_open_vocab,
     benchmark_surveillance,
     capabilities_commands,
     colab_commands,
+    dataset_validators,
     dev_commands,
+    domain_benchmarks,
     domain_zoo_commands,
     downloads_commands,
     draw_commands,
@@ -126,6 +129,15 @@ app.add_typer(training_commands.export_app, name="export-cmd")
 app.add_typer(training_commands.video_app, name="video")
 app.add_typer(model_zoo_commands.app, name="model-zoo")
 app.add_typer(domain_zoo_commands.app, name="domain-zoo")
+app.add_typer(dataset_validators.app, name="dataset")
+app.add_typer(domain_benchmarks.app_medical, name="benchmark-medical", invoke_without_command=True)
+app.add_typer(
+    domain_benchmarks.app_agriculture, name="benchmark-agriculture", invoke_without_command=True
+)
+app.add_typer(domain_benchmarks.app_aerial, name="benchmark-aerial", invoke_without_command=True)
+app.add_typer(
+    domain_benchmarks.app_surveillance, name="benchmark-surveillance", invoke_without_command=True
+)
 app.add_typer(embedding_commands.app, name="feature")
 app.add_typer(dev_commands.app, name="dev")
 app.add_typer(model_health_commands.app, name="models")
@@ -158,6 +170,9 @@ app.add_typer(
 )
 app.add_typer(
     benchmark_detection_cmd.app_ult, name="benchmark-ultralytics", invoke_without_command=True
+)
+app.add_typer(
+    benchmark_concurrency_cmd.app, name="benchmark-concurrency", invoke_without_command=True
 )
 
 # Top-level embedding aliases for Ultralytics-style ergonomics
@@ -1713,7 +1728,16 @@ def debug_output(
             }
             diag["official_category_id_detected"] = looks_official
             diag["contiguous_class_id_detected"] = looks_contiguous and not looks_official
-            diag["class_name_mapping_source"] = "engine.label_strings"
+            # v2.18.0: the rfdetr engine now remaps official→contiguous
+            # internally. `label_mapping_fixed` reports whether the result
+            # surface is healthy contiguous (True) or still leaking official
+            # ids (False).
+            diag["label_mapping_fixed"] = looks_contiguous and not looks_official
+            diag["class_name_mapping_source"] = (
+                "coco_official_to_contiguous"
+                if (looks_contiguous and not looks_official)
+                else "engine.label_strings"
+            )
         if family_lower.startswith("dfine") or "dfine" in family_lower:
             # D-FINE: surface top-k. We don't have backend access to top_k_before_nms here,
             # but we can report whether the count looks bounded by a fixed ceiling.

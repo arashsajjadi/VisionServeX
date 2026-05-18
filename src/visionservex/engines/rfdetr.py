@@ -214,37 +214,83 @@ class RFDETREngine(StubEngine):
 
 
 def _sv_to_detections(dets: Any, class_names: list[str]) -> list[Detection]:
-    """Convert sv.Detections to our Detection list."""
+    """Convert sv.Detections to our Detection list.
+
+    v2.18.0 fix: RF-DETR returns *official* COCO category ids (1..90 with
+    gaps). Pre-v2.18 the engine looked them up in a contiguous 0..79
+    label table, producing wrong labels (the v17 "cake/carrot/toilet on a
+    street scene" bug). We now always remap through the canonical
+    :mod:`visionservex.data.coco_mapping` table.
+    """
+    from visionservex.data.coco_mapping import (
+        COCO80_CONTIGUOUS_LABELS,
+        is_official_id_set,
+        remap_official_to_contiguous,
+    )
+
     out: list[Detection] = []
     if dets is None or len(dets) == 0:
         return out
     xyxy = dets.xyxy
     conf = dets.confidence if dets.confidence is not None else np.ones(len(xyxy))
     class_ids = dets.class_id if dets.class_id is not None else np.zeros(len(xyxy), dtype=int)
-    # Try data["class_name"] first (set by rfdetr)
-    names_arr = (dets.data or {}).get("class_name", None)
+    raw_ids = [int(c) for c in class_ids]
+
+    # Detect whether the engine returned official-COCO ids (any id > 79 is
+    # a tell-tale sign — contiguous max is 79). If so, every id flows
+    # through the official→contiguous remap regardless of whatever
+    # `dets.data["class_name"]` may have claimed.
+    uses_official = is_official_id_set(raw_ids)
+
+    # The rfdetr package sometimes ships its own `class_name` array in
+    # `dets.data["class_name"]`. When ids are official, that array is
+    # **wrong** because the upstream package indexed a contiguous label
+    # table. So we trust the remap, not the rfdetr-supplied names.
+    names_arr = (dets.data or {}).get("class_name", None) if not uses_official else None
+
     for i in range(len(xyxy)):
         box = xyxy[i].tolist()
-        label = ""
-        if names_arr is not None and i < len(names_arr):
-            label = str(names_arr[i])
-        elif 0 <= int(class_ids[i]) < len(class_names):
-            label = class_names[int(class_ids[i])]
+        cid_raw = raw_ids[i]
+        if uses_official:
+            # Official COCO ids → always remap via the canonical table.
+            cid_contiguous, label, _src = remap_official_to_contiguous(cid_raw)
         else:
-            label = f"class_{int(class_ids[i])}"
+            # Contiguous ids: prefer rfdetr's own class_name array (correct
+            # for both COCO and fine-tuned custom datasets), then the model's
+            # class_names list, then the canonical COCO80 as a last resort.
+            cid_contiguous = cid_raw
+            if names_arr is not None and i < len(names_arr):
+                label = str(names_arr[i])
+            elif 0 <= cid_raw < len(class_names):
+                label = class_names[cid_raw]
+            elif 0 <= cid_raw < len(COCO80_CONTIGUOUS_LABELS):
+                label = COCO80_CONTIGUOUS_LABELS[cid_raw]
+            else:
+                label = f"class_{cid_raw}"
+                cid_contiguous = -1
+        final_class_id = cid_contiguous if cid_contiguous >= 0 else cid_raw
         out.append(
             Detection(
                 box=Box(x1=float(box[0]), y1=float(box[1]), x2=float(box[2]), y2=float(box[3])),
                 score=float(conf[i]),
                 label=label,
-                class_id=int(class_ids[i]),
+                class_id=int(final_class_id),
             )
         )
     return out
 
 
 def _sv_to_segments(dets: Any, class_names: list[str]) -> list[Segment]:
-    """Convert sv.Detections (with mask) to our Segment list."""
+    """Convert sv.Detections (with mask) to our Segment list.
+
+    v2.18.0 fix: same official→contiguous remap as :func:`_sv_to_detections`.
+    """
+    from visionservex.data.coco_mapping import (
+        COCO80_CONTIGUOUS_LABELS,
+        is_official_id_set,
+        remap_official_to_contiguous,
+    )
+
     out: list[Segment] = []
     if dets is None or len(dets) == 0:
         return out
@@ -252,16 +298,27 @@ def _sv_to_segments(dets: Any, class_names: list[str]) -> list[Segment]:
     conf = dets.confidence if dets.confidence is not None else np.ones(len(xyxy))
     class_ids = dets.class_id if dets.class_id is not None else np.zeros(len(xyxy), dtype=int)
     masks = dets.mask if dets.mask is not None else [None] * len(xyxy)
-    names_arr = (dets.data or {}).get("class_name", None)
+    raw_ids = [int(c) for c in class_ids]
+    uses_official = is_official_id_set(raw_ids)
+    names_arr = (dets.data or {}).get("class_name", None) if not uses_official else None
+
     for i in range(len(xyxy)):
         box = xyxy[i].tolist()
-        label = ""
-        if names_arr is not None and i < len(names_arr):
-            label = str(names_arr[i])
-        elif 0 <= int(class_ids[i]) < len(class_names):
-            label = class_names[int(class_ids[i])]
+        cid_raw = raw_ids[i]
+        if uses_official:
+            cid_contiguous, label, _src = remap_official_to_contiguous(cid_raw)
         else:
-            label = f"class_{int(class_ids[i])}"
+            cid_contiguous = cid_raw
+            if names_arr is not None and i < len(names_arr):
+                label = str(names_arr[i])
+            elif 0 <= cid_raw < len(class_names):
+                label = class_names[cid_raw]
+            elif 0 <= cid_raw < len(COCO80_CONTIGUOUS_LABELS):
+                label = COCO80_CONTIGUOUS_LABELS[cid_raw]
+            else:
+                label = f"class_{cid_raw}"
+                cid_contiguous = -1
+        final_class_id = cid_contiguous if cid_contiguous >= 0 else cid_raw
         mask_arr = masks[i] if masks[i] is not None else np.zeros((1, 1), dtype=np.uint8)
         if hasattr(mask_arr, "astype"):
             mask_arr = mask_arr.astype(np.uint8)
@@ -271,7 +328,7 @@ def _sv_to_segments(dets: Any, class_names: list[str]) -> list[Segment]:
                 score=float(conf[i]),
                 label=label,
                 mask=mask_arr,
-                class_id=int(class_ids[i]),
+                class_id=int(final_class_id),
             )
         )
     return out

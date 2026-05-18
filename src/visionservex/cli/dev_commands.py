@@ -406,6 +406,38 @@ def disk_report() -> None:
     console.print(table)
 
 
+@app.command("concurrency-profile")
+def concurrency_profile_cmd(
+    out: Path = typer.Option(None, "--out"),
+    fmt: str = typer.Option("text", "--format"),
+) -> None:
+    """v2.18.0: emit the runtime concurrency profile (worker counts, policy)."""
+    import json as _json
+
+    from visionservex.runtime.concurrency import build_concurrency_profile
+
+    profile = build_concurrency_profile().to_dict()
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(_json.dumps(profile, indent=2))
+    if fmt == "json":
+        typer.echo(_json.dumps(profile, indent=2))
+        return
+    console.print(
+        f"[bold]Concurrency profile:[/bold] {profile['gpu_profile']} "
+        f"({profile['gpu_name'] or 'no GPU'})"
+    )
+    console.print(
+        f"  workers: small={profile['recommended_small_model_workers']}, "
+        f"medium={profile['recommended_medium_model_workers']}, "
+        f"heavy={profile['recommended_heavy_model_workers']}, "
+        f"cpu={profile['recommended_cpu_workers']}"
+    )
+    console.print(f"  max_safe_concurrent_requests: {profile['max_safe_concurrent_requests']}")
+    for note in profile["warnings"]:
+        console.print(f"  note: {note}")
+
+
 @app.command("make-synthetic-video")
 def make_synthetic_video_cmd(
     out: Path = typer.Option(..., "--out", help="Output MP4 path."),
