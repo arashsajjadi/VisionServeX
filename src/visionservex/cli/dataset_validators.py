@@ -668,4 +668,367 @@ def validate_surveillance(
     )
 
 
+# ---------------------------------------------------------------------------
+# v2.23.0: COCO val2017 400-subset preparation
+# ---------------------------------------------------------------------------
+
+
+@app.command("prepare-coco-val2017-subset")
+def prepare_coco_val2017_subset(
+    coco_root: Path = typer.Option(
+        ...,
+        "--coco-root",
+        help=(
+            "User-supplied COCO val2017 root. Must contain images/val2017/*.jpg "
+            "AND annotations/instances_val2017.json. We do NOT auto-download "
+            "COCO val2017 (license: CC BY 4.0 + Flickr terms — user must "
+            "agree)."
+        ),
+    ),
+    max_images: int = typer.Option(400, "--max-images"),
+    selection: str = typer.Option(
+        "object-rich-balanced",
+        "--selection",
+        help="object-rich-balanced | first-n | random",
+    ),
+    out_dir: Path = typer.Option(
+        ..., "--out", help="Where to write the selected YOLO-format subset."
+    ),
+    fmt: str = typer.Option("text", "--format"),
+    report: Path | None = typer.Option(None, "--report", help="Write a JSON selection report."),
+) -> None:
+    """v2.23.0: Build a 400-image object-rich-balanced COCO val2017 subset.
+
+    Does NOT download COCO val2017. The user must supply ``--coco-root``
+    pointing at an existing extraction. We emit structured blockers if the
+    layout isn't recognised, so the notebook never silently runs on the
+    wrong data.
+    """
+    payload: dict[str, Any] = {
+        "status": "ok",
+        "code": "OK",
+        "coco_root": str(coco_root),
+        "max_images_requested": max_images,
+        "selection": selection,
+        "out_dir": str(out_dir),
+    }
+    if not coco_root.exists():
+        payload.update(
+            status="expected_blocker",
+            code="COCO_VAL2017_USER_PATH_REQUIRED",
+            message=(
+                f"--coco-root {coco_root} not found. Provide your local COCO val2017 root "
+                "(must contain images/val2017/ + annotations/instances_val2017.json)."
+            ),
+        )
+        if report is not None:
+            report.parent.mkdir(parents=True, exist_ok=True)
+            report.write_text(json.dumps(payload, indent=2))
+        _emit(payload, out=None, fmt=fmt)
+        raise typer.Exit(2)
+
+    images_dir = coco_root / "images" / "val2017"
+    if not images_dir.exists():
+        images_dir = coco_root / "val2017"
+    ann_path = coco_root / "annotations" / "instances_val2017.json"
+    if not (images_dir.exists() and ann_path.exists()):
+        payload.update(
+            status="expected_blocker",
+            code="COCO_VAL2017_USER_PATH_REQUIRED",
+            message=(
+                "Expected layout: <coco-root>/images/val2017/*.jpg + "
+                "<coco-root>/annotations/instances_val2017.json. Found neither/incomplete."
+            ),
+            details={"images_dir_found": images_dir.exists(), "ann_file_found": ann_path.exists()},
+        )
+        if report is not None:
+            report.parent.mkdir(parents=True, exist_ok=True)
+            report.write_text(json.dumps(payload, indent=2))
+        _emit(payload, out=None, fmt=fmt)
+        raise typer.Exit(2)
+
+    try:
+        anns = json.loads(ann_path.read_text())
+    except Exception as exc:
+        payload.update(
+            status="failed",
+            code="ANNOTATION_FILE_INVALID",
+            message=f"Could not parse {ann_path}: {exc!s:.200}",
+        )
+        _emit(payload, out=None, fmt=fmt)
+        raise typer.Exit(2)
+
+    # Build image_id → list of annotations
+    by_image: dict[int, list[dict]] = {}
+    for a in anns.get("annotations", []):
+        by_image.setdefault(a["image_id"], []).append(a)
+    images_meta = {img["id"]: img for img in anns.get("images", [])}
+
+    # Selection
+    if selection == "first-n":
+        selected_ids = list(images_meta.keys())[:max_images]
+    elif selection == "random":
+        import random as _r
+
+        selected_ids = list(images_meta.keys())
+        _r.shuffle(selected_ids)
+        selected_ids = selected_ids[:max_images]
+    else:  # object-rich-balanced
+        # Sort images by (n_categories desc, n_objects desc) and take top max_images.
+        candidates = []
+        for img_id, ann_list in by_image.items():
+            if not ann_list:
+                continue
+            cats = {a["category_id"] for a in ann_list}
+            candidates.append((img_id, len(cats), len(ann_list)))
+        candidates.sort(key=lambda t: (-t[1], -t[2]))
+        selected_ids = [c[0] for c in candidates[:max_images]]
+
+    # Build YOLO-format output: out_dir/images/*.jpg + out_dir/labels/*.txt
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "images").mkdir(exist_ok=True)
+    (out_dir / "labels").mkdir(exist_ok=True)
+
+    from visionservex.data.coco_mapping import (
+        COCO80_CONTIGUOUS_LABELS,
+        COCO_OFFICIAL_TO_CONTIGUOUS,
+    )
+
+    n_written = 0
+    class_dist: dict[str, int] = {}
+    object_count = 0
+    selection_rows: list[dict[str, Any]] = []
+    for img_id in selected_ids:
+        meta = images_meta.get(img_id)
+        if not meta:
+            continue
+        src = images_dir / meta["file_name"]
+        if not src.exists():
+            continue
+        # Symlink rather than copy to save disk.
+        dst = out_dir / "images" / meta["file_name"]
+        try:
+            if not dst.exists():
+                dst.symlink_to(src.resolve())
+        except OSError:
+            import shutil as _sh
+
+            _sh.copy2(src, dst)
+        # YOLO label
+        w = float(meta.get("width", 0))
+        h = float(meta.get("height", 0))
+        if w <= 0 or h <= 0:
+            continue
+        lines = []
+        ann_list = by_image.get(img_id, [])
+        for ann in ann_list:
+            x, y, bw, bh = ann.get("bbox", [0, 0, 0, 0])
+            cx = (x + bw / 2.0) / w
+            cy = (y + bh / 2.0) / h
+            nw = bw / w
+            nh = bh / h
+            cid = COCO_OFFICIAL_TO_CONTIGUOUS.get(ann["category_id"])
+            if cid is None:
+                continue
+            lines.append(f"{cid} {cx:.6f} {cy:.6f} {nw:.6f} {nh:.6f}")
+            class_dist[COCO80_CONTIGUOUS_LABELS[cid]] = (
+                class_dist.get(COCO80_CONTIGUOUS_LABELS[cid], 0) + 1
+            )
+            object_count += 1
+        (out_dir / "labels" / f"{Path(meta['file_name']).stem}.txt").write_text("\n".join(lines))
+        n_written += 1
+        selection_rows.append(
+            {
+                "image_id": img_id,
+                "file_name": meta["file_name"],
+                "width": w,
+                "height": h,
+                "n_objects": len(ann_list),
+                "n_classes": len({a["category_id"] for a in ann_list}),
+            }
+        )
+
+    # data.yaml for YOLO loaders
+    (out_dir / "data.yaml").write_text(
+        "names:\n" + "\n".join(f"  {i}: {n}" for i, n in enumerate(COCO80_CONTIGUOUS_LABELS)) + "\n"
+    )
+
+    payload.update(
+        n_images_available=len(images_meta),
+        n_images_selected=n_written,
+        n_objects=object_count,
+        n_classes=len(class_dist),
+        class_distribution=class_dist,
+        selection_method=selection,
+        message=f"Wrote {n_written} image+label pairs to {out_dir}.",
+    )
+    if report is not None:
+        report.parent.mkdir(parents=True, exist_ok=True)
+        report.write_text(json.dumps(payload, indent=2))
+        # Class distribution CSV next to the report
+        import csv as _csv
+
+        with report.with_name("detection_class_distribution.csv").open("w", newline="") as fh:
+            w = _csv.writer(fh)
+            w.writerow(["class_name", "count"])
+            for k, v in sorted(class_dist.items(), key=lambda x: -x[1]):
+                w.writerow([k, v])
+        with report.with_name("detection_dataset_selection.csv").open("w", newline="") as fh:
+            w = _csv.DictWriter(
+                fh,
+                fieldnames=["image_id", "file_name", "width", "height", "n_objects", "n_classes"],
+            )
+            w.writeheader()
+            for r in selection_rows:
+                w.writerow(r)
+    _emit(payload, out=None, fmt=fmt)
+
+
+# ---------------------------------------------------------------------------
+# v2.23.0: synthetic permissive-license smoke datasets
+# ---------------------------------------------------------------------------
+
+
+@app.command("generate-synthetic")
+def generate_synthetic_cmd(
+    kind: str = typer.Argument(
+        ...,
+        help=("medical-nifti | agriculture-hbb | aerial-obb | anomaly-defect | tracking-video"),
+    ),
+    out: Path = typer.Option(..., "--out"),
+    fmt_in: str = typer.Option(
+        "json", "--format-in", help="Hint for the kind-specific format (yolo/dota/mot/etc.)."
+    ),
+    schema: str = typer.Option("simple", "--schema"),
+    fmt: str = typer.Option("text", "--format"),
+    n_samples: int = typer.Option(8, "--n-samples"),
+) -> None:
+    """Generate a tiny synthetic permissive-license smoke dataset.
+
+    These are intentional placeholders for demo/smoke. Specialised scientific
+    benchmarks require real user-supplied legal datasets — see the dataset
+    license audit in ``visionservex dataset audit-licenses`` (TBD).
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    payload: dict[str, Any] = {
+        "status": "ok",
+        "code": "OK",
+        "kind": kind,
+        "out": str(out),
+        "n_samples": n_samples,
+        "license": "synthetic (Apache-2.0 generated by VisionServeX v2.23.0)",
+    }
+    if kind == "medical-nifti":
+        # Generate fake "medical-like" PNGs (NIfTI requires nibabel; we don't
+        # bundle it). Write a manifest so callers know the schema.
+        try:
+            from PIL import Image, ImageDraw
+
+            for i in range(n_samples):
+                img = Image.new("L", (256, 256), 60 + (i * 5) % 80)
+                d = ImageDraw.Draw(img)
+                d.ellipse([60 + i, 60 + i, 180 + i, 180 + i], fill=180)
+                img.save(out / f"medical_demo_{i:02d}.png")
+            (out / "boxes.json").write_text(
+                json.dumps(
+                    [
+                        {
+                            "image_id": f"medical_demo_{i:02d}",
+                            "boxes": [[60 + i, 60 + i, 180 + i, 180 + i]],
+                        }
+                        for i in range(n_samples)
+                    ],
+                    indent=2,
+                )
+            )
+            payload["n_images"] = n_samples
+            payload["note"] = "Synthetic 2D medical-like (NOT NIfTI). For NIfTI use real data."
+        except ImportError:
+            payload.update(status="failed", code="OPENCV_REQUIRED", message="Pillow not available.")
+    elif kind == "agriculture-hbb":
+        try:
+            from PIL import Image
+
+            (out / "images").mkdir(exist_ok=True)
+            (out / "labels").mkdir(exist_ok=True)
+            for i in range(n_samples):
+                Image.new("RGB", (256, 256), (60 + (i * 5) % 80, 140, 60)).save(
+                    out / "images" / f"plot_{i:02d}.jpg"
+                )
+                (out / "labels" / f"plot_{i:02d}.txt").write_text(
+                    "0 0.5 0.5 0.4 0.4\n"  # one fake "crop" object
+                )
+            (out / "data.yaml").write_text("names:\n  0: crop\n  1: weed\n")
+            payload["n_images"] = n_samples
+        except ImportError:
+            payload.update(status="failed", code="OPENCV_REQUIRED")
+    elif kind == "aerial-obb":
+        try:
+            from PIL import Image
+
+            (out / "images").mkdir(exist_ok=True)
+            (out / "labelTxt").mkdir(exist_ok=True)
+            for i in range(n_samples):
+                Image.new("RGB", (256, 256), (90, 90, 130)).save(
+                    out / "images" / f"aer_{i:02d}.jpg"
+                )
+                # DOTA OBB format: 8 coords (4 corners) + label + difficulty
+                (out / "labelTxt" / f"aer_{i:02d}.txt").write_text(
+                    "60 60 180 60 180 180 60 180 plane 0\n"
+                )
+            payload["n_images"] = n_samples
+        except ImportError:
+            payload.update(status="failed", code="OPENCV_REQUIRED")
+    elif kind == "anomaly-defect":
+        try:
+            from PIL import Image, ImageDraw
+
+            (out / "normal").mkdir(exist_ok=True)
+            (out / "test").mkdir(exist_ok=True)
+            for i in range(n_samples):
+                Image.new("RGB", (128, 128), (200, 200, 200)).save(
+                    out / "normal" / f"good_{i:02d}.png"
+                )
+            for i in range(max(1, n_samples // 2)):
+                img = Image.new("RGB", (128, 128), (200, 200, 200))
+                d = ImageDraw.Draw(img)
+                d.rectangle([40, 40, 80, 80], fill=(40, 40, 40))
+                img.save(out / "test" / f"defect_{i:02d}.png")
+            payload["n_normal"] = n_samples
+            payload["n_defect"] = max(1, n_samples // 2)
+        except ImportError:
+            payload.update(status="failed", code="OPENCV_REQUIRED")
+    elif kind == "tracking-video":
+        try:
+            import cv2  # type: ignore
+            import numpy as np
+
+            video_path = out / "synthetic_track.mp4"
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+            writer = cv2.VideoWriter(str(video_path), fourcc, 10.0, (320, 240))
+            for i in range(n_samples * 4):
+                frame = np.zeros((240, 320, 3), dtype=np.uint8)
+                x = (i * 10) % 240
+                frame[80:160, x : x + 60] = [50, 180, 50]
+                writer.write(frame)
+            writer.release()
+            payload["video"] = str(video_path)
+            payload["n_frames"] = n_samples * 4
+        except Exception as exc:
+            payload.update(status="failed", code="OPENCV_REQUIRED", message=str(exc)[:200])
+    else:
+        payload.update(
+            status="failed",
+            code="UNKNOWN_SYNTHETIC_KIND",
+            message=(
+                f"Unknown synthetic kind {kind!r}. Known: medical-nifti, agriculture-hbb, "
+                "aerial-obb, anomaly-defect, tracking-video."
+            ),
+        )
+
+    # Manifest
+    (out / "_SYNTHETIC_MANIFEST.json").write_text(json.dumps(payload, indent=2))
+    _emit(payload, out=None, fmt=fmt)
+
+
 __all__ = ["app"]

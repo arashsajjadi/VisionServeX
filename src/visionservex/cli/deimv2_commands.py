@@ -114,6 +114,24 @@ def _emit(payload: dict[str, Any], *, out: Path | None, fmt: str) -> None:
         console.print(f"[{color}]{payload.get('code', '')}[/{color}]: {payload.get('message', '')}")
 
 
+@app.command("create-env")
+def create_env_cmd(
+    dry_run: bool = typer.Option(True, "--dry-run/--execute", help="Default: plan only."),
+    out: Path | None = typer.Option(None, "--out"),
+    fmt: str = typer.Option("text", "--format"),
+) -> None:
+    """v2.23.0: plan (default) or execute creation of the DEIMv2 sidecar conda env.
+
+    The default ``--dry-run`` returns the exact commands that would be run
+    (conda create + git clone + pip install). Use ``--execute`` only after
+    auditing them.
+    """
+    from visionservex.sidecars import SidecarManager
+
+    payload = SidecarManager().create("deimv2", dry_run=dry_run)
+    _emit(payload, out=out, fmt=fmt)
+
+
 @app.command("doctor")
 def doctor_cmd(
     out: Path | None = typer.Option(None, "--out"),

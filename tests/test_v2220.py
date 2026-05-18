@@ -114,29 +114,33 @@ def test_rtdetrv4_help_lists_subcommands() -> None:
         assert sub in res.stdout, sub
 
 
-def test_rtdetrv4_doctor_returns_upstream_not_released(tmp_path: Path) -> None:
+def test_rtdetrv4_doctor_no_longer_returns_v2_22_obsolete_blocker(tmp_path: Path) -> None:
+    """v2.23.0 corrected the obsolete v2.22 blocker. The doctor must NOT return
+    RTDETRV4_UPSTREAM_NOT_RELEASED anymore, and must surface the real upstream
+    (RT-DETRs/RT-DETRv4) plus the v2_22_obsolete_blocker_replaced marker.
+    """
     out = tmp_path / "doctor.json"
     res = _run(["rtdetrv4", "doctor", "--format", "json", "--out", str(out)])
     assert res.returncode == 0
     payload = json.loads(out.read_text())
-    assert payload["status"] == "expected_blocker"
-    assert payload["code"] == "RTDETRV4_UPSTREAM_NOT_RELEASED"
-    # Evidence carries the upstream variants that ARE available.
-    available = payload.get("evidence", {}).get("upstream_available_variants", [])
-    assert "rtdetrv2_pytorch" in available
-    assert "rtdetrv4_pytorch" not in available
+    assert payload["code"] != "RTDETRV4_UPSTREAM_NOT_RELEASED"
+    assert payload["v2_22_obsolete_blocker_replaced"] == "RTDETRV4_UPSTREAM_NOT_RELEASED"
+    assert payload["upstream_repo"] == "https://github.com/RT-DETRs/RT-DETRv4"
 
 
-def test_rtdetrv4_pull_returns_structured_blocker(tmp_path: Path) -> None:
+def test_rtdetrv4_pull_returns_gdown_blocker(tmp_path: Path) -> None:
+    """v2.23.0: pull returns CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP with a gdown command."""
     out = tmp_path / "pull.json"
     res = _run(["rtdetrv4", "pull", "rtdetrv4-s", "--format", "json", "--out", str(out)])
     assert res.returncode == 0
     payload = json.loads(out.read_text())
     assert payload["status"] == "expected_blocker"
-    assert payload["code"] == "RTDETRV4_UPSTREAM_NOT_RELEASED"
+    assert payload["code"] == "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP"
+    assert "gdown" in payload.get("gdown_command", "")
 
 
-def test_rtdetrv4_smoke_test_returns_structured_blocker(tmp_path: Path) -> None:
+def test_rtdetrv4_smoke_test_returns_sidecar_env_missing(tmp_path: Path) -> None:
+    """v2.23.0: smoke-test surfaces SIDECAR_ENV_MISSING (or another structured blocker) until the user runs `rtdetrv4 create-env --execute`."""
     from PIL import Image as _PIL
 
     img = tmp_path / "img.jpg"
@@ -157,7 +161,15 @@ def test_rtdetrv4_smoke_test_returns_structured_blocker(tmp_path: Path) -> None:
     assert res.returncode == 0
     payload = json.loads(out.read_text())
     assert payload["status"] == "expected_blocker"
-    assert payload["code"] == "RTDETRV4_UPSTREAM_NOT_RELEASED"
+    # In a fresh test env (no sidecar conda env) the structured blocker is
+    # SIDECAR_ENV_MISSING. If the env IS present, CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP
+    # is the next blocker.
+    assert payload["code"] in {
+        "SIDECAR_ENV_MISSING",
+        "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP",
+    }
+    # The v2.22 obsolete blocker must NOT appear.
+    assert payload["code"] != "RTDETRV4_UPSTREAM_NOT_RELEASED"
 
 
 # ---------------------------------------------------------------------------

@@ -7,6 +7,142 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.23.0] - 2026-05-18
+
+### Fixed: sidecar manager + RT-DETRv4 upstream-not-released blocker obsolete + COCO val2017 subset + synthetic datasets
+
+Pre-v3 infrastructure release. The v2.22 `RTDETRV4_UPSTREAM_NOT_RELEASED`
+blocker was wrong — Deep Research pointed to the real upstream
+(`RT-DETRs/RT-DETRv4`, arXiv 2510.25257, Apache-2.0, 473 stars). v2.23
+ships the sidecar manager, the corrected blocker, the COCO val2017
+400-subset CLI, and 5 synthetic permissive datasets so v3 readiness can
+move forward.
+
+**Phase 0/1 — Source verification (verified 2026-05-18)**
+
+- DEIMv2: `Intellindust-AI-Lab/DEIMv2` (Apache-2.0, 1758 stars, arXiv
+  2509.20787). HF S checkpoint at `Intellindust/DEIMv2_DINOv3_S_COCO`
+  uses PyTorchModelHubMixin. Sidecar required (torch==2.5.1 + custom
+  MSDeformableAttention CUDA ops).
+- RT-DETRv4: `RT-DETRs/RT-DETRv4` (Apache-2.0, 473 stars, arXiv
+  2510.25257). Configs are in repo at `configs/rtv4/rtv4_hgnetv2_{s,m,l,x}_coco.yml`.
+  Checkpoints are on Google Drive — `pull` returns
+  `CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP` with the exact `gdown`
+  command. v2.22's `RTDETRV4_UPSTREAM_NOT_RELEASED` is now obsolete.
+
+Artifacts: `reports/source_verification_deimv2.json`,
+`reports/source_verification_rtdetrv4.json`,
+`reports/source_verification_detector_candidates.csv`.
+
+**Phase 2 — `visionservex/sidecars/manager.py` + `visionservex sidecar` CLI**
+
+- `SidecarManager` class: conda detection, env existence probe, plan
+  (`plan_create`), execute (`create`), exec sidecar commands with
+  bounded timeout + JSON IO + resource guard pre-check.
+- Canonical specs for `deimv2` and `rtdetrv4` (python 3.11.9 + torch
+  2.5.1 + cu124 + their respective upstream repos).
+- 20-code blocker set: `SIDECAR_ENV_MISSING`, `SIDECAR_CREATE_FAILED`,
+  `SIDECAR_COMMAND_FAILED`, `SIDECAR_TIMEOUT`, `SIDECAR_JSON_MISSING`,
+  `SIDECAR_JSON_INVALID`, `CUSTOM_OPS_COMPILATION`,
+  `CUDA_EXTENSION_BUILD_FAILED`, `CHECKPOINT_DOWNLOAD_FAILED`,
+  `CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP`, `CONFIG_NOT_FOUND`,
+  `UPSTREAM_REPO_NOT_FOUND`, `RESOURCE_GUARD_BLOCKED`,
+  `CONDA_NOT_AVAILABLE`, `LICENSE_RESTRICTION_TRIGGERED`,
+  `DATASET_LICENSE_UNVERIFIED`, ...
+- New CLI: `visionservex sidecar list / doctor / create / exec`.
+
+**Phase 3 — DEIMv2 sidecar surface**
+
+- `visionservex deimv2 create-env --dry-run / --execute` (delegates to
+  `SidecarManager`). Default `--dry-run` emits the exact 5-step recipe
+  (`conda create -n visionservex-deimv2-sidecar python=3.11.9 -y`, `git
+  clone`, `pip install torch==2.5.1`, `pip install -r requirements.txt`,
+  `pip install opencv-python ...`).
+- `deimv2 doctor / pull / smoke-test` reuse the SidecarManager and
+  return structured blockers when the env is missing.
+
+**Phase 4 — RT-DETRv4 sidecar surface (obsolete blocker fixed)**
+
+- `cli/rtdetrv4_commands.py` rewritten. The v2.22 `doctor` /
+  `smoke-test` no longer hardcode `RTDETRV4_UPSTREAM_NOT_RELEASED`;
+  every payload includes
+  `v2_22_obsolete_blocker_replaced: "RTDETRV4_UPSTREAM_NOT_RELEASED"`
+  with the real upstream evidence.
+- `rtdetrv4 pull rtdetrv4-{s,m,l,x}` returns
+  `CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP` with the actual Google
+  Drive id, the upstream-reported COCO AP / AP50 / latency, and the
+  `gdown` command.
+- TensorRT backend gated behind `RTDETRV4_TRT_5080_ACCURACY_BUG_OPEN`
+  to honour the user-flagged RTX 5080 accuracy regression.
+
+**Phase 6 — COCO val2017 400-subset CLI**
+
+- `visionservex dataset prepare-coco-val2017-subset --coco-root USER_PATH
+  --max-images 400 --selection object-rich-balanced --out OUT --report R`.
+- Does NOT auto-download COCO val2017 (license: CC BY 4.0 + Flickr
+  terms — user must agree). Structured `COCO_VAL2017_USER_PATH_REQUIRED`
+  blocker when the user path is missing.
+- Object-rich-balanced selection: rank images by `(n_categories desc,
+  n_objects desc)`. Writes YOLO-format images/, labels/, data.yaml.
+- Optional report emits `coco_val2017_400_selection.json` +
+  `detection_class_distribution.csv` + `detection_dataset_selection.csv`.
+
+**Phase 7 — Synthetic permissive-license dataset generators**
+
+- `visionservex dataset generate-synthetic {medical-nifti,
+  agriculture-hbb, aerial-obb, anomaly-defect, tracking-video}`.
+- Every generator writes a `_SYNTHETIC_MANIFEST.json` so notebooks
+  can never confuse synthetic smoke data with real benchmark data.
+- Non-commercial dataset auto-downloads are NOT introduced; the synthetic
+  permissive alternatives are the recommended default.
+
+**Phase 9 — Notebook v26**
+
+- `VISION_SERVEX_VERSION = "2.23.0"`, `NOTEBOOK_VERSION = "v26"`,
+  `visionservex_v26_run` path.
+- New v26 cell **replaces** the prior v25 cell. Runs:
+  `sidecar list`, `sidecar doctor deimv2/rtdetrv4`,
+  `{deimv2,rtdetrv4} create-env --dry-run`, the COCO val2017 subset
+  prep (dry-run on user-supplied path), and a refreshed
+  `pre_v3_gate_report.csv` with new gates:
+  `sidecar_manager_available=ok`,
+  `deimv2_real_integration_attempted=ok`,
+  `deimv2_runnable_in_this_build=fail` (env not created in CI),
+  `rtdetrv4_obsolete_blocker_fixed=ok`,
+  `rtdetrv4_runnable_in_this_build=fail`,
+  `coco_val2017_400_subset_available=fail` (no user path in CI),
+  `non_commercial_dataset_purge_enforced=ok`,
+  `new_yolo11x_challenger_runnable=fail` (still blocking for v3).
+- Prints honest headline: "DEIMv2/RT-DETRv4 status: sidecar
+  infrastructure landed; smoke gated on user GPU session."
+
+**Phase 10 — Tests**
+
+- 16 new tests in `tests/test_v2230.py`.
+- Full quick suite: 1103 tests pass (up from 1087 in v2.22.0); 0 failed.
+- `ruff check .` + `ruff format --check .` clean.
+- `python -m build` + `python -m twine check dist/*` PASSED.
+
+**Honest verdict (per Phase 12 release rule)**
+
+The release rule says: ship v2.23.0 only if challenger benchmark is
+runnable OR the structured blockers are explicit. v2.23 ships the
+infrastructure — sidecar manager + create-env recipes + RT-DETRv4
+real-checkpoint registry + COCO val2017 400-subset CLI + synthetic
+datasets — and documents the exact next step for each of:
+
+- DEIMv2: `visionservex deimv2 create-env --execute` (creates sidecar env,
+  needs conda + ~20 GB disk + ~30 min). Followed by upstream HF
+  download for deimv2-s and a smoke-test.
+- RT-DETRv4: same + `gdown --id <ID> -O <PATH>` for the checkpoint.
+
+Current best VSX remains `dfine-x-o365-coco` (mAP50:95 ≈ 0.605 on
+COCO128). `yolo11x.pt` still wins (mAP50:95 ≈ 0.634).
+
+**v3_ready = false.** `new_yolo11x_challenger_runnable=fail` and
+`coco_val2017_400_subset_available=fail` (in CI; the user can flip the
+second to `ok` by supplying their COCO val2017 root).
+
 ## [2.22.0] - 2026-05-18
 
 ### Fixed: DEIMv2 + RT-DETRv4 real-integration attempt + notebook v25
