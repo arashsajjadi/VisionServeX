@@ -49,6 +49,7 @@ from visionservex.cli import (
     florence2_commands,
     gateway_commands,
     gpu_commands,
+    libreyolo_commands,
     license_commands,
     live_commands,
     maskdino_commands,
@@ -125,6 +126,7 @@ app.add_typer(privacy_commands.app, name="privacy")
 app.add_typer(validation_commands.app, name="validation")
 app.add_typer(colab_commands.app, name="colab")
 app.add_typer(notebook_commands.app, name="notebook")
+app.add_typer(libreyolo_commands.app, name="libreyolo")
 app.add_typer(capabilities_commands.app, name="capabilities")
 app.add_typer(model_card_commands.app, name="model-card")
 app.add_typer(replacement_map_commands.app, name="replacement-map")

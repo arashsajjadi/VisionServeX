@@ -182,6 +182,18 @@ EXPECTED_BLOCKER_CODES = frozenset(
         "COCO_VAL2017_DOWNLOAD_DISALLOWED",
         "COCO_VAL2017_DOWNLOAD_IN_PROGRESS",
         "NORMALIZER_OUTPUT_INVALID",
+        # v2.27.0 — LibreYOLO + upstream 404 + segmentation/runtime states
+        "LIBREYOLO_REQUIRED",
+        "LIBREYOLO_WEIGHT_LICENSE_UNVERIFIED",
+        "LIBREYOLO_MODEL_NOT_FOUND",
+        "UPSTREAM_HF_REPO_NOT_FOUND",
+        "DOWNLOAD_FAILED",
+        "SEGMENTATION_BENCHMARK_NOT_IMPLEMENTED",
+        "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
+        "OFFICIAL_METRIC_NOT_COLLECTED",
+        "OFFICIAL_METRIC_NOT_FOUND",
+        "ULTRALYTICS_REQUIRED",
+        "COCO_VAL2017_400_REQUIRED",
     ]
 )
 
@@ -322,7 +334,23 @@ def classify_command_result(
             structured_payload=structured,
         )
 
-    # 1. Hard runtime failures (traceback / segfault).
+    # v2.27.0: STRUCTURED EXPECTED BLOCKERS WIN OVER STDERR NOISE.
+    # When stdout contains a parseable JSON envelope that already carries a
+    # recognised expected_blocker code (e.g. ANOMALIB_REQUIRED,
+    # BYTETRACK_REQUIRED, OCSORT_REQUIRED, TORCHREID_REQUIRED), we must NOT
+    # downgrade it to failed_runtime just because stderr happened to contain
+    # a tail like "Error" or "Traceback" from a sub-import. The pre-v2.27
+    # ordering checked stderr first, which mis-classified every parseable
+    # blocker as a hard runtime failure.
+    if not strict and (
+        structured_status == "expected_blocker"
+        or (structured_code and structured_code in EXPECTED_BLOCKER_CODES)
+    ):
+        return _bag("expected_blocker")
+
+    # 1. Hard runtime failures (traceback / segfault) — only after the
+    #    structured-blocker check above, to avoid misclassifying parseable
+    #    expected_blocker payloads.
     if errors_:
         return _bag("failed_runtime")
 
@@ -330,13 +358,12 @@ def classify_command_result(
     if any(p.search(stderr) for p in _USAGE_STDERR_PATTERNS):
         return _bag("failed_usage")
 
-    # 3. Structured payload says expected_blocker → expected_blocker (unless strict).
-    if structured_status == "expected_blocker" or (
-        structured_code and structured_code in EXPECTED_BLOCKER_CODES
+    # 3. Strict mode: structured expected_blocker → failed_runtime.
+    if strict and (
+        structured_status == "expected_blocker"
+        or (structured_code and structured_code in EXPECTED_BLOCKER_CODES)
     ):
-        if strict:
-            return _bag("failed_runtime")
-        return _bag("expected_blocker")
+        return _bag("failed_runtime")
 
     # 4. JSON parse failure on a path we expected to be valid JSON.
     if json_parse_failed:
