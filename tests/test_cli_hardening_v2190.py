@@ -95,12 +95,11 @@ def test_unknown_id_still_raises() -> None:
 
 
 def test_segment_help_lists_v219_flags() -> None:
-    res = _run(["segment", "--help"])
-    assert res.returncode == 0
-    assert "--box" in res.stdout
-    assert "--out" in res.stdout
-    assert "--draw" in res.stdout
-    assert "--format" in res.stdout
+    """v2.25.1: rich-aware help assertion (CI terminal soft-wraps option names)."""
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["segment"])
+    assert_help_contains_all(res, ["--box", "--out", "--draw", "--format"])
 
 
 def test_segment_unknown_model_emits_structured_not_usage(tmp_path: Path) -> None:

@@ -89,31 +89,31 @@ def test_agriculture_model_card_scold_returns_expected_blocker(tmp_path: Path) -
 
 
 def test_video_search_tracker_smoke_help_lists_format() -> None:
-    res = _run(["video-search", "tracker-smoke", "--help"])
-    assert res.returncode == 0, (res.stdout, res.stderr)
-    assert "--format" in res.stdout
-    assert "--out" in res.stdout
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["video-search", "tracker-smoke"])
+    assert_help_contains_all(res, ["--format", "--out"])
 
 
 def test_video_search_reid_smoke_help_lists_format() -> None:
-    res = _run(["video-search", "reid-smoke", "--help"])
-    assert res.returncode == 0, (res.stdout, res.stderr)
-    assert "--format" in res.stdout
-    assert "--out" in res.stdout
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["video-search", "reid-smoke"])
+    assert_help_contains_all(res, ["--format", "--out"])
 
 
 def test_benchmark_anomaly_help_lists_format() -> None:
-    res = _run(["benchmark-anomaly", "--help"])
-    assert res.returncode == 0, (res.stdout, res.stderr)
-    assert "--format" in res.stdout
-    assert "--out" in res.stdout
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["benchmark-anomaly"])
+    assert_help_contains_all(res, ["--format", "--out"])
 
 
 def test_dev_gpu_profile_help_lists_format() -> None:
-    res = _run(["dev", "gpu-profile", "--help"])
-    assert res.returncode == 0, (res.stdout, res.stderr)
-    assert "--format" in res.stdout
-    assert "--out" in res.stdout
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["dev", "gpu-profile"])
+    assert_help_contains_all(res, ["--format", "--out"])
 
 
 def test_sam_family_validate_sam31_returns_expected_blocker(tmp_path: Path) -> None:
