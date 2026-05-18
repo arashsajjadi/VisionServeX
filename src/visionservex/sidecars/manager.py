@@ -62,8 +62,44 @@ SIDECAR_BLOCKER_CODES = frozenset(
         "DATASET_LICENSE_UNVERIFIED",
         "RESOURCE_GUARD_BLOCKED",
         "CONDA_NOT_AVAILABLE",
+        # v2.24.0: real execution blockers surfaced from sm_120 / Blackwell paths
+        "SIDECAR_INSTALL_ROOT_NOT_WRITABLE",
+        "BLACKWELL_SM120_TORCH_INCOMPATIBLE",
+        "CUDA_KERNEL_LAUNCH_FAILED",
+        "GIT_CLONE_FAILED",
+        "PIP_INSTALL_FAILED",
+        "CONDA_CREATE_FAILED",
+        "REQUIREMENTS_TXT_MISSING",
     ]
 )
+
+
+def _resolve_sidecar_root() -> Path:
+    """Return the base directory under which sidecar installs are placed.
+
+    Precedence:
+    1. ``$VISIONSERVEX_SIDECAR_ROOT`` (explicit override).
+    2. ``/opt/visionservex/sidecars`` if ``/opt`` is writable (root/sudo install).
+    3. ``~/.cache/visionservex/sidecars`` (user-writable default — picked
+       automatically when ``/opt`` is root-owned, which is the normal Linux case).
+    """
+    override = os.environ.get("VISIONSERVEX_SIDECAR_ROOT")
+    if override:
+        return Path(override).expanduser()
+    opt_parent = Path("/opt")
+    if opt_parent.exists() and os.access(opt_parent, os.W_OK):
+        return Path("/opt/visionservex/sidecars")
+    return Path.home() / ".cache" / "visionservex" / "sidecars"
+
+
+def _install_root_source() -> str:
+    """Return which precedence rule the active install root came from."""
+    if os.environ.get("VISIONSERVEX_SIDECAR_ROOT"):
+        return "env:VISIONSERVEX_SIDECAR_ROOT"
+    opt_parent = Path("/opt")
+    if opt_parent.exists() and os.access(opt_parent, os.W_OK):
+        return "default:/opt/visionservex/sidecars"
+    return "default:~/.cache/visionservex/sidecars"
 
 
 @dataclass
@@ -85,7 +121,7 @@ class SidecarSpec:
 
     @property
     def install_root(self) -> Path:
-        return Path("/opt/visionservex/sidecars") / self.name
+        return _resolve_sidecar_root() / self.name
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -319,6 +355,8 @@ class SidecarManager:
                 "sidecar": name,
                 "spec": spec.to_dict(),
                 "planned_commands": cmds,
+                "install_root": str(spec.install_root),
+                "install_root_source": _install_root_source(),
                 "message": (
                     "Dry-run only. To execute, rerun with --execute (requires conda + ~20 GB disk)."
                 ),
@@ -354,7 +392,52 @@ class SidecarManager:
                 "message": "conda not found on PATH; install miniconda first.",
                 "planned_commands": cmds,
             }
-        # Execute sequentially.
+
+        # Ensure the install_root parent is writable BEFORE running any command.
+        install_root = spec.install_root
+        try:
+            install_root.parent.mkdir(parents=True, exist_ok=True)
+        except (PermissionError, OSError) as exc:
+            return {
+                "status": "failed",
+                "code": "SIDECAR_INSTALL_ROOT_NOT_WRITABLE",
+                "sidecar": name,
+                "install_root": str(install_root),
+                "error": str(exc)[:300],
+                "message": (
+                    f"Cannot create sidecar install root {install_root}. "
+                    "Set $VISIONSERVEX_SIDECAR_ROOT to a writable path."
+                ),
+                "planned_commands": cmds,
+            }
+        if not os.access(install_root.parent, os.W_OK):
+            return {
+                "status": "failed",
+                "code": "SIDECAR_INSTALL_ROOT_NOT_WRITABLE",
+                "sidecar": name,
+                "install_root": str(install_root),
+                "message": (
+                    f"Install-root parent {install_root.parent} is not writable. "
+                    "Set $VISIONSERVEX_SIDECAR_ROOT to a writable path."
+                ),
+                "planned_commands": cmds,
+            }
+
+        # Map (command-substring → blocker code) for finer-grained reporting.
+        cmd_to_blocker = [
+            ("conda create", "CONDA_CREATE_FAILED"),
+            ("git clone", "GIT_CLONE_FAILED"),
+            ("pip install torch", "PIP_INSTALL_FAILED"),
+            ("pip install -r", "PIP_INSTALL_FAILED"),
+            ("pip install", "PIP_INSTALL_FAILED"),
+        ]
+
+        def _blocker_for(cmd: str) -> str:
+            for needle, code in cmd_to_blocker:
+                if needle in cmd:
+                    return code
+            return "SIDECAR_CREATE_FAILED"
+
         executed: list[dict[str, Any]] = []
         for cmd in cmds:
             t0 = time.time()
@@ -375,14 +458,24 @@ class SidecarManager:
                     }
                 )
                 if res.returncode != 0:
+                    blocker = _blocker_for(cmd)
+                    # GIT_CLONE_FAILED when the dir already exists is benign — surface it cleanly.
+                    if blocker == "GIT_CLONE_FAILED" and install_root.exists() and any(
+                        install_root.iterdir()
+                    ):
+                        executed[-1]["note"] = (
+                            "Install root already populated; continuing without reclone."
+                        )
+                        continue
                     return {
                         "status": "failed",
-                        "code": "SIDECAR_CREATE_FAILED",
+                        "code": blocker,
                         "sidecar": name,
                         "failing_command": cmd,
                         "returncode": res.returncode,
                         "stderr_tail": (res.stderr or "")[-1000:],
                         "executed": executed,
+                        "install_root": str(install_root),
                     }
             except subprocess.TimeoutExpired:
                 return {
@@ -392,12 +485,14 @@ class SidecarManager:
                     "failing_command": cmd,
                     "timeout_s": cfg.timeout_s,
                     "executed": executed,
+                    "install_root": str(install_root),
                 }
         return {
             "status": "ok",
             "code": "OK",
             "sidecar": name,
             "executed": executed,
+            "install_root": str(install_root),
             "message": "Sidecar environment created.",
         }
 

@@ -117,6 +117,11 @@ def _emit(payload: dict[str, Any], *, out: Path | None, fmt: str) -> None:
 @app.command("create-env")
 def create_env_cmd(
     dry_run: bool = typer.Option(True, "--dry-run/--execute", help="Default: plan only."),
+    timeout_s: int = typer.Option(
+        1800,
+        "--timeout-s",
+        help="Per-command timeout (default 1800s = 30 min).",
+    ),
     out: Path | None = typer.Option(None, "--out"),
     fmt: str = typer.Option("text", "--format"),
 ) -> None:
@@ -126,9 +131,10 @@ def create_env_cmd(
     (conda create + git clone + pip install). Use ``--execute`` only after
     auditing them.
     """
-    from visionservex.sidecars import SidecarManager
+    from visionservex.sidecars import SidecarConfig, SidecarManager
 
-    payload = SidecarManager().create("deimv2", dry_run=dry_run)
+    cfg = SidecarConfig(timeout_s=timeout_s)
+    payload = SidecarManager().create("deimv2", dry_run=dry_run, config=cfg)
     _emit(payload, out=out, fmt=fmt)
 
 

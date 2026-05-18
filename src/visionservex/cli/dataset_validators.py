@@ -673,16 +673,115 @@ def validate_surveillance(
 # ---------------------------------------------------------------------------
 
 
+_COCO_VAL2017_IMG_URL = "http://images.cocodataset.org/zips/val2017.zip"
+_COCO_VAL2017_ANN_URL = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
+_DEFAULT_COCO_CACHE = Path.home() / ".cache" / "visionservex" / "datasets" / "coco_val2017"
+
+
+def _download_coco_val2017(coco_root: Path) -> dict[str, Any]:
+    """v2.24.0: Download COCO val2017 images + annotations to ``coco_root``.
+
+    COCO val2017 is licensed CC BY 4.0 with Flickr terms — the user must
+    explicitly opt in via ``--allow-download``. ``coco_root`` is created with
+    the expected layout:
+
+        <coco_root>/images/val2017/*.jpg
+        <coco_root>/annotations/instances_val2017.json
+        <coco_root>/_DOWNLOAD_COMPLETE  (marker)
+
+    Returns a structured dict with ``status`` + ``code``; never raises.
+    """
+    import urllib.error
+    import urllib.request
+    import zipfile
+
+    coco_root.mkdir(parents=True, exist_ok=True)
+    marker = coco_root / "_DOWNLOAD_COMPLETE"
+    if marker.exists():
+        return {
+            "status": "ok",
+            "code": "OK",
+            "message": f"COCO val2017 already downloaded under {coco_root}.",
+            "marker": str(marker),
+            "skipped_download": True,
+        }
+
+    progress = coco_root / "_DOWNLOAD_IN_PROGRESS"
+    if progress.exists():
+        return {
+            "status": "expected_blocker",
+            "code": "COCO_VAL2017_DOWNLOAD_IN_PROGRESS",
+            "message": (
+                f"Another process appears to be downloading into {coco_root}. "
+                f"Remove {progress} if stale."
+            ),
+        }
+    progress.write_text("downloading\n")
+
+    try:
+        zips_dir = coco_root / "_zips"
+        zips_dir.mkdir(exist_ok=True)
+
+        for label, url, target in [
+            ("images", _COCO_VAL2017_IMG_URL, zips_dir / "val2017.zip"),
+            ("annotations", _COCO_VAL2017_ANN_URL, zips_dir / "annotations.zip"),
+        ]:
+            if not target.exists() or target.stat().st_size == 0:
+                try:
+                    urllib.request.urlretrieve(url, target)
+                except (urllib.error.URLError, urllib.error.HTTPError, OSError) as exc:
+                    return {
+                        "status": "failed",
+                        "code": "COCO_VAL2017_DOWNLOAD_FAILED",
+                        "url": url,
+                        "label": label,
+                        "error": str(exc)[:300],
+                        "message": f"Could not download COCO {label} from {url}.",
+                    }
+
+        images_target = coco_root / "images"
+        images_target.mkdir(exist_ok=True)
+        with zipfile.ZipFile(zips_dir / "val2017.zip") as zf:
+            zf.extractall(images_target)
+        with zipfile.ZipFile(zips_dir / "annotations.zip") as zf:
+            zf.extractall(coco_root)
+
+        ann_path = coco_root / "annotations" / "instances_val2017.json"
+        images_dir = images_target / "val2017"
+        if not (ann_path.exists() and images_dir.exists()):
+            return {
+                "status": "failed",
+                "code": "COCO_VAL2017_DOWNLOAD_FAILED",
+                "ann_path_exists": ann_path.exists(),
+                "images_dir_exists": images_dir.exists(),
+                "message": "Download finished but expected paths are missing after extract.",
+            }
+
+        marker.write_text("complete\n")
+        return {
+            "status": "ok",
+            "code": "OK",
+            "coco_root": str(coco_root),
+            "ann_path": str(ann_path),
+            "images_dir": str(images_dir),
+            "n_images_jpg": len(list(images_dir.glob("*.jpg"))),
+            "license": "CC BY 4.0 (https://cocodataset.org/#termsofuse)",
+            "message": "COCO val2017 downloaded + extracted.",
+        }
+    finally:
+        progress.unlink(missing_ok=True)
+
+
 @app.command("prepare-coco-val2017-subset")
 def prepare_coco_val2017_subset(
     coco_root: Path = typer.Option(
-        ...,
+        _DEFAULT_COCO_CACHE,
         "--coco-root",
         help=(
-            "User-supplied COCO val2017 root. Must contain images/val2017/*.jpg "
-            "AND annotations/instances_val2017.json. We do NOT auto-download "
-            "COCO val2017 (license: CC BY 4.0 + Flickr terms — user must "
-            "agree)."
+            "COCO val2017 root. Must contain images/val2017/*.jpg AND "
+            "annotations/instances_val2017.json. Without --allow-download we do "
+            "NOT auto-download COCO val2017 (CC BY 4.0 + Flickr terms — user "
+            "must explicitly opt in)."
         ),
     ),
     max_images: int = typer.Option(400, "--max-images"),
@@ -696,13 +795,22 @@ def prepare_coco_val2017_subset(
     ),
     fmt: str = typer.Option("text", "--format"),
     report: Path | None = typer.Option(None, "--report", help="Write a JSON selection report."),
+    allow_download: bool = typer.Option(
+        False,
+        "--allow-download",
+        help=(
+            "v2.24.0: explicitly opt in to downloading COCO val2017 (CC BY 4.0 + "
+            "Flickr terms). When set, missing assets at --coco-root are fetched "
+            "from cocodataset.org and extracted into the standard layout."
+        ),
+    ),
 ) -> None:
-    """v2.23.0: Build a 400-image object-rich-balanced COCO val2017 subset.
+    """v2.24.0: Build a 400-image object-rich-balanced COCO val2017 subset.
 
-    Does NOT download COCO val2017. The user must supply ``--coco-root``
-    pointing at an existing extraction. We emit structured blockers if the
-    layout isn't recognised, so the notebook never silently runs on the
-    wrong data.
+    By default does NOT download COCO val2017. The user can opt in via
+    ``--allow-download`` (CC BY 4.0 + Flickr terms). We emit structured
+    blockers if the layout isn't recognised, so the notebook never silently
+    runs on the wrong data.
     """
     payload: dict[str, Any] = {
         "status": "ok",
@@ -711,41 +819,67 @@ def prepare_coco_val2017_subset(
         "max_images_requested": max_images,
         "selection": selection,
         "out_dir": str(out_dir),
+        "allow_download": bool(allow_download),
     }
-    if not coco_root.exists():
-        payload.update(
-            status="expected_blocker",
-            code="COCO_VAL2017_USER_PATH_REQUIRED",
-            message=(
-                f"--coco-root {coco_root} not found. Provide your local COCO val2017 root "
-                "(must contain images/val2017/ + annotations/instances_val2017.json)."
-            ),
-        )
+
+    def _write_and_exit(p: dict[str, Any], code: int = 2) -> None:
         if report is not None:
             report.parent.mkdir(parents=True, exist_ok=True)
-            report.write_text(json.dumps(payload, indent=2))
-        _emit(payload, out=None, fmt=fmt)
-        raise typer.Exit(2)
+            report.write_text(json.dumps(p, indent=2))
+        _emit(p, out=None, fmt=fmt)
+        raise typer.Exit(code)
 
+    # Resolve target layout paths once.
     images_dir = coco_root / "images" / "val2017"
     if not images_dir.exists():
-        images_dir = coco_root / "val2017"
+        legacy_images_dir = coco_root / "val2017"
+        if legacy_images_dir.exists():
+            images_dir = legacy_images_dir
     ann_path = coco_root / "annotations" / "instances_val2017.json"
+
     if not (images_dir.exists() and ann_path.exists()):
-        payload.update(
-            status="expected_blocker",
-            code="COCO_VAL2017_USER_PATH_REQUIRED",
-            message=(
-                "Expected layout: <coco-root>/images/val2017/*.jpg + "
-                "<coco-root>/annotations/instances_val2017.json. Found neither/incomplete."
-            ),
-            details={"images_dir_found": images_dir.exists(), "ann_file_found": ann_path.exists()},
-        )
-        if report is not None:
-            report.parent.mkdir(parents=True, exist_ok=True)
-            report.write_text(json.dumps(payload, indent=2))
-        _emit(payload, out=None, fmt=fmt)
-        raise typer.Exit(2)
+        if not allow_download:
+            payload.update(
+                status="expected_blocker",
+                code=(
+                    "COCO_VAL2017_DOWNLOAD_DISALLOWED"
+                    if not coco_root.exists()
+                    else "COCO_VAL2017_USER_PATH_REQUIRED"
+                ),
+                message=(
+                    f"COCO val2017 not present under {coco_root}. Re-run with "
+                    "--allow-download to fetch it (CC BY 4.0 + Flickr terms), or "
+                    "supply an existing --coco-root."
+                ),
+                images_dir_found=images_dir.exists(),
+                ann_file_found=ann_path.exists(),
+            )
+            _write_and_exit(payload)
+
+        # --allow-download path
+        dl = _download_coco_val2017(coco_root)
+        payload["download_result"] = dl
+        if dl.get("status") != "ok":
+            payload.update(
+                status=dl.get("status", "failed"),
+                code=dl.get("code", "COCO_VAL2017_DOWNLOAD_FAILED"),
+                message=dl.get("message", "Download failed."),
+            )
+            _write_and_exit(payload)
+
+        # Refresh resolved paths after extraction.
+        images_dir = coco_root / "images" / "val2017"
+        ann_path = coco_root / "annotations" / "instances_val2017.json"
+        if not (images_dir.exists() and ann_path.exists()):
+            payload.update(
+                status="failed",
+                code="COCO_VAL2017_DOWNLOAD_FAILED",
+                message=(
+                    "Download reported ok but expected layout is still missing under "
+                    f"{coco_root}."
+                ),
+            )
+            _write_and_exit(payload)
 
     try:
         anns = json.loads(ann_path.read_text())

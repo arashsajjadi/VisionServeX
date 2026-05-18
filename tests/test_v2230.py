@@ -182,6 +182,11 @@ def test_deimv2_create_env_dry_run(tmp_path: Path) -> None:
 
 
 def test_coco_val2017_subset_missing_path_returns_structured_blocker(tmp_path: Path) -> None:
+    """v2.23 contract preserved through v2.24: missing dataset without
+    --allow-download must surface a structured blocker. v2.24 splits the
+    code into ``COCO_VAL2017_DOWNLOAD_DISALLOWED`` (when --coco-root does not
+    exist at all) vs ``COCO_VAL2017_USER_PATH_REQUIRED`` (when the dir exists
+    but the layout is wrong)."""
     out_dir = tmp_path / "subset"
     report = tmp_path / "report.json"
     res = _run(
@@ -202,7 +207,10 @@ def test_coco_val2017_subset_missing_path_returns_structured_blocker(tmp_path: P
     )
     assert res.returncode == 2
     d = json.loads(report.read_text())
-    assert d["code"] == "COCO_VAL2017_USER_PATH_REQUIRED"
+    assert d["code"] in {
+        "COCO_VAL2017_USER_PATH_REQUIRED",
+        "COCO_VAL2017_DOWNLOAD_DISALLOWED",
+    }
 
 
 # ---------------------------------------------------------------------------

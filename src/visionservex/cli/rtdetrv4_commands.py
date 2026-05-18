@@ -137,13 +137,19 @@ def doctor_cmd(
 @app.command("create-env")
 def create_env_cmd(
     dry_run: bool = typer.Option(True, "--dry-run/--execute"),
+    timeout_s: int = typer.Option(
+        1800,
+        "--timeout-s",
+        help="Per-command timeout (default 1800s = 30 min).",
+    ),
     out: Path | None = typer.Option(None, "--out"),
     fmt: str = typer.Option("text", "--format"),
 ) -> None:
     """Plan or execute creation of the RT-DETRv4 sidecar conda env."""
-    from visionservex.sidecars import SidecarManager
+    from visionservex.sidecars import SidecarConfig, SidecarManager
 
-    payload = SidecarManager().create("rtdetrv4", dry_run=dry_run)
+    cfg = SidecarConfig(timeout_s=timeout_s)
+    payload = SidecarManager().create("rtdetrv4", dry_run=dry_run, config=cfg)
     _emit(payload, out=out, fmt=fmt)
 
 

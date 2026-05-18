@@ -63,13 +63,17 @@ def doctor_cmd(
 def create_cmd(
     name: str = typer.Argument(..., help="Sidecar spec name."),
     dry_run: bool = typer.Option(True, "--dry-run/--execute", help="Default: plan only."),
+    timeout_s: int = typer.Option(
+        1800, "--timeout-s", help="Per-command timeout (default 1800s = 30 min)."
+    ),
     out: Path | None = typer.Option(None, "--out"),
     fmt: str = typer.Option("text", "--format"),
 ) -> None:
     """Plan (default) or execute creation of a sidecar conda environment."""
-    from visionservex.sidecars import SidecarManager
+    from visionservex.sidecars import SidecarConfig, SidecarManager
 
-    payload = SidecarManager().create(name, dry_run=dry_run)
+    cfg = SidecarConfig(timeout_s=timeout_s)
+    payload = SidecarManager().create(name, dry_run=dry_run, config=cfg)
     _emit(payload, out=out, fmt=fmt)
 
 
