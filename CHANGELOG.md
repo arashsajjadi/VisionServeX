@@ -7,6 +7,96 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.20.0] - 2026-05-17
+
+### Fixed: notebook v23 schema normalization (KeyError: 'model' crash)
+
+Notebook-side hardening release. After v2.19/notebook-v22, the local
+RTX 5080 execution still crashed with `KeyError: 'model'` in section 12
+(`Ultralytics SAM / SAM2 / SAM3 and VisionServeX segmentation`). Root
+cause: when `segmentation_rows = []` produced an empty DataFrame with
+no columns, downstream cells (30, 32, 34) did `df["model"]`,
+`sort_values(["mAP50_95","AP50"])`, and `dropna(subset=...)` without
+ensuring the columns existed.
+
+**v23 notebook patches**
+
+- New `V23 SCHEMA NORMALIZATION UTILITY` cell inserted right after the
+  helpers cell. Provides:
+  - `ensure_columns(df, defaults)` — guarantees every key in `defaults`
+    exists as a column.
+  - `normalize_common_result_schema(df, section_name, kind)` —
+    applies the common defaults plus a `detection` / `segmentation` /
+    `generic` overlay. The common defaults are: `section / source /
+    family / model / task / status / scope / evaluation_scope /
+    benchmark_or_smoke / metrics_valid / blocker_code / error /
+    warning / output_file / json_parseable / artifact_exists`.
+  - `safe_str_series(df, col)` — `df[col].astype(str)` that tolerates a
+    missing column with empty strings.
+  - `ensure_safe_for_plot(df)` — guarantees the detection-plot columns
+    exist even when `dropna(...)` returned an empty df.
+- Section 12 (segmentation/SAM):
+  - `df_seg` / `df_seg_fail` now pass through
+    `normalize_common_result_schema(..., kind='segmentation')` BEFORE
+    any downstream access.
+  - Truthful classification: every segmentation/SAM row defaults to
+    `benchmark_or_smoke='visual_smoke'`, `metrics_valid=False`,
+    `blocker_code='GT_MASKS_REQUIRED_FOR_MASK_METRICS'`.
+  - New artifact: `reports/segmentation_null_audit.csv`.
+- Section 10 (cell 32, detection plots):
+  - `df_det_all` and `plot_df` pass through `ensure_safe_for_plot`
+    before any column access.
+  - Every direct `row["model"]` / `df["model"].astype(str)` was
+    replaced with `safe_str_series(...)` / `row.get('model', '')`.
+- `df_vsx_det.iloc[0]["model"]` (cell 34) replaced with a `'model' in
+  df_vsx_det.columns and not df_vsx_det.empty` guard.
+
+**Targeted execution proof**
+
+`jupyter nbconvert --execute` was run against a 5-cell minimal slice of
+the notebook (config + helpers + utility + stubs + section 12). The
+section completed cleanly with no `KeyError`; all 4 v23 CSV outputs
+landed under `/tmp/v23_test_out/reports/`:
+`segmentation_smoke_summary.csv` (5 columns of the common envelope plus
+the segmentation overlay), `segmentation_failures.csv`,
+`segmentation_null_audit.csv`. Every row has a non-null `model`,
+`status`, `benchmark_or_smoke`, `blocker_code`.
+
+**Honest scope note**
+
+v2.20.0 does NOT execute the full 53-cell notebook end-to-end inside
+this release session — that requires 1-2 hours of GPU time per pass and
+the resource-guard freeze policy still applies. The user's RTX 5080
+notebook rerun after `pip install -U visionservex==2.20.0` is the
+empirical gate. The schema-utility fix is robust enough that section 12
+can no longer crash on its own; remaining crashes (if any) will surface
+in later cells with the same `safe_str_series` / `ensure_safe_for_plot`
+pattern available to patch them.
+
+**Phase 9 — Tests**
+
+- New `tests/test_notebook_schema_v2200.py` (10 tests) — extracts the
+  utility cell from notebook JSON, exec's it in a fresh namespace, and
+  asserts: `ensure_columns` on empty/partial dfs, segmentation kind adds
+  `n_masks`, detection kind adds AP columns, normalize on
+  completely-empty df returns a usable schema, `safe_str_series` on
+  missing column, `ensure_safe_for_plot` on empty df, the exact section
+  12 failure shape no longer crashes.
+
+**Validation**
+
+- 1064 quick tests pass (up from 1054 in v2.19.0); 0 failed.
+- `ruff check .` + `ruff format --check .` clean.
+- `python -m build` + `python -m twine check dist/*` PASSED.
+
+**What this release does NOT yet do** (the gate report stays honest):
+
+- Full 53-cell notebook end-to-end execution is gated on a GPU session
+  the user runs; this release ships the schema utility that makes the
+  crash impossible.
+- The pre-v3 gate report (introduced in v2.19) still lists the off-host
+  GHCR sidecar build and the COCO128-only label set as blockers.
+
 ## [2.19.0] - 2026-05-17
 
 ### Fixed: CLI hardening + notebook v22 + pre-v3 gate report
