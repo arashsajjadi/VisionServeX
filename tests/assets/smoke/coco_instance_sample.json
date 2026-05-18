@@ -1,0 +1,84 @@
+{
+  "info": {
+    "description": "VisionServeX smoke test asset",
+    "version": "1.0"
+  },
+  "licenses": [],
+  "images": [
+    {
+      "id": 1,
+      "file_name": "coco_instance_sample.jpg",
+      "width": 640,
+      "height": 480
+    }
+  ],
+  "annotations": [
+    {
+      "id": 1,
+      "image_id": 1,
+      "category_id": 1,
+      "bbox": [
+        100,
+        80,
+        60,
+        200
+      ],
+      "area": 12000,
+      "segmentation": [
+        [
+          100,
+          80,
+          160,
+          80,
+          160,
+          280,
+          100,
+          280
+        ]
+      ],
+      "iscrowd": 0
+    },
+    {
+      "id": 2,
+      "image_id": 1,
+      "category_id": 3,
+      "bbox": [
+        300,
+        170,
+        250,
+        190
+      ],
+      "area": 47500,
+      "segmentation": [
+        [
+          300,
+          170,
+          550,
+          170,
+          550,
+          360,
+          300,
+          360
+        ]
+      ],
+      "iscrowd": 0
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "person",
+      "supercategory": "person"
+    },
+    {
+      "id": 2,
+      "name": "bicycle",
+      "supercategory": "vehicle"
+    },
+    {
+      "id": 3,
+      "name": "car",
+      "supercategory": "vehicle"
+    }
+  ]
+}

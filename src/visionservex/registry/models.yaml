@@ -3079,7 +3079,8 @@ models:
   auto_download: false
   requires_optional_extra: true
   install_extra: hf
-  implementation_status: stub
+  # v2.29.0: promoted to partial — engine is wired via hf_classify, requires timm.
+  implementation_status: partial
   supported_devices:
   - cpu
   - cuda

@@ -1251,4 +1251,82 @@ def official_metrics_cmd(
     typer.echo(json.dumps(payload, indent=2))
 
 
+@app.command("smoke-matrix")
+def smoke_matrix_cmd(
+    device: str = typer.Option("cpu", "--device", help="cpu | cuda | mps"),
+    real_assets: bool = typer.Option(
+        True,
+        "--real-assets/--no-real-assets",
+        help="Use real deterministic smoke assets under tests/assets/smoke/",
+    ),
+    include_core: bool = typer.Option(True, "--include-core/--no-core"),
+    include_optional: bool = typer.Option(False, "--include-optional"),
+    include_sidecar: bool = typer.Option(False, "--include-sidecar"),
+    include_domain: bool = typer.Option(False, "--include-domain"),
+    include_mock: bool = typer.Option(False, "--include-mock"),
+    out: str = typer.Option("", "--out", help="Write JSON matrix to this path."),
+    csv: str = typer.Option("", "--csv", help="Write CSV matrix to this path."),
+    fail_on_package_bug: bool = typer.Option(
+        False,
+        "--fail-on-package-bug",
+        help="Exit 1 if any row is a package-side bug.",
+    ),
+    no_notebook: bool = typer.Option(True, "--no-notebook/--allow-notebook"),
+    timeout: int = typer.Option(120, "--timeout", help="Per-model timeout in seconds."),
+) -> None:
+    """v2.29.0: package-level model smoke matrix.
+
+    Discovers every advertised model, synthesises the exact CLI command,
+    executes it, and classifies the result into one of:
+    smoke_passed | benchmark_passed | expected_blocker |
+    license_blocked | manual_checkpoint_required | failed_runtime
+    """
+    import sys
+    from pathlib import Path as _P
+
+    # Import the standalone runner
+    sys.path.insert(0, str(_P(__file__).parent.parent.parent.parent / "tools"))
+    try:
+        from run_model_smoke_matrix import run_smoke_matrix
+    finally:
+        sys.path.pop(0)
+
+    out_path = _P(out) if out else None
+    csv_path = _P(csv) if csv else None
+
+    console.print(f"[bold]smoke-matrix[/bold]  device={device}  core={include_core}")
+    _rows, summary = run_smoke_matrix(
+        device=device,
+        include_core=include_core,
+        include_optional=include_optional,
+        include_sidecar=include_sidecar,
+        include_domain=include_domain,
+        include_mock=include_mock,
+        out=out_path,
+        csv_path=csv_path,
+        fail_on_package_bug=fail_on_package_bug,
+        no_notebook=no_notebook,
+        timeout_s=timeout,
+    )
+
+    payload = {
+        "status": "ok",
+        "code": "OK",
+        "version": "v2.29.0",
+        "device": device,
+        "total": summary.total,
+        "smoke_passed": summary.smoke_passed,
+        "benchmark_passed": summary.benchmark_passed,
+        "expected_blocker": summary.expected_blocker,
+        "license_blocked": summary.license_blocked,
+        "manual_checkpoint_required": summary.manual_checkpoint_required,
+        "failed_runtime": summary.failed_runtime,
+        "unclassified": summary.unclassified,
+        "package_bug_remaining": summary.package_bug_remaining,
+        "out": str(out_path) if out_path else "",
+        "csv": str(csv_path) if csv_path else "",
+    }
+    typer.echo(json.dumps(payload, indent=2))
+
+
 __all__ = ["app"]

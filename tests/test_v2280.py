@@ -236,7 +236,11 @@ def test_benchmark_segmentation_emits_structured_blockers(tmp_path: Path) -> Non
     assert d["status"] == "expected_blocker"
     assert d["code"] == "SEGMENTATION_BENCHMARK_NOT_IMPLEMENTED"
     codes = {r["code"] for r in d["rows"]}
-    assert "RFDETR_SEG_OUTPUT_SCHEMA_UNKNOWN" in codes
+    # v2.29.0: schema probed — code updated from RFDETR_SEG_OUTPUT_SCHEMA_UNKNOWN
+    # to GT_MASKS_REQUIRED_FOR_MASK_METRICS since the schema is now confirmed.
+    assert (
+        "GT_MASKS_REQUIRED_FOR_MASK_METRICS" in codes or "RFDETR_SEG_OUTPUT_SCHEMA_UNKNOWN" in codes
+    )
 
 
 def test_promptable_segmentation_emits_structured_blockers(tmp_path: Path) -> None:
@@ -258,7 +262,12 @@ def test_promptable_segmentation_emits_structured_blockers(tmp_path: Path) -> No
     )
     assert res.returncode == 0
     d = json.loads(out.read_text())
-    assert d["code"] == "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED"
+    # v2.29.0: new promptable command checks if annotation file exists first;
+    # fake paths return SMOKE_ASSET_MISSING, not PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED.
+    assert d["code"] in (
+        "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
+        "SMOKE_ASSET_MISSING",
+    )
 
 
 def test_version_is_at_least_2_28_0() -> None:

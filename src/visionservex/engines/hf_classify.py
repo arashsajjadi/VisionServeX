@@ -48,6 +48,21 @@ class HFClassifyEngine(StubEngine):
                 install_hint=self._install_hint(),
             )
 
+        # timm/ HF repos require the `timm` package and a timm-aware loader.
+        # AutoModelForImageClassification does NOT load timm/ repos via the
+        # standard path; attempting it raises a KeyError or class_not_found.
+        # We surface this as an actionable expected_blocker.
+        if (self.entry.hf_repo_id or "").startswith("timm/"):
+            try:
+                import timm as _timm  # type: ignore  # noqa: F401
+            except ImportError as exc:
+                raise MissingDependencyError(
+                    f"TIMM_REQUIRED: model {self.entry.id!r} uses a timm/ HF "
+                    f"repo ({self.entry.hf_repo_id}) which requires the `timm` "
+                    f"package. Install: pip install timm",
+                    install_hint="pip install timm",
+                ) from exc
+
         from visionservex.runtime.downloads import download
 
         download(self.entry)
