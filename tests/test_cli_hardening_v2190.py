@@ -131,12 +131,10 @@ def test_segment_unknown_model_emits_structured_not_usage(tmp_path: Path) -> Non
 
 
 def test_sam_family_smoke_test_help_lists_v219_flags() -> None:
-    res = _run(["sam-family", "smoke-test", "--help"])
-    assert res.returncode == 0
-    assert "--out" in res.stdout
-    assert "--draw" in res.stdout
-    assert "--format" in res.stdout
-    assert "--box" in res.stdout
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["sam-family", "smoke-test"])
+    assert_help_contains_all(res, ["--out", "--draw", "--format", "--box"])
 
 
 def test_sam_family_smoke_test_non_runnable_returns_expected_blocker(tmp_path: Path) -> None:

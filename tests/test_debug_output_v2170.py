@@ -28,17 +28,11 @@ def _make_image(tmp_path: Path) -> Path:
 
 
 def test_debug_output_help_lists_v217_flags() -> None:
-    res = subprocess.run(
-        [*_vsx_cmd(), "debug-output", "--help"],
-        capture_output=True,
-        text=True,
-        timeout=15,
-    )
-    assert res.returncode == 0
-    assert "--out" in res.stdout
-    assert "--format" in res.stdout
-    assert "--draw" in res.stdout
-    assert "--threshold" in res.stdout
+    """v2.25.1: rich-aware help assertion."""
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["debug-output"])
+    assert_help_contains_all(res, ["--out", "--format", "--draw", "--threshold"])
 
 
 def test_debug_output_mock_detect_writes_json(tmp_path: Path) -> None:

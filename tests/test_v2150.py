@@ -227,20 +227,23 @@ def test_annotate_image_accepts_model_and_task(tmp_path):
 
 
 def test_annotate_image_pred_mode_still_works():
-    """Legacy --pred mode must still be accepted (--pred is now optional)."""
-    _rc, out, _err = _cli("annotate", "image", "--help")
-    assert "--pred" in out, "annotate image --help must show --pred"
-    assert "--model" in out, "annotate image --help must show --model"
+    """Legacy --pred mode must still be accepted (--pred is now optional).
+
+    v2.25.1: use rich-aware help matcher (CI terminal soft-wraps long lines).
+    """
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["annotate", "image"])
+    assert_help_contains_all(res, ["--pred", "--model"])
 
 
 def test_annotate_video_accepts_model_and_task():
     """annotate video --model --task --json-out --max-frames must be accepted."""
-    _rc, out, err = _cli("annotate", "video", "--help")
-    assert "--model" in out
-    assert "--task" in out
-    assert "--json-out" in out
-    assert "--max-frames" in out
-    assert _no_usage_error(err)
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["annotate", "video"])
+    assert_help_contains_all(res, ["--model", "--task", "--json-out", "--max-frames"])
+    assert _no_usage_error(res.stderr)
 
 
 def test_annotate_video_no_usage_error(tmp_path):
@@ -323,14 +326,18 @@ def test_agriculture_doctor_accepts_format_and_out(tmp_path):
 
 def test_agriculture_prompt_detect_accepts_draw():
     """agriculture prompt-detect must accept --draw option."""
-    _rc, out, _err = _cli("agriculture", "prompt-detect", "--help")
-    assert "--draw" in out, f"--draw missing from prompt-detect --help:\n{out}"
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["agriculture", "prompt-detect"])
+    assert_help_contains_all(res, ["--draw"])
 
 
 def test_agriculture_prompt_segment_accepts_draw():
     """agriculture prompt-segment must accept --draw option."""
-    _rc, out, _err = _cli("agriculture", "prompt-segment", "--help")
-    assert "--draw" in out, f"--draw missing from prompt-segment --help:\n{out}"
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["agriculture", "prompt-segment"])
+    assert_help_contains_all(res, ["--draw"])
 
 
 def test_openmmlab_validate_accepts_format_and_out(tmp_path):
@@ -437,5 +444,7 @@ def test_validate_json_has_canonical_fields(tmp_path):
 
 def test_medical_segment_accepts_draw_option():
     """medical segment must accept --draw option."""
-    _rc, out, _err = _cli("medical", "segment", "--help")
-    assert "--draw" in out, f"--draw missing from medical segment --help:\n{out}"
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["medical", "segment"])
+    assert_help_contains_all(res, ["--draw"])

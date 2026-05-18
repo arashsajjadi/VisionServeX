@@ -133,12 +133,11 @@ def test_model_zoo_sources_single_model(tmp_path: Path) -> None:
 
 
 def test_model_zoo_sources_help_lists_v221_flags() -> None:
-    res = _run(["model-zoo", "sources", "--help"])
-    assert res.returncode == 0
-    assert "--model" in res.stdout
-    assert "--family" in res.stdout
-    assert "--out" in res.stdout
-    assert "--format" in res.stdout
+    """v2.25.1: rich-aware help assertion."""
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["model-zoo", "sources"])
+    assert_help_contains_all(res, ["--model", "--family", "--out", "--format"])
 
 
 # ---------------------------------------------------------------------------

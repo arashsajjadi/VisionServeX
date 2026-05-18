@@ -60,7 +60,8 @@ def test_video_search_smoke_returns_structured(tmp_path: Path) -> None:
 
 
 def test_dev_make_synthetic_video_help_lists_required_flags() -> None:
-    res = _run(["dev", "make-synthetic-video", "--help"])
-    assert res.returncode == 0
-    assert "--out" in res.stdout
-    assert "--frames" in res.stdout
+    """v2.25.1: rich-aware help assertion."""
+    from tests.helpers.cli_help import assert_help_contains_all, run_help
+
+    res = run_help(["dev", "make-synthetic-video"])
+    assert_help_contains_all(res, ["--out", "--frames"])
