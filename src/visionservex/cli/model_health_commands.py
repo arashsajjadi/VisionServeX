@@ -1167,4 +1167,88 @@ def execution_matrix_cmd(
     typer.echo(json.dumps(payload, indent=2))
 
 
+@app.command("state-resolve")
+def state_resolve_cmd(
+    reports_dir: str = typer.Option(..., "--reports-dir"),
+    fmt: str = typer.Option("json", "--format"),
+    out: str = typer.Option(..., "--out"),
+) -> None:
+    """v2.28.0: canonical model state resolver."""
+    import csv as _csv
+    from pathlib import Path as _P
+
+    from visionservex.reporting.state_resolver import resolve_canonical_model_state
+
+    payload = resolve_canonical_model_state(_P(reports_dir))
+    rows = payload.get("rows", [])
+    _P(out).parent.mkdir(parents=True, exist_ok=True)
+    if fmt == "csv":
+        fields = [
+            "model_id",
+            "family",
+            "task",
+            "advertised",
+            "candidate_state",
+            "benchmark_state",
+            "smoke_state",
+            "sidecar_state",
+            "checkpoint_state",
+            "license_state",
+            "dataset_state",
+            "final_state",
+            "final_blocker_code",
+            "evidence_artifact",
+            "next_action",
+        ]
+        with open(out, "w", newline="") as fh:
+            w = _csv.DictWriter(fh, fieldnames=fields)
+            w.writeheader()
+            for r in rows:
+                w.writerow({k: r.get(k, "") for k in fields})
+        typer.echo(json.dumps({"status": "ok", "code": "OK", "wrote": out, "n_rows": len(rows)}))
+        return
+    _P(out).write_text(json.dumps(payload, indent=2))
+    typer.echo(json.dumps(payload, indent=2))
+
+
+@app.command("official-metrics")
+def official_metrics_cmd(
+    fmt: str = typer.Option("json", "--format"),
+    out: str = typer.Option(..., "--out"),
+) -> None:
+    """v2.28.0: official metrics table with null-safe rendering (no raw NaN)."""
+    import csv as _csv
+    from pathlib import Path as _P
+
+    from visionservex.reporting.official_metrics import build_official_metrics_table
+
+    rows = build_official_metrics_table()
+    _P(out).parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "status": "ok",
+        "code": "OK",
+        "n_rows": len(rows),
+        "n_with_value": sum(1 for r in rows if r["value"] is not None),
+        "n_not_collected": sum(1 for r in rows if r["source_status"] == "not_collected"),
+        "n_not_found": sum(1 for r in rows if r["source_status"] == "not_found"),
+        "n_not_applicable": sum(1 for r in rows if r["source_status"] == "not_applicable"),
+        "rows": rows,
+    }
+    if fmt == "csv":
+        fields = list(rows[0].keys()) if rows else []
+        with open(out, "w", newline="") as fh:
+            w = _csv.DictWriter(fh, fieldnames=fields)
+            w.writeheader()
+            for r in rows:
+                # Render value as empty string (not "NaN") for null cells.
+                rr = dict(r)
+                if rr["value"] is None:
+                    rr["value"] = ""
+                w.writerow(rr)
+        typer.echo(json.dumps({"status": "ok", "code": "OK", "wrote": out, "n_rows": len(rows)}))
+        return
+    _P(out).write_text(json.dumps(payload, indent=2))
+    typer.echo(json.dumps(payload, indent=2))
+
+
 __all__ = ["app"]

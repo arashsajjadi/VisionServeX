@@ -63,10 +63,12 @@ from visionservex.cli import (
     privacy_commands,
     readiness_commands,
     replacement_map_commands,
+    reports_commands,
     rtdetrv4_commands,
     sam3_commands,
     sam_family_commands,
     security_commands,
+    segmentation_commands,
     sidecar_commands,
     suite_commands,
     syntax_audit,
@@ -127,6 +129,17 @@ app.add_typer(validation_commands.app, name="validation")
 app.add_typer(colab_commands.app, name="colab")
 app.add_typer(notebook_commands.app, name="notebook")
 app.add_typer(libreyolo_commands.app, name="libreyolo")
+app.add_typer(reports_commands.app, name="reports")
+app.add_typer(
+    segmentation_commands.app_auto,
+    name="benchmark-segmentation",
+    invoke_without_command=True,
+)
+app.add_typer(
+    segmentation_commands.app_promptable,
+    name="benchmark-promptable-segmentation",
+    invoke_without_command=True,
+)
 app.add_typer(capabilities_commands.app, name="capabilities")
 app.add_typer(model_card_commands.app, name="model-card")
 app.add_typer(replacement_map_commands.app, name="replacement-map")
