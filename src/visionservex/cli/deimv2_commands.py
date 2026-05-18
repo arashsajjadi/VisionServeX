@@ -360,4 +360,174 @@ def smoke_test_cmd(
     _emit(payload, out=out, fmt=fmt)
 
 
+@app.command("benchmark")
+def benchmark_cmd(
+    image_dir: Path = typer.Argument(
+        ...,
+        help="Directory of images to run inference over.",
+    ),
+    model_id: str = typer.Option("deimv2-s", "--model-id"),
+    profile: str = typer.Option(
+        "deimv2-blackwell-nightly",
+        "--profile",
+        help="Sidecar profile (deimv2-blackwell-nightly = RTX 5080 sm_120).",
+    ),
+    max_images: int = typer.Option(20, "--max-images"),
+    score_threshold: float = typer.Option(0.25, "--score-threshold"),
+    device: str = typer.Option("cuda", "--device"),
+    out: Path = typer.Option(
+        ...,
+        "--out",
+        help="Where to write the summary JSON.",
+    ),
+    out_ndjson: Path | None = typer.Option(
+        None,
+        "--out-ndjson",
+        help="Where to write per-image NDJSON predictions (default: alongside --out).",
+    ),
+    fmt: str = typer.Option("text", "--format"),
+    timeout_s: int = typer.Option(900, "--timeout-s"),
+) -> None:
+    """v2.26.0: DEIMv2 GPU latency probe + canonical detections.
+
+    Runs DEIMv2 inside the sidecar env (default profile
+    ``deimv2-blackwell-nightly``) on every image in ``IMAGE_DIR`` up to
+    ``--max-images``. Records per-image forward latency, p50/p95, total
+    predictions, and writes per-image predictions to NDJSON.
+
+    This is a **latency + predictions probe**, not a scientific AP
+    benchmark. AP requires a matching COCO annotation file (use
+    ``visionservex dataset prepare-coco-val2017-subset`` + a separate
+    AP-eval CLI).
+    """
+    from visionservex.sidecars import SidecarConfig, SidecarManager
+    from visionservex.sidecars.manager import _resolve_sidecar_root
+
+    if not image_dir.exists():
+        _emit(
+            {
+                "status": "failed",
+                "code": "INPUT_NOT_FOUND",
+                "message": f"--image-dir {image_dir} not found.",
+            },
+            out=out,
+            fmt=fmt,
+        )
+        raise typer.Exit(2)
+
+    mgr = SidecarManager()
+    if not mgr.env_exists("deimv2", profile=profile):
+        _emit(
+            {
+                "status": "expected_blocker",
+                "code": "SIDECAR_ENV_MISSING",
+                "model_id": model_id,
+                "profile": profile,
+                "image_dir": str(image_dir),
+                "message": (
+                    f"Sidecar env for profile {profile!r} not installed. Run "
+                    f"`visionservex deimv2 create-env --execute --profile {profile}`."
+                ),
+            },
+            out=out,
+            fmt=fmt,
+        )
+        return
+
+    repo_root = _resolve_sidecar_root() / "deimv2"
+    if not repo_root.exists():
+        _emit(
+            {
+                "status": "expected_blocker",
+                "code": "UPSTREAM_REPO_NOT_FOUND",
+                "expected": str(repo_root),
+                "message": "DEIMv2 upstream repo not cloned. Run create-env --execute.",
+            },
+            out=out,
+            fmt=fmt,
+        )
+        return
+
+    if out_ndjson is None:
+        out_ndjson = out.with_suffix(".ndjson")
+
+    env_name = mgr.env_name("deimv2", profile=profile)
+    import subprocess as _sp
+    import sys as _sys
+
+    runner_path = (
+        Path(_sys.modules["visionservex"].__file__).parent
+        / "sidecars"
+        / "_deimv2_benchmark_runner.py"
+    )
+    cmd = [
+        "conda",
+        "run",
+        "-n",
+        env_name,
+        "python",
+        str(runner_path),
+        "--repo-root",
+        str(repo_root),
+        "--model-id",
+        model_id,
+        "--hf-repo",
+        "Intellindust/DEIMv2_DINOv3_S_COCO",
+        "--image-dir",
+        str(image_dir),
+        "--max-images",
+        str(max_images),
+        "--score-threshold",
+        str(score_threshold),
+        "--device",
+        device,
+        "--output-ndjson",
+        str(out_ndjson),
+        "--summary-json",
+        str(out),
+    ]
+    cfg = SidecarConfig(timeout_s=timeout_s)
+    try:
+        proc = _sp.run(cmd, capture_output=True, text=True, timeout=cfg.timeout_s)
+    except _sp.TimeoutExpired:
+        _emit(
+            {
+                "status": "failed",
+                "code": "SIDECAR_TIMEOUT",
+                "model_id": model_id,
+                "image_dir": str(image_dir),
+                "command": cmd,
+                "message": f"DEIMv2 benchmark exceeded {cfg.timeout_s}s.",
+            },
+            out=out,
+            fmt=fmt,
+        )
+        return
+
+    if proc.returncode != 0:
+        stderr_tail = (proc.stderr or "")[-1000:]
+        code = "SIDECAR_COMMAND_FAILED"
+        if "no kernel image" in stderr_tail.lower():
+            code = "BLACKWELL_SM120_TORCH_INCOMPATIBLE"
+        elif "out of memory" in stderr_tail.lower():
+            code = "CUDA_OUT_OF_MEMORY"
+        _emit(
+            {
+                "status": "failed",
+                "code": code,
+                "model_id": model_id,
+                "image_dir": str(image_dir),
+                "returncode": proc.returncode,
+                "stderr_tail": stderr_tail,
+            },
+            out=out,
+            fmt=fmt,
+        )
+        return
+
+    # Runner already wrote the summary JSON; just emit it.
+    payload = json.loads(out.read_text())
+    _emit(payload, out=None, fmt=fmt)
+
+
 __all__ = ["app"]

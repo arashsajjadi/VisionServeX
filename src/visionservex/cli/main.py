@@ -57,6 +57,7 @@ from visionservex.cli import (
     model_health_commands,
     model_lifecycle_commands,
     model_zoo_commands,
+    notebook_commands,
     openmmlab_commands,
     privacy_commands,
     readiness_commands,
@@ -123,6 +124,7 @@ app.add_typer(security_commands.app, name="security")
 app.add_typer(privacy_commands.app, name="privacy")
 app.add_typer(validation_commands.app, name="validation")
 app.add_typer(colab_commands.app, name="colab")
+app.add_typer(notebook_commands.app, name="notebook")
 app.add_typer(capabilities_commands.app, name="capabilities")
 app.add_typer(model_card_commands.app, name="model-card")
 app.add_typer(replacement_map_commands.app, name="replacement-map")

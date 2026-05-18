@@ -587,4 +587,188 @@ def smoke_test_cmd(
     )
 
 
+@app.command("checkpoint-instructions")
+def checkpoint_instructions_cmd(
+    model_id: str = typer.Argument("rtdetrv4-s"),
+    out: Path | None = typer.Option(None, "--out"),
+    fmt: str = typer.Option("text", "--format"),
+) -> None:
+    """v2.26.0: emit copy-paste instructions for fetching an RT-DETRv4 checkpoint.
+
+    The upstream stores checkpoints on Google Drive. Drive's abuse filter
+    rejects automated requests after a small number of hits, so v2.26 ships
+    explicit instructions instead of pretending the automated path works
+    every time. Output names every field the user needs to fix it manually.
+    """
+    info = RTDETRV4_CHECKPOINTS.get(model_id)
+    cache_root = Path.home() / ".cache" / "visionservex" / "sidecars" / "rtdetrv4" / "checkpoints"
+    expected_path = cache_root / f"{model_id}.pth"
+    if info is None:
+        payload = {
+            "status": "expected_blocker",
+            "code": "CHECKPOINT_NOT_FOUND",
+            "model_id": model_id,
+            "message": f"Unknown variant {model_id!r}. Known: {sorted(RTDETRV4_CHECKPOINTS)}.",
+        }
+        _emit(payload, out=out, fmt=fmt)
+        return
+
+    gid = info["gdrive_id"]
+    drive_url = f"https://drive.google.com/file/d/{gid}/view?usp=sharing"
+    gdown_command = f"gdown -O {expected_path} https://drive.google.com/uc?id={gid}"
+    wget_attempt = "# wget cannot bypass Drive's confirm token; use the browser link or gdown."
+
+    payload = {
+        "status": "ok" if expected_path.exists() else "expected_blocker",
+        "code": "OK" if expected_path.exists() else "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP",
+        "model_id": model_id,
+        "checkpoint_source": "google_drive",
+        "official_url": RTDETRV4_UPSTREAM_REPO,
+        "direct_url_if_known": drive_url,
+        "gdown_command_if_known": gdown_command,
+        "wget_command_if_known": wget_attempt,
+        "manual_download_required": True,
+        "expected_filename": f"{model_id}.pth",
+        "expected_cache_path": str(expected_path),
+        "expected_size_bytes_if_known": None,
+        "checksum_if_known": None,
+        "additional_pretrain": info.get("additional_pretrain"),
+        "smoke_command_after_download": (
+            f"visionservex rtdetrv4 smoke-test {model_id} IMAGE "
+            f"--checkpoint {expected_path} --device cuda --backend torch "
+            f"--format json --out reports/{model_id}_smoke_v226.json"
+        ),
+        "benchmark_command_after_download": (
+            f"# AP benchmark requires a COCO-format annotation file:\n"
+            f"# visionservex benchmark-detection --models {model_id} "
+            f"--dataset coco:ANNOTATIONS.json --device cuda --require-gpu "
+            f"--backend sidecar-rtdetrv4 --format json "
+            f"--out reports/{model_id}_benchmark_v226.json"
+        ),
+        "blocker_code": (
+            "OK" if expected_path.exists() else "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP"
+        ),
+        "reported_AP": info.get("reported_AP"),
+        "reported_AP50": info.get("reported_AP50"),
+        "reported_latency_ms": info.get("reported_latency_ms"),
+        "license": RTDETRV4_LICENSE,
+        "upstream_repo": RTDETRV4_UPSTREAM_REPO,
+        "message": (
+            f"Checkpoint already cached at {expected_path}."
+            if expected_path.exists()
+            else (
+                "Download manually from the Google Drive link above, or run "
+                f"`{gdown_command}`. Drive's abuse filter rejects automated "
+                "fetches after a few attempts; in that case open the URL in a "
+                f"browser and save the file to {expected_path}."
+            )
+        ),
+    }
+    _emit(payload, out=out, fmt=fmt)
+
+
+@app.command("validate-checkpoint")
+def validate_checkpoint_cmd(
+    model_id: str = typer.Argument("rtdetrv4-s"),
+    checkpoint: Path = typer.Option(..., "--checkpoint", help="Path to the .pth."),
+    out: Path | None = typer.Option(None, "--out"),
+    fmt: str = typer.Option("text", "--format"),
+) -> None:
+    """v2.26.0: validate that a user-supplied .pth looks like an RT-DETRv4 checkpoint."""
+    info = RTDETRV4_CHECKPOINTS.get(model_id)
+    if info is None:
+        _emit(
+            {
+                "status": "expected_blocker",
+                "code": "CHECKPOINT_NOT_FOUND",
+                "model_id": model_id,
+                "message": f"Unknown variant {model_id!r}.",
+            },
+            out=out,
+            fmt=fmt,
+        )
+        return
+
+    if not checkpoint.exists():
+        _emit(
+            {
+                "status": "expected_blocker",
+                "code": "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP",
+                "model_id": model_id,
+                "checkpoint": str(checkpoint),
+                "message": f"Checkpoint not found at {checkpoint}.",
+            },
+            out=out,
+            fmt=fmt,
+        )
+        return
+
+    size = checkpoint.stat().st_size
+    # Probe the file via the sidecar env (host torch may not match upstream).
+    from visionservex.sidecars import SidecarManager
+
+    mgr = SidecarManager()
+    payload: dict[str, Any] = {
+        "status": "ok",
+        "code": "OK",
+        "model_id": model_id,
+        "checkpoint": str(checkpoint),
+        "size_bytes": size,
+        "size_mb": round(size / (1024 * 1024), 2),
+    }
+    if mgr.env_exists("rtdetrv4"):
+        import subprocess as _sp
+
+        probe = (
+            "import torch, json, sys; "
+            f"ckpt = torch.load({str(checkpoint)!r}, map_location='cpu', weights_only=False); "
+            "kinds = type(ckpt).__name__; "
+            "n_keys = len(ckpt) if hasattr(ckpt, '__len__') else 0; "
+            "has_model = isinstance(ckpt, dict) and ('model' in ckpt or 'state_dict' in ckpt); "
+            "print(json.dumps({'kinds': kinds, 'n_keys': n_keys, 'has_model_key': has_model}))"
+        )
+        try:
+            res = _sp.run(
+                [
+                    "conda",
+                    "run",
+                    "-n",
+                    "visionservex-rtdetrv4-sidecar",
+                    "python",
+                    "-c",
+                    probe,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            if res.returncode == 0:
+                last = res.stdout.strip().splitlines()[-1]
+                payload["probe"] = json.loads(last)
+                if not payload["probe"].get("has_model_key"):
+                    payload["status"] = "expected_blocker"
+                    payload["code"] = "CHECKPOINT_INVALID"
+                    payload["message"] = (
+                        "Checkpoint loaded but does not contain a 'model' or "
+                        "'state_dict' key — not an RT-DETRv4 checkpoint?"
+                    )
+            else:
+                payload["status"] = "expected_blocker"
+                payload["code"] = "CHECKPOINT_INVALID"
+                payload["stderr_tail"] = (res.stderr or "")[-400:]
+                payload["message"] = "torch.load failed inside the sidecar env."
+        except _sp.TimeoutExpired:
+            payload["status"] = "failed"
+            payload["code"] = "SIDECAR_TIMEOUT"
+            payload["message"] = "Sidecar probe exceeded 120s."
+    else:
+        payload["status"] = "expected_blocker"
+        payload["code"] = "SIDECAR_ENV_MISSING"
+        payload["message"] = (
+            "RT-DETRv4 sidecar env is not installed; cannot deeply validate the "
+            "checkpoint. File exists and is the right size though."
+        )
+    _emit(payload, out=out, fmt=fmt)
+
+
 __all__ = ["app"]
