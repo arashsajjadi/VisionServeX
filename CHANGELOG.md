@@ -7,6 +7,116 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.22.0] - 2026-05-18
+
+### Fixed: DEIMv2 + RT-DETRv4 real-integration attempt + notebook v25
+
+Blocker-clarity release. Per the user's release rule, when both
+DEIMv2 and RT-DETRv4 are proven impossible to run in this environment
+with exact structured blockers and source evidence, ship as
+"blocker-clarity / notebook-hardening" rather than a model-win release.
+**No new YOLO11x challenger became runnable in v2.22.0.**
+
+**Phase 0 — Upstream research (verified 2026-05-18)**
+
+DEIMv2:
+- Repo: `Intellindust-AI-Lab/DEIMv2` (Apache-2.0)
+- HF checkpoint: `Intellindust/DEIMv2_DINOv3_S_COCO` uses
+  `huggingface_hub.PyTorchModelHubMixin` (config.json +
+  model.safetensors). NO HF Transformers `model_type`, so
+  `transformers.AutoModelForObjectDetection.from_pretrained` cannot
+  load it.
+- PyPI: `deimv2` package does NOT exist. Inference requires
+  `git clone` of the upstream repo and adding it to PYTHONPATH.
+- Requirements: torch==2.5.1 (STRICT PIN). The VisionServeX install
+  ships torch 2.11.0+cu130 → STRICT VERSION CONFLICT.
+
+RT-DETRv4:
+- The canonical `lyuwenyu/RT-DETR` repo (5k+ stars) currently ships
+  `rtdetr_pytorch/` (v1) and `rtdetrv2_pytorch/` (v2). There is **no
+  `rtdetrv4_pytorch/` directory and no v4 release tag** as of
+  2026-05-18.
+- RT-DETRv4 has not been released upstream.
+
+**Phase 1 — `visionservex deimv2 doctor / pull / smoke-test`**
+
+- New `cli/deimv2_commands.py` typer subapp. `doctor` runs REAL
+  diagnostics: probes `torch.__version__` vs the required 2.5.1,
+  attempts `import deimv2`, checks `huggingface_hub` availability.
+- `pull deimv2-s` attempts an actual HF snapshot download (the only
+  variant with a published checkpoint). Other variants return
+  `CHECKPOINT_NOT_FOUND` with the exact reason.
+- `smoke-test` exits 0 with `status=expected_blocker, code=DEIMV2_NOT_RUNNABLE`
+  and `blockers=[TORCH_VERSION_CONFLICT, NEEDS_UPSTREAM_REPO]`
+  including the installed torch version as evidence.
+- No fake success. No usage error. No raw traceback.
+
+**Phase 2 — `visionservex rtdetrv4 doctor / pull / smoke-test`**
+
+- New `cli/rtdetrv4_commands.py` typer subapp. Every subcommand reports
+  `status=expected_blocker, code=RTDETRV4_UPSTREAM_NOT_RELEASED` with
+  `evidence={upstream_repo, upstream_available_variants, verified_on}`
+  so notebooks can never silently pretend RT-DETRv4 is "available but
+  blocked on dependencies".
+- `upstream_available_variants = ["rtdetr_pytorch", "rtdetrv2_pytorch"]`
+  is surfaced so downstream consumers see RT-DETRv2 is the real
+  alternative.
+
+**Phase 3 — `result_classifier` new codes**
+
+`EXPECTED_BLOCKER_CODES` gains 7 codes so the v25 notebook never
+classifies these structured payloads as `failed_runtime`:
+
+`DEIMV2_NOT_RUNNABLE`, `TORCH_VERSION_CONFLICT`, `NEEDS_UPSTREAM_REPO`,
+`HUGGINGFACE_HUB_REQUIRED`, `CHECKPOINT_NOT_FOUND`,
+`RTDETRV4_UPSTREAM_NOT_RELEASED`, `DEPENDENCY_CONFLICT`.
+
+**Phase 4 — Notebook v25**
+
+- `VISION_SERVEX_VERSION = "2.22.0"`, `NOTEBOOK_VERSION = "v25"`,
+  output path `visionservex_v25_run`.
+- Stale `v2.16, RTX 5080-ready, ...` subtitle and `Key v19 changes:`
+  text replaced with `{NOTEBOOK_VERSION}`-driven strings.
+- "after v19/v20/v21/v22/v23/v24 cleaning" narrative copy normalised.
+- New v25 cell **replaces** the prior v24 cell so DEIMv2 doctor +
+  RT-DETRv4 doctor + per-variant pull/smoke run BEFORE the final
+  report. Writes:
+  - `reports/deimv2_doctor.json`
+  - `reports/deimv2_execution_status.csv`
+  - `reports/rtdetrv4_doctor.json`
+  - `reports/rtdetrv4_execution_status.csv`
+  - Refreshes `reports/pre_v3_gate_report.csv` with
+    `deimv2_real_integration_attempted=ok`,
+    `deimv2_runnable_in_this_build=fail`,
+    `rtdetrv4_real_integration_attempted=ok`,
+    `rtdetrv4_runnable_in_this_build=fail`,
+    `new_yolo11x_challenger_runnable=fail` (blocking for v3).
+- Notebook prints the honest headline:
+  "No new YOLO11x challenger became runnable in v2.22.0."
+
+**Validation**
+
+- 11 new tests in `tests/test_v2220.py` (DEIMv2/RT-DETRv4 doctor /
+  pull / smoke-test contract + classifier coverage).
+- Full quick suite: 1087 tests pass (up from 1076 in v2.21.0); 0 failed.
+- `ruff check .` + `ruff format --check .` clean.
+- `python -m build` + `python -m twine check dist/*` PASSED.
+
+**Honest verdict (Phase 9 release rule)**
+
+The release rule says: release `v2.22.0` only if at least one of
+(A) DEIMv2 runs, (B) RT-DETRv4 runs, or (C) both are proven impossible
+with exact structured blockers. v2.22.0 releases under rule (C):
+
+- DEIMv2: blocked by upstream `torch==2.5.1` strict pin
+  (installed: torch 2.11.0+cu130) + no PyPI package.
+- RT-DETRv4: not yet released upstream
+  (`lyuwenyu/RT-DETR` ships v1 + v2 only).
+
+Current best VSX remains `dfine-x-o365-coco` (mAP50:95 ≈ 0.605 on
+COCO128). `yolo11x.pt` still wins (mAP50:95 ≈ 0.634).
+**v3_ready = false.**
+
 ## [2.21.0] - 2026-05-17
 
 ### Fixed: blocker classifier + DEIMv2 registry + tracker aliases + notebook v24

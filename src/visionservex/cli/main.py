@@ -38,6 +38,7 @@ from visionservex.cli import (
     capabilities_commands,
     colab_commands,
     dataset_validators,
+    deimv2_commands,
     dev_commands,
     domain_benchmarks,
     domain_zoo_commands,
@@ -60,6 +61,7 @@ from visionservex.cli import (
     privacy_commands,
     readiness_commands,
     replacement_map_commands,
+    rtdetrv4_commands,
     sam3_commands,
     sam_family_commands,
     security_commands,
@@ -130,6 +132,8 @@ app.add_typer(training_commands.video_app, name="video")
 app.add_typer(model_zoo_commands.app, name="model-zoo")
 app.add_typer(domain_zoo_commands.app, name="domain-zoo")
 app.add_typer(dataset_validators.app, name="dataset")
+app.add_typer(deimv2_commands.app, name="deimv2")
+app.add_typer(rtdetrv4_commands.app, name="rtdetrv4")
 app.add_typer(domain_benchmarks.app_medical, name="benchmark-medical", invoke_without_command=True)
 app.add_typer(
     domain_benchmarks.app_agriculture, name="benchmark-agriculture", invoke_without_command=True
