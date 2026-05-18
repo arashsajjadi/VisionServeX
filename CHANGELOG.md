@@ -7,6 +7,135 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.17.0] - 2026-05-17
+
+### Fixed: package benchmark routing + RTX 5080 notebook validation
+
+This release closes the gap between the v2.16 plumbing and the v19 Colab
+notebook. The package now refuses to silently CPU-fall-back, refuses to
+run mock or alias models, and emits a full timing breakdown. The notebook
+has been bumped to v20 and switched from a manual candidate list to the
+package-side `benchmark candidates` CLI.
+
+**Phase 1 — `visionservex benchmark candidates` (new CLI)**
+
+- `visionservex benchmark candidates --task detection --scope clean --format json --out PATH`
+  is the single source of truth for which models are eligible for a
+  closed-set detection AP benchmark. Mocks, aliases, sidecars, unwired
+  stubs, and experimental_sota models are filtered out by default;
+  `--include-mocks`, `--include-aliases`, `--include-open-vocab` opt them
+  back in.
+- On the current registry, clean detection candidates are
+  `dfine-{n-coco,s,m,l,x}-o365-coco` and `rfdetr-{nano,small,medium,large,base}`
+  (10 models). 19 are excluded with explicit reasons.
+
+**Phase 2/3 — persistent benchmark + GPU enforcement + GPU sampler**
+
+- `visionservex benchmark-detection --models a,b,c --device cuda
+  --require-gpu --sample-gpu` runs the new
+  `runtime/persistent_benchmark.py` path. Per model it emits:
+  `model_id`, `canonical_model_id`, `is_alias`, `evaluation_scope`
+  (`failed` / `diagnostic_6` / `diagnostic_partial` / `full_<N>`),
+  `device_requested`, `device_actual`, `gpu_name`, `gpu_profile`,
+  `load_count` (must be 1), `load_time_ms`, `preprocess_ms_p50`,
+  `inference_ms_p50`, `postprocess_ms_p50`, `evaluation_ms_p50`,
+  `total_latency_ms_p50`, `total_latency_ms_p95`, `images_per_second`,
+  `n_raw_predictions`, `n_normalized_predictions`,
+  `n_invalid_predictions`, `n_dropped_predictions`,
+  `no_detection_image_count`, `ap50`, `ap75`, `map50_95`,
+  `class_agnostic_ap50`, `precision50`, `recall50`, `f1_50`, plus the
+  optional `gpu_utilization` block.
+- `--require-gpu` + CPU fallback → `status=failed`, `code=GPU_REQUIRED_NOT_USED`.
+- mock-*, alias rows, and (when not explicitly included) open-vocab
+  rows are rejected at the entry point with `code=ALL_MODELS_REJECTED`
+  rather than wasting GPU time and then being filtered post-hoc.
+- The `--sample-gpu` flag launches a background `nvidia-smi` sampler
+  (configurable via `--gpu-sample-interval`); the summary records
+  `utilization_mean / p50 / p95` and `vram_used_peak_gb`. Missing
+  `nvidia-smi` is a warning, not a failure.
+
+**Phase 4 — `visionservex debug-output` extended**
+
+- New flags: `--out PATH`, `--format json|text`, `--draw PATH`
+  (notebook-contract aliases for `--save-json` / `--json` / `--visualize`).
+- Output JSON now contains: `raw_predictions_count`,
+  `after_threshold_count`, `after_nms_count`, `final_normalized_count`,
+  `invalid_box_count`, `dropped_prediction_count`, `warnings`, `errors`.
+- For RF-DETR-family IDs:
+  `coco_class_mapping_table {unique_class_ids_observed, id_min, id_max}`,
+  `official_category_id_detected`, `contiguous_class_id_detected`,
+  `class_name_mapping_source` — surfaces the v19-observed near-zero
+  class-aware AP as a label-mapping bug rather than model quality.
+- For D-FINE-family IDs: `top_k_after_nms`,
+  `whether_fixed_count_is_expected` (D-FINE's upstream postprocess uses
+  a fixed top-k of 300; the seemingly-uniform 1800/300 counts in v19
+  were the configured top-k, not a regression).
+
+**Phase 5 — Notebook v20**
+
+The Colab/local notebook (`notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark.ipynb`)
+is updated to v20:
+- `VISION_SERVEX_VERSION = "2.17.0"`, `NOTEBOOK_VERSION = "v20"`,
+  output path `visionservex_v20_run`.
+- A new cell calls `visionservex benchmark candidates` and overrides the
+  manual `vsx_det_models` list; mocks/aliases/stubs never enter the
+  benchmark again.
+- `benchmark-detection` invocation now passes `--require-gpu --sample-gpu`.
+- The diagnostic block runs only when the package benchmark actually
+  failed (or returned no full-scope rows, or fell back to CPU, or
+  `FORCE_RUN_DIAGNOSTICS=True`).
+- The final audit report writes a `v20_validity_flags` block:
+  `PACKAGE_BENCHMARK_USED_GPU`, `PACKAGE_BENCHMARK_FULL_SCOPE`,
+  `CLEAN_LEADERBOARD_VALID`, `RFDETR_CLASS_MAPPING_SUSPECT`,
+  `DFINE_TOPK_SUSPECT`, `LATENCY_VALID`,
+  `RESULT_CAN_SUPPORT_ACCURACY_CLAIM`.
+
+**Phase 6 — Empirical probes (RTX 5080)**
+
+Run on the user's RTX 5080 with `--max-images 20 --device cuda
+--require-gpu --sample-gpu`:
+
+- `dfine-s-o365-coco`: status=ok, **load_count=1**, device_actual=cuda,
+  gpu_profile=desktop_16gb_fast, evaluation_scope=full_20,
+  load_time_ms=2653, inference_ms_p50=12.46, total_latency_ms_p50=14.09,
+  images_per_second=70.98, **AP50=0.8283, mAP50:95=0.7280,
+  class_agnostic_AP50=0.8166** (no class-mapping suspicion),
+  vram_used_peak_gb=2.05. All 14 acceptance criteria pass.
+- `rfdetr-small`: status=ok, **load_count=1**, device_actual=cuda,
+  evaluation_scope=full_20, inference_ms_p50=9.07,
+  total_latency_ms_p50=10.08, images_per_second=99.19,
+  **AP50 class-aware=0.0047 / AP50 class-agnostic=0.8539** — the
+  ~0.85 gap is the smoking-gun class-mapping bug. The `debug-output`
+  inspection of image 1 shows `official_category_id_detected: True`
+  (ids 40-88, including 88 which only exists in the official COCO
+  1-90 numbering), confirming the engine returns official category
+  ids that are being looked up in a contiguous 0-79 label table.
+  **Fixing the RF-DETR class mapping is the v2.18.0 target.**
+
+**Phase 7 — Tests**
+
+23 new tests across:
+- `test_benchmark_candidates_v2170.py` (9 tests): mock/alias/unwired
+  exclusion, canonical metadata, open-vocab gating, include-aliases.
+- `test_benchmark_detection_persistent_v2170.py` (8 tests): load_count=1
+  on N images, --require-gpu blocks CPU fallback, --include-mocks
+  required to allow mocks, CLI JSON schema.
+- `test_debug_output_v2170.py` (3 tests): v2.17 schema fields, drawing
+  side-effect.
+
+**Validation**
+
+- 988 tests pass in the full quick suite (up from 982 in v2.16.0).
+- `ruff check .` clean.
+- `ruff format --check .` clean.
+- `python -m build` + `python -m twine check dist/*` PASSED.
+
+**What is NOT yet fixed (the v2.18.0 target)**
+
+- RF-DETR class-aware AP near-zero is now **diagnosed** as a
+  class-mapping bug via the debug-output schema; the engine fix itself
+  is on the v2.18 roadmap.
+
 ## [2.16.0] - 2026-05-17
 
 ### Fixed: Notebook v16 package-side audit (no notebook edits)

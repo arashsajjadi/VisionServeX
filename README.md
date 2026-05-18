@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-2.16.0-informational.svg" alt="v2.16.0">
+  <img src="https://img.shields.io/badge/version-2.17.0-informational.svg" alt="v2.17.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -555,20 +555,55 @@ visionservex models health --runnable-only
 
 A pytest lockfile at `/tmp/visionservex_pytest.lock` prevents concurrent test runs. Default budgets: 8 GB free RAM, 2 GB free VRAM, 10 GB free disk. See [AGENT_RULES.md](AGENT_RULES.md) and [docs/agent_safety.md](docs/agent_safety.md).
 
+### Detection benchmark — clean candidates and persistent GPU runs
+
+Before running a benchmark, ask the package which models are eligible. The `benchmark candidates` command is the single source of truth (mocks, aliases, sidecars, unwired stubs, and experimental_sota are excluded by default):
+
+```bash
+visionservex benchmark candidates \
+  --task detection --scope clean \
+  --format json --out /tmp/vsx_candidates.json
+```
+
+Then run a persistent-load benchmark with GPU enforcement and optional GPU utilization sampling. `--require-gpu` makes a CPU fallback a hard failure (`code=GPU_REQUIRED_NOT_USED`); `--sample-gpu` records utilization and VRAM peak via `nvidia-smi`:
+
+```bash
+visionservex benchmark-detection \
+  --models dfine-s-o365-coco,rfdetr-small \
+  --dataset yolo:/path/to/coco128 \
+  --max-images 100 \
+  --device cuda --require-gpu --sample-gpu \
+  --out /tmp/vsx_bench.json --format json --isolate-process
+```
+
+Each per-model JSON row reports `load_count` (must be 1), the full timing breakdown (`preprocess / inference / postprocess / evaluation / total_latency p50 / p95`), `images_per_second`, raw / normalized prediction counts, class-aware **and class-agnostic** AP, and the optional `gpu_utilization` block.
+
 ### Benchmark report hygiene
 
-Detection benchmark JSON often mixes mock models, alias duplicates, diagnostic-only rows, and expected-blocker rows. The `benchmark report-clean` command splits a raw run into a publishable leaderboard and an audit-grade excluded-rows file with explicit reasons (`MOCK_MODEL`, `ALIAS_DUPLICATE`, `DIAGNOSTIC_ONLY`, `NOT_DETECTION_TASK`, `EXPECTED_BLOCKER`, `MISSING_METRICS`, `NAN_METRICS`, `NOT_FULL_EVALUATION`, …):
+`benchmark report-clean` splits a raw benchmark JSON into a publishable leaderboard and an audit-grade excluded-rows file with explicit reasons (`MOCK_MODEL`, `ALIAS_DUPLICATE`, `DIAGNOSTIC_ONLY`, `NOT_DETECTION_TASK`, `EXPECTED_BLOCKER`, `MISSING_METRICS`, `NAN_METRICS`, `NOT_FULL_EVALUATION`, …):
 
 ```bash
 visionservex benchmark report-clean \
-  --input /tmp/vsx_detection_benchmark.json \
-  --out /tmp/vsx_detection_clean_report.json \
-  --leaderboard /tmp/vsx_detection_leaderboard.csv \
-  --excluded /tmp/vsx_detection_excluded.csv \
+  --input /tmp/vsx_bench.json \
+  --out /tmp/vsx_clean.json \
+  --leaderboard /tmp/vsx_leaderboard.csv \
+  --excluded /tmp/vsx_excluded.csv \
   --format json
 ```
 
 Aliases such as `dfine-s`, `dfine-s-coco`, and `dfine-s-o365-coco` are collapsed to a single canonical row (`canonical_model_id` + `is_alias` + `alias_of` metadata).
+
+### Diagnosing low AP — `debug-output`
+
+If a model reports near-zero class-aware AP but reasonable class-agnostic AP, that's a label-mapping bug, not model quality. The `debug-output` command surfaces it:
+
+```bash
+visionservex debug-output rfdetr-small image.jpg \
+  --threshold 0.001 --device cuda \
+  --format json --out /tmp/rfdetr_debug.json --draw /tmp/rfdetr_debug.jpg
+```
+
+For RF-DETR-family IDs the JSON includes `coco_class_mapping_table`, `official_category_id_detected`, and `contiguous_class_id_detected`. For D-FINE-family IDs the JSON includes `top_k_after_nms` and `whether_fixed_count_is_expected`.
 
 ### Notebook-safe smoke commands (no repo-local scripts required)
 

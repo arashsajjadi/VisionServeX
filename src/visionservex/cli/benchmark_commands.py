@@ -1599,6 +1599,201 @@ def benchmark_obb(json_: bool = typer.Option(False, "--json")) -> None:
 
 
 @app.command(
+    "candidates",
+    help="v2.17.0: emit the clean detection-benchmark candidate list (no mocks/aliases/sidecars).",
+)
+def benchmark_candidates(
+    task: str = typer.Option("detection", "--task", help="Task: detection (open-vocab/etc. TBD)."),
+    scope: str = typer.Option(
+        "clean",
+        "--scope",
+        help="`clean` = production-safe; `all-wired` = include experimental wired models too.",
+    ),
+    out: Path | None = typer.Option(None, "--out", help="Write candidate JSON here."),
+    fmt: str = typer.Option("text", "--format", help="Output format: text or json."),
+    include_aliases: bool = typer.Option(
+        False, "--include-aliases", help="Keep alias rows (default: collapse to canonical)."
+    ),
+    include_open_vocab: bool = typer.Option(
+        False,
+        "--include-open-vocab",
+        help="Include open-vocab models in the detection candidate list.",
+    ),
+) -> None:
+    """Build a notebook-safe detection benchmark candidate list.
+
+    Notebooks (and anyone else driving the benchmark) should call this first
+    and pass `rows[*].model_id` straight into `visionservex benchmark-detection
+    --models ...`. The command is the single source of truth for which models
+    are eligible for a closed-set detection AP comparison.
+    """
+    import json as _json
+
+    from visionservex.registry import default_registry
+    from visionservex.runtime.leaderboard import MOCK_MODEL_IDS, canonicalize_model_id
+
+    if task != "detection":
+        payload = {
+            "status": "expected_blocker",
+            "code": "TASK_NOT_SUPPORTED",
+            "task": task,
+            "message": (
+                "v2.17.0: only `--task detection` is implemented. "
+                "Open-vocab / pose / OBB candidate selection is on the v2.18 roadmap."
+            ),
+            "rows": [],
+            "excluded": [],
+        }
+        if out:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(_json.dumps(payload, indent=2))
+        if fmt == "json":
+            typer.echo(_json.dumps(payload, indent=2))
+            return
+        console.print(f"[yellow]{payload['code']}[/yellow]: {payload['message']}")
+        return
+
+    reg = default_registry()
+    rows: list[dict] = []
+    excluded: list[dict] = []
+    seen_canonical: dict[str, str] = {}
+
+    for entry in reg.list(task="detect"):
+        mid = entry.id
+        canonical, is_alias = canonicalize_model_id(mid)
+
+        # 1. Mocks are never eligible.
+        if mid in MOCK_MODEL_IDS or mid.startswith("mock-"):
+            excluded.append({"model_id": mid, "reason": "MOCK_MODEL"})
+            continue
+
+        # 2. Unwired / stub models go to validate-only.
+        if entry.implementation_status != "wired":
+            excluded.append(
+                {
+                    "model_id": mid,
+                    "reason": "NOT_WIRED",
+                    "implementation_status": entry.implementation_status,
+                }
+            )
+            continue
+
+        # 3. Unavailable / external API / expert sidecar must not enter the benchmark.
+        category = entry.model_category or ""
+        if category in (
+            "unavailable_with_reason",
+            "external_api",
+            "expert_sidecar",
+        ):
+            excluded.append(
+                {
+                    "model_id": mid,
+                    "reason": "EXPECTED_BLOCKER",
+                    "model_category": category,
+                    "unavailable_reason": entry.unavailable_reason,
+                }
+            )
+            continue
+
+        # 4. Aliases collapse to canonical (unless explicitly requested).
+        if is_alias and not include_aliases:
+            excluded.append(
+                {
+                    "model_id": mid,
+                    "reason": "ALIAS_DUPLICATE",
+                    "alias_of": canonical,
+                }
+            )
+            continue
+
+        # 5. Experimental wired models only in --scope all-wired.
+        if scope == "clean" and entry.status == "experimental":
+            excluded.append(
+                {
+                    "model_id": mid,
+                    "reason": "EXPERIMENTAL_NOT_IN_CLEAN_SCOPE",
+                    "status": entry.status,
+                }
+            )
+            continue
+
+        # 6. Open-vocab gating
+        # (Detection task in the registry should be closed-set; this is a safety net.)
+        if "open" in (entry.task or "") and not include_open_vocab:
+            excluded.append({"model_id": mid, "reason": "OPEN_VOCAB_NOT_INCLUDED"})
+            continue
+
+        if canonical in seen_canonical and not include_aliases:
+            excluded.append(
+                {
+                    "model_id": mid,
+                    "reason": "ALIAS_DUPLICATE",
+                    "alias_of": seen_canonical[canonical],
+                }
+            )
+            continue
+        seen_canonical[canonical] = mid
+
+        rows.append(
+            {
+                "model_id": mid,
+                "canonical_model_id": canonical,
+                "display_model_id": mid,
+                "family": entry.family,
+                "backend_family": entry.family.lower(),
+                "model_size_key": _size_key_from_id(mid),
+                "is_alias": is_alias,
+                "alias_of": canonical if is_alias else None,
+                "model_category": category or None,
+                "eligible_for_detection_benchmark": True,
+                "eligible_for_ultralytics_comparison": True,
+                "requires_sidecar": category == "expert_sidecar",
+                "requires_auth": entry.requires_auth,
+                "is_mock": False,
+                "expected_load_mode": "core_load",
+                "auto_download": entry.auto_download,
+                "download_type": entry.download_type,
+            }
+        )
+
+    payload = {
+        "task": task,
+        "scope": scope,
+        "include_aliases": include_aliases,
+        "include_open_vocab": include_open_vocab,
+        "n_rows": len(rows),
+        "n_excluded": len(excluded),
+        "rows": rows,
+        "excluded": excluded,
+    }
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(_json.dumps(payload, indent=2))
+    if fmt == "json":
+        typer.echo(_json.dumps(payload, indent=2))
+        return
+    console.print(
+        f"[bold]Detection candidates[/bold] (scope={scope}): "
+        f"{len(rows)} eligible / {len(excluded)} excluded."
+    )
+    for row in rows:
+        console.print(f"  [green]{row['model_id']}[/green]  ({row['model_category']})")
+    if excluded:
+        console.print("\n[bold]Excluded:[/bold]")
+        for e in excluded[:10]:
+            console.print(f"  [dim]{e['model_id']}[/dim] — {e['reason']}")
+        if len(excluded) > 10:
+            console.print(f"  [dim]... {len(excluded) - 10} more[/dim]")
+
+
+def _size_key_from_id(model_id: str) -> str:
+    """Coarse size bucket (n/s/m/l/x/...) for a detection model id."""
+    from visionservex.runtime.leaderboard import _size_key
+
+    return _size_key(model_id)
+
+
+@app.command(
     "report-clean",
     help="v2.16.0: filter a benchmark JSON to a clean detection leaderboard.",
 )

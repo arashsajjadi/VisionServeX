@@ -1595,20 +1595,44 @@ def debug_output(
     save_json: Path | None = typer.Option(
         None, "--save-json", help="Save diagnostics JSON to this path."
     ),
+    out: Path | None = typer.Option(
+        None,
+        "--out",
+        help="v2.17.0: notebook alias for --save-json.",
+    ),
     visualize: Path | None = typer.Option(
         None, "--visualize", help="Save annotated image with detection boxes."
+    ),
+    draw: Path | None = typer.Option(
+        None, "--draw", help="v2.17.0: notebook alias for --visualize."
+    ),
+    fmt: str = typer.Option(
+        "text", "--format", help="Output format: text or json (notebook contract)."
     ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Diagnostic tool: print raw output keys, normalized detections, score/label histograms,
     invalid boxes, preprocessing config, and optional visualization.
     Run this before declaring a checkpoint weak.
+
+    v2.17.0 adds: ``--out`` / ``--draw`` / ``--format`` (notebook contract);
+    plus ``raw_predictions_count`` / ``after_threshold_count`` /
+    ``after_nms_count`` / ``final_normalized_count`` /
+    ``coco_class_mapping_table`` (RF-DETR) / ``top_k`` (D-FINE).
     """
 
     from visionservex.core.results import DetectionResult
 
+    # v2.17.0 alias: --out and --draw fold into --save-json and --visualize.
+    if out is not None and save_json is None:
+        save_json = out
+    if draw is not None and visualize is None:
+        visualize = draw
+
+    json_mode = json_ or fmt == "json"
+
     if not input_path.exists():
-        _die(f"file not found: {input_path}", json_mode=json_, code="FILE_NOT_FOUND")
+        _die(f"file not found: {input_path}", json_mode=json_mode, code="FILE_NOT_FOUND")
         return
 
     try:
@@ -1617,7 +1641,7 @@ def debug_output(
         img = _PIL.open(input_path).convert("RGB")
         w, h = img.size
     except Exception as exc:
-        _die(str(exc), json_mode=json_, code="IMAGE_LOAD_FAILED")
+        _die(str(exc), json_mode=json_mode, code="IMAGE_LOAD_FAILED")
         return
 
     try:
@@ -1626,25 +1650,82 @@ def debug_output(
             kwargs["device"] = device
         model = VisionModel(model_id, **kwargs)
         model._ensure_loaded()
+        device_actual = str(getattr(model, "device", device or "auto"))
         result = model.predict(img, threshold=threshold)
     except Exception as exc:
-        _die(str(exc), json_mode=json_, code="PREDICT_FAILED")
+        _die(str(exc), json_mode=json_mode, code="PREDICT_FAILED")
         return
 
     diag: dict = {
         "model_id": model_id,
+        "image": str(input_path),
+        "image_size": [w, h],
+        "image_size_wh": [w, h],
         "device": result.device,
+        "device_requested": device or "auto",
+        "device_actual": device_actual,
         "precision": result.precision,
         "backend": result.backend,
         "task": result.task,
         "kind": result.kind,
-        "image_size_wh": [w, h],
         "threshold_used": threshold,
+        "threshold": threshold,
+        "warnings": [],
+        "errors": [],
     }
 
     if isinstance(result, DetectionResult):
         dets = result.detections
         diag["total_detections"] = len(dets)
+        # v2.17.0 counts. We don't have access to raw logits here (those live
+        # inside the engine); the best we can do at the CLI layer is to report
+        # the post-engine counts. n_raw = n_after_threshold here because the
+        # threshold is already applied by `model.predict(..., threshold=...)`.
+        diag["raw_predictions_count"] = len(dets)
+        diag["after_threshold_count"] = len(dets)
+        # NMS happens inside the engine; if downstream callers ever surface
+        # a separate count, override this.
+        diag["after_nms_count"] = len(dets)
+        diag["final_normalized_count"] = len(dets)
+        diag["invalid_box_count"] = 0  # filled in below
+        diag["dropped_prediction_count"] = 0
+        # Family-specific hints
+        family_lower = (model_id or "").lower()
+        if family_lower.startswith("rfdetr") or "rfdetr" in family_lower:
+            # RF-DETR: detect whether class ids are contiguous (0..79) or
+            # official-COCO (1..90). The CLI sees mapped *label strings*, not
+            # raw ids, so we infer from class_id ranges.
+            unique_ids = sorted({d.class_id for d in dets if d.class_id is not None})
+            id_min = min(unique_ids) if unique_ids else None
+            id_max = max(unique_ids) if unique_ids else None
+            looks_official = bool(unique_ids and id_max is not None and id_max >= 80)
+            looks_contiguous = bool(
+                unique_ids
+                and id_min is not None
+                and id_min >= 0
+                and id_max is not None
+                and id_max <= 79
+            )
+            diag["coco_class_mapping_table"] = {
+                "unique_class_ids_observed": unique_ids[:20],
+                "id_min": id_min,
+                "id_max": id_max,
+            }
+            diag["official_category_id_detected"] = looks_official
+            diag["contiguous_class_id_detected"] = looks_contiguous and not looks_official
+            diag["class_name_mapping_source"] = "engine.label_strings"
+        if family_lower.startswith("dfine") or "dfine" in family_lower:
+            # D-FINE: surface top-k. We don't have backend access to top_k_before_nms here,
+            # but we can report whether the count looks bounded by a fixed ceiling.
+            diag["top_k_applied"] = None
+            diag["max_detections"] = None
+            diag["top_k_before_nms"] = None
+            diag["top_k_after_nms"] = len(dets)
+            diag["whether_fixed_count_is_expected"] = (
+                "D-FINE upstream postprocess uses a fixed top-k per image (typically 300). "
+                "If you see exactly 300 detections per image regardless of content, that's the "
+                "configured top-k, not a bug. Use --threshold to filter to high-confidence."
+            )
         diag["first_10_boxes"] = [
             {
                 "label": d.label,
@@ -1698,6 +1779,10 @@ def debug_output(
                 invalid.append({"label": d.label, "score": round(d.score, 4), "reasons": reasons})
         diag["invalid_boxes"] = len(invalid)
         diag["invalid_box_details"] = invalid[:5]
+        diag["invalid_box_count"] = len(invalid)
+        diag["final_normalized_count"] = max(0, len(dets) - len(invalid))
+        # v2.17.0 score histogram fields (counts already in diag["score_histogram"])
+        # so keep them as-is; nothing else to add.
 
         # Unmapped labels
         unmapped = [d.label for d in dets if d.label.startswith("class_")]
@@ -1716,8 +1801,34 @@ def debug_output(
         diag["raw_kind"] = result.kind
         diag["note"] = f"Full debug-output is implemented for detect task. Got task={result.task}."
 
-    if json_:
+    # Save JSON if --save-json / --out was set, regardless of format.
+    if save_json:
+        import json as _json
+
+        save_json.parent.mkdir(parents=True, exist_ok=True)
+        save_json.write_text(_json.dumps(diag, indent=2, default=str), encoding="utf-8")
+
+    if json_mode:
         _emit(diag, json_mode=True)
+        # Visualize even in JSON mode if requested.
+        if visualize and isinstance(result, DetectionResult):
+            try:
+                from PIL import ImageDraw as _Draw
+
+                vis_img = img.copy()
+                d = _Draw.Draw(vis_img)
+                for det in result.detections:
+                    b = det.box
+                    d.rectangle([b.x1, b.y1, b.x2, b.y2], outline=(255, 0, 0), width=2)
+                    d.text(
+                        (b.x1, max(0, b.y1 - 12)),
+                        f"{det.label} {det.score:.2f}",
+                        fill=(255, 0, 0),
+                    )
+                visualize.parent.mkdir(parents=True, exist_ok=True)
+                vis_img.save(str(visualize))
+            except Exception:
+                pass
         return
 
     from rich.panel import Panel as _Panel
@@ -1763,12 +1874,8 @@ def debug_output(
 
     console.print(f"\n  [dim]{diag.get('preprocessing_notes', '')}[/dim]")
 
-    # Save JSON if requested
+    # Save JSON if requested (text-mode path)
     if save_json:
-        import json as _json
-
-        save_json.parent.mkdir(parents=True, exist_ok=True)
-        save_json.write_text(_json.dumps(diag, indent=2, default=str), encoding="utf-8")
         console.print(f"\n  [green]Diagnostics JSON saved to {save_json}[/green]")
 
     # Visualize if requested
@@ -1777,11 +1884,11 @@ def debug_output(
             from PIL import ImageDraw as _Draw
 
             vis_img = img.copy()
-            draw = _Draw.Draw(vis_img)
+            draw_canvas = _Draw.Draw(vis_img)
             for det in result.detections:
                 b = det.box
-                draw.rectangle([b.x1, b.y1, b.x2, b.y2], outline=(255, 0, 0), width=2)
-                draw.text(
+                draw_canvas.rectangle([b.x1, b.y1, b.x2, b.y2], outline=(255, 0, 0), width=2)
+                draw_canvas.text(
                     (b.x1, max(0, b.y1 - 12)), f"{det.label} {det.score:.2f}", fill=(255, 0, 0)
                 )
             visualize.parent.mkdir(parents=True, exist_ok=True)

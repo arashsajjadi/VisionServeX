@@ -83,9 +83,13 @@ _SIZE_TOKEN = re.compile(
 # fully-qualified ``-o365-coco`` variant (the production checkpoint),
 # treating the bare ``dfine-s`` and ``dfine-s-coco`` IDs as aliases of it
 # until the registry distinguishes them with separate checkpoint metadata.
+# v2.17.0: canonical IDs must EXIST in the actual registry. The dfine-n
+# family does NOT have an -o365-coco variant in the registry, so the
+# longest existing variant (dfine-n-coco) is canonical for that family-size.
 _DFINE_FAMILY_ALIASES = {
-    "dfine-n": "dfine-n-o365-coco",
-    "dfine-n-coco": "dfine-n-o365-coco",
+    # dfine-n has no -o365-coco upstream; collapse to -coco.
+    "dfine-n": "dfine-n-coco",
+    # All other sizes: collapse to the -o365-coco production checkpoint.
     "dfine-s": "dfine-s-o365-coco",
     "dfine-s-coco": "dfine-s-o365-coco",
     "dfine-m": "dfine-m-o365-coco",
