@@ -1,0 +1,56 @@
+{
+  "status": "ok",
+  "code": "OK",
+  "n_families": 6,
+  "rows": [
+    {
+      "family": "yolox",
+      "code_license": "MIT",
+      "weight_license": "Apache-2.0",
+      "weight_upstream": "https://github.com/Megvii-BaseDetection/YOLOX",
+      "license_risk": "none",
+      "auto_pull": true
+    },
+    {
+      "family": "yolo9",
+      "code_license": "MIT",
+      "weight_license": "GPL-3.0",
+      "weight_upstream": "https://github.com/WongKinYiu/yolov9",
+      "license_risk": "gpl",
+      "auto_pull": false
+    },
+    {
+      "family": "yolonas",
+      "code_license": "MIT",
+      "weight_license": "Deci-AI YOLO-NAS proprietary, non-commercial",
+      "weight_upstream": "https://github.com/Deci-AI/super-gradients",
+      "license_risk": "non_commercial",
+      "auto_pull": false
+    },
+    {
+      "family": "dfine",
+      "code_license": "MIT",
+      "weight_license": "Apache-2.0",
+      "weight_upstream": "https://github.com/Peterande/D-FINE",
+      "license_risk": "none",
+      "auto_pull": true
+    },
+    {
+      "family": "rtdetr",
+      "code_license": "MIT",
+      "weight_license": "Apache-2.0",
+      "weight_upstream": "https://github.com/lyuwenyu/RT-DETR",
+      "license_risk": "none",
+      "auto_pull": true
+    },
+    {
+      "family": "rfdetr",
+      "code_license": "MIT",
+      "weight_license": "Apache-2.0",
+      "weight_upstream": "https://github.com/roboflow/rf-detr",
+      "license_risk": "none",
+      "auto_pull": true
+    }
+  ],
+  "policy": "Aggressive default: pull permissive (Apache-2.0/MIT). Opt-in for GPL-3.0. Blocked for non-commercial (YOLO-NAS)."
+}

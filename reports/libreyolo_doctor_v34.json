@@ -1,0 +1,17 @@
+{
+  "status": "ok",
+  "code": "OK",
+  "libreyolo_installed": true,
+  "libreyolo_version": "1.1.1",
+  "minimum_version": "1.1.0",
+  "upstream_repo": "https://github.com/Libre-YOLO/libreyolo",
+  "code_license": "MIT",
+  "torch_version": "2.11.0+cu130",
+  "cuda_available": true,
+  "gpu_name": "NVIDIA GeForce RTX 5080",
+  "compute_capability": [
+    12,
+    0
+  ],
+  "message": "libreyolo 1.1.1 installed; GPU probe attempted."
+}

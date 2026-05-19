@@ -1,0 +1,8 @@
+model_id,task,final_state,blocker_code,fix,runtime_ms
+convnextv2-base,classify,smoke_passed,—,—,4696.2078
+convnextv2-tiny,classify,smoke_passed,—,—,4389.5011
+maxvit-tiny-tf-224,classify,smoke_passed,—,—,4830.4057
+swinv2-base,classify,smoke_passed,—,—,4775.7638
+swinv2-large,classify,download_failed_retryable,DOWNLOAD_FAILED_RETRYABLE,"Retry the command; if still failing, set HF_TOKEN. Brotli decoder issue is transient.",3730.8027
+swinv2-small,classify,smoke_passed,—,—,4566.3902
+swinv2-tiny,classify,smoke_passed,—,—,4602.6285

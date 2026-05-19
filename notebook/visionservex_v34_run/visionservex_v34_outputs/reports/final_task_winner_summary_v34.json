@@ -1,0 +1,33 @@
+{
+  "detection_best_mAP50_95": {
+    "model_id": "yolo26x.pt",
+    "source_engine": "ultralytics",
+    "mAP50_95": 0.4894,
+    "AP50": 0.6612,
+    "dataset": "COCO val2017, 400-image object-rich subset"
+  },
+  "detection_fastest_p50": {
+    "model_id": "yolov10b.pt",
+    "latency_ms_p50": 6.05,
+    "mAP50_95": 0.4393
+  },
+  "automatic_segmentation_best_mask_mAP50_95": {
+    "model_id": "yolo26x-seg.pt",
+    "mask_mAP50_95": 0.2728,
+    "dataset": "COCO val2017 400 + Ultralytics yolo*-seg only (RF-DETR-Seg AP pending pycocotools)"
+  },
+  "promptable_segmentation_status": {
+    "models_attempted": [
+      "sam2-hiera-tiny",
+      "sam2.1-hiera-tiny"
+    ],
+    "note": "Smoke/eval with GT box prompts. Full COCO 400 promptable benchmark deferred."
+  },
+  "classification_status": "smoke_only (no ImageNet labels supplied)",
+  "embedding_status": "smoke_only (no retrieval GT supplied)",
+  "medical_status": "smoke_only (no NIfTI GT)",
+  "agriculture_status": "smoke_only (no crop/weed GT)",
+  "aerial_obb_status": "dataset_required",
+  "anomaly_status": "expected_blocker (ANOMALIB_REQUIRED)",
+  "surveillance_status": "expected_blocker (BYTETRACK/OCSORT/TORCHREID required)"
+}

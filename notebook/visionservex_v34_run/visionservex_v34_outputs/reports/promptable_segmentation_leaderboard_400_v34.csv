@@ -1,0 +1,3 @@
+model_id,status,total_instances,mean_iou_display,metric_status
+sam2-hiera-tiny,expected_blocker,0,not applicable (smoke),not_applicable
+sam2.1-hiera-tiny,expected_blocker,0,not applicable (smoke),not_applicable

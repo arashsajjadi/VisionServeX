@@ -1,0 +1,14 @@
+model_id,source_engine,family,status,display_status
+yolo26x.pt,ultralytics,ultralytics,ok,benchmark_passed
+dfine-x-o365-coco,visionservex,dfine,ok,benchmark_passed
+yolo11x.pt,ultralytics,ultralytics,ok,benchmark_passed
+yolov10b.pt,ultralytics,ultralytics,ok,benchmark_passed
+yolov8x.pt,ultralytics,ultralytics,ok,benchmark_passed
+dfine-l-o365-coco,visionservex,dfine,ok,benchmark_passed
+libreyolo-dfine-s,libreyolo,dfine,ok,benchmark_passed
+rfdetr-large,visionservex,rfdetr,ok,benchmark_passed
+rfdetr-base,visionservex,rfdetr,ok,benchmark_passed
+deimv2-s,deimv2_sidecar,deimv2,ok,benchmark_passed
+libreyolo-dfine-n,libreyolo,dfine,ok,benchmark_passed
+libreyolo-yolox-s,libreyolo,yolox,ok,benchmark_passed
+libreyolo-yolox-n,libreyolo,yolox,ok,benchmark_passed

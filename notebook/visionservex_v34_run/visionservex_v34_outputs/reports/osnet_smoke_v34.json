@@ -1,0 +1,6 @@
+{
+  "code": "TORCHREID_REQUIRED",
+  "reid": "osnet",
+  "install": "pip install torchreid  # or: pip install git+https://github.com/KaiyangZhou/deep-person-reid",
+  "status": "expected_blocker"
+}

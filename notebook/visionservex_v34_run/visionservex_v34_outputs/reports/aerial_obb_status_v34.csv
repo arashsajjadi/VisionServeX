@@ -1,0 +1,2 @@
+task,final_state,blocker_code,fix
+aerial_obb,dataset_required,OBB_DATASET_NOT_AUDITED,Supply a permissive OBB dataset (e.g. user-labelled GT)

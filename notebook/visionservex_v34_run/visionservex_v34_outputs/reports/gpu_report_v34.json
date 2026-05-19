@@ -1,0 +1,12 @@
+{
+  "cuda_available": true,
+  "gpu_name": "NVIDIA GeForce RTX 5080",
+  "compute_capability": [
+    12,
+    0
+  ],
+  "cuda_version": "13.0",
+  "total_vram_gb": 15.46,
+  "free_vram_gb": 12.24,
+  "torch_version": "2.11.0+cu130"
+}

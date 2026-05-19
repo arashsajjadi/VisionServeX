@@ -1,0 +1,6 @@
+{
+  "code": "BYTETRACK_REQUIRED",
+  "tracker": "bytetrack",
+  "install": "pip install bytetracker  # or git clone https://github.com/ifzhang/ByteTrack",
+  "status": "expected_blocker"
+}
