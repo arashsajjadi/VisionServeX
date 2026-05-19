@@ -1,8 +1,0 @@
-{
-  "generic_expected_blocker_count": 0,
-  "stub_final_state_count": 0,
-  "stale_rows_found": 46,
-  "stale_rows_fixed": 46,
-  "ledger_source": "/home/arash/PycharmProjects/VisionServeX/notebook/99_final_report/reports/model_coverage_ledger.csv",
-  "fix_applied_in": "v2.38.0"
-}

@@ -1,9 +1,0 @@
-{
-  "timestamp": "2026-05-19",
-  "venv_path": "/home/arash/PycharmProjects/VisionServeX/notebook/.venv",
-  "python_version": "3.13.12",
-  "installed_version": "2.36.0",
-  "install_source": "local_wheel_same_artifact_as_pypi_2.36.0",
-  "pypi_confirmed": true,
-  "forbidden_scan": "PASS"
-}

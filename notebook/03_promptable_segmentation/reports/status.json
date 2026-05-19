@@ -1,5 +1,0 @@
-{
-  "task": "03_promptable_segmentation",
-  "dataset": "COCO val2017 400 (GT-box prompts) \u2014 smoke/eval (30 instances)",
-  "protocol": "smoke_eval"
-}
