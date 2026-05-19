@@ -125,7 +125,9 @@ EXPECTED_CORRECTED_STATES: dict[str, str] = {
     "deimv2-m": "benchmark_passed",
     "deimv2-l": "benchmark_passed",
     "deimv2-x": "benchmark_passed",
-    "deimv2-n": "loader_missing",
+    # v2.44: deimv2-n reclassified — the real issue is no published checkpoint,
+    # not a loader/state_dict mismatch.
+    "deimv2-n": "checkpoint_required",
     "rtdetrv4-s": "checkpoint_downloaded",
     "rtdetrv4-m": "checkpoint_downloaded",
     "rtdetrv4-l": "checkpoint_downloaded",

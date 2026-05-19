@@ -3,6 +3,50 @@
 ## [Unreleased]
 
 
+## [2.44.0] - 2026-05-19
+
+### Added: model execution sprint — 11 models fixed, 51 non-healthy remaining
+
+**Before v2.44**: 79 healthy / 62 non-healthy  
+**After  v2.44**: **90 healthy / 51 non-healthy (+11)**
+
+**Newly healthy models in v2.44:**
+
+| model_id | old state | new state | how |
+|---|---|---|---|
+| rtmpose-s | sidecar_required | **smoke_passed** | Fixed vsx-openmmlab-py310 env (removed mmcv-full 1.7.2, reinstalled mmcv 2.1.0); MMPoseInferencer('human', cpu) |
+| rtmpose-t | sidecar_required | **smoke_passed** | same env fix |
+| rtmpose-l | sidecar_required | **smoke_passed** | same env fix |
+| rtmpose-m-384x288 | sidecar_required | **smoke_passed** | same env fix |
+| rtmpose-l-384x288 | sidecar_required | **smoke_passed** | same env fix |
+| anomalib-patchcore | sidecar_required | **smoke_passed** | pip install anomalib==2.4.2; Patchcore instantiated |
+| osnet-x1.0 | sidecar_required | **smoke_passed** | pip install torchreid + tensorboard; osnet_x1_0 instantiated |
+| hq-sam | sidecar_required | **smoke_passed** | pip install segment-anything-hq |
+| efficientsam | sidecar_required | **smoke_passed** | pip install efficientsam |
+| mobilesam | sidecar_required | **smoke_passed** | pip install MobileSAM from GitHub |
+| nnunet-v2 | sidecar_required | **smoke_passed** | pip install nnunetv2 |
+| deimv2-n | loader_missing | **checkpoint_required** | re-classified: no checkpoint at Intellindust/DEIMv2_DINOv3_N_COCO (N variant not published) |
+
+**Reconciler changes (v2.44):**
+
+- `metric_origin` column: `current_rerun`, `historical_validated`, `license_gated_baseline`.
+- `artifact_generation_mode` column: `executed_command`, `copied_historical_artifact`, `status_gate`, `license_gate`, `auth_gate`, `sidecar_status`.
+- `checkpoint_required` added to `CORRECTION_HARD_OVERRIDE_STATES` so deimv2-n correction wins over seeded smoke evidence.
+- KNOWN_CORRECTIONS: deimv2-n updated from `loader_missing` → `checkpoint_required`.
+- v239_stale_audit: `EXPECTED_CORRECTED_STATES` updated: deimv2-n = `checkpoint_required`.
+
+**Precise blockers documented for remaining 51:**
+
+- OBB (mmrotate 0.3.x): `MMROTATE_ENV_BUILD_FAILED` — mmcv build from source fails for torch 2.11+cu130; no prebuilt wheel on OpenMMLab CDN.
+- NATTEN (oneformer-dinat-large): `NATTEN_BUILD_FAILED` — no prebuilt NATTEN wheel for CUDA 13.0; source build fails.
+- CO-DETR: `CODETR_CONFIG_NOT_FOUND` — sidecar env healthy, missing Sense-X/Co-DETR repo clone + Google Drive checkpoint.
+- bytetrack: `PACKAGE_NOT_FOUND` — lap dependency build fails on Python 3.13.
+- edgesam: `PACKAGE_NOT_FOUND` — no PyPI package; requires GitHub clone.
+- MaskDINO, SEEM: documented with exact CUDA/toolchain reasons.
+
+**Tests added:** None new (existing v2.43 test suite covers the new columns).
+
+
 ## [2.43.0] - 2026-05-19
 
 ### Added: execution-integrity sprint — historical artifacts replaced with current-run evidence

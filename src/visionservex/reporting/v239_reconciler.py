@@ -100,8 +100,8 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     "deimv2-l": {"final_state": "benchmark_passed", "blocker_code": ""},
     "deimv2-x": {"final_state": "benchmark_passed", "blocker_code": ""},
     "deimv2-n": {
-        "final_state": "loader_missing",
-        "blocker_code": "CHECKPOINT_STATE_DICT_MISMATCH",
+        "final_state": "checkpoint_required",
+        "blocker_code": "CHECKPOINT_REQUIRED",
     },
     "rtdetrv4-s": {
         "final_state": "benchmark_passed",
@@ -538,6 +538,7 @@ def _resolve_one_model(
     candidates: list[tuple[str, str, str, str, str]] = []
     CORRECTION_HARD_OVERRIDE_STATES = {
         "loader_missing",
+        "checkpoint_required",
         "wrong_registry_entry",
         "upstream_deprecated",
         "opt_in_license_required",
@@ -825,6 +826,64 @@ def reconcile(
         row.extras["evidence_is_current_run_file"] = is_current_run_file
         row.extras["historical_path_detected"] = bool(hist_detected_pattern)
         row.extras["historical_path_pattern"] = hist_detected_pattern
+
+        # v2.44: metric_origin + artifact_generation_mode
+        healthy_states_v244 = {
+            "benchmark_passed",
+            "benchmarked",
+            "smoke_passed",
+            "demo_passed_sidecar",
+            "contract_passed",
+        }
+        if final_state in healthy_states_v244:
+            if hist_detected_pattern and not current_run_ea:
+                metric_origin = "historical_validated"
+            elif current_run_ea and not hist_detected_pattern:
+                metric_origin = "current_rerun"
+            elif final_state in {"opt_in_license_required", "license_blocked"}:
+                metric_origin = "license_gated_baseline"
+            else:
+                metric_origin = "current_rerun"
+        else:
+            metric_origin = ""
+        # Determine how the artifact was generated
+        extras = next(
+            (
+                nc.get("extras") or {}
+                for nc in current_run_calls
+                if nc.get("output_artifact_exists")
+            ),
+            {},
+        )
+        if extras.get("historical_evidence_replaced"):
+            artifact_gen_mode = "copied_historical_artifact"
+        elif extras.get("current_run_attempt"):
+            ct = next(
+                (
+                    nc.get("call_type", "")
+                    for nc in current_run_calls
+                    if nc.get("output_artifact_exists")
+                ),
+                "",
+            )
+            artifact_gen_mode = {
+                "smoke": "executed_command",
+                "benchmark": "executed_command"
+                if not hist_detected_pattern
+                else "copied_historical_artifact",
+                "demo": "executed_command",
+                "contract": "executed_command",
+                "status": "status_gate",
+                "license_gate": "license_gate",
+                "auth_gate": "auth_gate",
+                "sidecar_status": "sidecar_status",
+            }.get(ct, "status_gate")
+        elif not has_current_run_call:
+            artifact_gen_mode = "seeded_historical"
+        else:
+            artifact_gen_mode = "status_gate"
+        row.extras["metric_origin"] = metric_origin
+        row.extras["artifact_generation_mode"] = artifact_gen_mode
         row.extras["historical_artifact_used_as_fallback"] = (
             evidence_source_kind == "historical"
             and final_state
@@ -939,6 +998,9 @@ def _row_to_dict(row: ReconciledRow) -> dict[str, Any]:
         "evidence_is_current_run_file": row.extras.get("evidence_is_current_run_file", False),
         "historical_path_detected": row.extras.get("historical_path_detected", False),
         "historical_path_pattern": row.extras.get("historical_path_pattern", ""),
+        # v2.44 honesty columns
+        "metric_origin": row.extras.get("metric_origin", ""),
+        "artifact_generation_mode": row.extras.get("artifact_generation_mode", ""),
     }
 
 
