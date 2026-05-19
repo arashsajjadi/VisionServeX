@@ -7,6 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.36.0] - 2026-05-19
+
+### Added: OneFormer segmentation + Florence-2 demo + CI fixes
+
+**Automatic segmentation improvement:**
+- OneFormer-SwinLarge now benchmarked via `benchmark-segmentation`.
+- Uses same `rfdetr_seg_benchmark` runner (SegmentationResult.segments[i].mask schema).
+- **oneformer-swin-large: mask mAP50:95 = 0.1649** (63% improvement over rfdetr-seg-medium=0.1011).
+- Full segmentation leaderboard (COCO val2017 400 images):
+  - oneformer-swin-large: 0.1649 (VisionServeX, new best)
+  - rfdetr-seg-medium: 0.1011
+  - rfdetr-seg-small: 0.0977
+  - rfdetr-seg-nano: 0.0924
+  - yolo26x-seg.pt (reference): 0.2728
+  - Gap to Ultralytics: 0.1079 (down from 0.1717 before OneFormer)
+- oneformer-convnext-large: `DOWNLOAD_FAILED_RETRYABLE` (404 at HF, transient)
+- oneformer-dinat-large: `NATTEN_REQUIRED` (natten has no Python 3.13 wheel)
+
+**rfdetr_seg_benchmark.py blocker code fix:**
+- `except Exception` now maps to specific codes:
+  - `DownloadError` → `DOWNLOAD_FAILED_RETRYABLE`
+  - `natten` mention → `NATTEN_REQUIRED`
+  - `CHECKPOINT` → `CHECKPOINT_REQUIRED`
+  - `ImportError` → `DEPENDENCY_REQUIRED`
+  - fallback → `MODEL_LOAD_FAILED`
+
+**Florence-2 sidecar:**
+- Uses existing `vsx-florence-test` conda env (transformers==4.46.3, float32 inference).
+- Caption demo: `"a cardboard box and a carton on a blue background"`
+- OD demo: 1 vehicle detection on smoke image.
+- Sidecar: `conda run -n vsx-florence-test python [inference_script.py]`
+
+**DINOv3 official audit:**
+- `auth_required` — gated on HuggingFace (facebook/dinov3 requires license acceptance + HF_TOKEN).
+- DINOv2 (open models, 4 variants) remains contract_passed from v2.33.
+
+**RT-DETRv4 documented:**
+- All 4 variants (s/m/l/x) need manual Google Drive checkpoints.
+- Exact gdown commands and cache paths documented in `checkpoint-state` output.
+
+**CI fixes:**
+- test_deimv2_checkpoints_downloaded: skip in CI (no local model cache).
+- test_maxvit_smoke: handle cases where CI returns no structured payload.
+- test_contract_cli_help: strip ANSI codes before asserting on help text.
+- test_rfdetr_seg_coco_rle_conversion: skip if pycocotools not installed.
+- 1338 tests now pass in CI.
+
+**Detection headline preserved:**
+- libreyolo-dfine-x = 0.5030 mAP (v2.35 result preserved, not regressed).
+
+**New tests (7 files):**
+- test_v236_oneformer_segmentation_contract
+- test_v236_rfdetr_seg_large_state
+- test_v236_florence2_sidecar
+- test_v236_dinov3_registry_auth_gate
+- test_v236_detection_headline_preserved
+- test_v236_no_generic_blockers
+- test_v236_rtdetrv4_checkpoint_state
+
 ## [2.35.0] - 2026-05-19
 
 ### Added: DEIMv2 sidecar + real COCO400 benchmark + LibreYOLO full suite

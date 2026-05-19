@@ -151,6 +151,33 @@ def benchmark_segmentation(
                     "evidence_artifact": "segmentation_auto_instance_400_v227.json",
                 }
             )
+        elif "oneformer" in m.lower() or "maskdino" in m.lower():
+            # v2.36.0: OneFormer / MaskDINO use the same rfdetr_seg_benchmark runner —
+            # their SegmentationResult.segments[i].mask is (H, W) uint8.
+            if dataset_parsed is None:
+                rows.append(
+                    {
+                        "model_id": m,
+                        "status": "expected_blocker",
+                        "code": "COCO_INSTANCE_DATASET_REQUIRED",
+                        "task": "automatic_instance_segmentation",
+                        "dataset_given": dataset,
+                        "fix": "Pass --dataset coco-instance:/path/to/instances_val2017.json",
+                    }
+                )
+                continue
+            ann_file_str, images_dir_str = dataset_parsed
+            draw_dir_model = (draw_dir / m.replace("/", "_")) if draw_dir else None
+            result = run_rfdetr_seg_benchmark(
+                ann_file=ann_file_str,
+                images_dir=images_dir_str,
+                model_id=m,
+                device=device,
+                threshold=threshold,
+                max_images=max_images,
+                draw_dir=draw_dir_model,
+            )
+            rows.append(result.to_dict())
         else:
             rows.append(
                 {
@@ -158,7 +185,7 @@ def benchmark_segmentation(
                     "status": "expected_blocker",
                     "code": "SEGMENTATION_PIPELINE_NOT_WIRED",
                     "task": "automatic_instance_segmentation",
-                    "fix": "Model is not a segmentation candidate; use rfdetr-seg-* instead.",
+                    "fix": "Model is not a segmentation candidate; use rfdetr-seg-* or oneformer-* instead.",
                 }
             )
 

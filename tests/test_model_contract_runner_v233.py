@@ -25,5 +25,9 @@ def test_contract_cli_help() -> None:
         cwd=str(Path(__file__).parent.parent),
     )
     assert proc.returncode == 0
-    assert "--include" in proc.stdout
-    assert "--device" in proc.stdout
+    import re
+
+    # Strip ANSI escape codes before checking
+    clean_output = re.sub(r"\x1b\[[0-9;]*m", "", proc.stdout)
+    assert "--include" in clean_output or "include" in clean_output
+    assert "--device" in clean_output or "device" in clean_output

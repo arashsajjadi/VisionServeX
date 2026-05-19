@@ -1,0 +1,11 @@
+{
+  "status": "ok",
+  "code": "OK",
+  "sidecar_name": "vsx-florence-test",
+  "transformers_version": "4.46.3",
+  "caption_result": "a cardboard box and a carton on a blue background",
+  "n_detections": 1,
+  "demo_image": "tests/assets/smoke/coco_person_car.jpg",
+  "note": "Florence-2 uses vsx-florence-test conda env with transformers==4.46.3 (4.x series)",
+  "inference_dtype": "float32 (avoids Half/float type mismatch)"
+}

@@ -4,9 +4,14 @@
 
 from __future__ import annotations
 
+import importlib
 import math
 
 import numpy as np
+import pytest
+
+_PYCOCOTOOLS = importlib.util.find_spec("pycocotools") is not None
+pytestmark = pytest.mark.skipif(not _PYCOCOTOOLS, reason="pycocotools not installed")
 
 
 def test_binary_mask_to_rle_roundtrip() -> None:

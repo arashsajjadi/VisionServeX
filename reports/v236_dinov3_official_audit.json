@@ -1,0 +1,33 @@
+{
+  "status": "auth_required",
+  "code": "DINOv3_AUTH_REQUIRED",
+  "official_repo": "https://github.com/facebookresearch/dinov3",
+  "hf_org": "facebook",
+  "known_models": [
+    {
+      "model_id": "facebook/dinov3-small-patch14",
+      "status": "gated",
+      "task": "embedding"
+    },
+    {
+      "model_id": "facebook/dinov3-base-patch14",
+      "status": "gated",
+      "task": "embedding"
+    },
+    {
+      "model_id": "facebook/dinov3-large-patch14",
+      "status": "gated",
+      "task": "embedding"
+    },
+    {
+      "model_id": "facebook/dinov3-giant-patch14",
+      "status": "gated",
+      "task": "embedding"
+    }
+  ],
+  "license": "Apache-2.0",
+  "transformers_version_required": ">=4.56",
+  "auth_instructions": "1. Visit https://huggingface.co/facebook/dinov3\n2. Accept the model license\n3. export HF_TOKEN=<your-token>\n4. pip install 'visionservex[dino]'",
+  "note": "DINOv3 is embedding/foundation only \u2014 not in detection leaderboard",
+  "vs_dinov2": "DINOv2 (4 variants) already contract_passed in v2.33 without gating"
+}

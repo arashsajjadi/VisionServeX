@@ -1,0 +1,24 @@
+{
+  "models": [
+    {
+      "model_id": "facebook/dinov3-small-patch14",
+      "status": "gated",
+      "task": "embedding"
+    },
+    {
+      "model_id": "facebook/dinov3-base-patch14",
+      "status": "gated",
+      "task": "embedding"
+    },
+    {
+      "model_id": "facebook/dinov3-large-patch14",
+      "status": "gated",
+      "task": "embedding"
+    },
+    {
+      "model_id": "facebook/dinov3-giant-patch14",
+      "status": "gated",
+      "task": "embedding"
+    }
+  ]
+}

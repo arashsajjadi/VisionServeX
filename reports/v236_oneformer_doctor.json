@@ -1,0 +1,10 @@
+{
+  "status": "partial",
+  "models": {
+    "oneformer-swin-large": "ok \u2014 loads and produces SegmentationResult.segments (v2.36 segmentation benchmark)",
+    "oneformer-convnext-large": "expected_blocker \u2014 DOWNLOAD_FAILED_RETRYABLE",
+    "oneformer-dinat-large": "expected_blocker \u2014 NATTEN_PYTHON_VERSION_UNSUPPORTED (Python 3.13.12 has no natten wheel)"
+  },
+  "natten_installed": false,
+  "note": "NATTEN requires Python <= 3.12 for pre-built wheels"
+}

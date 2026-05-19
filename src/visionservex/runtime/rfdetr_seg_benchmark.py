@@ -288,11 +288,24 @@ def run_rfdetr_seg_benchmark(
                     )
 
     except Exception as model_exc:
+        # Map exception type to specific blocker code
+        exc_str = str(model_exc)
+        exc_type = type(model_exc).__name__
+        if "DownloadError" in exc_type or "download" in exc_str.lower() or "404" in exc_str:
+            blocker_code = "DOWNLOAD_FAILED_RETRYABLE"
+        elif "natten" in exc_str.lower():
+            blocker_code = "NATTEN_REQUIRED"
+        elif "CHECKPOINT" in exc_str.upper() or "not cached" in exc_str.lower():
+            blocker_code = "CHECKPOINT_REQUIRED"
+        elif "ImportError" in exc_type or "ModuleNotFoundError" in exc_type:
+            blocker_code = "DEPENDENCY_REQUIRED"
+        else:
+            blocker_code = "MODEL_LOAD_FAILED"
         return RFDETRSegBenchmarkResult(
             model_id=model_id,
             status="expected_blocker",
-            code="RFDETR_SEG_CHECKPOINT_REQUIRED",
-            failures=[{"reason": "model_load_error", "error": str(model_exc)[:400]}],
+            code=blocker_code,
+            failures=[{"reason": "model_load_error", "error": exc_str[:400]}],
             ann_file=str(ann_file),
             images_dir=str(images_dir),
             device=device,

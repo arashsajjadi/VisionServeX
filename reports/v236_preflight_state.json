@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-05-19",
+  "current_git_status": "modified test files + version bump",
+  "latest_pypi_version": "2.35.0",
+  "v235_release_exists": true,
+  "latest_ci_status": "failure - 4 test issues (being fixed in v2.36)",
+  "ci_failures": [
+    "test_deimv2_checkpoints_downloaded - skips in CI (no local model cache)",
+    "test_maxvit_smoke_returns_expected_blocker_or_passed - CI payloads differ",
+    "test_contract_cli_help - ANSI codes in help output",
+    "pycocotools not installed in CI"
+  ],
+  "current_detection_winner": "libreyolo-dfine-x = 0.5030 mAP (beats yolo26x 0.4894)",
+  "current_auto_segmentation_winner": "yolo26x-seg.pt = 0.2728, best VisionServeX = rfdetr-seg-medium = 0.1011",
+  "current_promptable_winner": "sam2.1-hiera-large = 0.8060 mean IoU",
+  "blocking_issues_for_v236": [
+    "automatic segmentation still weak (0.1011 vs 0.2728 gap)",
+    "Florence-2 sidecar not created",
+    "LibreYOLO 13 seg weights gated (HTTP 401)",
+    "DINOv3 registry incomplete",
+    "RT-DETRv4 manual checkpoints needed"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "status": "expected_blocker",
+  "code": "NATTEN_PYTHON_VERSION_UNSUPPORTED",
+  "python_version": "3.13.12",
+  "torch_version": "2.11.0+cu130",
+  "cuda_version": "13.0",
+  "gpu": "NVIDIA GeForce RTX 5080",
+  "attempted_install": "pip install natten",
+  "error": "Failed building wheel for natten \u2014 no pre-built wheels for Python 3.13",
+  "recommendation": "Install natten in a Python 3.11 sidecar: conda create -n vsx-natten python=3.11 && conda run -n vsx-natten pip install natten",
+  "oneformer_dinat_status": "NATTEN_PYTHON_VERSION_UNSUPPORTED",
+  "oneformer_swin_large": "benchmarked via rfdetr_seg_benchmark runner (same SegmentationResult.segments schema)"
+}

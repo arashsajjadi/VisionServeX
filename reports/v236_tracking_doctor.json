@@ -1,0 +1,31 @@
+{
+  "status": "dependency_required",
+  "code": "TRACKING_DEPS_REQUIRED",
+  "extra": "tracking",
+  "installed": {},
+  "missing": [
+    "bytetracker",
+    "ocsort",
+    "torchreid"
+  ],
+  "missing_detail": [
+    {
+      "module": "bytetracker",
+      "error": "No module named 'bytetracker'"
+    },
+    {
+      "module": "ocsort",
+      "error": "No module named 'ocsort'"
+    },
+    {
+      "module": "torchreid",
+      "error": "No module named 'torchreid'"
+    }
+  ],
+  "install_commands": {
+    "bytetracker": "pip install bytetracker",
+    "ocsort": "pip install ocsort",
+    "torchreid": "pip install torchreid (or git+https://github.com/KaiyangZhou/deep-person-reid)"
+  },
+  "next_action": "Install the specific tracking package you need."
+}
