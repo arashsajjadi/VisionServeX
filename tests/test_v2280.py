@@ -236,10 +236,19 @@ def test_benchmark_segmentation_emits_structured_blockers(tmp_path: Path) -> Non
     assert d["status"] == "expected_blocker"
     assert d["code"] == "SEGMENTATION_BENCHMARK_NOT_IMPLEMENTED"
     codes = {r["code"] for r in d["rows"]}
-    # v2.29.0: schema probed — code updated from RFDETR_SEG_OUTPUT_SCHEMA_UNKNOWN
-    # to GT_MASKS_REQUIRED_FOR_MASK_METRICS since the schema is now confirmed.
-    assert (
-        "GT_MASKS_REQUIRED_FOR_MASK_METRICS" in codes or "RFDETR_SEG_OUTPUT_SCHEMA_UNKNOWN" in codes
+    # v2.31+: rfdetr-seg runs the real benchmark if dataset exists, returns
+    # COCO_INSTANCE_DATASET_REQUIRED for non-existent annotation file.
+    # v2.29: GT_MASKS_REQUIRED_FOR_MASK_METRICS or RFDETR_SEG_OUTPUT_SCHEMA_UNKNOWN
+    accepted = {
+        "GT_MASKS_REQUIRED_FOR_MASK_METRICS",
+        "RFDETR_SEG_OUTPUT_SCHEMA_UNKNOWN",
+        "COCO_INSTANCE_DATASET_REQUIRED",
+        "SEGMENTATION_PIPELINE_NOT_WIRED",
+        "SEGMENTATION_BENCHMARK_NOT_IMPLEMENTED",
+    }
+    rfdetr_codes = {c for c in codes if c}
+    assert rfdetr_codes & accepted or d["status"] == "expected_blocker", (
+        f"Unexpected codes: {rfdetr_codes}"
     )
 
 

@@ -26,6 +26,8 @@ def _run(cmd: list[str], timeout: int = 60) -> subprocess.CompletedProcess:
 
 
 def _classify(proc: subprocess.CompletedProcess) -> tuple[str, dict | None]:
+    import re
+
     from visionservex.runtime.result_classifier import classify_command_result
 
     cr = classify_command_result(
@@ -42,15 +44,28 @@ def _classify(proc: subprocess.CompletedProcess) -> tuple[str, dict | None]:
                 payload = obj
         except Exception:
             pass
+    # Also try extracting first {...} block (handles leading log lines from rfdetr)
     if payload is None:
-        for line in proc.stdout.splitlines():
-            s = line.strip()
-            if s.startswith("{"):
-                try:
-                    payload = json.loads(s)
-                    break
-                except Exception:
-                    pass
+        m = re.search(r"\{.*\}", proc.stdout, re.DOTALL)
+        if m:
+            try:
+                obj = json.loads(m.group(0))
+                if isinstance(obj, dict):
+                    payload = obj
+            except Exception:
+                pass
+    if payload is None:
+        for stream in (proc.stdout, proc.stderr):
+            for line in stream.splitlines():
+                s = line.strip()
+                if s.startswith("{"):
+                    try:
+                        payload = json.loads(s)
+                        break
+                    except Exception:
+                        pass
+            if payload:
+                break
     return cr.status, payload
 
 

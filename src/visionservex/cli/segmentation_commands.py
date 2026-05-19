@@ -290,14 +290,28 @@ def benchmark_promptable_segmentation(
                     if len(bbox) < 4:
                         continue
                     x, y, w, h = bbox
-                    box_str = f"{x:.1f},{y:.1f},{x + w:.1f},{y + h:.1f}"
+                    # Pass box as a list [x1, y1, x2, y2] — SAM/SAM2 engines
+                    # accept this; passing as a string "x1,y1,x2,y2" fails
+                    # when coordinates contain decimals (comma ambiguity).
+                    box_coords = [float(x), float(y), float(x + w), float(y + h)]
                     pil_img = _PIL.open(img_path).convert("RGB")
-                    result = model.predict(pil_img, box=box_str)
+                    result = model.predict(pil_img, box=box_coords)
 
-                    # Extract mask from result
+                    # Extract mask from result — SAM2/SAM2.1 use SegmentationResult
+                    # with .segments[i].mask (HxW uint8); rfdetr-seg also uses this.
+                    # Legacy SAM path uses .mask (HxW bool/uint8).
                     mask = None
                     n_masks = 0
-                    if hasattr(result, "masks") and result.masks:
+                    if hasattr(result, "segments") and result.segments:
+                        segs_list = result.segments
+                        n_masks = len(segs_list)
+                        if n_masks > 0:
+                            import numpy as _npz
+
+                            seg0 = segs_list[0]
+                            if hasattr(seg0, "mask") and seg0.mask is not None:
+                                mask = _npz.asarray(seg0.mask)
+                    elif hasattr(result, "masks") and result.masks:
                         masks_val = result.masks
                         n_masks = len(masks_val) if hasattr(masks_val, "__len__") else 1
                         if n_masks > 0:

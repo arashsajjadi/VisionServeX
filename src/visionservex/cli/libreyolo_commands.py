@@ -736,3 +736,164 @@ def build_model_map_cmd(
 
 
 __all__ = ["app"]
+
+
+@app.command("contract-test-all-default-safe")
+def contract_test_all_default_safe_cmd(
+    device: str = typer.Option("cuda", "--device"),
+    out: Path = typer.Option(..., "--out"),
+    csv: Path | None = typer.Option(None, "--csv"),
+    draw_dir: Path | None = typer.Option(None, "--draw-dir"),
+    fmt: str = typer.Option("json", "--format"),
+) -> None:
+    """v2.34.0: contract-test every default-safe LibreYOLO weight."""
+    import subprocess as _sp
+    import sys as _sys
+    import time as _time
+
+    avail, ver = _libreyolo_available()
+    if not avail:
+        _emit(
+            {
+                "status": "expected_blocker",
+                "code": "LIBREYOLO_REQUIRED",
+                "fix": "pip install 'visionservex[libreyolo]'",
+            },
+            out=out,
+            fmt=fmt,
+        )
+        return
+
+    weights = _all_discovered_weights()
+    rows: list[dict[str, Any]] = []
+    for w in weights:
+        verdict = _license_verdict_for_family(w["family"])
+        risk = (verdict.get("license_risk") or "").lower()
+        wl = (verdict.get("weight_license") or "").upper()
+        is_safe = risk == "none" and any(ok in wl for ok in ("APACHE-2.0", "APACHE 2.0", "MIT"))
+        if not is_safe:
+            rows.append(
+                {
+                    "model_id": w["model_id"],
+                    "family": w["family"],
+                    "task": w["task"],
+                    "final_state": "license_blocked",
+                    "blocker_code": "LIBREYOLO_WEIGHT_LICENSE_NOT_DEFAULT_SAFE",
+                    "weight_license": verdict.get("weight_license", ""),
+                    "license_risk": risk,
+                    "fix": "opt-in explicitly if you accept the license",
+                }
+            )
+            continue
+
+        smoke_img_path = (
+            Path(__file__).resolve().parent.parent.parent.parent
+            / "tests/assets/smoke/coco_person_car.jpg"
+        )
+        if not smoke_img_path.exists():
+            smoke_img_path = Path("/tmp/smoke_test.jpg")
+
+        out_json = Path(f"/tmp/libreyolo_contract_{w['model_id'].replace('/', '_')}.json")
+        cmd = [
+            _sys.executable,
+            "-m",
+            "visionservex",
+            "libreyolo",
+            "smoke-test",
+            w["model_id"],
+            str(smoke_img_path),
+            "--device",
+            device,
+            "--format",
+            "json",
+            "--out",
+            str(out_json),
+        ]
+        if draw_dir:
+            draw_dir.mkdir(parents=True, exist_ok=True)
+            cmd += ["--draw", str(draw_dir / f"{w['model_id'].replace('/', '_')}.jpg")]
+
+        t0 = _time.monotonic()
+        try:
+            proc = _sp.run(cmd, capture_output=True, text=True, timeout=120)
+            rt = (_time.monotonic() - t0) * 1000.0
+            payload: dict[str, Any] = {}
+            try:
+                payload = json.loads(out_json.read_text()) if out_json.exists() else {}
+            except Exception:
+                pass
+            if not payload:
+                import re
+
+                m_obj = re.search(r"\{.*\}", proc.stdout, re.DOTALL)
+                if m_obj:
+                    try:
+                        payload = json.loads(m_obj.group(0))
+                    except Exception:
+                        pass
+
+            final_state = (
+                "contract_passed"
+                if payload.get("status") == "ok"
+                else (
+                    "expected_blocker"
+                    if payload.get("status") == "expected_blocker"
+                    else "download_failed_retryable"
+                    if "download" in (payload.get("code", "") or "").lower()
+                    else "package_bug"
+                    if proc.returncode != 0
+                    else "dependency_required"
+                )
+            )
+
+            rows.append(
+                {
+                    "model_id": w["model_id"],
+                    "family": w["family"],
+                    "task": w["task"],
+                    "final_state": final_state,
+                    "blocker_code": payload.get("code", ""),
+                    "n_predictions": payload.get("n_predictions", 0),
+                    "runtime_ms": round(rt, 0),
+                    "weight_license": verdict.get("weight_license", ""),
+                    "fix": payload.get("install", ""),
+                }
+            )
+        except Exception as exc:
+            rows.append(
+                {
+                    "model_id": w["model_id"],
+                    "family": w["family"],
+                    "task": w["task"],
+                    "final_state": "package_bug",
+                    "blocker_code": str(exc)[:100],
+                    "n_predictions": 0,
+                    "runtime_ms": 0,
+                    "weight_license": verdict.get("weight_license", ""),
+                    "fix": "",
+                }
+            )
+
+    n_safe = sum(1 for r in rows if r["final_state"] == "contract_passed")
+    n_blocked = sum(1 for r in rows if r["final_state"] in ("license_blocked",))
+    payload_out = {
+        "status": "ok",
+        "code": "OK",
+        "version": "v2.34.0",
+        "libreyolo_version": ver,
+        "n_total": len(rows),
+        "n_contract_passed": n_safe,
+        "n_license_blocked": n_blocked,
+        "rows": rows,
+    }
+    _emit(payload_out, out=out, fmt=fmt)
+    if csv is not None:
+        import csv as _csv
+
+        csv.parent.mkdir(parents=True, exist_ok=True)
+        fields = list(rows[0].keys()) if rows else ["model_id"]
+        with open(csv, "w", newline="") as fh:
+            w2 = _csv.DictWriter(fh, fieldnames=fields)
+            w2.writeheader()
+            for r in rows:
+                w2.writerow(r)

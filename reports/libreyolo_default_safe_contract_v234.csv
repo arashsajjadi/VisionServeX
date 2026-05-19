@@ -1,0 +1,13 @@
+model_id,family,task,final_state,blocker_code,n_predictions,runtime_ms,weight_license,fix
+libreyolo-yolox-n,yolox,detect,contract_passed,OK,1,3648.0,Apache-2.0,
+libreyolo-yolox-n-seg,yolox,segment,contract_passed,OK,1,3710.0,Apache-2.0,
+libreyolo-yolox-t,yolox,detect,expected_blocker,CHECKPOINT_REQUIRED,0,3178.0,Apache-2.0,
+libreyolo-yolox-t-seg,yolox,segment,expected_blocker,CHECKPOINT_REQUIRED,0,3142.0,Apache-2.0,
+libreyolo-yolox-s,yolox,detect,contract_passed,OK,1,3778.0,Apache-2.0,
+libreyolo-yolox-s-seg,yolox,segment,contract_passed,OK,1,3658.0,Apache-2.0,
+libreyolo-yolox-m,yolox,detect,expected_blocker,CHECKPOINT_REQUIRED,0,3074.0,Apache-2.0,
+libreyolo-yolox-m-seg,yolox,segment,expected_blocker,CHECKPOINT_REQUIRED,0,3012.0,Apache-2.0,
+libreyolo-yolox-l,yolox,detect,expected_blocker,CHECKPOINT_REQUIRED,0,3153.0,Apache-2.0,
+libreyolo-yolox-l-seg,yolox,segment,expected_blocker,CHECKPOINT_REQUIRED,0,3083.0,Apache-2.0,
+libreyolo-yolox-x,yolox,detect,expected_blocker,CHECKPOINT_REQUIRED,0,3068.0,Apache-2.0,
+libreyolo-yolox-x-seg,yolox,segment,expected_blocker,CHECKPOINT_REQUIRED,0,3061.0,Apache-2.0,

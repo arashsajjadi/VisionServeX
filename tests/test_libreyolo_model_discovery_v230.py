@@ -4,12 +4,22 @@
 
 from __future__ import annotations
 
+import importlib
 import json
 import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO = Path(__file__).parent.parent
+
+# Skip all LibreYOLO tests when the package is not installed
+_LIBREYOLO_AVAILABLE = importlib.util.find_spec("libreyolo") is not None
+pytestmark = pytest.mark.skipif(
+    not _LIBREYOLO_AVAILABLE,
+    reason="libreyolo not installed — install visionservex[libreyolo]",
+)
 
 
 def _run(args: list[str], timeout: int = 30) -> subprocess.CompletedProcess:

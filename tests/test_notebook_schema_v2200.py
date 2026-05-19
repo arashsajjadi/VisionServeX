@@ -27,6 +27,12 @@ NB_PATH = Path(
     "VisionServeX_Colab_Universal_Model_Audit_Benchmark.ipynb"
 )
 
+# Skip if the legacy Colab notebook has been archived
+pytestmark = pytest.mark.skipif(
+    not NB_PATH.exists(),
+    reason="Legacy Colab notebook has been archived; skipping v23 schema tests",
+)
+
 
 def _load_utility_namespace() -> dict:
     """Find the v23 utility cell, exec it, return its namespace."""

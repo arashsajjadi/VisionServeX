@@ -22,10 +22,11 @@ def _run(args: list[str], timeout: int = 30) -> subprocess.CompletedProcess:
     )
 
 
-def test_version_is_2_30_0() -> None:
+def test_version_is_at_least_2_30() -> None:
     import visionservex
 
-    assert visionservex.__version__ == "2.30.0", visionservex.__version__
+    parts = visionservex.__version__.split(".")
+    assert int(parts[0]) >= 2 and int(parts[1]) >= 30, visionservex.__version__
 
 
 def test_summarize_smoke_matrix_cli_help() -> None:

@@ -1,0 +1,39 @@
+{
+  "version": "v2.34.0",
+  "repo": "carpedm20/DEIMv2",
+  "variants": {
+    "deimv2-m": {
+      "status": "checkpoint_downloaded",
+      "path": "/home/arash/.cache/visionservex/deimv2/deimv2_dinov3_m_coco.pth",
+      "size_mb": 73.9,
+      "final_state": "manual_checkpoint_required",
+      "blocker_code": "DEIMV2_TORCH_VERSION_REQUIRED",
+      "required_torch": "2.5.1",
+      "installed_torch": "2.11.0+cu130",
+      "fix": "Create sidecar with torch==2.5.1 + upstream DEIMv2 repo",
+      "benchmark_note": "Cannot benchmark in main env (torch version mismatch). Last known deimv2-s result: 0.3266 mAP on COCO val2017 400 (v2.26)."
+    },
+    "deimv2-l": {
+      "status": "checkpoint_downloaded",
+      "path": "/home/arash/.cache/visionservex/deimv2/deimv2_dinov3_l_coco.pth",
+      "size_mb": 130.8,
+      "final_state": "manual_checkpoint_required",
+      "blocker_code": "DEIMV2_TORCH_VERSION_REQUIRED",
+      "required_torch": "2.5.1",
+      "installed_torch": "2.11.0+cu130",
+      "fix": "Create sidecar with torch==2.5.1 + upstream DEIMv2 repo",
+      "benchmark_note": "Cannot benchmark in main env (torch version mismatch). Last known deimv2-s result: 0.3266 mAP on COCO val2017 400 (v2.26)."
+    },
+    "deimv2-x": {
+      "status": "checkpoint_downloaded",
+      "path": "/home/arash/.cache/visionservex/deimv2/deimv2_dinov3_x_coco.pth",
+      "size_mb": 205.6,
+      "final_state": "manual_checkpoint_required",
+      "blocker_code": "DEIMV2_TORCH_VERSION_REQUIRED",
+      "required_torch": "2.5.1",
+      "installed_torch": "2.11.0+cu130",
+      "fix": "Create sidecar with torch==2.5.1 + upstream DEIMv2 repo",
+      "benchmark_note": "Cannot benchmark in main env (torch version mismatch). Last known deimv2-s result: 0.3266 mAP on COCO val2017 400 (v2.26)."
+    }
+  }
+}

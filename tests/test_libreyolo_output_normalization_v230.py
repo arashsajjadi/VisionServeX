@@ -4,12 +4,17 @@
 
 from __future__ import annotations
 
+import importlib
 import json
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
+
+_LIBREYOLO_AVAILABLE = importlib.util.find_spec("libreyolo") is not None
+pytestmark = pytest.mark.skipif(not _LIBREYOLO_AVAILABLE, reason="libreyolo not installed")
+
 
 REPO = Path(__file__).parent.parent
 SMOKE_IMG = REPO / "tests/assets/smoke/coco_person_car.jpg"

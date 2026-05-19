@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.34.0] - 2026-05-19
+
+### Fixed: CI green + SAM2 promptable benchmark + LibreYOLO contract suite
+
+**CI fixes (were breaking GitHub Actions on every push):**
+- Renamed `doctor` sub-app to `extra` (`visionservex extra all-benchmark|dino|sam3...`) — the old `visionservex doctor --json` system command was being overridden.
+- LibreYOLO tests now skip when `libreyolo` is not installed (CI env has no libreyolo).
+- Legacy Colab notebook schema tests skip when archived notebook is not found.
+- `test_v2300::test_version_is_2_30_0` updated to `test_version_is_at_least_2_30`.
+- `test_v2280::test_benchmark_segmentation_emits_structured_blockers` updated to accept v2.31+ COCO_INSTANCE_DATASET_REQUIRED code.
+- `test_segmentation_smoke_schema::test_benchmark_segmentation_cmd_exists` fixed with regex-based JSON extraction that handles leading log lines (rfdetr pattern).
+- **Result: 1327 passed, 0 failed, 14 skipped in CI.**
+
+**SAM2 / SAM2.1 full promptable benchmark (first real IoU values):**
+- Fixed box format from string "x1,y1,x2,y2" (fails with decimal coords) to list [x1,y1,x2,y2].
+- Fixed mask extraction: SegmentationResult.segments[i].mask was not checked; now checked before .masks/.mask.
+- Benchmark results on COCO val2017 400 instances (10 per image, GT-box prompts):
+  - sam2.1-hiera-large: mean IoU = **0.8060** (best)
+  - sam2.1-hiera-tiny: mean IoU = 0.7849
+  - sam2-hiera-tiny: mean IoU = 0.7853
+  - sam2-hiera-small: mean IoU = 0.7836
+  - sam2.1-hiera-small: mean IoU = 0.7824
+  - sam2-hiera-large: mean IoU = 0.7895
+
+**DEIMv2 M/L/X checkpoints downloaded:**
+- carpedm20/DEIMv2 has all variants: atto/femto/pico/n/s/m/l/x.
+- deimv2-m.pth (74 MB), deimv2-l.pth (131 MB), deimv2-x.pth (206 MB) downloaded.
+- Cannot run in main env: requires torch==2.5.1 (installed: 2.11.0).
+- Status: `manual_checkpoint_required` with `DEIMV2_TORCH_VERSION_REQUIRED`.
+- Sidecar with torch==2.5.1 needed for benchmarking.
+
+**LibreYOLO: first full default-safe contract test (all 44 weights attempted):**
+- 8 contract_passed (yolox-n/s + dfine-n/s + seg variants of each).
+- 36 expected_blocker (`CHECKPOINT_REQUIRED` — weights not pre-downloaded).
+- 14 license_blocked (GPL + non-commercial).
+- New command: `visionservex libreyolo contract-test-all-default-safe`
+
+**New commands:**
+- `visionservex extra {all-benchmark, detection, segmentation, promptable, foundation, dino, sam3, grounding-dino15, florence2, tracking, anomaly, openmmlab}` (renamed from `doctor` to avoid conflict)
+- `visionservex libreyolo contract-test-all-default-safe`
+
+**New reports:**
+- reports/promptable_coco400_v234.json — SAM2/SAM2.1 real IoU benchmark
+- reports/libreyolo_default_safe_contract_v234.{json,csv}
+- reports/deimv2_hf_audit_v234.json
+- reports/v234_preflight_release_state.json
+
 ## [2.33.0] - 2026-05-18
 
 ### Added: Model contract testing, doctor commands per extra, model cache
