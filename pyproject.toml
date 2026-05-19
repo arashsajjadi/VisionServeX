@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "visionservex"
-version = "2.32.0"
+version = "2.33.0"
 description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -202,8 +202,50 @@ tracking = [
     "safetensors>=0.4",
     "accelerate>=0.28",
 ]
+detection = [
+    "rfdetr>=1.6",
+    "supervision>=0.22",
+    "huggingface_hub>=0.24",
+    "timm>=0.9",
+    "transformers>=4.40",
+    "safetensors>=0.4",
+    "accelerate>=0.28",
+    "torch>=2.1",
+    "torchvision>=0.16",
+]
+foundation = [
+    "timm>=0.9",
+    "transformers>=4.40",
+    "huggingface_hub>=0.24",
+    "safetensors>=0.4",
+    "accelerate>=0.28",
+]
+dino = [
+    # DINOv3 needs transformers>=4.56 — may conflict with Florence-2; install in
+    # a fresh env or via the dinov3 sidecar.
+    "transformers>=4.56",
+    "timm>=1.0.20",
+    "huggingface_hub>=0.24",
+    "safetensors>=0.4",
+    "accelerate>=0.28",
+]
+"open-vocab" = [
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "transformers>=4.40",
+    "huggingface_hub>=0.24",
+    "pillow>=10.0",
+]
+vlm = [
+    "torch>=2.1",
+    "transformers>=4.40",
+    "huggingface_hub>=0.24",
+    "safetensors>=0.4",
+    "accelerate>=0.28",
+    "pillow>=10.0",
+]
 "all-benchmark" = [
-    "visionservex[server,hf,rfdetr,libreyolo,sam2,grounding,anomaly,video,notebook,benchmark,segmentation,promptable]",
+    "visionservex[server,hf,rfdetr,libreyolo,sam2,grounding,anomaly,video,notebook,benchmark,segmentation,promptable,detection,foundation,open-vocab]",
 ]
 all = [
     "visionservex[server,cloudflare,onnx,hf]",

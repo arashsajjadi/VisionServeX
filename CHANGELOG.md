@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.33.0] - 2026-05-18
+
+### Added: Model contract testing, doctor commands per extra, model cache
+
+Move from weak smoke-only validation to strict task-aware contract tests.
+
+**New CLI surface:**
+- `visionservex models contract-test --include core|all --device --out --csv`
+  — task-aware contract runner: a model passes only when it loads, runs, and
+  produces a schema-valid output for its task. Otherwise returns one of:
+  `contract_passed | dependency_required | manual_checkpoint_required |
+  license_blocked | dataset_required | auth_required | download_failed_retryable |
+  sidecar_required | package_bug`.
+- `visionservex models cache-status / cache-add / cache-verify` — local model
+  cache abstraction with SHA256 manifest. Supports `VISION_SERVEX_MODEL_CACHE`,
+  `VISION_SERVEX_MODEL_MIRROR`, `VISION_SERVEX_MODEL_BASE_URL`.
+- `visionservex doctor {all-benchmark, detection, segmentation, promptable,
+  foundation, dino, sam3, grounding-dino15, florence2, tracking, anomaly,
+  openmmlab}` — per-extra doctor with structured `{status, code, installed,
+  missing, exact_install_command, sidecar_recommended, next_action}`.
+- `doctor sam3` returns `SAM3_AUTH_REQUIRED` with HF token instructions.
+- `doctor grounding-dino15` returns `GROUNDING_DINO15_API_KEY_REQUIRED` with
+  the official IDEA-Research API URL and `DINO_X_API_KEY` env var.
+- `doctor florence2` returns `FLORENCE2_TRANSFORMERS_VERSION_REQUIRED` with
+  sidecar install command when transformers >=5.
+
+**New extras (pyproject.toml):**
+- `detection` — rfdetr + transformers + timm + supervision
+- `foundation` — timm + transformers (lightweight)
+- `dino` — pins `transformers>=4.56` for DINOv3 (sidecar candidate)
+- `open-vocab` — for OWLv2/OWL-ViT/GroundingDINO
+- `vlm` — for VLM models
+- `all-benchmark` — now includes detection/foundation/open-vocab
+
+**Failure map:**
+- `reports/v233_blocked_model_audit.csv|json` — 49 blocked rows classified
+  by root_cause (missing_loader_or_dep, download_failed, missing_dependency,
+  license_blocked) and priority (P0/P1/P2/P3). 0 P0/P1 with `unknown` root cause.
+
+**New tests (6 files, 23 tests):**
+- test_extras_all_benchmark_v233.py
+- test_doctor_commands_v233.py
+- test_model_contract_runner_v233.py
+- test_no_generic_expected_blocker_v233.py
+- test_v233_model_cache_manifest.py
+- test_v233_ci_marker_configuration.py
+
 ## [2.32.0] - 2026-05-18
 
 ### Changed: Unified master benchmark notebook, RF-DETR-Seg family curves, package extras

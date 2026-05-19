@@ -6,7 +6,9 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any
 
 import typer
@@ -1448,6 +1450,186 @@ def summarize_smoke_matrix_cmd(
     typer.echo(
         json.dumps(
             {"status": "ok", "code": "OK", "wrote": str(out_path), "n_rows": len(canonical)},
+            indent=2,
+        )
+    )
+
+
+@app.command("contract-test")
+def contract_test_cmd(
+    include: str = typer.Option("core", "--include", help="core | all"),
+    device: str = typer.Option("cuda", "--device"),
+    real_assets: bool = typer.Option(True, "--real-assets/--no-real-assets"),
+    download_policy: str = typer.Option("retry", "--download-policy"),
+    max_retries: int = typer.Option(1, "--max-retries"),
+    out: str = typer.Option(..., "--out"),
+    csv: str = typer.Option("", "--csv"),
+    fail_on_package_bug: bool = typer.Option(False, "--fail-on-package-bug"),
+    timeout: int = typer.Option(90, "--timeout"),
+) -> None:
+    """v2.33.0: full model contract-test runner.
+
+    A model passes only when it loads, runs, and produces a valid normalized
+    output for its task. Otherwise returns a precise structured blocker.
+    """
+    from pathlib import Path as _P
+
+    from visionservex.runtime.contract_runner import run_contract_matrix
+
+    out_path = _P(out)
+    csv_path = _P(csv) if csv else None
+    _rows, summary = run_contract_matrix(
+        include=include,
+        device=device,
+        out_json=out_path,
+        out_csv=csv_path,
+        fail_on_package_bug=fail_on_package_bug,
+        timeout_s=timeout,
+        max_retries=max_retries,
+    )
+    from dataclasses import asdict
+
+    typer.echo(
+        json.dumps({"status": "ok", "summary": asdict(summary), "out": str(out_path)}, indent=2)
+    )
+
+
+@app.command("cache-status")
+def cache_status_cmd(
+    fmt: str = typer.Option("json", "--format"),
+    out: str = typer.Option("", "--out"),
+) -> None:
+    """v2.33.0: model cache status report.
+
+    Reports cache root, mirror configuration, and discovered weights.
+    """
+    import os as _os
+    from pathlib import Path as _P
+
+    cache_root = _P(
+        _os.environ.get("VISION_SERVEX_MODEL_CACHE", _P.home() / ".cache/visionservex/models")
+    )
+    mirror = _os.environ.get("VISION_SERVEX_MODEL_MIRROR", "")
+    base_url = _os.environ.get("VISION_SERVEX_MODEL_BASE_URL", "")
+
+    cache_root.mkdir(parents=True, exist_ok=True)
+    entries = []
+    for f in cache_root.rglob("*"):
+        if f.is_file():
+            entries.append(
+                {
+                    "path": str(f.relative_to(cache_root)),
+                    "size_mb": round(f.stat().st_size / 1e6, 2),
+                }
+            )
+
+    report = {
+        "status": "ok",
+        "version": "v2.33.0",
+        "cache_root": str(cache_root),
+        "model_mirror": mirror,
+        "model_base_url": base_url,
+        "n_files": len(entries),
+        "entries": entries[:200],
+    }
+    if out:
+        _P(out).parent.mkdir(parents=True, exist_ok=True)
+        _P(out).write_text(json.dumps(report, indent=2))
+    typer.echo(json.dumps(report, indent=2))
+
+
+@app.command("cache-add")
+def cache_add_cmd(
+    model_id: str = typer.Argument(...),
+    file: str = typer.Option(..., "--file"),
+    license: str = typer.Option("Apache-2.0", "--license"),
+    source: str = typer.Option("user-supplied", "--source"),
+    mirror_allowed: bool = typer.Option(False, "--mirror-allowed/--no-mirror-allowed"),
+    fmt: str = typer.Option("json", "--format"),
+) -> None:
+    """v2.33.0: register a user-supplied checkpoint into the model cache."""
+    import hashlib
+    import os as _os
+    import shutil as _sh
+    from pathlib import Path as _P
+
+    src = _P(file)
+    if not src.exists():
+        typer.echo(
+            json.dumps(
+                {"status": "expected_blocker", "code": "FILE_NOT_FOUND", "file": str(src)}, indent=2
+            )
+        )
+        raise typer.Exit(2)
+
+    cache_root = _P(
+        _os.environ.get("VISION_SERVEX_MODEL_CACHE", _P.home() / ".cache/visionservex/models")
+    )
+    dest = cache_root / model_id / src.name
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    _sh.copy2(str(src), str(dest))
+
+    sha = hashlib.sha256(dest.read_bytes()).hexdigest()
+    manifest = dest.parent / "manifest.json"
+    record = {
+        "model_id": model_id,
+        "file": str(dest),
+        "size_bytes": dest.stat().st_size,
+        "sha256": sha,
+        "license": license,
+        "source": source,
+        "mirror_allowed": mirror_allowed,
+        "added_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+    }
+    manifest.write_text(json.dumps(record, indent=2))
+    typer.echo(json.dumps({"status": "ok", **record}, indent=2))
+
+
+@app.command("cache-verify")
+def cache_verify_cmd(
+    model_id: str = typer.Argument(...),
+    fmt: str = typer.Option("json", "--format"),
+) -> None:
+    """v2.33.0: verify SHA256 of a cached model."""
+    import hashlib
+    import os as _os
+    from pathlib import Path as _P
+
+    cache_root = _P(
+        _os.environ.get("VISION_SERVEX_MODEL_CACHE", _P.home() / ".cache/visionservex/models")
+    )
+    manifest = cache_root / model_id / "manifest.json"
+    if not manifest.exists():
+        typer.echo(
+            json.dumps(
+                {"status": "expected_blocker", "code": "MODEL_NOT_IN_CACHE", "model_id": model_id},
+                indent=2,
+            )
+        )
+        raise typer.Exit(2)
+
+    rec = json.loads(manifest.read_text())
+    f = Path(rec["file"])
+    if not f.exists():
+        typer.echo(
+            json.dumps(
+                {"status": "expected_blocker", "code": "CACHED_FILE_MISSING", "model_id": model_id},
+                indent=2,
+            )
+        )
+        raise typer.Exit(2)
+
+    sha = hashlib.sha256(f.read_bytes()).hexdigest()
+    ok = sha == rec["sha256"]
+    typer.echo(
+        json.dumps(
+            {
+                "status": "ok" if ok else "expected_blocker",
+                "code": "OK" if ok else "SHA256_MISMATCH",
+                "model_id": model_id,
+                "expected": rec["sha256"],
+                "actual": sha,
+            },
             indent=2,
         )
     )

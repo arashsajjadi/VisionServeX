@@ -1,0 +1,507 @@
+{
+  "total_blocked": 49,
+  "by_priority": {
+    "P3": 8,
+    "P2": 19,
+    "P0": 18,
+    "P1": 4
+  },
+  "by_root_cause": {
+    "missing_loader_or_dep": 40,
+    "download_failed": 3,
+    "missing_dependency": 3,
+    "license_blocked": 3
+  },
+  "rows": [
+    {
+      "model_id": "internimage-b",
+      "family": "internimage",
+      "task": "classify",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P3"
+    },
+    {
+      "model_id": "internimage-h",
+      "family": "internimage",
+      "task": "classify",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P3"
+    },
+    {
+      "model_id": "internimage-l",
+      "family": "internimage",
+      "task": "classify",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P3"
+    },
+    {
+      "model_id": "internimage-s",
+      "family": "internimage",
+      "task": "classify",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P3"
+    },
+    {
+      "model_id": "internimage-t",
+      "family": "internimage",
+      "task": "classify",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P3"
+    },
+    {
+      "model_id": "swinv2-large",
+      "family": "swinv2",
+      "task": "classify",
+      "current_state": "download_failed_retryable",
+      "current_blocker_code": "DOWNLOAD_FAILED_RETRYABLE",
+      "root_cause_category": "download_failed",
+      "expected_fix_type": "retry_with_backoff_or_mirror",
+      "priority": "P3"
+    },
+    {
+      "model_id": "deim-m",
+      "family": "deim",
+      "task": "detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "deim-s",
+      "family": "deim",
+      "task": "detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "deimv2-atto",
+      "family": "deim",
+      "task": "detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "deimv2-femto",
+      "family": "deim",
+      "task": "detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "deimv2-l",
+      "family": "deim",
+      "task": "detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "deimv2-m",
+      "family": "deim",
+      "task": "detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "deimv2-n",
+      "family": "deim",
+      "task": "detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "deimv2-pico",
+      "family": "deim",
+      "task": "detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "deimv2-s",
+      "family": "deim",
+      "task": "detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "deimv2-x",
+      "family": "deim",
+      "task": "detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "rtdetrv4-l",
+      "family": "rtdetrv4",
+      "task": "detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "rtdetrv4-m",
+      "family": "rtdetrv4",
+      "task": "detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "rtdetrv4-s",
+      "family": "rtdetrv4",
+      "task": "detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "rtdetrv4-x",
+      "family": "rtdetrv4",
+      "task": "detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "siglip-base-patch16-224",
+      "family": "siglip",
+      "task": "embed",
+      "current_state": "download_failed_retryable",
+      "current_blocker_code": "DOWNLOAD_FAILED_RETRYABLE",
+      "root_cause_category": "download_failed",
+      "expected_fix_type": "retry_with_backoff_or_mirror",
+      "priority": "P2"
+    },
+    {
+      "model_id": "sam3-base",
+      "family": "sam3",
+      "task": "foundation_segment",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "seem-davit-d3",
+      "family": "seem",
+      "task": "grounded_segment",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P3"
+    },
+    {
+      "model_id": "seem-focal-t",
+      "family": "seem",
+      "task": "grounded_segment",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P3"
+    },
+    {
+      "model_id": "rtmdet-r-l",
+      "family": "rtmdet",
+      "task": "obb",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "rtmdet-r-m",
+      "family": "rtmdet",
+      "task": "obb",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "rtmdet-r-s",
+      "family": "rtmdet",
+      "task": "obb",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "rtmdet-r-t",
+      "family": "rtmdet",
+      "task": "obb",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "rtmdet-r2-l",
+      "family": "rtmdet",
+      "task": "obb",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "rtmdet-r2-m",
+      "family": "rtmdet",
+      "task": "obb",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "rtmdet-r2-t",
+      "family": "rtmdet",
+      "task": "obb",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "grounding-dino-1.5",
+      "family": "grounding-dino",
+      "task": "open_vocab_detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "grounding-dino-1.6",
+      "family": "grounding-dino",
+      "task": "open_vocab_detect",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P0"
+    },
+    {
+      "model_id": "rtmpose-l",
+      "family": "rtmpose",
+      "task": "pose",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "rtmpose-l-384x288",
+      "family": "rtmpose",
+      "task": "pose",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "rtmpose-m",
+      "family": "rtmpose",
+      "task": "pose",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "rtmpose-m-384x288",
+      "family": "rtmpose",
+      "task": "pose",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "rtmpose-t",
+      "family": "rtmpose",
+      "task": "pose",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "co-dino-inst-vit-l-coco",
+      "family": "co-dino",
+      "task": "segment",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "co-dino-inst-vit-l-lvis",
+      "family": "co-dino",
+      "task": "segment",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "maskdino-r50-coco",
+      "family": "maskdino",
+      "task": "segment",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "maskdino-r50-panoptic",
+      "family": "maskdino",
+      "task": "segment",
+      "current_state": "expected_blocker",
+      "current_blocker_code": "",
+      "root_cause_category": "missing_loader_or_dep",
+      "expected_fix_type": "audit_official_source_then_implement",
+      "priority": "P2"
+    },
+    {
+      "model_id": "oneformer-convnext-large",
+      "family": "oneformer",
+      "task": "segment",
+      "current_state": "download_failed_retryable",
+      "current_blocker_code": "DOWNLOAD_FAILED_RETRYABLE",
+      "root_cause_category": "download_failed",
+      "expected_fix_type": "retry_with_backoff_or_mirror",
+      "priority": "P1"
+    },
+    {
+      "model_id": "oneformer-dinat-large",
+      "family": "oneformer",
+      "task": "segment",
+      "current_state": "dependency_required",
+      "current_blocker_code": "NATTEN_REQUIRED",
+      "root_cause_category": "missing_dependency",
+      "expected_fix_type": "add_dependency_extra_or_sidecar",
+      "priority": "P1"
+    },
+    {
+      "model_id": "rfdetr-seg-2xlarge",
+      "family": "rfdetr",
+      "task": "segment",
+      "current_state": "license_blocked",
+      "current_blocker_code": "",
+      "root_cause_category": "license_blocked",
+      "expected_fix_type": "audit_official_source_then_classify",
+      "priority": "P0"
+    },
+    {
+      "model_id": "rfdetr-seg-large",
+      "family": "rfdetr",
+      "task": "segment",
+      "current_state": "license_blocked",
+      "current_blocker_code": "",
+      "root_cause_category": "license_blocked",
+      "expected_fix_type": "audit_official_source_then_classify",
+      "priority": "P0"
+    },
+    {
+      "model_id": "rfdetr-seg-xlarge",
+      "family": "rfdetr",
+      "task": "segment",
+      "current_state": "license_blocked",
+      "current_blocker_code": "",
+      "root_cause_category": "license_blocked",
+      "expected_fix_type": "audit_official_source_then_classify",
+      "priority": "P0"
+    },
+    {
+      "model_id": "florence-2-base",
+      "family": "florence-2",
+      "task": "vlm",
+      "current_state": "dependency_required",
+      "current_blocker_code": "FLORENCE2_TRANSFORMERS_VERSION_REQUIRED",
+      "root_cause_category": "missing_dependency",
+      "expected_fix_type": "add_dependency_extra_or_sidecar",
+      "priority": "P1"
+    },
+    {
+      "model_id": "florence-2-large",
+      "family": "florence-2",
+      "task": "vlm",
+      "current_state": "dependency_required",
+      "current_blocker_code": "FLORENCE2_TRANSFORMERS_VERSION_REQUIRED",
+      "root_cause_category": "missing_dependency",
+      "expected_fix_type": "add_dependency_extra_or_sidecar",
+      "priority": "P1"
+    }
+  ]
+}

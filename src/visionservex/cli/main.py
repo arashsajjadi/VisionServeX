@@ -40,6 +40,7 @@ from visionservex.cli import (
     dataset_validators,
     deimv2_commands,
     dev_commands,
+    doctor_commands,
     domain_benchmarks,
     domain_zoo_commands,
     downloads_commands,
@@ -175,6 +176,7 @@ app.add_typer(benchmark_open_vocab.app, name="benchmark-open-vocab", invoke_with
 app.add_typer(agriculture_commands.app, name="agriculture")
 app.add_typer(aerial_commands.app, name="aerial")
 app.add_typer(audit_commands.app, name="audit")
+app.add_typer(doctor_commands.app, name="doctor")
 app.add_typer(license_commands.app, name="license")
 app.add_typer(florence2_commands.app, name="florence2")
 app.add_typer(sam_family_commands.app, name="sam-family")
