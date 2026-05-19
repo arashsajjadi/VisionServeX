@@ -561,6 +561,13 @@ def reconcile(
                 "auth_required",
                 "manual_checkpoint_required",
                 "sidecar_required",
+                "external_api_only",
+                "not_advertised",
+                "license_blocked",
+                "loader_missing",
+                "download_failed_retryable",
+                "audit_only",
+                "do_not_add",
             }:
                 missing_reason = final_state
 
