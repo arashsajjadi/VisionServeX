@@ -1,0 +1,270 @@
+{
+  "total": 44,
+  "available": 31,
+  "rows": [
+    {
+      "model_id": "libreyolo-yolox-n",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreYOLOXn.pt",
+      "size_mb": 7.7
+    },
+    {
+      "model_id": "libreyolo-yolox-n-seg",
+      "status": "download_failed",
+      "error": "HTTP 401",
+      "url": "https://huggingface.co/LibreYOLO/LibreYOLOXn-seg/resolve/main/LibreYOLOXn-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-yolox-t",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreYOLOXt.pt",
+      "size_mb": 40.8
+    },
+    {
+      "model_id": "libreyolo-yolox-t-seg",
+      "status": "download_failed",
+      "error": "HTTP 401",
+      "url": "https://huggingface.co/LibreYOLO/LibreYOLOXt-seg/resolve/main/LibreYOLOXt-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-yolox-s",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreYOLOXs.pt",
+      "size_mb": 72.1
+    },
+    {
+      "model_id": "libreyolo-yolox-s-seg",
+      "status": "download_failed",
+      "error": "HTTP 401",
+      "url": "https://huggingface.co/LibreYOLO/LibreYOLOXs-seg/resolve/main/LibreYOLOXs-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-yolox-m",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreYOLOXm.pt",
+      "size_mb": 203.1
+    },
+    {
+      "model_id": "libreyolo-yolox-m-seg",
+      "status": "download_failed",
+      "error": "HTTP 401",
+      "url": "https://huggingface.co/LibreYOLO/LibreYOLOXm-seg/resolve/main/LibreYOLOXm-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-yolox-l",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreYOLOXl.pt",
+      "size_mb": 434.4
+    },
+    {
+      "model_id": "libreyolo-yolox-l-seg",
+      "status": "download_failed",
+      "error": "HTTP 401",
+      "url": "https://huggingface.co/LibreYOLO/LibreYOLOXl-seg/resolve/main/LibreYOLOXl-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-yolox-x",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreYOLOXx.pt",
+      "size_mb": 793.5
+    },
+    {
+      "model_id": "libreyolo-yolox-x-seg",
+      "status": "download_failed",
+      "error": "HTTP 401",
+      "url": "https://huggingface.co/LibreYOLO/LibreYOLOXx-seg/resolve/main/LibreYOLOXx-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-dfine-n",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreDFINEn.pt",
+      "size_mb": 15.5
+    },
+    {
+      "model_id": "libreyolo-dfine-n-seg",
+      "status": "download_failed",
+      "error": "HTTP 401",
+      "url": "https://huggingface.co/LibreYOLO/LibreDFINEn-seg/resolve/main/LibreDFINEn-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-dfine-s",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreDFINEs.pt",
+      "size_mb": 41.8
+    },
+    {
+      "model_id": "libreyolo-dfine-s-seg",
+      "status": "download_failed",
+      "error": "HTTP 401",
+      "url": "https://huggingface.co/LibreYOLO/LibreDFINEs-seg/resolve/main/LibreDFINEs-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-dfine-m",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreDFINEm.pt",
+      "size_mb": 79.1
+    },
+    {
+      "model_id": "libreyolo-dfine-m-seg",
+      "status": "download_failed",
+      "error": "HTTP 401",
+      "url": "https://huggingface.co/LibreYOLO/LibreDFINEm-seg/resolve/main/LibreDFINEm-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-dfine-l",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreDFINEl.pt",
+      "size_mb": 126.1
+    },
+    {
+      "model_id": "libreyolo-dfine-l-seg",
+      "status": "download_failed",
+      "error": "HTTP 401",
+      "url": "https://huggingface.co/LibreYOLO/LibreDFINEl-seg/resolve/main/LibreDFINEl-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-dfine-x",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreDFINEx.pt",
+      "size_mb": 252.1
+    },
+    {
+      "model_id": "libreyolo-dfine-x-seg",
+      "status": "download_failed",
+      "error": "HTTP 401",
+      "url": "https://huggingface.co/LibreYOLO/LibreDFINEx-seg/resolve/main/LibreDFINEx-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r18",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRTDETRr18.pt",
+      "size_mb": 81.0
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r18-seg",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRTDETRr18-seg.pt",
+      "size_mb": 81.0
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r34",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRTDETRr34.pt",
+      "size_mb": 126.1
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r34-seg",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRTDETRr34-seg.pt",
+      "size_mb": 126.1
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r50",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRTDETRr50.pt",
+      "size_mb": 172.4
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r50-seg",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRTDETRr50-seg.pt",
+      "size_mb": 172.4
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r50m",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRTDETRr50m.pt",
+      "size_mb": 147.1
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r50m-seg",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRTDETRr50m-seg.pt",
+      "size_mb": 147.1
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r101",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRTDETRr101.pt",
+      "size_mb": 307.6
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r101-seg",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRTDETRr101-seg.pt",
+      "size_mb": 307.6
+    },
+    {
+      "model_id": "libreyolo-rtdetr-l",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRTDETRl.pt",
+      "size_mb": 132.4
+    },
+    {
+      "model_id": "libreyolo-rtdetr-l-seg",
+      "status": "download_failed",
+      "error": "HTTP 401",
+      "url": "https://huggingface.co/LibreYOLO/LibreRTDETRl-seg/resolve/main/LibreRTDETRl-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-rtdetr-x",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRTDETRx.pt",
+      "size_mb": 270.7
+    },
+    {
+      "model_id": "libreyolo-rtdetr-x-seg",
+      "status": "download_failed",
+      "error": "HTTP 401",
+      "url": "https://huggingface.co/LibreYOLO/LibreRTDETRx-seg/resolve/main/LibreRTDETRx-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-rfdetr-n",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRFDETRn.pt",
+      "size_mb": 122.1
+    },
+    {
+      "model_id": "libreyolo-rfdetr-n-seg",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRFDETRn-seg.pt",
+      "size_mb": 134.5
+    },
+    {
+      "model_id": "libreyolo-rfdetr-s",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRFDETRs.pt",
+      "size_mb": 128.6
+    },
+    {
+      "model_id": "libreyolo-rfdetr-s-seg",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRFDETRs-seg.pt",
+      "size_mb": 135.1
+    },
+    {
+      "model_id": "libreyolo-rfdetr-m",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRFDETRm.pt",
+      "size_mb": 135.0
+    },
+    {
+      "model_id": "libreyolo-rfdetr-m-seg",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRFDETRm-seg.pt",
+      "size_mb": 143.0
+    },
+    {
+      "model_id": "libreyolo-rfdetr-l",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRFDETRl.pt",
+      "size_mb": 136.0
+    },
+    {
+      "model_id": "libreyolo-rfdetr-l-seg",
+      "status": "downloaded",
+      "path": "/home/arash/PycharmProjects/VisionServeX/notebook/models/checkpoints/libreyolo/LibreRFDETRl-seg.pt",
+      "size_mb": 143.7
+    }
+  ]
+}

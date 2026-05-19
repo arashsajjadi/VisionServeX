@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-05-19",
+  "current_git_status": "clean (some modified notebook files in .gitignore)",
+  "latest_pypi_version": "2.34.0",
+  "github_release_v234_exists": true,
+  "latest_ci_status": "failure",
+  "ci_failure_cause": "test_doctor_commands_v233.py calls 'visionservex doctor all-benchmark' but doctor was renamed to 'extra' in v2.34 \u2014 fix was applied locally but not committed",
+  "blocking_ci_failures": [
+    "test_doctor_commands_v233.py::test_doctor_returns_structured_json[all-benchmark]",
+    "and 10 other parametrize variants"
+  ],
+  "deimv2_checkpoints_downloaded": {
+    "m": "~/.cache/visionservex/deimv2/deimv2_dinov3_m_coco.pth (74 MB)",
+    "l": "~/.cache/visionservex/deimv2/deimv2_dinov3_l_coco.pth (131 MB)",
+    "x": "~/.cache/visionservex/deimv2/deimv2_dinov3_x_coco.pth (206 MB)"
+  },
+  "deimv2_sidecar_status": "creating (deimv2 create-env --execute running)",
+  "v235_target": "fix CI, benchmark DEIMv2, LibreYOLO, release",
+  "next_action": "commit test_doctor fix, wait for sidecar, run benchmarks, release v2.35.0"
+}

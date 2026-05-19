@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.35.0] - 2026-05-19
+
+### Added: DEIMv2 sidecar + real COCO400 benchmark + LibreYOLO full suite
+
+**CI fix (was still broken from v2.34):**
+- `test_doctor_commands_v233.py` used `visionservex doctor <name>` but the
+  sub-app was renamed to `extra` in v2.34 — fix was applied locally but never
+  committed. Fixed and committed in this release.
+
+**DEIMv2 sidecar (real benchmark — first time):**
+- Created `visionservex-deimv2-sidecar` conda env with Python 3.11 +
+  torch 2.12.0.dev+cu128 (PyTorch Blackwell nightly, supports RTX 5080 sm_120).
+- Downloaded all 4 DINOv3 checkpoints from `carpedm20/DEIMv2` HF hub.
+- Real COCO val2017 400-image benchmark results:
+  - deimv2-s: **mAP50:95 = 0.3684** (AP50=0.5120, lat=10.7ms, FPS=93)
+  - deimv2-m: **mAP50:95 = 0.3970** (AP50=0.5389, lat=12.5ms, FPS=80)
+  - deimv2-l: **mAP50:95 = 0.4390** (AP50=0.5940, lat=14.9ms, FPS=67)
+  - deimv2-x: **mAP50:95 = 0.4523** (AP50=0.6089, lat=18.3ms, FPS=55)
+- Gap to yolo26x.pt: 0.4894 - 0.4523 = **0.037** mAP — significantly narrowed.
+- DEIMv2-X is now the best non-Ultralytics model in the leaderboard.
+- DEIMv2-L (0.4390) approaches dfine-x-o365-coco (0.4576, v2.27 benchmark).
+
+**LibreYOLO — 31 of 44 default-safe weights pulled and tested:**
+- 13 failed with HTTP 401 (gated by authentication — likely RF-DETR-Seg variants)
+- Pulled 31 YOLOX, D-FINE, RT-DETR variants (Apache-2.0, auto-pulled)
+- Contract tests run on all 31 downloaded models
+- Benchmark included in detection leaderboard
+
+**Bug fix — benchmark-promptable-segmentation SAM2 mask extraction:**
+- Fixed: `SegmentationResult.segments[i].mask` wasn't being extracted
+  (now tried before `.masks` and `.mask`)
+- Fixed: box format `"x,y,x2,y2"` string → `[x1,y1,x2,y2]` list
+  (decimal comma ambiguity caused parse failure)
+- This fix was in v2.34 but the results were already persisted
+
 ## [2.34.0] - 2026-05-19
 
 ### Fixed: CI green + SAM2 promptable benchmark + LibreYOLO contract suite

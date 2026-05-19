@@ -1,0 +1,60 @@
+{
+  "version": "v2.35.0",
+  "device": "cuda",
+  "n_images": 400,
+  "dataset": "coco_val2017_400_vsx",
+  "rows": [
+    {
+      "model_id": "deimv2-s",
+      "status": "ok",
+      "code": "OK",
+      "mAP50_95": 0.3684,
+      "AP50": 0.512,
+      "AP75": null,
+      "latency_ms_p50": 10.7,
+      "fps": 93.4,
+      "n_images": 400,
+      "source_engine": "deimv2_sidecar",
+      "family": "deimv2"
+    },
+    {
+      "model_id": "deimv2-m",
+      "status": "ok",
+      "code": "OK",
+      "mAP50_95": 0.397,
+      "AP50": 0.5389,
+      "AP75": 0.4381,
+      "latency_ms_p50": 12.5,
+      "fps": 80.2,
+      "n_images": 400,
+      "source_engine": "deimv2_sidecar",
+      "family": "deimv2"
+    },
+    {
+      "model_id": "deimv2-l",
+      "status": "ok",
+      "code": "OK",
+      "mAP50_95": 0.439,
+      "AP50": 0.594,
+      "AP75": 0.491,
+      "latency_ms_p50": 14.9,
+      "fps": 67.3,
+      "n_images": 400,
+      "source_engine": "deimv2_sidecar",
+      "family": "deimv2"
+    },
+    {
+      "model_id": "deimv2-x",
+      "status": "ok",
+      "code": "OK",
+      "mAP50_95": 0.4523,
+      "AP50": 0.6089,
+      "AP75": null,
+      "latency_ms_p50": 18.3,
+      "fps": 54.6,
+      "n_images": 400,
+      "source_engine": "deimv2_sidecar",
+      "family": "deimv2"
+    }
+  ]
+}

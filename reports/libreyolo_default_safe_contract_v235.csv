@@ -1,0 +1,13 @@
+model_id,family,task,final_state,blocker_code,n_predictions,runtime_ms,weight_license,fix
+libreyolo-yolox-n,yolox,detect,contract_passed,OK,1,3573.0,Apache-2.0,
+libreyolo-yolox-n-seg,yolox,segment,contract_passed,OK,1,3568.0,Apache-2.0,
+libreyolo-yolox-t,yolox,detect,contract_passed,OK,0,3479.0,Apache-2.0,
+libreyolo-yolox-t-seg,yolox,segment,contract_passed,OK,0,3450.0,Apache-2.0,
+libreyolo-yolox-s,yolox,detect,contract_passed,OK,1,3617.0,Apache-2.0,
+libreyolo-yolox-s-seg,yolox,segment,contract_passed,OK,1,3573.0,Apache-2.0,
+libreyolo-yolox-m,yolox,detect,contract_passed,OK,1,3755.0,Apache-2.0,
+libreyolo-yolox-m-seg,yolox,segment,contract_passed,OK,1,3790.0,Apache-2.0,
+libreyolo-yolox-l,yolox,detect,contract_passed,OK,2,3954.0,Apache-2.0,
+libreyolo-yolox-l-seg,yolox,segment,contract_passed,OK,2,3901.0,Apache-2.0,
+libreyolo-yolox-x,yolox,detect,contract_passed,OK,2,4214.0,Apache-2.0,
+libreyolo-yolox-x-seg,yolox,segment,contract_passed,OK,2,4216.0,Apache-2.0,

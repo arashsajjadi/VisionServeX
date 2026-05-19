@@ -31,7 +31,7 @@ DOCTORS = [
 @pytest.mark.parametrize("name", DOCTORS)
 def test_doctor_returns_structured_json(name: str) -> None:
     proc = subprocess.run(
-        [sys.executable, "-m", "visionservex", "doctor", name],
+        [sys.executable, "-m", "visionservex", "extra", name],
         capture_output=True,
         text=True,
         timeout=30,
@@ -66,7 +66,7 @@ def test_doctor_returns_structured_json(name: str) -> None:
 
 def test_doctor_sam3_returns_auth_required() -> None:
     proc = subprocess.run(
-        [sys.executable, "-m", "visionservex", "doctor", "sam3"],
+        [sys.executable, "-m", "visionservex", "extra", "sam3"],
         capture_output=True,
         text=True,
         timeout=30,
@@ -79,7 +79,7 @@ def test_doctor_sam3_returns_auth_required() -> None:
 
 def test_doctor_grounding_dino15_returns_api_key_required() -> None:
     proc = subprocess.run(
-        [sys.executable, "-m", "visionservex", "doctor", "grounding-dino15"],
+        [sys.executable, "-m", "visionservex", "extra", "grounding-dino15"],
         capture_output=True,
         text=True,
         timeout=30,

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "visionservex"
-version = "2.34.0"
+version = "2.35.0"
 description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -330,4 +330,5 @@ markers = [
     "disk_heavy: disk-intensive test; opt in: VISIONSERVEX_RUN_DISK_HEAVY_TESTS=1",
     "download: downloads large assets; opt in: VISIONSERVEX_RUN_DOWNLOAD_TESTS=1",
     "smoke: small smoke-only variant of real_model or gpu test; always paired with real_model or gpu marker",
+    "notebook: notebook execution test; opt in: manually",
 ]
