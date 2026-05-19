@@ -1,0 +1,256 @@
+{
+  "total": 32,
+  "by_priority": {
+    "P0": 5,
+    "P1": 5,
+    "P2": 17,
+    "P3": 5
+  },
+  "research_needed": 29,
+  "auth_only": 3,
+  "requests": [
+    {
+      "model_id": "oneformer-convnext-large",
+      "family": "oneformer",
+      "task": "segment",
+      "current_state": "upstream_unavailable",
+      "priority": "P2",
+      "missing_info": "Whether SHI-Labs ConvNeXt OneFormer for COCO is officially released",
+      "proposed_research_prompt": "Find whether oneformer-convnext-large is officially released for COCO by SHI-Labs."
+    },
+    {
+      "model_id": "rtdetrv4-s",
+      "family": "rtdetrv4",
+      "task": "detect",
+      "current_state": "manual_checkpoint_required",
+      "priority": "P1",
+      "missing_info": "Google Drive ID for rtdetrv4_s.pth",
+      "proposed_research_prompt": "Find Google Drive ID and SHA256 for rtdetrv4_s.pth official checkpoint."
+    },
+    {
+      "model_id": "rtdetrv4-m",
+      "family": "rtdetrv4",
+      "task": "detect",
+      "current_state": "manual_checkpoint_required",
+      "priority": "P1",
+      "missing_info": "Google Drive ID for rtdetrv4_m.pth"
+    },
+    {
+      "model_id": "rtdetrv4-l",
+      "family": "rtdetrv4",
+      "task": "detect",
+      "current_state": "manual_checkpoint_required",
+      "priority": "P1",
+      "missing_info": "Google Drive ID for rtdetrv4_l.pth"
+    },
+    {
+      "model_id": "rtdetrv4-x",
+      "family": "rtdetrv4",
+      "task": "detect",
+      "current_state": "manual_checkpoint_required",
+      "priority": "P1",
+      "missing_info": "Google Drive ID for rtdetrv4_x.pth"
+    },
+    {
+      "model_id": "seem-davit-d3",
+      "family": "seem",
+      "task": "promptable_segment",
+      "current_state": "sidecar_required",
+      "priority": "P2",
+      "missing_info": "Latest Python/torch/Detectron2 versions compatible with X-Decoder/SEEM"
+    },
+    {
+      "model_id": "seem-focal-t",
+      "family": "seem",
+      "task": "promptable_segment",
+      "current_state": "sidecar_required",
+      "priority": "P2",
+      "missing_info": "Same as davit-d3"
+    },
+    {
+      "model_id": "maskdino-r50-coco",
+      "family": "maskdino",
+      "task": "segment",
+      "current_state": "sidecar_required",
+      "priority": "P0",
+      "missing_info": "Official MaskDINO checkpoint URL for COCO instance + mmcv version",
+      "potential_impact": "could beat oneformer-swin-large=0.1649 and close gap to yolo26x-seg=0.2728"
+    },
+    {
+      "model_id": "maskdino-r50-panoptic",
+      "family": "maskdino",
+      "task": "segment",
+      "current_state": "sidecar_required",
+      "priority": "P0",
+      "missing_info": "Same as coco"
+    },
+    {
+      "model_id": "co-dino-inst-vit-l-coco",
+      "family": "co-detr",
+      "task": "detect",
+      "current_state": "sidecar_required",
+      "priority": "P0",
+      "missing_info": "Official CO-DETR ViT-L COCO checkpoint URL + HF integration status",
+      "potential_impact": "CO-DETR achieves ~67 mAP on COCO \u2014 could beat yolo26x=0.4894"
+    },
+    {
+      "model_id": "co-dino-inst-vit-l-lvis",
+      "family": "co-detr",
+      "task": "detect",
+      "current_state": "sidecar_required",
+      "priority": "P0",
+      "missing_info": "https://huggingface.co/zongzhuofan/co-detr-vit-large-lvis exists but COCO variant unclear"
+    },
+    {
+      "model_id": "internimage-t",
+      "family": "internimage",
+      "current_state": "sidecar_required",
+      "priority": "P3",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "internimage-s",
+      "family": "internimage",
+      "current_state": "sidecar_required",
+      "priority": "P3",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "internimage-b",
+      "family": "internimage",
+      "current_state": "sidecar_required",
+      "priority": "P3",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "internimage-l",
+      "family": "internimage",
+      "current_state": "sidecar_required",
+      "priority": "P3",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "internimage-h",
+      "family": "internimage",
+      "current_state": "sidecar_required",
+      "priority": "P3",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "rtmdet-r-s",
+      "family": "rtmdet",
+      "current_state": "sidecar_required",
+      "priority": "P2",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "rtmdet-r-t",
+      "family": "rtmdet",
+      "current_state": "sidecar_required",
+      "priority": "P2",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "rtmdet-r-m",
+      "family": "rtmdet",
+      "current_state": "sidecar_required",
+      "priority": "P2",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "rtmdet-r-l",
+      "family": "rtmdet",
+      "current_state": "sidecar_required",
+      "priority": "P2",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "rtmdet-r2-t",
+      "family": "rtmdet",
+      "current_state": "sidecar_required",
+      "priority": "P2",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "rtmdet-r2-m",
+      "family": "rtmdet",
+      "current_state": "sidecar_required",
+      "priority": "P2",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "rtmdet-r2-l",
+      "family": "rtmdet",
+      "current_state": "sidecar_required",
+      "priority": "P2",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "rtmpose-t",
+      "family": "rtmpose",
+      "current_state": "sidecar_required",
+      "priority": "P2",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "rtmpose-m",
+      "family": "rtmpose",
+      "current_state": "sidecar_required",
+      "priority": "P2",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "rtmpose-l",
+      "family": "rtmpose",
+      "current_state": "sidecar_required",
+      "priority": "P2",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "rtmpose-m-384x288",
+      "family": "rtmpose",
+      "current_state": "sidecar_required",
+      "priority": "P2",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "rtmpose-l-384x288",
+      "family": "rtmpose",
+      "current_state": "sidecar_required",
+      "priority": "P2",
+      "missing_info": "OpenMMLab sidecar dependency matrix (mmcv/mmdet/mmrotate/mmpose) for Python 3.11"
+    },
+    {
+      "model_id": "grounding-dino-1.5",
+      "family": "grounding-dino",
+      "current_state": "auth_required",
+      "priority": "P2",
+      "missing_info": "User must obtain DINO_X_API_KEY from cloud.deepdataspace.com",
+      "research_needed": false
+    },
+    {
+      "model_id": "grounding-dino-1.6",
+      "family": "grounding-dino",
+      "current_state": "auth_required",
+      "priority": "P2",
+      "research_needed": false,
+      "missing_info": "Same as 1.5"
+    },
+    {
+      "model_id": "sam3-base",
+      "family": "sam3",
+      "current_state": "auth_required",
+      "priority": "P1",
+      "research_needed": false,
+      "missing_info": "User must accept HF license at hf.co/facebook/sam3"
+    },
+    {
+      "model_id": "rfdetr-seg-large",
+      "family": "rfdetr",
+      "current_state": "checkpoint_required",
+      "priority": "P0",
+      "missing_info": "Public availability of rfdetr-seg-large checkpoint (Apache core, not PML)",
+      "potential_impact": "could improve auto-seg if Apache Large checkpoint exists"
+    }
+  ]
+}

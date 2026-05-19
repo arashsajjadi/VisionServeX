@@ -1,0 +1,9 @@
+{
+  "status": "auth_required",
+  "code": "SAM3_AUTH_REQUIRED",
+  "model_id": "facebook/sam3",
+  "official_repo": "https://github.com/facebookresearch/sam3",
+  "license": "Apache-2.0 (but gated on HF for distribution)",
+  "auth_instructions": "1) accept license at hf.co/facebook/sam3, 2) hf auth login, 3) export HF_TOKEN",
+  "alternative": "Ultralytics docs: download sam3.pt manually then load via ultralytics"
+}

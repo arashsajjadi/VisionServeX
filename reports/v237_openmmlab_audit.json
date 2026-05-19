@@ -1,0 +1,22 @@
+{
+  "status": "sidecar_required",
+  "code": "OPENMMLAB_SIDECAR_REQUIRED",
+  "main_env": {
+    "python": "3.13.12",
+    "torch": "2.11.0+cu130",
+    "mmcv_compatibility": "no wheels for Python 3.13 + torch 2.11 + CUDA 13"
+  },
+  "required_sidecars": {
+    "openmmlab_detseg_py311": "for CO-DETR, MaskDINO (Python 3.11 + mmcv + mmdet)",
+    "openmmlab_obb_py311": "for RTMDet-R, RTMDet-R2 (Python 3.11 + mmcv + mmrotate)",
+    "openmmlab_pose_py311": "for RTMPose (Python 3.11 + mmcv + mmpose)",
+    "openmmlab_classify_py311": "for InternImage (Python 3.11 + custom internimage ops)"
+  },
+  "official_sources": {
+    "mmdetection": "https://github.com/open-mmlab/mmdetection",
+    "mmrotate": "https://github.com/open-mmlab/mmrotate",
+    "mmpose": "https://github.com/open-mmlab/mmpose",
+    "co-detr": "https://github.com/sense-x/co-detr",
+    "internimage": "https://github.com/OpenGVLab/InternImage"
+  }
+}

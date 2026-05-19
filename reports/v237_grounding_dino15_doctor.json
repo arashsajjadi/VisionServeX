@@ -1,0 +1,8 @@
+{
+  "status": "auth_required",
+  "code": "GROUNDING_DINO15_API_KEY_REQUIRED",
+  "api_url": "https://cloud.deepdataspace.com",
+  "official_repo": "https://github.com/IDEA-Research/Grounding-DINO-1.5-API",
+  "env_var": "DINO_X_API_KEY",
+  "auth_instructions": "1) Register at cloud.deepdataspace.com, 2) get API key, 3) export DINO_X_API_KEY"
+}

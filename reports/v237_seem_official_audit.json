@@ -1,0 +1,14 @@
+{
+  "status": "sidecar_required",
+  "code": "SEEM_SIDECAR_REQUIRED",
+  "models": [
+    "seem-davit-d3",
+    "seem-focal-t"
+  ],
+  "official_repos": [
+    "https://github.com/MqLeet/SEEM",
+    "https://github.com/microsoft/x-decoder"
+  ],
+  "facts": "SEEM uses old X-Decoder dependency stack. Requires Python 3.9 + Detectron2 + custom packages.",
+  "recommended_sidecar": "vsx-seem-py39 with X-Decoder repo cloned and installed via requirements.txt"
+}

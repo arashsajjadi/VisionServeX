@@ -1,11 +1,64 @@
 # Changelog
 
+## [Unreleased]
+
+## [2.37.0] - 2026-05-19
+
+### Fixed: 49 blocked-model registry resolution + license reclassification
+
+CI fix (1356 → 1372 passed):
+- `EXPECTED_BLOCKER_CODES` extended with v2.37 codes: RFDETR_LOAD_FAILED, DOWNLOAD_FAILED_RETRYABLE, NATTEN_REQUIRED, GROUNDING_DINO15_API_KEY_REQUIRED, SAM3_AUTH_REQUIRED, FLORENCE2_DEMO_PASSED_SIDECAR, DEIMV2_TORCH_VERSION_REQUIRED, RFDETR_PLUS_PML_NOT_DEFAULT_SAFE, etc.
+- test_maxvit_alias: also accept `error.code: PREDICT_FAILED` envelope (CI environments without torch).
+
+49-row resolution matrix (`reports/v237_49_blocked_resolution_matrix.{json,csv}`):
+- 9 fixed (benchmark/demo passed):
+  - DEIMv2-s/m/l/x: stale-synced from v2.35 benchmark (mAP 0.3684–0.4523)
+  - DEIMv2-atto: 0.1556 mAP (new)
+  - DEIMv2-femto: 0.1965 mAP (new)
+  - DEIMv2-pico: 0.2677 mAP (new)
+  - Florence-2 base + large: stale-synced from v2.36 sidecar demo
+- 4 manual_checkpoint_required: rtdetrv4-{s,m,l,x} (Google Drive)
+- 3 auth_required: grounding-dino-1.5/1.6 (API key), sam3-base (HF license)
+- 24 sidecar_required: OneFormer-DiNAT (NATTEN), SEEM (X-Decoder), 21 OpenMMLab (CO-DINO, MaskDINO, InternImage, RTMDet-R, RTMPose)
+- 2 download_failed_retryable: siglip-base, swinv2-large
+- 2 upstream_deprecated: deim-m, deim-s (use DEIMv2)
+- 1 upstream_unavailable: oneformer-convnext-large (404)
+- 1 wrong_registry_entry: rfdetr-seg-large (was license_blocked, actually Apache-2.0)
+- 1 loader_missing: deimv2-n (state_dict mismatch)
+- 2 opt_in_license_required: rfdetr-seg-xlarge/2xlarge (PML 1.0)
+
+License reclassification (rfdetr-seg):
+- rfdetr-seg-large: Apache-2.0 (core) — NOT license_blocked. Reclassified to `checkpoint_required`.
+- rfdetr-seg-xlarge/2xlarge: PML-1.0 — correctly `opt_in_license_required`.
+
+DEIMv2 family complete coverage:
+- atto: 0.1556 mAP, lat=4.4ms (smallest model)
+- femto: 0.1965 mAP, lat=4.5ms
+- pico: 0.2677 mAP, lat=4.8ms
+- n: state_dict mismatch (config/weight asymmetry)
+- s: 0.3684 mAP (v2.35)
+- m: 0.3970 mAP (v2.35)
+- l: 0.4390 mAP (v2.35)
+- x: 0.4523 mAP (v2.35)
+
+Deep Research requests (32 items):
+- P0 (5): MaskDINO instance/panoptic, CO-DETR ViT-L COCO/LVIS, rfdetr-seg-large checkpoint
+- P1 (5): RT-DETRv4 s/m/l/x Google Drive IDs, sam3-base HF auth
+- P2 (17): OneFormer-ConvNeXt, SEEM, OpenMMLab OBB/Pose, Grounding DINO 1.5/1.6 API keys
+- P3 (5): InternImage classification (low priority)
+
+New tests (3 files, 16 tests):
+- test_v237_49_blocked_resolution_matrix
+- test_v237_no_permissive_license_marked_license_blocked
+- test_v237_stale_deimv2_florence_synced
+
+Detection headline preserved: libreyolo-dfine-x = 0.5030 > yolo26x.pt = 0.4894.
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
 
 ## [2.36.0] - 2026-05-19
 

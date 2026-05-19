@@ -1,0 +1,55 @@
+{
+  "status": "expected_blocker",
+  "code": "RTDETRV4_MANUAL_CHECKPOINT_REQUIRED",
+  "official_repo": "https://github.com/RT-DETRs/RT-DETRv4",
+  "rows": [
+    {
+      "model_id": "rtdetrv4-s",
+      "final_state": "manual_checkpoint_required",
+      "blocker_code": "MANUAL_CHECKPOINT_REQUIRED",
+      "expected_filename": "rtdetrv4_s.pth",
+      "expected_cache_path": "~/.cache/visionservex/rtdetrv4/rtdetrv4_s.pth",
+      "official_url": "https://github.com/RT-DETRs/RT-DETRv4 (Google Drive links)",
+      "gdown_command": "gdown <ID_for_rtdetrv4_s> -O ~/.cache/visionservex/rtdetrv4/rtdetrv4_s.pth",
+      "validate_command": "visionservex rtdetrv4 validate-checkpoint rtdetrv4-s --format json",
+      "smoke_command": "visionservex rtdetrv4 smoke-test rtdetrv4-s IMAGE --device cuda --backend torch",
+      "benchmark_command": "visionservex benchmark-detection --models rtdetrv4-s --device cuda --backend torch"
+    },
+    {
+      "model_id": "rtdetrv4-m",
+      "final_state": "manual_checkpoint_required",
+      "blocker_code": "MANUAL_CHECKPOINT_REQUIRED",
+      "expected_filename": "rtdetrv4_m.pth",
+      "expected_cache_path": "~/.cache/visionservex/rtdetrv4/rtdetrv4_m.pth",
+      "official_url": "https://github.com/RT-DETRs/RT-DETRv4 (Google Drive links)",
+      "gdown_command": "gdown <ID_for_rtdetrv4_m> -O ~/.cache/visionservex/rtdetrv4/rtdetrv4_m.pth",
+      "validate_command": "visionservex rtdetrv4 validate-checkpoint rtdetrv4-m --format json",
+      "smoke_command": "visionservex rtdetrv4 smoke-test rtdetrv4-m IMAGE --device cuda --backend torch",
+      "benchmark_command": "visionservex benchmark-detection --models rtdetrv4-m --device cuda --backend torch"
+    },
+    {
+      "model_id": "rtdetrv4-l",
+      "final_state": "manual_checkpoint_required",
+      "blocker_code": "MANUAL_CHECKPOINT_REQUIRED",
+      "expected_filename": "rtdetrv4_l.pth",
+      "expected_cache_path": "~/.cache/visionservex/rtdetrv4/rtdetrv4_l.pth",
+      "official_url": "https://github.com/RT-DETRs/RT-DETRv4 (Google Drive links)",
+      "gdown_command": "gdown <ID_for_rtdetrv4_l> -O ~/.cache/visionservex/rtdetrv4/rtdetrv4_l.pth",
+      "validate_command": "visionservex rtdetrv4 validate-checkpoint rtdetrv4-l --format json",
+      "smoke_command": "visionservex rtdetrv4 smoke-test rtdetrv4-l IMAGE --device cuda --backend torch",
+      "benchmark_command": "visionservex benchmark-detection --models rtdetrv4-l --device cuda --backend torch"
+    },
+    {
+      "model_id": "rtdetrv4-x",
+      "final_state": "manual_checkpoint_required",
+      "blocker_code": "MANUAL_CHECKPOINT_REQUIRED",
+      "expected_filename": "rtdetrv4_x.pth",
+      "expected_cache_path": "~/.cache/visionservex/rtdetrv4/rtdetrv4_x.pth",
+      "official_url": "https://github.com/RT-DETRs/RT-DETRv4 (Google Drive links)",
+      "gdown_command": "gdown <ID_for_rtdetrv4_x> -O ~/.cache/visionservex/rtdetrv4/rtdetrv4_x.pth",
+      "validate_command": "visionservex rtdetrv4 validate-checkpoint rtdetrv4-x --format json",
+      "smoke_command": "visionservex rtdetrv4 smoke-test rtdetrv4-x IMAGE --device cuda --backend torch",
+      "benchmark_command": "visionservex benchmark-detection --models rtdetrv4-x --device cuda --backend torch"
+    }
+  ]
+}

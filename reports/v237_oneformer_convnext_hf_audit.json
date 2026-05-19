@@ -1,0 +1,12 @@
+{
+  "status": "expected_blocker",
+  "code": "WRONG_REGISTRY_ENTRY",
+  "model_id": "oneformer-convnext-large",
+  "checked_urls": [
+    "https://huggingface.co/shi-labs/oneformer_coco_convnext_large (404)",
+    "https://huggingface.co/shi-labs (only swin and dinat exist for COCO)"
+  ],
+  "official_source": "https://github.com/SHI-Labs/OneFormer",
+  "facts": "SHI-Labs publishes oneformer_coco_swin_large and oneformer_coco_dinat_large on HF. No oneformer_coco_convnext_large checkpoint exists at the registry-mapped HF ID.",
+  "recommendation": "Remove from registry OR remap to a non-COCO ConvNeXt variant if needed. Mark wrong_registry_entry."
+}

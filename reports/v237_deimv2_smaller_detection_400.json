@@ -1,0 +1,59 @@
+{
+  "version": "v2.37.0",
+  "device": "cuda",
+  "n_images": 400,
+  "dataset": "coco_val2017_400_vsx",
+  "rows": [
+    {
+      "model_id": "deimv2-atto",
+      "status": "ok",
+      "code": "OK",
+      "n_images": 400,
+      "n_predictions": 5692,
+      "mAP50_95": 0.15558134560496004,
+      "AP50": 0.2410888235577362,
+      "AP75": 0.16143907803175814,
+      "latency_ms_p50": 4.371164497570135,
+      "latency_ms_p95": 5.244949902407822,
+      "fps": 228.77198983380404,
+      "source_engine": "deimv2_sidecar",
+      "family": "deimv2"
+    },
+    {
+      "model_id": "deimv2-femto",
+      "status": "ok",
+      "code": "OK",
+      "n_images": 400,
+      "n_predictions": 7100,
+      "mAP50_95": 0.1965474417394418,
+      "AP50": 0.29794547908406677,
+      "AP75": 0.21895340354985557,
+      "latency_ms_p50": 4.474843502976,
+      "latency_ms_p95": 5.650185159174718,
+      "fps": 223.47150226258165,
+      "source_engine": "deimv2_sidecar",
+      "family": "deimv2"
+    },
+    {
+      "model_id": "deimv2-pico",
+      "status": "ok",
+      "code": "OK",
+      "n_images": 400,
+      "n_predictions": 9110,
+      "mAP50_95": 0.26771434420811285,
+      "AP50": 0.40043914806177305,
+      "AP75": 0.27933199699595623,
+      "latency_ms_p50": 4.7635800001444295,
+      "latency_ms_p95": 5.757017161522522,
+      "fps": 209.92614797477538,
+      "source_engine": "deimv2_sidecar",
+      "family": "deimv2"
+    },
+    {
+      "model_id": "deimv2-n",
+      "status": "expected_blocker",
+      "code": "DEIMV2_MODEL_LOAD_FAILED",
+      "error": "Error(s) in loading state_dict for DEIM:\n\tMissing key(s) in state_dict: \"decoder.decoder.layers.0.norm2.scale\", \"decoder.decoder.layers.1.norm2.scale\", \"decoder.decoder.layers.2.norm2.scale\". \n\tUnexpected key(s) in state_dict: \"decoder.decoder.layers.0.gateway.gate.weight\", \"decoder.decoder.layers.0"
+    }
+  ]
+}

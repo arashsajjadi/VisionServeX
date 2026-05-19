@@ -1,0 +1,10 @@
+{
+  "status": "expected_blocker",
+  "code": "UPSTREAM_DEPRECATED",
+  "models": {
+    "deim-m": "no maintained checkpoint route \u2014 superseded by DEIMv2-m",
+    "deim-s": "no maintained checkpoint route \u2014 superseded by DEIMv2-s"
+  },
+  "recommendation": "Use DEIMv2 family (carpedm20/DEIMv2 on HF). Apache-2.0 weights for Atto..X.",
+  "official_source": "https://github.com/Intellindust-AI-Lab/DEIMv2"
+}

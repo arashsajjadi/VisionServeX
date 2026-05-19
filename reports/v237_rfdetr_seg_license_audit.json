@@ -1,0 +1,15 @@
+{
+  "status": "ok",
+  "code": "OK",
+  "official_source": "https://rfdetr.roboflow.com/develop/",
+  "license_policy": {
+    "rfdetr-seg-nano": "Apache-2.0 (core)",
+    "rfdetr-seg-small": "Apache-2.0 (core)",
+    "rfdetr-seg-medium": "Apache-2.0 (core)",
+    "rfdetr-seg-large": "Apache-2.0 (core \u2014 NOT license_blocked despite previous mismarking)",
+    "rfdetr-seg-xlarge": "PML-1.0 (requires rfdetr[plus]) \u2014 opt-in non-commercial",
+    "rfdetr-seg-2xlarge": "PML-1.0 (requires rfdetr[plus]) \u2014 opt-in non-commercial"
+  },
+  "rfdetr_seg_large_status": "checkpoint_required (no public seg checkpoint at this size yet)",
+  "rfdetr_seg_xlarge_2xlarge_status": "opt_in_license_required (PML-1.0)"
+}
