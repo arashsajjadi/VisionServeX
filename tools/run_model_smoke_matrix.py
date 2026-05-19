@@ -784,9 +784,7 @@ def main() -> None:
     p.add_argument("--include-sidecar", action="store_true", default=False)
     p.add_argument("--include-domain", action="store_true", default=False)
     p.add_argument("--include-mock", action="store_true", default=False)
-    p.add_argument(
-        "--include-libreyolo-default-safe", action="store_true", default=False
-    )
+    p.add_argument("--include-libreyolo-default-safe", action="store_true", default=False)
     p.add_argument("--out", type=Path, default=None)
     p.add_argument("--csv", type=Path, default=None)
     p.add_argument("--fail-on-package-bug", action="store_true", default=False)

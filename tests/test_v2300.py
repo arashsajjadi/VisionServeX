@@ -98,9 +98,7 @@ def test_deimv2_audit_hf_runs() -> None:
 
 
 def test_rtdetrv4_audit_checkpoints_runs() -> None:
-    proc = _run(
-        ["rtdetrv4", "audit-checkpoints", "--out", "/tmp/v230_rtdetrv4_audit.json"]
-    )
+    proc = _run(["rtdetrv4", "audit-checkpoints", "--out", "/tmp/v230_rtdetrv4_audit.json"])
     assert proc.returncode == 0
     data = json.loads(Path("/tmp/v230_rtdetrv4_audit.json").read_text())
     rows = data.get("rows", [])

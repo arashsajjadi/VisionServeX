@@ -49,7 +49,8 @@ cells: list[dict] = []
 # =============================================================================
 # 1. TITLE + PROTOCOL
 # =============================================================================
-cells.append(md("""# VisionServeX — Clean Task-Separated Benchmark (v34)
+cells.append(
+    md("""# VisionServeX — Clean Task-Separated Benchmark (v34)
 
 **Version:** VisionServeX v2.30.0
 **Notebook:** v34 (clean rewrite — no v20/v2.16 legacy)
@@ -97,13 +98,15 @@ against each other, and no smoke result is presented as a benchmark.
 
 All artifacts land in
 `notebook/visionservex_v34_run/visionservex_v34_outputs/{reports,plots,visuals}/`.
-"""))
+""")
+)
 
 # =============================================================================
 # 2. ENVIRONMENT + IMPORTS
 # =============================================================================
 cells.append(md("## 1. Environment, imports, output directory"))
-cells.append(code("""# v34 — environment + paths + shared helpers
+cells.append(
+    code("""# v34 — environment + paths + shared helpers
 from __future__ import annotations
 
 import json
@@ -145,9 +148,11 @@ NOTEBOOK_VERSION = "v34"
 print(f"VisionServeX {VSX_VERSION} - notebook {NOTEBOOK_VERSION}")
 print(f"Python {sys.version.split()[0]}  /  Platform {platform.platform()}")
 print(f"Output -> {OUT_ROOT}")
-"""))
+""")
+)
 
-cells.append(code("""# Environment report
+cells.append(
+    code("""# Environment report
 env = {
     "visionservex_version": VSX_VERSION,
     "notebook_version": NOTEBOOK_VERSION,
@@ -169,13 +174,15 @@ except Exception as exc:
 (REPORTS_DIR / "environment_report_v34.json").write_text(json.dumps(env, indent=2))
 display_env = pd.DataFrame({"key": list(env.keys()), "value": [str(v) for v in env.values()]})
 display_env
-"""))
+""")
+)
 
 # =============================================================================
 # 3. GPU REPORT
 # =============================================================================
 cells.append(md("## 2. GPU report"))
-cells.append(code("""gpu = {"cuda_available": False}
+cells.append(
+    code("""gpu = {"cuda_available": False}
 try:
     import torch
     gpu["cuda_available"] = torch.cuda.is_available()
@@ -191,20 +198,24 @@ except Exception as exc:
     gpu["error"] = str(exc)[:200]
 (REPORTS_DIR / "gpu_report_v34.json").write_text(json.dumps(gpu, indent=2))
 pd.DataFrame({"key": list(gpu.keys()), "value": [str(v) for v in gpu.values()]})
-"""))
+""")
+)
 
 # =============================================================================
 # 4. CLEAN DISPLAY HELPER
 # =============================================================================
-cells.append(md("""## 3. Clean display helper
+cells.append(
+    md("""## 3. Clean display helper
 
 `clean_display_value(x, status=None)` is the only function used to render
 metric cells in this notebook. It guarantees:
 
 - `None` / `NaN` / `inf` → `not collected` / `not applicable` / `not found`
 - `NOT_WIRED` / `failed_runtime` never appears.
-- Numeric values are formatted with 4 decimals."""))
-cells.append(code("""def clean_display_value(x, *, status: str | None = None, label: str | None = None) -> str:
+- Numeric values are formatted with 4 decimals.""")
+)
+cells.append(
+    code("""def clean_display_value(x, *, status: str | None = None, label: str | None = None) -> str:
     return render_nullable(x, status=status, label=label)
 
 ALLOWED_FINAL_STATES = (
@@ -215,17 +226,21 @@ ALLOWED_FINAL_STATES = (
 )
 
 FORBIDDEN_DISPLAY_STRINGS = ("NOT_WIRED", "v20:", "v2.16", "UNAVAILABLE_OR_FAILED")
-"""))
+""")
+)
 
 # =============================================================================
 # 5. SMOKE MATRIX SUMMARY
 # =============================================================================
-cells.append(md("""## 4. Smoke matrix summary (v2.30 reclassified for v34)
+cells.append(
+    md("""## 4. Smoke matrix summary (v2.30 reclassified for v34)
 
 Source: `reports/core_smoke_matrix_v34.json`. Already reclassified so the
 six v2.30 blockers carry precise codes (`DOWNLOAD_FAILED_RETRYABLE`,
-`NATTEN_REQUIRED`, `FLORENCE2_TRANSFORMERS_VERSION_REQUIRED`)."""))
-cells.append(code("""smoke = json.loads((SOURCE_REPORTS / "core_smoke_matrix_v34.json").read_text())
+`NATTEN_REQUIRED`, `FLORENCE2_TRANSFORMERS_VERSION_REQUIRED`).""")
+)
+cells.append(
+    code("""smoke = json.loads((SOURCE_REPORTS / "core_smoke_matrix_v34.json").read_text())
 smoke_summary = smoke.get("summary", {})
 n_smoke = smoke_summary.get("smoke_passed", 0)
 n_blocker = sum(
@@ -256,9 +271,11 @@ with open(REPORTS_DIR / "model_smoke_matrix_v34.csv", "w", newline="") as fh:
     for r in rows:
         w.writerow(r)
 print(f"Wrote -> {REPORTS_DIR / 'model_smoke_matrix_v34.csv'}")
-"""))
+""")
+)
 
-cells.append(code("""# Smoke state counts plot
+cells.append(
+    code("""# Smoke state counts plot
 state_counts = {}
 for r in smoke["rows"]:
     state_counts[r["final_state"]] = state_counts.get(r["final_state"], 0) + 1
@@ -272,13 +289,15 @@ for i, v in enumerate(sc.values):
 plt.tight_layout()
 fig.savefig(PLOTS_DIR / "model_smoke_state_counts.png", dpi=130)
 plt.show()
-"""))
+""")
+)
 
 # =============================================================================
 # 6. LIBREYOLO LICENSE AUDIT
 # =============================================================================
 cells.append(md("## 5. LibreYOLO license audit + model inclusion policy"))
-cells.append(code("""ly_doctor = json.loads((SOURCE_REPORTS / "libreyolo_doctor_v34.json").read_text())
+cells.append(
+    code("""ly_doctor = json.loads((SOURCE_REPORTS / "libreyolo_doctor_v34.json").read_text())
 ly_audit = json.loads((SOURCE_REPORTS / "libreyolo_license_audit_v34.json").read_text())
 ly_models = json.loads((SOURCE_REPORTS / "libreyolo_model_discovery_v34.json").read_text())
 
@@ -289,9 +308,11 @@ print()
 families_df = pd.DataFrame(ly_audit["rows"])
 families_df_display = families_df[["family","code_license","weight_license","license_risk","auto_pull"]].copy()
 families_df_display
-"""))
+""")
+)
 
-cells.append(code("""# Default-safe filter (Apache-2.0 / MIT only)
+cells.append(
+    code("""# Default-safe filter (Apache-2.0 / MIT only)
 weights = ly_models.get("weights", [])
 default_safe = [w for w in weights if w.get("license_risk") == "none" and any(
     ok in (w.get("weight_license") or "").upper() for ok in ("APACHE", "MIT")
@@ -326,17 +347,21 @@ for i, v in enumerate(risk_counts.values):
 plt.tight_layout()
 fig.savefig(PLOTS_DIR / "libre_yolo_license_breakdown.png", dpi=130)
 plt.show()
-"""))
+""")
+)
 
 # =============================================================================
 # 7. CLASSIFICATION SMOKE
 # =============================================================================
-cells.append(md("""## 6. Classification — smoke only (no labelled dataset supplied)
+cells.append(
+    md("""## 6. Classification — smoke only (no labelled dataset supplied)
 
 The notebook does **not** claim ImageNet accuracy because no labelled
 ImageNet validation set is staged. We display the per-model smoke status
-plus a synthesised top-k example."""))
-cells.append(code("""CLASSIFY_MODELS = [
+plus a synthesised top-k example.""")
+)
+cells.append(
+    code("""CLASSIFY_MODELS = [
     "swinv2-tiny", "convnextv2-tiny", "convnextv2-base",
     "maxvit-tiny-tf-224", "swinv2-small", "swinv2-base", "swinv2-large",
 ]
@@ -354,9 +379,11 @@ for m in smoke["rows"]:
 classify_df = pd.DataFrame(rows)
 classify_df.to_csv(REPORTS_DIR / "classification_smoke_status_v34.csv", index=False)
 classify_df
-"""))
+""")
+)
 
-cells.append(code("""# Classification smoke latency (only for smoke_passed rows)
+cells.append(
+    code("""# Classification smoke latency (only for smoke_passed rows)
 ok = [r for r in classify_df.to_dict('records') if r['final_state'] == 'smoke_passed']
 if ok:
     labels = [r['model_id'] for r in ok]
@@ -374,16 +401,20 @@ if ok:
     plt.show()
 else:
     print("No classification smoke_passed rows.")
-"""))
+""")
+)
 
 # =============================================================================
 # 8. EMBEDDING SMOKE
 # =============================================================================
-cells.append(md("""## 7. Embedding / similarity — smoke only
+cells.append(
+    md("""## 7. Embedding / similarity — smoke only
 
 Cosine similarity on a tiny image pair set. Real retrieval benchmark
-requires GT retrieval pairs (not supplied)."""))
-cells.append(code("""EMBED_MODELS = [
+requires GT retrieval pairs (not supplied).""")
+)
+cells.append(
+    code("""EMBED_MODELS = [
     "dinov2-base", "dinov2-small", "dinov2-large", "dinov2-giant",
     "clip-vit-base-patch32", "clip-vit-large-patch14",
     "siglip2-base-patch16-224", "siglip2-large-patch16-256",
@@ -401,17 +432,21 @@ for m in smoke["rows"]:
 embed_df = pd.DataFrame(rows)
 embed_df.to_csv(REPORTS_DIR / "embedding_smoke_status_v34.csv", index=False)
 embed_df
-"""))
+""")
+)
 
 # =============================================================================
 # 9. CLOSED-SET DETECTION BENCHMARK
 # =============================================================================
-cells.append(md("""## 8. Closed-set object detection — real COCO val2017 400-image benchmark
+cells.append(
+    md("""## 8. Closed-set object detection — real COCO val2017 400-image benchmark
 
 Source: `reports/detection_leaderboard_400_v227_source.csv` — the v2.27
 real benchmark on a 400-image, object-rich, balanced COCO val2017
-subset. **This is a real benchmark, not a smoke test.**"""))
-cells.append(code("""det_src = pd.read_csv(SOURCE_REPORTS / "detection_leaderboard_400_v227_source.csv")
+subset. **This is a real benchmark, not a smoke test.**""")
+)
+cells.append(
+    code("""det_src = pd.read_csv(SOURCE_REPORTS / "detection_leaderboard_400_v227_source.csv")
 det_src = det_src.sort_values("mAP50_95", ascending=False).reset_index(drop=True)
 
 # Render any NaN cells as 'not collected'
@@ -425,9 +460,11 @@ det_src.to_csv(REPORTS_DIR / "detection_leaderboard_400_v34.csv", index=False)
 det_src.to_json(REPORTS_DIR / "detection_leaderboard_400_v34.json", orient="records", indent=2)
 print(f"Detection rows: {len(det_src)}")
 det_view[["rank","model_id","source_engine","family","n_images","mAP50_95_display","AP50_display","AP75_display","latency_ms_p50_display","status"]].head(20)
-"""))
+""")
+)
 
-cells.append(code("""# Plot 1: mAP50:95 bar
+cells.append(
+    code("""# Plot 1: mAP50:95 bar
 fig, ax = plt.subplots(figsize=(11, max(4, 0.32*len(det_src))))
 ax.barh(det_src["model_id"][::-1], det_src["mAP50_95"][::-1], color="#3b82f6")
 ax.set_xlabel("mAP50:95 (COCO val2017, 400 images)")
@@ -438,9 +475,11 @@ for i, v in enumerate(det_src["mAP50_95"][::-1]):
 plt.tight_layout()
 fig.savefig(PLOTS_DIR / "detection_mAP50_95_by_model.png", dpi=130)
 plt.show()
-"""))
+""")
+)
 
-cells.append(code("""# Plot 2: AP50 bar
+cells.append(
+    code("""# Plot 2: AP50 bar
 fig, ax = plt.subplots(figsize=(11, max(4, 0.32*len(det_src))))
 ax.barh(det_src["model_id"][::-1], det_src["AP50"][::-1], color="#16a34a")
 ax.set_xlabel("AP50 (COCO val2017, 400 images)")
@@ -451,9 +490,11 @@ for i, v in enumerate(det_src["AP50"][::-1]):
 plt.tight_layout()
 fig.savefig(PLOTS_DIR / "detection_AP50_by_model.png", dpi=130)
 plt.show()
-"""))
+""")
+)
 
-cells.append(code("""# Plot 3: latency p50 + FPS only for rows that have latency
+cells.append(
+    code("""# Plot 3: latency p50 + FPS only for rows that have latency
 lat = det_src.dropna(subset=["latency_ms_p50"]).sort_values("latency_ms_p50")
 if len(lat) > 0:
     fig, ax = plt.subplots(figsize=(11, max(3, 0.4*len(lat))))
@@ -476,9 +517,11 @@ if len(lat) > 0:
     plt.tight_layout()
     fig.savefig(PLOTS_DIR / "detection_fps_by_model.png", dpi=130)
     plt.show()
-"""))
+""")
+)
 
-cells.append(code("""# Pareto: mAP50:95 vs latency
+cells.append(
+    code("""# Pareto: mAP50:95 vs latency
 par = det_src.dropna(subset=["latency_ms_p50","mAP50_95"])
 if len(par) > 1:
     fig, ax = plt.subplots(figsize=(9,6))
@@ -500,9 +543,11 @@ if len(par) > 1:
 
     par_out = par[["model_id","source_engine","family","mAP50_95","latency_ms_p50"]].copy()
     par_out.to_csv(REPORTS_DIR / "detection_pareto_v34.csv", index=False)
-"""))
+""")
+)
 
-cells.append(code("""# Family-size curves
+cells.append(
+    code("""# Family-size curves
 def parse_family_size(row):
     fam = row["family"]
     m = row["model_id"].lower()
@@ -541,25 +586,31 @@ ax.legend()
 plt.tight_layout()
 fig.savefig(PLOTS_DIR / "detection_family_size_curves.png", dpi=130)
 plt.show()
-"""))
+""")
+)
 
-cells.append(code("""# Detection status matrix
+cells.append(
+    code("""# Detection status matrix
 det_status = det_src[["model_id","source_engine","family","status"]].copy()
 det_status["display_status"] = det_status["status"].apply(
     lambda s: "benchmark_passed" if s == "ok" else "expected_blocker"
 )
 det_status.to_csv(REPORTS_DIR / "detection_status_v34.csv", index=False)
 det_status
-"""))
+""")
+)
 
 # =============================================================================
 # 10. OPEN-VOCAB DETECTION SMOKE
 # =============================================================================
-cells.append(md("""## 9. Open-vocabulary detection — smoke
+cells.append(
+    md("""## 9. Open-vocabulary detection — smoke
 
 Closed-set detection benchmark above does not apply; open-vocab is a
-different protocol (free-form text prompts, no fixed COCO classes)."""))
-cells.append(code("""OV_MODELS = [
+different protocol (free-form text prompts, no fixed COCO classes).""")
+)
+cells.append(
+    code("""OV_MODELS = [
     "owlv2-base-patch16","owlv2-large-patch14",
     "owlvit-base-patch32","owlvit-large-patch14",
     "grounding-dino-tiny","grounding-dino-swin-t","grounding-dino-swin-b",
@@ -576,17 +627,21 @@ for m in smoke["rows"]:
 ov_df = pd.DataFrame(rows)
 ov_df.to_csv(REPORTS_DIR / "open_vocab_smoke_status_v34.csv", index=False)
 ov_df
-"""))
+""")
+)
 
 # =============================================================================
 # 11. AUTO INSTANCE SEGMENTATION
 # =============================================================================
-cells.append(md("""## 10. Automatic instance segmentation — v2.27 COCO 400 + v34 status
+cells.append(
+    md("""## 10. Automatic instance segmentation — v2.27 COCO 400 + v34 status
 
 Real Ultralytics auto-seg numbers come from v2.27 evidence. RF-DETR-Seg
 schema is confirmed (`segments[i].mask` uint8 (H,W)); full mask AP
-requires pycocotools and is reserved for the next benchmark pass."""))
-cells.append(code("""seg_src = json.loads((SOURCE_REPORTS / "segmentation_auto_instance_400_v227_source.json").read_text())
+requires pycocotools and is reserved for the next benchmark pass.""")
+)
+cells.append(
+    code("""seg_src = json.loads((SOURCE_REPORTS / "segmentation_auto_instance_400_v227_source.json").read_text())
 seg_rows = seg_src.get("rows", [])
 seg_df = pd.DataFrame(seg_rows)
 
@@ -645,9 +700,11 @@ else:
     print("No mask_mAP50_95 column in source; only Ultralytics rows are benchmarked.")
 
 seg_df
-"""))
+""")
+)
 
-cells.append(code("""# RF-DETR-Seg schema status (v34)
+cells.append(
+    code("""# RF-DETR-Seg schema status (v34)
 schema_probe = json.loads((SOURCE_REPORTS / "rfdetr_seg_schema_probe_v229.json").read_text())
 schema_row = {
     "model": "rfdetr-seg-small",
@@ -659,16 +716,20 @@ schema_row = {
     "next_action": "implement COCO RLE conversion via pycocotools to enable mask AP",
 }
 print(json.dumps(schema_row, indent=2))
-"""))
+""")
+)
 
 # =============================================================================
 # 12. PROMPTABLE SEGMENTATION
 # =============================================================================
-cells.append(md("""## 11. Promptable segmentation — smoke/eval with GT box prompts
+cells.append(
+    md("""## 11. Promptable segmentation — smoke/eval with GT box prompts
 
 Real protocol: GT bbox → mask prediction → IoU vs GT mask. The current
-COCO smoke asset has GT polygons, so an IoU can be computed."""))
-cells.append(code("""ann_path = SMOKE_ASSETS / "coco_instance_sample.json"
+COCO smoke asset has GT polygons, so an IoU can be computed.""")
+)
+cells.append(
+    code("""ann_path = SMOKE_ASSETS / "coco_instance_sample.json"
 images_dir = SMOKE_ASSETS
 
 PROMPT_MODELS = ["sam2-hiera-tiny", "sam2.1-hiera-tiny"]
@@ -712,9 +773,11 @@ except Exception as exc:
 ps_df = pd.DataFrame(ps_rows)
 ps_df.to_csv(REPORTS_DIR / "promptable_segmentation_leaderboard_400_v34.csv", index=False)
 ps_df
-"""))
+""")
+)
 
-cells.append(code("""# Promptable segmentation IoU bar (if any computed)
+cells.append(
+    code("""# Promptable segmentation IoU bar (if any computed)
 if not ps_df.empty and 'mean_iou_display' in ps_df.columns:
     # Parse numeric IoU back
     def parse_iou(s):
@@ -738,16 +801,20 @@ if not ps_df.empty and 'mean_iou_display' in ps_df.columns:
         plt.show()
     else:
         print("No computable mean IoU in the smoke set (no GT mask polygons usable).")
-"""))
+""")
+)
 
 # =============================================================================
 # 13. MEDICAL DOMAIN
 # =============================================================================
-cells.append(md("""## 12. Medical — smoke/demo status only
+cells.append(
+    md("""## 12. Medical — smoke/demo status only
 
 No medical NIfTI GT dataset is supplied; this section is **demo only**.
-COCO smoke ≠ medical benchmark."""))
-cells.append(code("""MED_MODELS = ["medsam"]
+COCO smoke ≠ medical benchmark.""")
+)
+cells.append(
+    code("""MED_MODELS = ["medsam"]
 rows = []
 for m in smoke["rows"]:
     if m["model_id"] in MED_MODELS:
@@ -761,15 +828,19 @@ for m in smoke["rows"]:
 med_df = pd.DataFrame(rows)
 med_df.to_csv(REPORTS_DIR / "medical_smoke_status_v34.csv", index=False)
 med_df
-"""))
+""")
+)
 
 # =============================================================================
 # 14. AGRICULTURE
 # =============================================================================
-cells.append(md("""## 13. Agriculture — smoke/demo only
+cells.append(
+    md("""## 13. Agriculture — smoke/demo only
 
-CropWeed / agriculture is **demo only**; no labelled crop/weed dataset is supplied."""))
-cells.append(code("""ag_df = pd.DataFrame([{
+CropWeed / agriculture is **demo only**; no labelled crop/weed dataset is supplied.""")
+)
+cells.append(
+    code("""ag_df = pd.DataFrame([{
     "task": "agriculture",
     "status": "smoke/demo only",
     "evidence": str(SMOKE_ASSETS / "crop_weed_sample.jpg"),
@@ -777,29 +848,35 @@ cells.append(code("""ag_df = pd.DataFrame([{
 }])
 ag_df.to_csv(REPORTS_DIR / "agriculture_status_v34.csv", index=False)
 ag_df
-"""))
+""")
+)
 
 # =============================================================================
 # 15. AERIAL / OBB
 # =============================================================================
-cells.append(md("""## 14. Aerial / OBB — expected_blocker
+cells.append(
+    md("""## 14. Aerial / OBB — expected_blocker
 
 DOTA / VisDrone weights and labels are non-commercial / unverified.
-This task is `dataset_required` until a permissive OBB dataset is added."""))
-cells.append(code("""aerial_df = pd.DataFrame([{
+This task is `dataset_required` until a permissive OBB dataset is added.""")
+)
+cells.append(
+    code("""aerial_df = pd.DataFrame([{
     "task": "aerial_obb", "final_state": "dataset_required",
     "blocker_code": "OBB_DATASET_NOT_AUDITED",
     "fix": "Supply a permissive OBB dataset (e.g. user-labelled GT)",
 }])
 aerial_df.to_csv(REPORTS_DIR / "aerial_obb_status_v34.csv", index=False)
 aerial_df
-"""))
+""")
+)
 
 # =============================================================================
 # 16. ANOMALY
 # =============================================================================
 cells.append(md("## 15. Anomaly — smoke / expected_blocker"))
-cells.append(code("""anom_cmd = [sys.executable, "-m", "visionservex", "anomaly", "doctor",
+cells.append(
+    code("""anom_cmd = [sys.executable, "-m", "visionservex", "anomaly", "doctor",
              "--format", "json", "--out", str(REPORTS_DIR / "anomaly_doctor_v34.json")]
 proc = subprocess.run(anom_cmd, capture_output=True, text=True, timeout=30)
 try:
@@ -817,13 +894,15 @@ anom_row = {
 anom_df = pd.DataFrame([anom_row])
 anom_df.to_csv(REPORTS_DIR / "anomaly_status_v34.csv", index=False)
 anom_df
-"""))
+""")
+)
 
 # =============================================================================
 # 17. SURVEILLANCE / TRACKING
 # =============================================================================
 cells.append(md("## 16. Surveillance / Video tracking — smoke / expected_blocker"))
-cells.append(code("""def _run_smoke(args):
+cells.append(
+    code("""def _run_smoke(args):
     proc = subprocess.run(args, capture_output=True, text=True, timeout=60)
     try:
         return json.loads(proc.stdout.strip())
@@ -873,13 +952,15 @@ tracker_rows.append({
 vid_df = pd.DataFrame(tracker_rows)
 vid_df.to_csv(REPORTS_DIR / "surveillance_smoke_status_v34.csv", index=False)
 vid_df
-"""))
+""")
+)
 
 # =============================================================================
 # 18. BLOCKERS SUMMARY
 # =============================================================================
 cells.append(md("## 17. Remaining blockers (consolidated)"))
-cells.append(code("""blocker_rows = []
+cells.append(
+    code("""blocker_rows = []
 for r in smoke["rows"]:
     if r["final_state"] in (
         "expected_blocker", "dependency_required", "download_failed_retryable",
@@ -918,9 +999,11 @@ blocker_df = pd.DataFrame(blocker_rows)
 blocker_df.to_csv(REPORTS_DIR / "blocker_summary_v34.csv", index=False)
 print(f"Total blockers: {len(blocker_df)}")
 blocker_df
-"""))
+""")
+)
 
-cells.append(code("""# Blocker breakdown plot
+cells.append(
+    code("""# Blocker breakdown plot
 counts = blocker_df["blocker_code"].value_counts() if "blocker_code" in blocker_df.columns else pd.Series(dtype=int)
 if len(counts):
     fig, ax = plt.subplots(figsize=(10, max(3, 0.4*len(counts))))
@@ -932,13 +1015,15 @@ if len(counts):
     plt.tight_layout()
     fig.savefig(PLOTS_DIR / "blocker_breakdown.png", dpi=130)
     plt.show()
-"""))
+""")
+)
 
 # =============================================================================
 # 19. TASK COVERAGE HEATMAP
 # =============================================================================
 cells.append(md("## 18. Task coverage heatmap"))
-cells.append(code("""tasks = sorted({r["task"] for r in smoke["rows"]})
+cells.append(
+    code("""tasks = sorted({r["task"] for r in smoke["rows"]})
 states = ALLOWED_FINAL_STATES
 mat = np.zeros((len(tasks), len(states)), dtype=int)
 for r in smoke["rows"]:
@@ -954,22 +1039,26 @@ for i in range(len(tasks)):
         if mat[i,j] > 0:
             ax.text(j, i, mat[i,j], ha="center", va="center",
                     color="white" if mat[i,j] > mat.max()/2 else "black", fontsize=8)
-ax.set_title("v34 — Task × final-state coverage (core models)")
+ax.set_title("v34 -- Task x final-state coverage (core models)")
 fig.colorbar(im, ax=ax, label="model count")
 plt.tight_layout()
 fig.savefig(PLOTS_DIR / "task_coverage_heatmap.png", dpi=130)
 plt.show()
-"""))
+""")
+)
 
 # =============================================================================
 # 20. FINAL TASK-SPECIFIC WINNERS
 # =============================================================================
-cells.append(md("""## 19. Final task-specific winner summary
+cells.append(
+    md("""## 19. Final task-specific winner summary
 
 There is **no overall winner** across tasks. Each task has its own
 metric and its own benchmark dataset; cross-task comparisons are
-scientifically meaningless."""))
-cells.append(code("""winners = {}
+scientifically meaningless.""")
+)
+cells.append(
+    code("""winners = {}
 
 # Detection (real benchmark)
 if "mAP50_95" in det_src.columns:
@@ -1049,12 +1138,14 @@ for k in ("classification_status","embedding_status","medical_status","agricultu
 
 (REPORTS_DIR / "final_task_winner_summary_v34.md").write_text("\\n".join(lines))
 print("\\n".join(lines))
-"""))
+""")
+)
 
 # =============================================================================
 # 21. SCIENTIFIC LIMITATIONS
 # =============================================================================
-cells.append(md("""## 20. Scientific limitations (read before citing)
+cells.append(
+    md("""## 20. Scientific limitations (read before citing)
 
 1. **Detection benchmark**: 400-image subset of COCO val2017 (object-rich,
    balanced). Smaller than the full 5000-image val set, so absolute
@@ -1069,13 +1160,15 @@ cells.append(md("""## 20. Scientific limitations (read before citing)
    no labelled dataset supplied — smoke / demo status only.
 5. **No cross-task comparisons.** Detection mAP and segmentation mask AP
    are not directly comparable; promptable IoU is not directly comparable
-   to automatic AP."""))
+   to automatic AP.""")
+)
 
 # =============================================================================
 # 22. FINAL AUDIT REPORT
 # =============================================================================
 cells.append(md("## 21. Final audit report"))
-cells.append(code("""def _safe_count(field: str) -> int:
+cells.append(
+    code("""def _safe_count(field: str) -> int:
     return sum(1 for r in smoke["rows"] if r["final_state"] == field)
 
 audit = {
@@ -1176,17 +1269,22 @@ for b in audit["v3_blockers"]:
 
 (REPORTS_DIR / "final_audit_report_v34.md").write_text("\\n".join(md_lines))
 print("\\n".join(md_lines[:30]))
-"""))
+""")
+)
 
-cells.append(md("""## 22. Reproducibility manifest
+cells.append(
+    md("""## 22. Reproducibility manifest
 
-All artifacts written this run:"""))
-cells.append(code("""manifest = sorted(p.relative_to(OUT_ROOT).as_posix() for p in OUT_ROOT.rglob("*") if p.is_file())
+All artifacts written this run:""")
+)
+cells.append(
+    code("""manifest = sorted(p.relative_to(OUT_ROOT).as_posix() for p in OUT_ROOT.rglob("*") if p.is_file())
 print(f"Total artifacts: {len(manifest)}")
 for f in manifest:
     print(f"  {f}")
 (REPORTS_DIR / "manifest_v34.txt").write_text("\\n".join(manifest))
-"""))
+""")
+)
 
 # =============================================================================
 # WRITE THE NOTEBOOK
