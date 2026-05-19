@@ -731,6 +731,39 @@ def reconcile(
         else:
             evidence_source_kind = "registry"
 
+        # If there's a current-run call with a real NON-HISTORICAL artifact, prefer it.
+        # We specifically avoid seeded historical paths like reports/canonical_smoke_summary_v230.json.
+        _HIST_PATS = [
+            "v230",
+            "v234",
+            "v235",
+            "v236",
+            "v237",
+            "v238",
+            "canonical_smoke_summary",
+            "core_smoke_matrix",
+        ]
+
+        _hist_pats_local = _HIST_PATS  # bind for closure
+
+        def _is_historical_ea(ea: str, _pats: list = _hist_pats_local) -> bool:
+            return any(p in ea for p in _pats)
+
+        current_run_ea = ""
+        # Prefer non-historical artifact first, fall back to any current-run artifact
+        for nc in sorted(
+            current_run_calls,
+            key=lambda nc: 0 if not _is_historical_ea(nc.get("evidence_artifact", "")) else 1,
+        ):
+            ea = nc.get("evidence_artifact", "")
+            if ea and nc.get("output_artifact_exists"):
+                current_run_ea = ea
+                break
+        effective_artifact = current_run_ea or artifact
+        effective_source = (
+            "current_run" if (current_run_ea and not _is_historical_ea(current_run_ea)) else source
+        )
+
         row = ReconciledRow(
             model_id=mid,
             family=row_family or "",
@@ -742,8 +775,8 @@ def reconcile(
             final_state=final_state,
             blocker_code=blocker,
             blocker_category="",
-            evidence_artifact=artifact,
-            evidence_source=source,
+            evidence_artifact=effective_artifact,
+            evidence_source=effective_source,
             run_mode=run_mode,
             should_be_called_in_notebook=True,
             called_in_notebook=called,
@@ -756,11 +789,42 @@ def reconcile(
             current_run_id=current_run_id,
             missing_from_notebook_reason=missing_reason,
         )
+        # v2.43: historical-artifact detection patterns.
+        _HISTORICAL_PATTERNS = [
+            "v230",
+            "v234",
+            "v235",
+            "v236",
+            "v237",
+            "v238",
+            "canonical_smoke_summary",
+            "core_smoke_matrix",
+            "correction",
+        ]
+        # Use the effective_artifact (after current_run preference) for historical detection.
+        art_str = effective_artifact or ""
+        hist_detected_pattern = ""
+        for _p in _HISTORICAL_PATTERNS:
+            if _p in art_str:
+                hist_detected_pattern = _p
+                break
+
+        # evidence_is_current_run_file: the artifact is under notebook/_runs/<run_id>/
+        is_current_run_file = (
+            has_current_run_artifact
+            and bool(artifact)
+            and (f"_runs/{current_run_id}" in art_str or not hist_detected_pattern)
+            and not hist_detected_pattern
+        )
+
         # v2.40: current-run vs historical evidence flags
         row.extras["evidence_source_kind"] = evidence_source_kind
         row.extras["current_run_call_count"] = len(current_run_calls)
         row.extras["current_run_artifact_exists"] = has_current_run_artifact
         row.extras["called_in_current_notebook_run"] = has_current_run_call
+        row.extras["evidence_is_current_run_file"] = is_current_run_file
+        row.extras["historical_path_detected"] = bool(hist_detected_pattern)
+        row.extras["historical_path_pattern"] = hist_detected_pattern
         row.extras["historical_artifact_used_as_fallback"] = (
             evidence_source_kind == "historical"
             and final_state
@@ -771,10 +835,39 @@ def reconcile(
                 "contract_passed",
             }
         )
-        # blocker category from v239_blockers
+        # blocker category from v239_blockers (code-based), with state-based fallback.
         from visionservex.reporting.v239_blockers import categorize_blocker
 
-        row.blocker_category = categorize_blocker(blocker)
+        cat = categorize_blocker(blocker)
+        if cat == "unclassified" or not cat:
+            # Derive from final_state when the blocker code is absent/unrecognized.
+            _STATE_TO_CATEGORY: dict[str, str] = {
+                "benchmark_passed": "none",
+                "benchmarked": "none",
+                "smoke_passed": "none",
+                "smoke_ok_no_metric": "none",
+                "visual_smoke_only": "none",
+                "demo_passed_sidecar": "none",
+                "demo_passed": "none",
+                "contract_passed": "none",
+                "sidecar_required": "sidecar",
+                "auth_required": "auth",
+                "external_api_only": "external_api",
+                "opt_in_license_required": "license",
+                "license_blocked": "license",
+                "upstream_deprecated": "upstream",
+                "wrong_registry_entry": "registry",
+                "not_advertised": "registry",
+                "loader_missing": "loader",
+                "download_failed_retryable": "external",
+                "checkpoint_downloaded": "checkpoint",
+                "checkpoint_required": "checkpoint",
+                "manual_checkpoint_required": "checkpoint",
+                "segmentation_pipeline_not_wired": "output_adapter",
+                "benchmark_candidate": "none",
+            }
+            cat = _STATE_TO_CATEGORY.get(final_state, "unclassified")
+        row.blocker_category = cat
 
         rows.append(row)
 
@@ -842,6 +935,10 @@ def _row_to_dict(row: ReconciledRow) -> dict[str, Any]:
         "historical_artifact_used_as_fallback": row.extras.get(
             "historical_artifact_used_as_fallback", False
         ),
+        # v2.43 historical-artifact detection columns
+        "evidence_is_current_run_file": row.extras.get("evidence_is_current_run_file", False),
+        "historical_path_detected": row.extras.get("historical_path_detected", False),
+        "historical_path_pattern": row.extras.get("historical_path_pattern", ""),
     }
 
 

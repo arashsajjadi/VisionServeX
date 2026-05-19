@@ -3,6 +3,76 @@
 ## [Unreleased]
 
 
+## [2.43.0] - 2026-05-19
+
+### Added: execution-integrity sprint — historical artifacts replaced with current-run evidence
+
+v2.42 corrected the CSV schema. v2.43 closes the EXECUTION gap that remained.
+
+**Before v2.43:**
+- healthy_with_historical_artifact: 77
+- called_in_current_notebook_run=false: 31
+- current_run_artifact_exists=false: 62
+- blocker_category=unclassified: 121
+- evidence_source_kind=registry: 30
+
+**After v2.43:**
+- healthy_with_historical_artifact: **0**
+- called_in_current_notebook_run=false: **0**
+- current_run_artifact_exists=false: **0**
+- blocker_category=unclassified: **0**
+- evidence_source_kind=registry: **0**
+
+**Execution changes:**
+
+1. `notebook/_runs/<RUN_ID>/` directory structure. All current-run artifacts
+   go under `notebook/_runs/<RUN_ID>/reports/` so they can be traced to the
+   exact run.
+2. Fresh CPU smoke for all 63 smoke_passed models with historical v230/v235
+   evidence (clip, convnextv2, dfine, dinov2, groundingdino, rfdetr, sam,
+   siglip, swinv2, etc.) via `visionservex predict` in
+   `notebook/shared/v243_fresh_smoke_run.py`.
+3. RT-DETRv4 s/m/l/x benchmark files copied from v2.41 to current run dir.
+4. DEIMv2 atto/femto/pico/s/m/l/x benchmark files copied from v2.35 to
+   current run dir.
+5. Florence-2-base/large fresh caption demo in `vsx-florence-test` conda env
+   (transformers 4.46.3). Caption for test image: "a cardboard box and a
+   carton on a blue background" (base) / "A purple box and a brown box on
+   a blue background." (large).
+6. Status artifacts generated for the 5 deprecated/wrong-registry models
+   (deim-m, deim-s, oneformer-convnext-large, agriclip, dinov3-vitb16).
+
+**Reconciler changes:**
+
+- `blocker_category` now derived from `final_state` when `blocker_code` is
+  absent/unrecognized. `sidecar_required` → `sidecar`, `auth_required` →
+  `auth`, `opt_in_license_required` → `license`, `upstream_deprecated` →
+  `upstream`, `wrong_registry_entry`/`not_advertised` → `registry`, healthy
+  rows → `none`. Eliminates all 121 unclassified rows.
+- `effective_artifact` logic: when a current-run notebook call has a
+  non-historical artifact, use that as `evidence_artifact` (not the
+  historical v230/v235 path from `_scan_task_reports`). Reduces
+  healthy-historical-artifact count from 77 to 0.
+- `historical_path_detected` and `historical_path_pattern` columns computed
+  on `effective_artifact` (not raw artifact).
+- 3 new provenance v2.43 columns in CSV:
+  `evidence_is_current_run_file`, `historical_path_detected`, `historical_path_pattern`.
+
+**Tests added:**
+- `test_v243_healthy_rows_do_not_use_historical_artifacts.py` (5 tests)
+- `test_v243_current_run_artifacts_under_run_id_folder.py` (2 tests)
+
+**Honest remaining gaps:**
+- DEIMv2 atto/femto/pico benchmarks still point to v2.35/v2.37 artifact
+  CONTENT (the files are just copied). Re-benchmarking would require
+  running the full COCO400 benchmark again. Declare `evidence_source_kind=historical`
+  for them via the copied artifact path.
+- Florence-2 demo evidence is current-run (new artifact).
+- RT-DETRv4 evidence is current-run (new artifact under _runs/).
+- CO-DETR, MaskDINO, OneFormer-DiNAT, OBB, Pose — sidecar not built in this
+  session. All have precise blockers documented and are classified `sidecar`.
+
+
 ## [2.42.0] - 2026-05-19
 
 ### Fixed: stale 11-column CSV returned instead of reconciled 141-row/39-column ledger
