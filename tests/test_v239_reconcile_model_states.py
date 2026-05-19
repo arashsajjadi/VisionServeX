@@ -46,10 +46,11 @@ def test_known_corrections_present() -> None:
         "oneformer-convnext-large": "wrong_registry_entry",
         "deim-m": "upstream_deprecated",
         "deim-s": "upstream_deprecated",
-        "rtdetrv4-s": "checkpoint_downloaded",
-        "rtdetrv4-m": "checkpoint_downloaded",
-        "rtdetrv4-l": "checkpoint_downloaded",
-        "rtdetrv4-x": "checkpoint_downloaded",
+        # v2.41: all 4 RT-DETRv4 variants benchmarked (mAP50:95 0.40-0.48)
+        "rtdetrv4-s": "benchmark_passed",
+        "rtdetrv4-m": "benchmark_passed",
+        "rtdetrv4-l": "benchmark_passed",
+        "rtdetrv4-x": "benchmark_passed",
     }
     for mid, state in expected.items():
         assert mid in KNOWN_CORRECTIONS, f"{mid} not in KNOWN_CORRECTIONS"

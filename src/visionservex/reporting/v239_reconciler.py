@@ -104,20 +104,20 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "CHECKPOINT_STATE_DICT_MISMATCH",
     },
     "rtdetrv4-s": {
-        "final_state": "checkpoint_downloaded",
-        "blocker_code": "CHECKPOINT_DOWNLOADED",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
     },
     "rtdetrv4-m": {
-        "final_state": "checkpoint_downloaded",
-        "blocker_code": "CHECKPOINT_DOWNLOADED",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
     },
     "rtdetrv4-l": {
-        "final_state": "checkpoint_downloaded",
-        "blocker_code": "CHECKPOINT_DOWNLOADED",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
     },
     "rtdetrv4-x": {
-        "final_state": "checkpoint_downloaded",
-        "blocker_code": "CHECKPOINT_DOWNLOADED",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
     },
     "rfdetr-seg-large": {"final_state": "benchmark_passed", "blocker_code": ""},
     "rfdetr-seg-xlarge": {

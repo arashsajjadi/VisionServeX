@@ -3,6 +3,63 @@
 ## [Unreleased]
 
 
+## [2.41.0] - 2026-05-19
+
+### Added: RT-DETRv4 COCO400 benchmark — new best VSX model + swinv2-large fix
+
+**Critical execution results:**
+
+1. **RT-DETRv4 all 4 variants benchmarked on COCO val2017 400-image subset:**
+
+   | Model | mAP50:95 | AP50 | Notes |
+   |-------|----------|------|-------|
+   | rtdetrv4-x | **0.4818** | **0.6623** | **New best VSX detection** |
+   | rtdetrv4-l | 0.4624 | 0.6370 | |
+   | rtdetrv4-m | 0.4481 | 0.6253 | |
+   | rtdetrv4-s | 0.3971 | 0.5636 | |
+
+   RT-DETRv4-X (0.4818) now beats the previous best VSX model dfine-x-o365-coco
+   (0.4576) and yolo26x.pt (0.4894) on AP50 (0.6623 vs 0.6612). The overall
+   detection winner remains libreyolo-dfine-x (0.5030 mAP50:95) — RT-DETRv4-X
+   is 2nd overall and 1st within VisionServeX's own stack.
+
+   Root cause of previous `checkpoint_downloaded` stale state: checkpoints were
+   at `~/.cache/visionservex/rtdetrv4/rtdetrv4_X.pth` (underscore, flat dir)
+   not at `~/.cache/visionservex/sidecars/rtdetrv4/checkpoints/rtdetrv4-X.pth`
+   (hyphen, sidecars dir). Symlinks created; sidecar env recreated with
+   `rtdetrv4-blackwell-nightly` profile (torch nightly cu128) for Blackwell
+   sm_120 compatibility. All 4 variants smoke on GPU.
+
+2. **swinv2-large: smoke_passed** (was `download_failed_retryable`).
+   Root cause: `brotlicffi` package caused brotli decoder errors during
+   HuggingFace file downloads. Removing and reinstalling brotlicffi resolved
+   the issue; model now caches correctly at
+   `~/.cache/visionservex/models/swinv2-large/snapshot/pytorch_model.bin`.
+
+3. **RTMPose-M: contract_passed** via `vsx-openmmlab-py310` conda env
+   (mmpose 1.3.2 + mmdet 3.3.0 + mmcv 2.1.0). 1 person detected in 264ms on CPU.
+
+4. **RTMDet-R2-S (OBB): precise blocker** `MMROTATE_NUMPY_VERSION_CONFLICT` —
+   mmrotate 0.3.4 requires mmcv-full 1.7.2 compiled with NumPy 1.x, but the
+   conda env has NumPy 2.2.6. Fix: pin `numpy<2.0` before `mim install mmrotate`.
+
+5. **CO-DETR (co-dino-inst-vit-l-coco): precise blocker** `CONFIG_NOT_FOUND` —
+   OpenMMLab env (`vsx-openmmlab-py310`) is healthy with mmdet 3.3.0, but
+   CO-DETR requires the Sense-X/Co-DETR repo clone + Google Drive checkpoint.
+
+6. **MaskDINO: precise blocker** `MASKDINO_LEGACY_CUDA_BLACKWELL_UNSUPPORTED` —
+   torch 1.9.0+cu111 supports only up to sm_86; RTX 5080 is sm_120.
+
+7. **OneFormer-DiNAT: precise blocker** `NATTEN_REQUIRED` / `NATTEN_BUILD_FAILED` —
+   no Python 3.13 NATTEN wheel; py3.11 sidecar build attempted but not completed.
+
+**Package changes:**
+- `rtdetrv4 smoke-test` now accepts `--profile` option (rtdetrv4-cu124-stable
+  or rtdetrv4-blackwell-nightly) to use the correct conda env.
+- `KNOWN_CORRECTIONS` updated: rtdetrv4-s/m/l/x now classified as `benchmark_passed`.
+- `tests/test_v239_reconcile_model_states.py` updated to reflect new states.
+
+
 ## [2.40.0] - 2026-05-19
 
 ### Added: 140-row execution sprint + extended manifest + current-run artifacts

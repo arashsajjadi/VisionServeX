@@ -352,6 +352,11 @@ def smoke_test_cmd(
     image: Path = typer.Argument(..., help="Image path."),
     device: str = typer.Option("cuda", "--device"),
     backend: str = typer.Option("torch", "--backend", help="torch | onnxruntime | tensorrt"),
+    profile: str = typer.Option(
+        "rtdetrv4-cu124-stable",
+        "--profile",
+        help="rtdetrv4-cu124-stable (default) | rtdetrv4-blackwell-nightly",
+    ),
     checkpoint: Path | None = typer.Option(
         None,
         "--checkpoint",
@@ -491,11 +496,17 @@ def smoke_test_cmd(
         return
 
     cuda_str = "cuda:0" if device.startswith("cuda") else "cpu"
+    # Map profile name to conda env name.
+    _profile_env: dict[str, str] = {
+        "rtdetrv4-cu124-stable": "visionservex-rtdetrv4-sidecar",
+        "rtdetrv4-blackwell-nightly": "visionservex-rtdetrv4-blackwell-nightly-sidecar",
+    }
+    conda_env = _profile_env.get(profile, "visionservex-rtdetrv4-sidecar")
     cmd = [
         "conda",
         "run",
         "-n",
-        "visionservex-rtdetrv4-sidecar",
+        conda_env,
         "python",
         str(repo_root / "tools" / "inference" / "torch_inf.py"),
         "-c",
