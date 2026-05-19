@@ -3,6 +3,52 @@
 ## [Unreleased]
 
 
+## [2.38.1] - 2026-05-19
+
+### Fixed: stale model-state tables in coverage ledger
+
+Found 46 stale rows in `notebook/99_final_report/reports/model_coverage_ledger.csv`
+where final_state was `expected_blocker` or `stub` despite v2.35–v2.38 having
+resolved those models with precise states.
+
+Stale rows found (46) → fixed to v2.38 resolution matrix as source of truth:
+- florence-2-base/large: dependency_required → demo_passed_sidecar
+- deimv2-s/m/l/x: expected_blocker → benchmark_passed (v2.35 evidence)
+- deimv2-atto/femto/pico: expected_blocker → benchmark_passed (v2.37 evidence)
+- deimv2-n: expected_blocker → loader_missing
+- rtdetrv4-s/m/l/x: expected_blocker → checkpoint_downloaded (v2.38 gdown)
+- rfdetr-seg-large: license_blocked → benchmark_passed (Apache-2.0, v2.38 mAP=0.1114)
+- rfdetr-seg-xlarge/2xlarge: license_blocked → opt_in_license_required (PML-1.0)
+- oneformer-convnext-large: download_failed_retryable → wrong_registry_entry (no COCO ckpt)
+- deim-m/deim-s: expected_blocker → upstream_deprecated
+- sam3-base: expected_blocker → auth_required
+- grounding-dino-1.5/1.6: expected_blocker → auth_required
+- 21 OpenMMLab models: expected_blocker → sidecar_required
+
+Generic expected_blocker remaining: 0.
+Stub as final_state remaining: 0.
+
+Updated counts (119 registry rows):
+- smoke/demo/bench/downloaded (valid output): 84
+- smoke_passed: 70
+- benchmark_passed: 8
+- demo_passed_sidecar: 2
+- checkpoint_downloaded: 4
+- sidecar_required: 23
+- auth_required: 3
+- download_failed_retryable: 2
+- upstream_deprecated: 2
+- opt_in_license_required: 2
+- loader_missing: 1
+- wrong_registry_entry: 1
+- package_bugs: 0
+
+New test file: test_v238_coverage_ledger_no_stale_states.py
+- 11 tests verifying all required states (all pass).
+
+CI: 1388 passed, 0 failed.
+
+
 ## [2.38.0] - 2026-05-19
 
 ### Added: RF-DETR-Seg-Large benchmark + RT-DETRv4 checkpoints + Deep Research ingestion
