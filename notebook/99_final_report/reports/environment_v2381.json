@@ -1,0 +1,9 @@
+{
+  "version": "2.38.1",
+  "timestamp": "2026-05-19",
+  "install_source": "PyPI v2.38.1",
+  "pypi_confirmed": true,
+  "forbidden_scan": "PASS",
+  "stale_rows_fixed": 46,
+  "generic_expected_blocker_remaining": 0
+}
