@@ -1,0 +1,21 @@
+[2026-05-18 21:18:11] [INFO] rf-detr - File rf-detr-small.pth already exists with correct MD5 hash.
+[2026-05-18 21:18:11] [INFO] rf-detr - File rf-detr-small.pth already exists with correct MD5 hash.
+{
+  "kind": "detection",
+  "model_id": "rfdetr-small",
+  "task": "detect",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "rfdetr_package",
+  "model_loaded_from": null,
+  "cache_path": null,
+  "latency_ms": 236.74776699044742,
+  "fallback_reason": null,
+  "metadata": {},
+  "warnings": [],
+  "detections": []
+}

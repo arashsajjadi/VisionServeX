@@ -1,0 +1,24 @@
+{
+  "kind": "embedding",
+  "model_id": "dinov2-small",
+  "task": "embed",
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_dinov2",
+  "latency_ms": 109.99108999385498,
+  "image_size": [
+    640,
+    480
+  ],
+  "embedding_dim": 384,
+  "normalized": true,
+  "embedding_norm": 0.9999999403953552,
+  "embedding_first_5": [
+    -0.02180774137377739,
+    -0.007704670540988445,
+    -0.06011025235056877,
+    0.0004144219565205276,
+    0.05331970751285553
+  ],
+  "warnings": []
+}

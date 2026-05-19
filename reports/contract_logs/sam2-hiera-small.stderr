@@ -1,0 +1,25 @@
+2026-05-18T21:19:58 INFO visionservex.engines.sam2_hf :: loading SAM2 sam2-hiera-small from facebook/sam2-hiera-small on cuda
+2026-05-18T21:19:58 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/facebook/sam2-hiera-small/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:58 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-small/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:58 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam2-hiera-small/e080ada8afd19df5e165abe71b006edc7f4c3d4e/processor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:58 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-small/resolve/main/chat_template.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:58 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-small/resolve/main/chat_template.jinja "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:58 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-small/resolve/main/audio_tokenizer_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:58 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-small/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:58 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam2-hiera-small/e080ada8afd19df5e165abe71b006edc7f4c3d4e/processor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:58 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-small/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:58 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam2-hiera-small/e080ada8afd19df5e165abe71b006edc7f4c3d4e/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:58 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-small/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:58 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam2-hiera-small/e080ada8afd19df5e165abe71b006edc7f4c3d4e/processor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:59 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-small/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:59 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam2-hiera-small/e080ada8afd19df5e165abe71b006edc7f4c3d4e/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:59 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-small/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:59 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam2-hiera-small/e080ada8afd19df5e165abe71b006edc7f4c3d4e/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:59 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-small/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:59 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam2-hiera-small/e080ada8afd19df5e165abe71b006edc7f4c3d4e/config.json "HTTP/1.1 200 OK"
+You are using a model of type `sam2_video` to instantiate a model of type `sam2`. This may be expected if you are loading a checkpoint that shares a subset of the architecture (e.g., loading a `sam2_video` checkpoint into `Sam2Model`), but is otherwise not supported and can yield errors. Please verify that the checkpoint is compatible with the model you are instantiating.
+2026-05-18T21:19:59 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-small/resolve/main/model.safetensors "HTTP/1.1 302 Found"
+
+Loading weights:   0%|          | 0/357 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 357/357 [00:00<00:00, 14583.84it/s]
+2026-05-18T21:19:59 INFO visionservex.engines.sam2_hf :: SAM2 sam2-hiera-small ready

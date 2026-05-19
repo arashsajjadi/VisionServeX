@@ -1,0 +1,23 @@
+2026-05-18T21:18:20 INFO visionservex.engines.dinov2 :: loading clip-vit-large-patch14 from openai/clip-vit-large-patch14 on cuda
+2026-05-18T21:18:20 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:18:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/openai/clip-vit-large-patch14/32bd64288804d66eefd0ccbe215aa642df71cc41/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:18:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:18:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/openai/clip-vit-large-patch14/32bd64288804d66eefd0ccbe215aa642df71cc41/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:18:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/openai/clip-vit-large-patch14/32bd64288804d66eefd0ccbe215aa642df71cc41/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:18:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/openai/clip-vit-large-patch14/32bd64288804d66eefd0ccbe215aa642df71cc41/config.json "HTTP/1.1 200 OK"
+
+Loading weights:   0%|          | 0/590 [00:00<?, ?it/s]
+Loading weights:  61%|██████    | 359/590 [00:00<00:00, 3572.97it/s]
+Loading weights: 100%|██████████| 590/590 [00:00<00:00, 4072.72it/s]
+[1mCLIPModel LOAD REPORT[0m from: openai/clip-vit-large-patch14
+Key                                  | Status     |  | 
+-------------------------------------+------------+--+-
+text_model.embeddings.position_ids   | UNEXPECTED |  | 
+vision_model.embeddings.position_ids | UNEXPECTED |  | 
+
+[3mNotes:
+- UNEXPECTED[3m	:can be ignored when loading from different task/architecture; not ok if you expect identical arch.[0m

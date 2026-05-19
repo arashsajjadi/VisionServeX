@@ -1,0 +1,22 @@
+2026-05-18T21:19:31 INFO visionservex.engines.sam_hf :: loading sam-vit-base from facebook/sam-vit-base
+2026-05-18T21:19:31 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/facebook/sam-vit-base/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:31 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam-vit-base/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:31 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam-vit-base/resolve/main/chat_template.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:31 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam-vit-base/resolve/main/chat_template.jinja "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam-vit-base/resolve/main/audio_tokenizer_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam-vit-base/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam-vit-base/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam-vit-base/70c1a07f894ebb5b307fd9eaaee97b9dfc16068f/preprocessor_config.json "HTTP/1.1 200 OK"
+The image processor of type `SamImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+2026-05-18T21:19:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam-vit-base/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam-vit-base/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam-vit-base/70c1a07f894ebb5b307fd9eaaee97b9dfc16068f/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam-vit-base/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam-vit-base/70c1a07f894ebb5b307fd9eaaee97b9dfc16068f/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam-vit-base/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam-vit-base/70c1a07f894ebb5b307fd9eaaee97b9dfc16068f/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam-vit-base/resolve/main/model.safetensors "HTTP/1.1 302 Found"
+
+Loading weights:   0%|          | 0/314 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 314/314 [00:00<00:00, 22687.15it/s]
+2026-05-18T21:19:32 INFO visionservex.engines.sam_hf :: sam-vit-base loaded

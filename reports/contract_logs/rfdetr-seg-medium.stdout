@@ -1,0 +1,21 @@
+[2026-05-18 21:21:47] [INFO] rf-detr - File rf-detr-seg-medium.pt already exists with correct MD5 hash.
+[2026-05-18 21:21:47] [INFO] rf-detr - File rf-detr-seg-medium.pt already exists with correct MD5 hash.
+{
+  "kind": "segmentation",
+  "model_id": "rfdetr-seg-medium",
+  "task": "segment",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "rfdetr_package",
+  "model_loaded_from": null,
+  "cache_path": null,
+  "latency_ms": 269.26094699592795,
+  "fallback_reason": null,
+  "metadata": {},
+  "warnings": [],
+  "segments": []
+}

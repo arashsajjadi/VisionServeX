@@ -1,0 +1,26 @@
+2026-05-18T21:21:07 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/google/owlv2-large-patch14-ensemble/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:08 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlv2-large-patch14-ensemble/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:08 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlv2-large-patch14-ensemble/resolve/main/chat_template.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:08 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlv2-large-patch14-ensemble/resolve/main/chat_template.jinja "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:08 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlv2-large-patch14-ensemble/resolve/main/audio_tokenizer_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:08 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlv2-large-patch14-ensemble/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:08 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlv2-large-patch14-ensemble/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:21:08 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/owlv2-large-patch14-ensemble/95e26936e865f87db1742128404b3c035d47d89d/preprocessor_config.json "HTTP/1.1 200 OK"
+The image processor of type `Owlv2ImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+2026-05-18T21:21:08 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlv2-large-patch14-ensemble/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:08 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlv2-large-patch14-ensemble/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:21:08 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/owlv2-large-patch14-ensemble/95e26936e865f87db1742128404b3c035d47d89d/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:21:08 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlv2-large-patch14-ensemble/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:21:08 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/owlv2-large-patch14-ensemble/95e26936e865f87db1742128404b3c035d47d89d/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:21:08 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlv2-large-patch14-ensemble/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:21:08 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/owlv2-large-patch14-ensemble/95e26936e865f87db1742128404b3c035d47d89d/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:21:09 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/google/owlv2-large-patch14-ensemble/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:09 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/google/owlv2-large-patch14-ensemble/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-05-18T21:21:09 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlv2-large-patch14-ensemble/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:21:09 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/owlv2-large-patch14-ensemble/95e26936e865f87db1742128404b3c035d47d89d/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:21:09 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlv2-large-patch14-ensemble/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:21:09 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/owlv2-large-patch14-ensemble/95e26936e865f87db1742128404b3c035d47d89d/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:21:09 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlv2-large-patch14-ensemble/resolve/main/model.safetensors "HTTP/1.1 302 Found"
+
+Loading weights:   0%|          | 0/610 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 610/610 [00:00<00:00, 14569.19it/s]

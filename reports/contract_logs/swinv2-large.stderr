@@ -1,0 +1,11 @@
+2026-05-18T21:16:33 INFO visionservex.engines.swinv2 :: loading swinv2-large from microsoft/swinv2-large-patch4-window12-192-22k
+2026-05-18T21:16:33 INFO httpx :: HTTP Request: HEAD https://huggingface.co/microsoft/swinv2-large-patch4-window12-192-22k/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:16:33 INFO httpx :: HTTP Request: HEAD https://huggingface.co/microsoft/swinv2-large-patch4-window12-192-22k/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:33 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/microsoft/swinv2-large-patch4-window12-192-22k/02e27d1b2d71ea7fb05ea45319bdd9556869a072/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:16:34 INFO httpx :: HTTP Request: HEAD https://huggingface.co/microsoft/swinv2-large-patch4-window12-192-22k/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:16:34 INFO httpx :: HTTP Request: HEAD https://huggingface.co/microsoft/swinv2-large-patch4-window12-192-22k/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:34 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/microsoft/swinv2-large-patch4-window12-192-22k/02e27d1b2d71ea7fb05ea45319bdd9556869a072/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:16:34 INFO httpx :: HTTP Request: HEAD https://huggingface.co/microsoft/swinv2-large-patch4-window12-192-22k/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:34 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/microsoft/swinv2-large-patch4-window12-192-22k/02e27d1b2d71ea7fb05ea45319bdd9556869a072/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:16:34 INFO httpx :: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/microsoft/swinv2-large-patch4-window12-192-22k/02e27d1b2d71ea7fb05ea45319bdd9556869a072/config.json "HTTP/1.1 200 OK"
+{"error": {"code": "PREDICT_FAILED", "message": "brotli: decoder process called with data when 'can_accept_more_data()' is False", "hint": ""}}

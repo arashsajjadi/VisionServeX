@@ -1,0 +1,49 @@
+{
+  "kind": "open_vocab",
+  "model_id": "grounding-dino-swin-b",
+  "task": "open_vocab_detect",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/grounding-dino-swin-b/snapshot/pytorch_model.bin",
+  "latency_ms": 404.4743480044417,
+  "fallback_reason": null,
+  "metadata": {
+    "backend": "huggingface",
+    "precision": "fp32"
+  },
+  "warnings": [],
+  "prompts": [
+    "person",
+    "car"
+  ],
+  "detections": [
+    {
+      "box": {
+        "x1": 299.59613037109375,
+        "y1": 170.1247100830078,
+        "x2": 551.5923461914062,
+        "y2": 381.554443359375
+      },
+      "score": 0.31537002325057983,
+      "label": "person car",
+      "class_id": null
+    },
+    {
+      "box": {
+        "x1": 98.97773742675781,
+        "y1": 38.74085235595703,
+        "x2": 160.63223266601562,
+        "y2": 280.3303527832031
+      },
+      "score": 0.36809611320495605,
+      "label": "person",
+      "class_id": null
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+2026-05-18T21:18:42 INFO visionservex.engines.dinov2 :: loading dinov2-large from facebook/dinov2-large on cuda
+2026-05-18T21:18:42 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/dinov2-large/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:18:42 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/dinov2-large/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:42 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/dinov2-large/47b73eefe95e8d44ec3623f8890bd894b6ea2d6c/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:18:42 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/dinov2-large/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:18:43 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/dinov2-large/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:43 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/dinov2-large/47b73eefe95e8d44ec3623f8890bd894b6ea2d6c/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:18:43 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/dinov2-large/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:43 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/dinov2-large/47b73eefe95e8d44ec3623f8890bd894b6ea2d6c/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:18:43 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/dinov2-large/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:43 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/dinov2-large/47b73eefe95e8d44ec3623f8890bd894b6ea2d6c/config.json "HTTP/1.1 200 OK"
+
+Loading weights:   0%|          | 0/439 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 439/439 [00:00<00:00, 4545.25it/s]

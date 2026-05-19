@@ -1,0 +1,62 @@
+/home/arash/PycharmProjects/VisionServeX/src/visionservex/cli/main.py:1131: UserWarning: Checkpoint for 'grounded-sam2' is not cached. Run: visionservex model pull grounded-sam2  (or pass auto_pull=True / --auto-pull)
+  result = model.predict(input_path, **kwargs)
+2026-05-18T21:20:34 INFO visionservex.engines.grounded_sam2 :: loading GroundedSAM2 sub-models on device=cuda
+2026-05-18T21:20:35 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:35 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:35 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-tiny/a2bb814dd30d776dcf7e30523b00659f4f141c71/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:35 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:35 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:35 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-tiny/a2bb814dd30d776dcf7e30523b00659f4f141c71/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:35 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/IDEA-Research/grounding-dino-tiny/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:35 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:35 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/chat_template.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:36 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/chat_template.jinja "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:36 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/audio_tokenizer_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:36 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:36 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:36 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-tiny/a2bb814dd30d776dcf7e30523b00659f4f141c71/preprocessor_config.json "HTTP/1.1 200 OK"
+The image processor of type `GroundingDinoImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+2026-05-18T21:20:36 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:36 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:36 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-tiny/a2bb814dd30d776dcf7e30523b00659f4f141c71/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:36 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:36 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-tiny/a2bb814dd30d776dcf7e30523b00659f4f141c71/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:36 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:36 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-tiny/a2bb814dd30d776dcf7e30523b00659f4f141c71/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:36 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/IDEA-Research/grounding-dino-tiny/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:37 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/IDEA-Research/grounding-dino-tiny/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-05-18T21:20:37 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:37 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-tiny/a2bb814dd30d776dcf7e30523b00659f4f141c71/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:37 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:37 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-tiny/a2bb814dd30d776dcf7e30523b00659f4f141c71/config.json "HTTP/1.1 200 OK"
+
+Loading weights:   0%|          | 0/990 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 990/990 [00:00<00:00, 16510.38it/s]
+2026-05-18T21:20:37 INFO visionservex.engines.sam2_hf :: loading SAM2 sam2-hiera-tiny from facebook/sam2-hiera-tiny on cuda
+2026-05-18T21:20:37 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/facebook/sam2-hiera-tiny/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:37 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-tiny/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:37 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam2-hiera-tiny/7c218beaf0bb87874785f32b582f640134fc1c09/processor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:37 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-tiny/resolve/main/chat_template.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:37 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-tiny/resolve/main/chat_template.jinja "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:38 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-tiny/resolve/main/audio_tokenizer_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:38 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-tiny/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:38 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam2-hiera-tiny/7c218beaf0bb87874785f32b582f640134fc1c09/processor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:38 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-tiny/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:38 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam2-hiera-tiny/7c218beaf0bb87874785f32b582f640134fc1c09/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:38 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-tiny/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:38 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam2-hiera-tiny/7c218beaf0bb87874785f32b582f640134fc1c09/processor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:38 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-tiny/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:38 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam2-hiera-tiny/7c218beaf0bb87874785f32b582f640134fc1c09/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:38 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-tiny/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:38 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam2-hiera-tiny/7c218beaf0bb87874785f32b582f640134fc1c09/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:38 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-tiny/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:38 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/sam2-hiera-tiny/7c218beaf0bb87874785f32b582f640134fc1c09/config.json "HTTP/1.1 200 OK"
+You are using a model of type `sam2_video` to instantiate a model of type `sam2`. This may be expected if you are loading a checkpoint that shares a subset of the architecture (e.g., loading a `sam2_video` checkpoint into `Sam2Model`), but is otherwise not supported and can yield errors. Please verify that the checkpoint is compatible with the model you are instantiating.
+2026-05-18T21:20:38 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/sam2-hiera-tiny/resolve/main/model.safetensors "HTTP/1.1 302 Found"
+
+Loading weights:   0%|          | 0/309 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 309/309 [00:00<00:00, 15677.65it/s]
+2026-05-18T21:20:38 INFO visionservex.engines.sam2_hf :: SAM2 sam2-hiera-tiny ready
+2026-05-18T21:20:38 INFO visionservex.engines.grounded_sam2 :: GroundedSAM2 ready (GD+SAM2)
+/home/arash/miniconda3/lib/python3.13/site-packages/transformers/models/grounding_dino/processing_grounding_dino.py:96: FutureWarning: The key `labels` is will return integer ids in `GroundingDinoProcessor.post_process_grounded_object_detection` output since v4.51.0. Use `text_labels` instead to retrieve string object names.
+  warnings.warn(self.message, FutureWarning)

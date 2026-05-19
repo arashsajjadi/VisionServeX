@@ -1,0 +1,64 @@
+{
+  "kind": "detection",
+  "model_id": "dfine-m",
+  "task": "detect",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_dfine",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/dfine-m/snapshot/model.safetensors",
+  "latency_ms": 313.7986319925403,
+  "fallback_reason": null,
+  "metadata": {},
+  "warnings": [],
+  "detections": [
+    {
+      "box": {
+        "x1": 309.25250244140625,
+        "y1": 339.6929931640625,
+        "x2": 371.6002197265625,
+        "y2": 381.2838134765625
+      },
+      "score": 0.6406418681144714,
+      "label": "sports ball",
+      "class_id": 32
+    },
+    {
+      "box": {
+        "x1": 489.2576904296875,
+        "y1": 339.6731262207031,
+        "x2": 551.2009887695312,
+        "y2": 381.2474365234375
+      },
+      "score": 0.5987999439239502,
+      "label": "sports ball",
+      "class_id": 32
+    },
+    {
+      "box": {
+        "x1": 308.8290710449219,
+        "y1": 338.91790771484375,
+        "x2": 551.68994140625,
+        "y2": 382.2128601074219
+      },
+      "score": 0.35721614956855774,
+      "label": "baseball bat",
+      "class_id": 34
+    },
+    {
+      "box": {
+        "x1": 308.8290710449219,
+        "y1": 338.91790771484375,
+        "x2": 551.68994140625,
+        "y2": 382.2128601074219
+      },
+      "score": 0.3071662485599518,
+      "label": "person",
+      "class_id": 0
+    }
+  ]
+}

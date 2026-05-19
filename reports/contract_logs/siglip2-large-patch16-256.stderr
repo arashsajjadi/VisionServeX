@@ -1,0 +1,16 @@
+2026-05-18T21:19:05 INFO visionservex.engines.dinov2 :: loading siglip2-large-patch16-256 from google/siglip2-large-patch16-256 on cuda
+2026-05-18T21:19:05 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-large-patch16-256/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:05 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-large-patch16-256/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:05 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/siglip2-large-patch16-256/787800c8990e6f058423089178e718139608408c/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:06 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-large-patch16-256/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:06 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-large-patch16-256/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:06 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/siglip2-large-patch16-256/787800c8990e6f058423089178e718139608408c/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:06 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-large-patch16-256/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:06 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/siglip2-large-patch16-256/787800c8990e6f058423089178e718139608408c/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:06 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-large-patch16-256/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:06 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/siglip2-large-patch16-256/787800c8990e6f058423089178e718139608408c/config.json "HTTP/1.1 200 OK"
+
+Loading weights:   0%|          | 0/792 [00:00<?, ?it/s]
+Loading weights:  43%|████▎     | 339/792 [00:00<00:00, 3376.60it/s]
+Loading weights:  96%|█████████▋| 763/792 [00:00<00:00, 3881.53it/s]
+Loading weights: 100%|██████████| 792/792 [00:00<00:00, 3851.20it/s]

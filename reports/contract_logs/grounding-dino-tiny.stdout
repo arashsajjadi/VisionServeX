@@ -1,0 +1,38 @@
+{
+  "kind": "open_vocab",
+  "model_id": "grounding-dino-tiny",
+  "task": "open_vocab_detect",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/grounding-dino-tiny/snapshot/pytorch_model.bin",
+  "latency_ms": 374.4630449946271,
+  "fallback_reason": null,
+  "metadata": {
+    "backend": "huggingface",
+    "precision": "fp32"
+  },
+  "warnings": [],
+  "prompts": [
+    "person",
+    "car"
+  ],
+  "detections": [
+    {
+      "box": {
+        "x1": 299.21905517578125,
+        "y1": 169.3069610595703,
+        "x2": 552.1878662109375,
+        "y2": 381.7338562011719
+      },
+      "score": 0.37421655654907227,
+      "label": "car",
+      "class_id": null
+    }
+  ]
+}

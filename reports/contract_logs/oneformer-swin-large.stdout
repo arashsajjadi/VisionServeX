@@ -1,0 +1,70 @@
+{
+  "kind": "segmentation",
+  "model_id": "oneformer-swin-large",
+  "task": "segment",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_oneformer",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/oneformer-swin-large/snapshot/150_16_swin_l_oneformer_coco_100ep.pth",
+  "latency_ms": 386.0327129950747,
+  "fallback_reason": null,
+  "metadata": {
+    "oneformer_task": "semantic"
+  },
+  "warnings": [],
+  "segments": [
+    {
+      "box": {
+        "x1": 99.0,
+        "y1": 41.0,
+        "x2": 159.0,
+        "y2": 280.0
+      },
+      "score": 0.04431966145833333,
+      "label": "bottle",
+      "class_id": 39,
+      "mask_shape": [
+        480,
+        640
+      ],
+      "mask_pixels_on": 13615
+    },
+    {
+      "box": {
+        "x1": 0.0,
+        "y1": 0.0,
+        "x2": 639.0,
+        "y2": 479.0
+      },
+      "score": 0.8735384114583333,
+      "label": "sky-other-merged",
+      "class_id": 119,
+      "mask_shape": [
+        480,
+        640
+      ],
+      "mask_pixels_on": 268351
+    },
+    {
+      "box": {
+        "x1": 325.0,
+        "y1": 201.0,
+        "x2": 521.0,
+        "y2": 341.0
+      },
+      "score": 0.08214192708333333,
+      "label": "paper-merged",
+      "class_id": 127,
+      "mask_shape": [
+        480,
+        640
+      ],
+      "mask_pixels_on": 25234
+    }
+  ]
+}

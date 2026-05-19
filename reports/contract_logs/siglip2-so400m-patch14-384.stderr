@@ -1,0 +1,16 @@
+2026-05-18T21:19:15 INFO visionservex.engines.dinov2 :: loading siglip2-so400m-patch14-384 from google/siglip2-so400m-patch14-384 on cuda
+2026-05-18T21:19:15 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:15 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:15 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/siglip2-so400m-patch14-384/e8e487298228002f3d8a82e0cd5c8ea9c567f57f/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:15 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:15 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:15 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/siglip2-so400m-patch14-384/e8e487298228002f3d8a82e0cd5c8ea9c567f57f/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:15 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:15 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/siglip2-so400m-patch14-384/e8e487298228002f3d8a82e0cd5c8ea9c567f57f/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:15 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:15 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/siglip2-so400m-patch14-384/e8e487298228002f3d8a82e0cd5c8ea9c567f57f/config.json "HTTP/1.1 200 OK"
+
+Loading weights:   0%|          | 0/888 [00:00<?, ?it/s]
+Loading weights:  44%|████▎     | 388/888 [00:00<00:00, 3866.44it/s]
+Loading weights:  87%|████████▋ | 775/888 [00:00<00:00, 3861.34it/s]
+Loading weights: 100%|██████████| 888/888 [00:00<00:00, 3867.97it/s]

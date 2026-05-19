@@ -1,0 +1,43 @@
+{
+  "kind": "classification",
+  "model_id": "convnextv2-large",
+  "task": "classify",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_classify",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/convnextv2-large/snapshot/pytorch_model.bin",
+  "latency_ms": 457.4861520086415,
+  "fallback_reason": null,
+  "metadata": {
+    "backend": "huggingface_classify",
+    "precision": "fp32"
+  },
+  "warnings": [],
+  "top_k": [
+    [
+      "envelope",
+      0.5100612044334412
+    ],
+    [
+      "Band Aid",
+      0.06416438519954681
+    ],
+    [
+      "carton",
+      0.062117427587509155
+    ],
+    [
+      "guillotine",
+      0.017551865428686142
+    ],
+    [
+      "jigsaw puzzle",
+      0.010229111649096012
+    ]
+  ]
+}

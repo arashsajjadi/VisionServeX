@@ -1,0 +1,42 @@
+{
+  "kind": "detection",
+  "model_id": "dfine-s-o365-coco",
+  "task": "detect",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_dfine",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/dfine-s-o365-coco/snapshot/model.safetensors",
+  "latency_ms": 309.4314479967579,
+  "fallback_reason": null,
+  "metadata": {},
+  "warnings": [],
+  "detections": [
+    {
+      "box": {
+        "x1": 309.1439208984375,
+        "y1": 339.5724792480469,
+        "x2": 371.678466796875,
+        "y2": 380.9193420410156
+      },
+      "score": 0.5751472115516663,
+      "label": "sports ball",
+      "class_id": 32
+    },
+    {
+      "box": {
+        "x1": 489.2816162109375,
+        "y1": 339.452880859375,
+        "x2": 551.4773559570312,
+        "y2": 380.94171142578125
+      },
+      "score": 0.4905683100223541,
+      "label": "sports ball",
+      "class_id": 32
+    }
+  ]
+}

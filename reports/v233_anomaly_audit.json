@@ -1,0 +1,18 @@
+{
+  "status": "expected_blocker",
+  "code": "ANOMALY_REQUIRED",
+  "extra": "anomaly",
+  "installed": {},
+  "missing": [
+    "anomalib"
+  ],
+  "missing_detail": [
+    {
+      "module": "anomalib",
+      "error": "No module named 'anomalib'"
+    }
+  ],
+  "exact_install_command": "visionservex[anomaly]",
+  "sidecar_recommended": false,
+  "next_action": "pip install 'visionservex[anomaly]'"
+}

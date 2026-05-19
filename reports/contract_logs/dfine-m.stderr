@@ -1,0 +1,15 @@
+2026-05-18T21:17:00 INFO visionservex.engines.dfine :: loading D-FINE dfine-m from ustc-community/dfine-medium-obj2coco on cuda
+2026-05-18T21:17:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-medium-obj2coco/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:17:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-medium-obj2coco/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:17:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ustc-community/dfine-medium-obj2coco/e82849660b18b6eab3fbcc88c9560d844d919ab4/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:17:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-medium-obj2coco/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:17:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-medium-obj2coco/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:17:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ustc-community/dfine-medium-obj2coco/e82849660b18b6eab3fbcc88c9560d844d919ab4/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:17:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-medium-obj2coco/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:17:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ustc-community/dfine-medium-obj2coco/e82849660b18b6eab3fbcc88c9560d844d919ab4/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:17:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-medium-obj2coco/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:17:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ustc-community/dfine-medium-obj2coco/e82849660b18b6eab3fbcc88c9560d844d919ab4/config.json "HTTP/1.1 200 OK"
+
+Loading weights:   0%|          | 0/1009 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 1009/1009 [00:00<00:00, 20636.41it/s]
+2026-05-18T21:17:01 INFO visionservex.engines.dfine :: D-FINE dfine-m ready (80 classes)

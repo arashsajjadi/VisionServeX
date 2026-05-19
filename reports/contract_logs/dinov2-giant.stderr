@@ -1,0 +1,15 @@
+2026-05-18T21:18:32 INFO visionservex.engines.dinov2 :: loading dinov2-giant from facebook/dinov2-giant on cuda
+2026-05-18T21:18:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/dinov2-giant/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:18:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/dinov2-giant/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/dinov2-giant/611a9d42f2335e0f921f1e313ad3c1b7178d206d/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:18:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/dinov2-giant/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:18:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/dinov2-giant/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:32 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/dinov2-giant/611a9d42f2335e0f921f1e313ad3c1b7178d206d/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:18:33 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/dinov2-giant/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:33 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/dinov2-giant/611a9d42f2335e0f921f1e313ad3c1b7178d206d/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:18:33 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/dinov2-giant/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:33 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/dinov2-giant/611a9d42f2335e0f921f1e313ad3c1b7178d206d/config.json "HTTP/1.1 200 OK"
+
+Loading weights:   0%|          | 0/727 [00:00<?, ?it/s]
+Loading weights:  76%|███████▌  | 550/727 [00:00<00:00, 5496.49it/s]
+Loading weights: 100%|██████████| 727/727 [00:00<00:00, 5350.03it/s]

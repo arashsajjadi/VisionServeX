@@ -1,0 +1,3 @@
+/home/arash/PycharmProjects/VisionServeX/src/visionservex/cli/main.py:1131: UserWarning: Checkpoint for 'rtmdet-r2-s' is not cached. Run: visionservex model pull rtmdet-r2-s  (or pass auto_pull=True / --auto-pull)
+  result = model.predict(input_path, **kwargs)
+{"error": {"code": "PREDICT_FAILED", "message": "OpenMMLab sidecar is not reachable at http://localhost:8090. Start it with: visionservex openmmlab docker-run  Install hint: visionservex openmmlab docker-build && visionservex openmmlab docker-run", "hint": ""}}

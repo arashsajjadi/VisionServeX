@@ -1,0 +1,33 @@
+2026-05-18T21:20:44 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:44 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:44 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-base/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:44 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:44 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:44 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-base/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:44 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/IDEA-Research/grounding-dino-base/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:44 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:44 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/chat_template.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:44 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/chat_template.jinja "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:44 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/audio_tokenizer_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:45 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:45 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:45 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-base/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/preprocessor_config.json "HTTP/1.1 200 OK"
+The image processor of type `GroundingDinoImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+2026-05-18T21:20:45 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:45 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:45 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-base/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:45 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:45 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-base/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:45 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:45 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-base/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:45 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/IDEA-Research/grounding-dino-base/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-18T21:20:45 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/IDEA-Research/grounding-dino-base/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-05-18T21:20:45 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:45 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-base/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:20:46 INFO httpx :: HTTP Request: HEAD https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:20:46 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/IDEA-Research/grounding-dino-base/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/config.json "HTTP/1.1 200 OK"
+
+Loading weights:   0%|          | 0/1206 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 1206/1206 [00:00<00:00, 17552.37it/s]
+/home/arash/miniconda3/lib/python3.13/site-packages/transformers/models/grounding_dino/processing_grounding_dino.py:96: FutureWarning: The key `labels` is will return integer ids in `GroundingDinoProcessor.post_process_grounded_object_detection` output since v4.51.0. Use `text_labels` instead to retrieve string object names.
+  warnings.warn(self.message, FutureWarning)

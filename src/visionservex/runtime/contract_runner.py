@@ -34,14 +34,19 @@ _SMOKE_IMG = REPO_ROOT / "tests/assets/smoke/coco_person_car.jpg"
 
 
 _TASK_SCHEMAS = {
-    "detect": {"required_keys": ["detections", "boxes"], "any_of": True},
-    "classify": {"required_keys": ["predictions", "topk"], "any_of": True},
-    "segment": {"required_keys": ["segments", "masks"], "any_of": True},
-    "foundation_segment": {"required_keys": ["mask", "masks", "segments"], "any_of": True},
-    "embed": {"required_keys": ["embedding", "embeddings"], "any_of": True},
-    "open_vocab_detect": {"required_keys": ["detections", "boxes"], "any_of": True},
-    "grounded_segment": {"required_keys": ["segments", "masks"], "any_of": True},
-    "vlm": {"required_keys": ["answer", "text", "predictions"], "any_of": True},
+    "detect": {"required_keys": ["detections", "boxes", "kind"], "any_of": True},
+    "classify": {"required_keys": ["predictions", "topk", "top_k", "kind"], "any_of": True},
+    "segment": {"required_keys": ["segments", "masks", "kind"], "any_of": True},
+    "foundation_segment": {"required_keys": ["mask", "masks", "segments", "kind"], "any_of": True},
+    "embed": {
+        "required_keys": ["embedding", "embeddings", "embedding_dim", "kind"],
+        "any_of": True,
+    },
+    "open_vocab_detect": {"required_keys": ["detections", "boxes", "kind"], "any_of": True},
+    "grounded_segment": {"required_keys": ["segments", "masks", "kind"], "any_of": True},
+    "vlm": {"required_keys": ["answer", "text", "predictions", "kind"], "any_of": True},
+    "pose": {"required_keys": ["keypoints", "poses", "kind"], "any_of": True},
+    "obb": {"required_keys": ["oriented_boxes", "obb", "kind"], "any_of": True},
 }
 
 
@@ -152,21 +157,28 @@ def _classify_one(
     )
     payload = classified.structured_payload or {}
 
-    # Also parse stderr as JSON in case the predict wrapper dumped error there
+    # Also parse stderr as JSON in case the predict wrapper dumped error there.
+    # rfdetr and others print log lines before the JSON, so search for the
+    # first {…} block regardless of position.
+    import re
+
     if not payload:
         for stream_text in (stdout, stderr):
-            for line in stream_text.splitlines():
-                line = line.strip()
-                if line.startswith("{"):
+            try:
+                parsed = json.loads(stream_text.strip())
+                if isinstance(parsed, dict):
+                    payload = parsed
+                    break
+            except Exception:
+                m_obj = re.search(r"\{.*\}", stream_text, re.DOTALL)
+                if m_obj:
                     try:
-                        parsed = json.loads(line)
+                        parsed = json.loads(m_obj.group(0))
                         if isinstance(parsed, dict):
                             payload = parsed
                             break
                     except Exception:
                         continue
-            if payload:
-                break
 
     # Unwrap PREDICT_FAILED envelope
     code = payload.get("code", "")

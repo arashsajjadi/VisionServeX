@@ -1,0 +1,17 @@
+{
+  "status": "expected_blocker",
+  "code": "FLORENCE2_TRANSFORMERS_VERSION_REQUIRED",
+  "extra": "florence2",
+  "installed": {
+    "transformers": "5.3.0",
+    "huggingface_hub": "1.7.2",
+    "safetensors": "0.7.0",
+    "accelerate": "1.13.0"
+  },
+  "missing": [],
+  "missing_detail": [],
+  "exact_install_command": "visionservex[vlm-legacy]",
+  "sidecar_recommended": true,
+  "next_action": "pip install 'transformers<5.0' (sidecar recommended)",
+  "sidecar_install": "python3.11 -m venv .venv-florence2 && source .venv-florence2/bin/activate && pip install 'transformers>=4.40,<5.0' accelerate safetensors"
+}

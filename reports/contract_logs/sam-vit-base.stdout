@@ -1,0 +1,36 @@
+{
+  "kind": "segmentation",
+  "model_id": "sam-vit-base",
+  "task": "foundation_segment",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_sam",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/sam-vit-base/snapshot/pytorch_model.bin",
+  "latency_ms": 216.70297700620722,
+  "fallback_reason": null,
+  "metadata": {},
+  "warnings": [],
+  "segments": [
+    {
+      "box": {
+        "x1": 2.0,
+        "y1": 38.0,
+        "x2": 193.0,
+        "y2": 271.0
+      },
+      "score": 0.893986701965332,
+      "label": "segment",
+      "class_id": null,
+      "mask_shape": [
+        480,
+        640
+      ],
+      "mask_pixels_on": 12650
+    }
+  ]
+}

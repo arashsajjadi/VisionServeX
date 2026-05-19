@@ -1,0 +1,7 @@
+/home/arash/PycharmProjects/VisionServeX/src/visionservex/cli/main.py:1131: UserWarning: Checkpoint for 'rfdetr-medium' is not cached. Run: visionservex model pull rfdetr-medium  (or pass auto_pull=True / --auto-pull)
+  result = model.predict(input_path, **kwargs)
+2026-05-18T21:18:00 INFO visionservex.engines.rfdetr :: loading RFDETRMedium on device=cuda
+[2026-05-18 21:18:00] [WARNING] rf-detr - Using a different number of positional encodings than DINOv2, which means we're not loading DINOv2 backbone weights. This is not a problem if finetuning a pretrained RF-DETR model.
+[2026-05-18 21:18:00] [WARNING] rf-detr - Using patch size 16 instead of 14, which means we're not loading DINOv2 backbone weights. This is not a problem if finetuning a pretrained RF-DETR model.
+2026-05-18T21:18:01 INFO visionservex.engines.rfdetr :: RFDETRMedium ready
+[2026-05-18 21:18:01] [WARNING] rf-detr - Model is not optimized for inference. Latency may be higher than expected. You can optimize the model for inference by calling model.optimize_for_inference().

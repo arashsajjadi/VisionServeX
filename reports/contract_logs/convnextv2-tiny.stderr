@@ -1,0 +1,14 @@
+2026-05-18T21:16:14 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/convnextv2-tiny-22k-224/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:16:14 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/convnextv2-tiny-22k-224/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:14 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/convnextv2-tiny-22k-224/9cba4896e97bb86b1eb609e482a2149d84f345bc/preprocessor_config.json "HTTP/1.1 200 OK"
+The image processor of type `ConvNextImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+2026-05-18T21:16:14 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/convnextv2-tiny-22k-224/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:16:14 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/convnextv2-tiny-22k-224/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:14 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/convnextv2-tiny-22k-224/9cba4896e97bb86b1eb609e482a2149d84f345bc/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:16:14 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/convnextv2-tiny-22k-224/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:14 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/convnextv2-tiny-22k-224/9cba4896e97bb86b1eb609e482a2149d84f345bc/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:16:14 INFO httpx :: HTTP Request: HEAD https://huggingface.co/facebook/convnextv2-tiny-22k-224/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:14 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/convnextv2-tiny-22k-224/9cba4896e97bb86b1eb609e482a2149d84f345bc/config.json "HTTP/1.1 200 OK"
+
+Loading weights:   0%|          | 0/200 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 200/200 [00:00<00:00, 19212.61it/s]

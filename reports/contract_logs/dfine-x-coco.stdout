@@ -1,0 +1,64 @@
+{
+  "kind": "detection",
+  "model_id": "dfine-x-coco",
+  "task": "detect",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_dfine",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/dfine-x-coco/snapshot/model.safetensors",
+  "latency_ms": 328.21354900079314,
+  "fallback_reason": null,
+  "metadata": {},
+  "warnings": [],
+  "detections": [
+    {
+      "box": {
+        "x1": 298.6840515136719,
+        "y1": 169.63818359375,
+        "x2": 552.7479248046875,
+        "y2": 383.17266845703125
+      },
+      "score": 0.5291379690170288,
+      "label": "suitcase",
+      "class_id": 28
+    },
+    {
+      "box": {
+        "x1": 298.6840515136719,
+        "y1": 169.63818359375,
+        "x2": 552.7479248046875,
+        "y2": 383.17266845703125
+      },
+      "score": 0.3856446146965027,
+      "label": "clock",
+      "class_id": 74
+    },
+    {
+      "box": {
+        "x1": 298.6840515136719,
+        "y1": 169.63818359375,
+        "x2": 552.7479248046875,
+        "y2": 383.17266845703125
+      },
+      "score": 0.3598855435848236,
+      "label": "truck",
+      "class_id": 7
+    },
+    {
+      "box": {
+        "x1": 298.6840515136719,
+        "y1": 169.63818359375,
+        "x2": 552.7479248046875,
+        "y2": 383.17266845703125
+      },
+      "score": 0.3304741084575653,
+      "label": "book",
+      "class_id": 73
+    }
+  ]
+}

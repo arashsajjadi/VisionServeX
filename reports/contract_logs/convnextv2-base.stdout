@@ -1,0 +1,43 @@
+{
+  "kind": "classification",
+  "model_id": "convnextv2-base",
+  "task": "classify",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_classify",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/convnextv2-base/snapshot/pytorch_model.bin",
+  "latency_ms": 471.0011459974339,
+  "fallback_reason": null,
+  "metadata": {
+    "backend": "huggingface_classify",
+    "precision": "fp32"
+  },
+  "warnings": [],
+  "top_k": [
+    [
+      "envelope",
+      0.21642111241817474
+    ],
+    [
+      "carton",
+      0.028119228780269623
+    ],
+    [
+      "switch, electric switch, electrical switch",
+      0.02491314709186554
+    ],
+    [
+      "hook, claw",
+      0.022644858807325363
+    ],
+    [
+      "binder, ring-binder",
+      0.021717753261327744
+    ]
+  ]
+}

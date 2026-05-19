@@ -1,0 +1,27 @@
+{
+  "kind": "open_vocab",
+  "model_id": "owlv2-base-patch16",
+  "task": "open_vocab_detect",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_owlv2",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/owlv2-base-patch16/snapshot/pytorch_model.bin",
+  "latency_ms": 265.21212499937974,
+  "fallback_reason": null,
+  "metadata": {
+    "backend": "huggingface_owlv2",
+    "precision": "fp32",
+    "threshold": 0.1
+  },
+  "warnings": [],
+  "prompts": [
+    "person",
+    "car"
+  ],
+  "detections": []
+}

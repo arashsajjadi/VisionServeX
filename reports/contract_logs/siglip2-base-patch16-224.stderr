@@ -1,0 +1,14 @@
+2026-05-18T21:18:59 INFO visionservex.engines.dinov2 :: loading siglip2-base-patch16-224 from google/siglip2-base-patch16-224 on cuda
+2026-05-18T21:18:59 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-base-patch16-224/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:18:59 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-base-patch16-224/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:59 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/siglip2-base-patch16-224/75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-base-patch16-224/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-base-patch16-224/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/siglip2-base-patch16-224/75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-base-patch16-224/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/siglip2-base-patch16-224/75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip2-base-patch16-224/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:00 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/siglip2-base-patch16-224/75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2/config.json "HTTP/1.1 200 OK"
+
+Loading weights:   0%|          | 0/408 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 408/408 [00:00<00:00, 20636.18it/s]

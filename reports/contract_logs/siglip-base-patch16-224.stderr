@@ -1,0 +1,169 @@
+/home/arash/PycharmProjects/VisionServeX/src/visionservex/cli/embedding_commands.py:48: UserWarning: Checkpoint for 'siglip-base-patch16-224' is not cached. Run: visionservex model pull siglip-base-patch16-224  (or pass auto_pull=True / --auto-pull)
+  with VisionModel(model_id, device=device) as model:
+2026-05-18T21:18:56 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/google/siglip-base-patch16-224/revision/main "HTTP/1.1 200 OK"
+
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]2026-05-18T21:18:56 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/siglip-base-patch16-224/resolve/7fd15f0689c79d79e38b1c2e2e2370a7bf2761ed/tokenizer.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:56 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/siglip-base-patch16-224/7fd15f0689c79d79e38b1c2e2e2370a7bf2761ed/tokenizer.json "HTTP/1.1 200 OK"
+2026-05-18T21:18:56 INFO httpx :: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/google/siglip-base-patch16-224/7fd15f0689c79d79e38b1c2e2e2370a7bf2761ed/tokenizer.json "HTTP/1.1 200 OK"
+
+Fetching 10 files:  80%|████████  | 8/10 [00:00<00:00, 36.14it/s]
+Traceback (most recent call last):
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/httpx/_decoders.py", line 141, in decode
+    return self._decompress(data)
+           ~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/brotlicffi/_api.py", line 413, in decompress
+    raise error(
+    ...<2 lines>...
+    )
+brotlicffi._api.error: brotli: decoder process called with data when 'can_accept_more_data()' is False
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/arash/PycharmProjects/VisionServeX/src/visionservex/runtime/downloads.py", line 472, in _download_huggingface
+    local = Path(snapshot_download(**kwargs))
+                 ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/huggingface_hub/_snapshot_download.py", line 450, in snapshot_download
+    thread_map(
+    ~~~~~~~~~~^
+        _inner_hf_hub_download,
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        tqdm_class=tqdm_class,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/tqdm/contrib/concurrent.py", line 69, in thread_map
+    return _executor_map(ThreadPoolExecutor, fn, *iterables, **tqdm_kwargs)
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/tqdm/contrib/concurrent.py", line 51, in _executor_map
+    return list(tqdm_class(ex.map(fn, *iterables, chunksize=chunksize), **kwargs))
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/tqdm/std.py", line 1181, in __iter__
+    for obj in iterable:
+               ^^^^^^^^
+  File "/home/arash/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 619, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/home/arash/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 317, in _result_or_cancel
+    return fut.result(timeout)
+           ~~~~~~~~~~^^^^^^^^^
+  File "/home/arash/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 456, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/home/arash/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/home/arash/miniconda3/lib/python3.13/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/huggingface_hub/_snapshot_download.py", line 430, in _inner_hf_hub_download
+    hf_hub_download(  # type: ignore
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+        repo_id,
+        ^^^^^^^^
+    ...<14 lines>...
+        dry_run=dry_run,
+        ^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 965, in hf_hub_download
+    return _hf_hub_download_to_local_dir(
+        # Destination
+    ...<16 lines>...
+        dry_run=dry_run,
+    )
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1413, in _hf_hub_download_to_local_dir
+    _download_to_tmp_and_move(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        incomplete_path=paths.incomplete_path(etag),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+        tqdm_class=tqdm_class,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1842, in _download_to_tmp_and_move
+    http_get(
+    ~~~~~~~~^
+        url_to_download,
+        ^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        tqdm_class=tqdm_class,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 412, in http_get
+    for chunk in response.iter_bytes(chunk_size=constants.DOWNLOAD_CHUNK_SIZE):
+                 ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/httpx/_models.py", line 898, in iter_bytes
+    decoded = decoder.decode(raw_bytes)
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/httpx/_decoders.py", line 143, in decode
+    raise DecodingError(str(exc)) from exc
+httpx.DecodingError: brotli: decoder process called with data when 'can_accept_more_data()' is False
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/arash/PycharmProjects/VisionServeX/src/visionservex/__main__.py", line 11, in <module>
+    main()
+    ~~~~^^
+  File "/home/arash/PycharmProjects/VisionServeX/src/visionservex/__main__.py", line 7, in main
+    app()
+    ~~~^^
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/typer/main.py", line 327, in __call__
+    raise e
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/typer/main.py", line 310, in __call__
+    return get_command(self)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/click/core.py", line 1442, in __call__
+    return self.main(*args, **kwargs)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/typer/core.py", line 803, in main
+    return _main(
+        self,
+    ...<6 lines>...
+        **extra,
+    )
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/typer/core.py", line 192, in _main
+    rv = self.invoke(ctx)
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/click/core.py", line 1830, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/click/core.py", line 1830, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/click/core.py", line 1226, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/click/core.py", line 794, in invoke
+    return callback(*args, **kwargs)
+  File "/home/arash/miniconda3/lib/python3.13/site-packages/typer/main.py", line 691, in wrapper
+    return callback(**use_params)
+  File "/home/arash/PycharmProjects/VisionServeX/src/visionservex/cli/embedding_commands.py", line 48, in embed_cmd
+    with VisionModel(model_id, device=device) as model:
+         ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arash/PycharmProjects/VisionServeX/src/visionservex/core/model.py", line 170, in __enter__
+    self._ensure_loaded()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "/home/arash/PycharmProjects/VisionServeX/src/visionservex/core/model.py", line 166, in _ensure_loaded
+    self.engine.load(device=self.device, precision=self.precision)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arash/PycharmProjects/VisionServeX/src/visionservex/engines/_stub.py", line 65, in load
+    self._real_load(device=device, precision=precision)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arash/PycharmProjects/VisionServeX/src/visionservex/engines/dinov2.py", line 55, in _real_load
+    download(self.entry)
+    ~~~~~~~~^^^^^^^^^^^^
+  File "/home/arash/PycharmProjects/VisionServeX/src/visionservex/runtime/downloads.py", line 280, in download
+    return _download_huggingface(entry, progress)
+  File "/home/arash/PycharmProjects/VisionServeX/src/visionservex/runtime/downloads.py", line 475, in _download_huggingface
+    raise DownloadError(
+    ...<3 lines>...
+    ) from exc
+visionservex.runtime.downloads.DownloadError: Hugging Face download failed for 'siglip-base-patch16-224': brotli: decoder process called with data when 'can_accept_more_data()' is False.
+Check that the repo 'google/siglip-base-patch16-224' exists and is public, or set HF_TOKEN if it is gated.

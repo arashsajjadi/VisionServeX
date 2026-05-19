@@ -1,0 +1,75 @@
+{
+  "kind": "detection",
+  "model_id": "dfine-n",
+  "task": "detect",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_dfine",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/dfine-n/snapshot/model.safetensors",
+  "latency_ms": 340.25826799916103,
+  "fallback_reason": null,
+  "metadata": {},
+  "warnings": [],
+  "detections": [
+    {
+      "box": {
+        "x1": 309.0347900390625,
+        "y1": 339.4095458984375,
+        "x2": 371.4335632324219,
+        "y2": 381.2226257324219
+      },
+      "score": 0.7161024212837219,
+      "label": "frisbee",
+      "class_id": 29
+    },
+    {
+      "box": {
+        "x1": 489.3936767578125,
+        "y1": 339.17083740234375,
+        "x2": 551.1917724609375,
+        "y2": 380.9605407714844
+      },
+      "score": 0.7140651345252991,
+      "label": "frisbee",
+      "class_id": 29
+    },
+    {
+      "box": {
+        "x1": 309.0347900390625,
+        "y1": 339.4095458984375,
+        "x2": 371.4335632324219,
+        "y2": 381.2226257324219
+      },
+      "score": 0.4148575961589813,
+      "label": "sports ball",
+      "class_id": 32
+    },
+    {
+      "box": {
+        "x1": 489.3936767578125,
+        "y1": 339.17083740234375,
+        "x2": 551.1917724609375,
+        "y2": 380.9605407714844
+      },
+      "score": 0.40765219926834106,
+      "label": "sports ball",
+      "class_id": 32
+    },
+    {
+      "box": {
+        "x1": 98.75900268554688,
+        "y1": 38.8604736328125,
+        "x2": 161.72879028320312,
+        "y2": 282.6011962890625
+      },
+      "score": 0.3484809398651123,
+      "label": "book",
+      "class_id": 73
+    }
+  ]
+}

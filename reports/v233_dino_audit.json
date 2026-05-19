@@ -1,0 +1,16 @@
+{
+  "status": "ok",
+  "code": "OK",
+  "extra": "dino",
+  "installed": {
+    "transformers": "5.3.0",
+    "timm": "1.0.25",
+    "huggingface_hub": "1.7.2",
+    "safetensors": "0.7.0"
+  },
+  "missing": [],
+  "missing_detail": [],
+  "exact_install_command": "visionservex[dino]",
+  "sidecar_recommended": false,
+  "next_action": "use the feature"
+}

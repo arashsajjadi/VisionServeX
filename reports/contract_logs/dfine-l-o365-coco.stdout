@@ -1,0 +1,31 @@
+{
+  "kind": "detection",
+  "model_id": "dfine-l-o365-coco",
+  "task": "detect",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_dfine",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/dfine-l-o365-coco/snapshot/model.safetensors",
+  "latency_ms": 316.85610000567976,
+  "fallback_reason": null,
+  "metadata": {},
+  "warnings": [],
+  "detections": [
+    {
+      "box": {
+        "x1": 299.4270935058594,
+        "y1": 172.309814453125,
+        "x2": 552.224365234375,
+        "y2": 382.75830078125
+      },
+      "score": 0.8287617564201355,
+      "label": "traffic light",
+      "class_id": 9
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+2026-05-18T21:17:40 INFO visionservex.engines.dfine :: loading D-FINE dfine-x-coco from ustc-community/dfine-xlarge-coco on cuda
+2026-05-18T21:17:41 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-xlarge-coco/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:17:41 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-xlarge-coco/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:17:41 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ustc-community/dfine-xlarge-coco/ea4f6be7350bbe3c199ec6febc74168346cb5a68/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:17:41 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-xlarge-coco/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:17:41 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-xlarge-coco/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:17:41 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ustc-community/dfine-xlarge-coco/ea4f6be7350bbe3c199ec6febc74168346cb5a68/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:17:41 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-xlarge-coco/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:17:41 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ustc-community/dfine-xlarge-coco/ea4f6be7350bbe3c199ec6febc74168346cb5a68/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:17:41 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-xlarge-coco/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:17:41 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ustc-community/dfine-xlarge-coco/ea4f6be7350bbe3c199ec6febc74168346cb5a68/config.json "HTTP/1.1 200 OK"
+
+Loading weights:   0%|          | 0/1465 [00:00<?, ?it/s]
+Loading weights:  52%|█████▏    | 764/1465 [00:00<00:00, 7604.45it/s]
+Loading weights: 100%|██████████| 1465/1465 [00:00<00:00, 7384.99it/s]
+2026-05-18T21:17:42 INFO visionservex.engines.dfine :: D-FINE dfine-x-coco ready (80 classes)

@@ -1,0 +1,23 @@
+{
+  "status": "auth_required",
+  "code": "SAM3_AUTH_REQUIRED",
+  "extra": "sam3",
+  "installed": {
+    "transformers": "5.3.0",
+    "huggingface_hub": "1.7.2"
+  },
+  "missing": [],
+  "missing_detail": [],
+  "exact_install_command": "visionservex[promptable]",
+  "sidecar_recommended": false,
+  "next_action": "Authenticate with Hugging Face and accept the SAM3 license.",
+  "official_repo": "https://github.com/facebookresearch/segment-anything-3",
+  "hf_org": "facebook",
+  "models": [
+    "facebook/sam3",
+    "facebook/sam3.1-base",
+    "facebook/sam3.1-large"
+  ],
+  "auth_required": true,
+  "auth_instructions": "1. Visit https://huggingface.co/facebook/sam3.\n2. Accept the model license.\n3. Set HF_TOKEN environment variable.\n4. Run: huggingface-cli login"
+}

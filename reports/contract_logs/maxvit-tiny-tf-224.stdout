@@ -1,0 +1,43 @@
+{
+  "kind": "classification",
+  "model_id": "maxvit-tiny-tf-224",
+  "task": "classify",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_classify",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/maxvit-tiny-tf-224/snapshot/pytorch_model.bin",
+  "latency_ms": 164.71813899988774,
+  "fallback_reason": null,
+  "metadata": {
+    "backend": "huggingface_classify",
+    "precision": "fp32"
+  },
+  "warnings": [],
+  "top_k": [
+    [
+      "envelope",
+      0.25910311937332153
+    ],
+    [
+      "web site, website, internet site, site",
+      0.022074980661273003
+    ],
+    [
+      "rule, ruler",
+      0.01380996871739626
+    ],
+    [
+      "Band Aid",
+      0.010701385326683521
+    ],
+    [
+      "digital clock",
+      0.007822257466614246
+    ]
+  ]
+}

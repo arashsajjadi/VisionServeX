@@ -1,0 +1,24 @@
+{
+  "kind": "embedding",
+  "model_id": "siglip2-large-patch16-256",
+  "task": "embed",
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_dinov2",
+  "latency_ms": 141.92592099425383,
+  "image_size": [
+    640,
+    480
+  ],
+  "embedding_dim": 1024,
+  "normalized": true,
+  "embedding_norm": 0.9999999403953552,
+  "embedding_first_5": [
+    0.007123193237930536,
+    0.014714203774929047,
+    0.011056565679609776,
+    -0.025954704731702805,
+    0.03156048059463501
+  ],
+  "warnings": []
+}

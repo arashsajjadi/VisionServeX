@@ -1,0 +1,43 @@
+2026-05-18T21:21:19 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/google/owlvit-large-patch14/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:19 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:19 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/chat_template.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:20 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/chat_template.jinja "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:20 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/audio_tokenizer_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:20 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:20 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:21:20 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/owlvit-large-patch14/faf39bb4c1f3ff75544daacd5fd327e9101ecff7/preprocessor_config.json "HTTP/1.1 200 OK"
+The image processor of type `OwlViTImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+2026-05-18T21:21:20 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:20 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:21:20 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/owlvit-large-patch14/faf39bb4c1f3ff75544daacd5fd327e9101ecff7/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:21:20 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:21:20 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/owlvit-large-patch14/faf39bb4c1f3ff75544daacd5fd327e9101ecff7/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:21:20 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:21:20 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/owlvit-large-patch14/faf39bb4c1f3ff75544daacd5fd327e9101ecff7/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:21:20 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/google/owlvit-large-patch14/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:21 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/google/owlvit-large-patch14/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-05-18T21:21:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:21:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/owlvit-large-patch14/faf39bb4c1f3ff75544daacd5fd327e9101ecff7/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:21:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:21:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/google/owlvit-large-patch14/faf39bb4c1f3ff75544daacd5fd327e9101ecff7/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:21:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/model.safetensors "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/model.safetensors.index.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/pytorch_model.bin "HTTP/1.1 302 Found"
+2026-05-18T21:21:21 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/main/model.safetensors "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:21 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/google/owlvit-large-patch14 "HTTP/1.1 200 OK"
+
+Loading weights:   0%|          | 0/604 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 604/604 [00:00<00:00, 96395.10it/s]
+[1mOwlViTForObjectDetection LOAD REPORT[0m from: google/owlvit-large-patch14
+Key                                         | Status     |  | 
+--------------------------------------------+------------+--+-
+owlvit.text_model.embeddings.position_ids   | UNEXPECTED |  | 
+owlvit.vision_model.embeddings.position_ids | UNEXPECTED |  | 
+
+[3mNotes:
+- UNEXPECTED[3m	:can be ignored when loading from different task/architecture; not ok if you expect identical arch.[0m
+2026-05-18T21:21:21 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/google/owlvit-large-patch14/commits/main "HTTP/1.1 200 OK"
+2026-05-18T21:21:22 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/google/owlvit-large-patch14/discussions?p=0 "HTTP/1.1 200 OK"
+2026-05-18T21:21:22 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/google/owlvit-large-patch14/commits/refs%2Fpr%2F8 "HTTP/1.1 200 OK"
+2026-05-18T21:21:22 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/refs%2Fpr%2F8/model.safetensors.index.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:21:22 INFO httpx :: HTTP Request: HEAD https://huggingface.co/google/owlvit-large-patch14/resolve/refs%2Fpr%2F8/model.safetensors "HTTP/1.1 302 Found"

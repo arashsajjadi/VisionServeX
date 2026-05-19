@@ -1,0 +1,1 @@
+{"error": {"code": "PREDICT_FAILED", "message": "Florence-2 is incompatible with transformers 5.3.0. The model's custom code uses four internal APIs removed in transformers 5.x. Install a compatible version: pip install 'transformers>=4.40,<5.0'  Install hint: pip install 'transformers>=4.40,<5.0'  (or: pip install 'visionservex[hf]' after pinning transformers)", "hint": ""}}

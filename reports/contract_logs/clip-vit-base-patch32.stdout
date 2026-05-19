@@ -1,0 +1,24 @@
+{
+  "kind": "embedding",
+  "model_id": "clip-vit-base-patch32",
+  "task": "embed",
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_dinov2",
+  "latency_ms": 110.07892600900959,
+  "image_size": [
+    640,
+    480
+  ],
+  "embedding_dim": 768,
+  "normalized": true,
+  "embedding_norm": 1.0,
+  "embedding_first_5": [
+    0.07048461586236954,
+    -0.025398576632142067,
+    0.0041504898108541965,
+    0.06020008772611618,
+    0.01988355815410614
+  ],
+  "warnings": []
+}

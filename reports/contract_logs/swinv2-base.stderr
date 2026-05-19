@@ -1,0 +1,22 @@
+2026-05-18T21:16:23 INFO visionservex.engines.swinv2 :: loading swinv2-base from microsoft/swinv2-base-patch4-window8-256
+2026-05-18T21:16:23 INFO httpx :: HTTP Request: HEAD https://huggingface.co/microsoft/swinv2-base-patch4-window8-256/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:16:23 INFO httpx :: HTTP Request: HEAD https://huggingface.co/microsoft/swinv2-base-patch4-window8-256/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:23 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/microsoft/swinv2-base-patch4-window8-256/485f4d7059ce28604233e20188df5ee19ab960c6/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:16:23 INFO httpx :: HTTP Request: HEAD https://huggingface.co/microsoft/swinv2-base-patch4-window8-256/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:16:23 INFO httpx :: HTTP Request: HEAD https://huggingface.co/microsoft/swinv2-base-patch4-window8-256/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:23 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/microsoft/swinv2-base-patch4-window8-256/485f4d7059ce28604233e20188df5ee19ab960c6/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:16:23 INFO httpx :: HTTP Request: HEAD https://huggingface.co/microsoft/swinv2-base-patch4-window8-256/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:23 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/microsoft/swinv2-base-patch4-window8-256/485f4d7059ce28604233e20188df5ee19ab960c6/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:16:23 INFO httpx :: HTTP Request: HEAD https://huggingface.co/microsoft/swinv2-base-patch4-window8-256/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:23 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/microsoft/swinv2-base-patch4-window8-256/485f4d7059ce28604233e20188df5ee19ab960c6/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:16:24 INFO httpx :: HTTP Request: HEAD https://huggingface.co/microsoft/swinv2-base-patch4-window8-256/resolve/main/model.safetensors "HTTP/1.1 404 Not Found"
+2026-05-18T21:16:24 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/microsoft/swinv2-base-patch4-window8-256 "HTTP/1.1 200 OK"
+
+Loading weights:   0%|          | 0/473 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 473/473 [00:00<00:00, 60357.96it/s]
+2026-05-18T21:16:24 INFO visionservex.engines.swinv2 :: swinv2-base loaded with 1000 classes
+2026-05-18T21:16:24 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/microsoft/swinv2-base-patch4-window8-256/commits/main "HTTP/1.1 200 OK"
+2026-05-18T21:16:24 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/microsoft/swinv2-base-patch4-window8-256/discussions?p=0 "HTTP/1.1 200 OK"
+2026-05-18T21:16:24 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/microsoft/swinv2-base-patch4-window8-256/commits/refs%2Fpr%2F1 "HTTP/1.1 200 OK"
+2026-05-18T21:16:24 INFO httpx :: HTTP Request: HEAD https://huggingface.co/microsoft/swinv2-base-patch4-window8-256/resolve/refs%2Fpr%2F1/model.safetensors.index.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:16:24 INFO httpx :: HTTP Request: HEAD https://huggingface.co/microsoft/swinv2-base-patch4-window8-256/resolve/refs%2Fpr%2F1/model.safetensors "HTTP/1.1 302 Found"

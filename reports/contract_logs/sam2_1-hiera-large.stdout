@@ -1,0 +1,36 @@
+{
+  "kind": "segmentation",
+  "model_id": "sam2.1-hiera-large",
+  "task": "foundation_segment",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_sam2",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/sam2.1-hiera-large/snapshot/sam2.1_hiera_large.pt",
+  "latency_ms": 299.918852004339,
+  "fallback_reason": null,
+  "metadata": {},
+  "warnings": [],
+  "segments": [
+    {
+      "box": {
+        "x1": 8.0,
+        "y1": 39.0,
+        "x2": 317.0,
+        "y2": 291.0
+      },
+      "score": 0.014057976193726063,
+      "label": "segment",
+      "class_id": null,
+      "mask_shape": [
+        480,
+        640
+      ],
+      "mask_pixels_on": 23797
+    }
+  ]
+}

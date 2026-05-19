@@ -1,0 +1,29 @@
+2026-05-18T21:18:15 INFO visionservex.engines.dinov2 :: loading clip-vit-base-patch32 from openai/clip-vit-base-patch32 on cuda
+2026-05-18T21:18:15 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-base-patch32/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:18:15 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-base-patch32/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:15 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/openai/clip-vit-base-patch32/3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:18:16 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-base-patch32/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:18:16 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-base-patch32/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:16 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/openai/clip-vit-base-patch32/3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:18:16 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-base-patch32/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:16 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/openai/clip-vit-base-patch32/3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:18:16 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-base-patch32/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:18:16 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/openai/clip-vit-base-patch32/3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:18:16 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-base-patch32/resolve/main/model.safetensors "HTTP/1.1 404 Not Found"
+
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 398/398 [00:00<00:00, 111444.89it/s]
+[1mCLIPModel LOAD REPORT[0m from: openai/clip-vit-base-patch32
+Key                                  | Status     |  | 
+-------------------------------------+------------+--+-
+vision_model.embeddings.position_ids | UNEXPECTED |  | 
+text_model.embeddings.position_ids   | UNEXPECTED |  | 
+
+[3mNotes:
+- UNEXPECTED[3m	:can be ignored when loading from different task/architecture; not ok if you expect identical arch.[0m
+2026-05-18T21:18:16 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/openai/clip-vit-base-patch32 "HTTP/1.1 200 OK"
+2026-05-18T21:18:16 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/openai/clip-vit-base-patch32/commits/main "HTTP/1.1 200 OK"
+2026-05-18T21:18:16 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/openai/clip-vit-base-patch32/discussions?p=0 "HTTP/1.1 200 OK"
+2026-05-18T21:18:17 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/openai/clip-vit-base-patch32/commits/refs%2Fpr%2F66 "HTTP/1.1 200 OK"
+2026-05-18T21:18:17 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-base-patch32/resolve/refs%2Fpr%2F66/model.safetensors.index.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:18:17 INFO httpx :: HTTP Request: HEAD https://huggingface.co/openai/clip-vit-base-patch32/resolve/refs%2Fpr%2F66/model.safetensors "HTTP/1.1 302 Found"

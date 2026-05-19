@@ -1,0 +1,64 @@
+{
+  "kind": "detection",
+  "model_id": "dfine-s-coco",
+  "task": "detect",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface_dfine",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/dfine-s-coco/snapshot/model.safetensors",
+  "latency_ms": 315.4852440056857,
+  "fallback_reason": null,
+  "metadata": {},
+  "warnings": [],
+  "detections": [
+    {
+      "box": {
+        "x1": 309.51129150390625,
+        "y1": 339.3927917480469,
+        "x2": 371.54034423828125,
+        "y2": 381.1983947753906
+      },
+      "score": 0.7068393230438232,
+      "label": "sports ball",
+      "class_id": 32
+    },
+    {
+      "box": {
+        "x1": 489.4956970214844,
+        "y1": 339.3472595214844,
+        "x2": 551.1419677734375,
+        "y2": 381.1383361816406
+      },
+      "score": 0.6093977689743042,
+      "label": "sports ball",
+      "class_id": 32
+    },
+    {
+      "box": {
+        "x1": 309.51129150390625,
+        "y1": 339.3927917480469,
+        "x2": 371.54034423828125,
+        "y2": 381.1983947753906
+      },
+      "score": 0.5955292582511902,
+      "label": "frisbee",
+      "class_id": 29
+    },
+    {
+      "box": {
+        "x1": 489.4956970214844,
+        "y1": 339.3472595214844,
+        "x2": 551.1419677734375,
+        "y2": 381.1383361816406
+      },
+      "score": 0.35948148369789124,
+      "label": "frisbee",
+      "class_id": 29
+    }
+  ]
+}

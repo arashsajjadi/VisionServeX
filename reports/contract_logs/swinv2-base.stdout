@@ -1,0 +1,40 @@
+{
+  "kind": "classification",
+  "model_id": "swinv2-base",
+  "task": "classify",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "huggingface",
+  "model_loaded_from": "cache",
+  "cache_path": "/home/arash/.cache/visionservex/models/swinv2-base/snapshot/pytorch_model.bin",
+  "latency_ms": 188.54010100767482,
+  "fallback_reason": null,
+  "metadata": {},
+  "warnings": [],
+  "top_k": [
+    [
+      "envelope",
+      0.1383846402168274
+    ],
+    [
+      "jigsaw puzzle",
+      0.06040923297405243
+    ],
+    [
+      "rubber eraser, rubber, pencil eraser",
+      0.03633226081728935
+    ],
+    [
+      "Band Aid",
+      0.031607769429683685
+    ],
+    [
+      "candle, taper, wax light",
+      0.027707204222679138
+    ]
+  ]
+}

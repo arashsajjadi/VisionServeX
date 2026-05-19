@@ -1,0 +1,15 @@
+2026-05-18T21:16:55 INFO visionservex.engines.dfine :: loading D-FINE dfine-l-o365-coco from ustc-community/dfine-large-obj2coco-e25 on cuda
+2026-05-18T21:16:55 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-large-obj2coco-e25/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:16:55 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-large-obj2coco-e25/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:55 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ustc-community/dfine-large-obj2coco-e25/c89de47153e338c07cddc81fc21a776b97cbf75e/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:16:56 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-large-obj2coco-e25/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:16:56 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-large-obj2coco-e25/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:56 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ustc-community/dfine-large-obj2coco-e25/c89de47153e338c07cddc81fc21a776b97cbf75e/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:16:56 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-large-obj2coco-e25/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:56 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ustc-community/dfine-large-obj2coco-e25/c89de47153e338c07cddc81fc21a776b97cbf75e/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:16:56 INFO httpx :: HTTP Request: HEAD https://huggingface.co/ustc-community/dfine-large-obj2coco-e25/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:16:56 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/ustc-community/dfine-large-obj2coco-e25/c89de47153e338c07cddc81fc21a776b97cbf75e/config.json "HTTP/1.1 200 OK"
+
+Loading weights:   0%|          | 0/1197 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 1197/1197 [00:00<00:00, 22666.80it/s]
+2026-05-18T21:16:56 INFO visionservex.engines.dfine :: D-FINE dfine-l-o365-coco ready (80 classes)

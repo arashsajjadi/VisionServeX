@@ -1,0 +1,22 @@
+{
+  "status": "ok",
+  "code": "OK",
+  "extra": "all_benchmark",
+  "installed": {
+    "torch": "2.11.0+cu130",
+    "torchvision": "0.26.0+cu130",
+    "pycocotools": "imported_ok",
+    "matplotlib": "3.10.8",
+    "pandas": "3.0.2",
+    "numpy": "2.4.4",
+    "PIL": "12.2.0",
+    "tqdm": "4.67.3",
+    "transformers": "5.3.0",
+    "rfdetr": "imported_ok"
+  },
+  "missing": [],
+  "missing_detail": [],
+  "exact_install_command": "visionservex[all-benchmark]",
+  "sidecar_recommended": false,
+  "next_action": "use the feature"
+}

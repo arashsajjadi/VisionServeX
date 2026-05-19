@@ -1,0 +1,810 @@
+{
+  "status": "ok",
+  "version": "v2.33.0",
+  "cache_root": "/home/arash/.cache/visionservex/models",
+  "model_mirror": "",
+  "model_base_url": "",
+  "n_files": 932,
+  "entries": [
+    {
+      "path": "dinov2-base/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-base-plus/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "florence-2-base/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "owlv2-base-patch16/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-n-coco/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "convnextv2-base/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-x-o365-coco/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam-vit-base/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "owlvit-large-patch14/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-large/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "siglip2-large-patch16-256/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "clip-vit-base-patch32/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam-vit-huge/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "oneformer-swin-large/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-x-coco/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam-vit-large/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "clip-vit-large-patch14/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "convnextv2-large/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-l-coco/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "siglip2-base-patch16-224/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-small/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "owlv2-large-patch14/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dinov2-large/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-s-o365-coco/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-large/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "owlvit-base-patch32/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-s-coco/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-l/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dinov2-small/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "siglip2-so400m-patch14-384/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-base-plus/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "oneformer-dinat-large/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-m-coco/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-x/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-tiny/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-tiny/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-m-o365-coco/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-t/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "maxvit-tiny-tf-224/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-tiny/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-m/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dinov2-giant/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-l-o365-coco/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-s/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-large/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "medsam/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-n/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-base/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-tiny/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "convnextv2-tiny/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/manifest.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/model.safetensors",
+      "size_mb": 184.31
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/processor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/preprocessor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/.gitattributes",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/README.md",
+      "size_mb": 0.02
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/sam2.1_hiera_s.yaml",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/sam2.1_hiera_small.pt",
+      "size_mb": 184.42
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/video_preprocessor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/config.json",
+      "size_mb": 0.01
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/.cache/huggingface/.gitignore",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/.cache/huggingface/download/sam2.1_hiera_small.pt.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/.cache/huggingface/download/video_preprocessor_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/.cache/huggingface/download/model.safetensors.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/.cache/huggingface/download/processor_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/.cache/huggingface/download/README.md.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/.cache/huggingface/download/sam2.1_hiera_s.yaml.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/.cache/huggingface/download/config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/.cache/huggingface/download/.gitattributes.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2.1-hiera-small/snapshot/.cache/huggingface/download/preprocessor_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/model.safetensors",
+      "size_mb": 184.24
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/processor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/sam2_hiera_s.yaml",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/preprocessor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/.gitattributes",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/README.md",
+      "size_mb": 0.02
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/sam2_hiera_small.pt",
+      "size_mb": 184.31
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/video_preprocessor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/config.json",
+      "size_mb": 0.01
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/.cache/huggingface/.gitignore",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/.cache/huggingface/download/video_preprocessor_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/.cache/huggingface/download/model.safetensors.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/.cache/huggingface/download/sam2_hiera_s.yaml.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/.cache/huggingface/download/processor_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/.cache/huggingface/download/README.md.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/.cache/huggingface/download/config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/.cache/huggingface/download/.gitattributes.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/.cache/huggingface/download/preprocessor_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "sam2-hiera-small/snapshot/.cache/huggingface/download/sam2_hiera_small.pt.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/model.safetensors",
+      "size_mb": 114.57
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/tf_model.h5",
+      "size_mb": 114.79
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/pytorch_model.bin",
+      "size_mb": 114.61
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/preprocessor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/.gitattributes",
+      "size_mb": 0.0
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/README.md",
+      "size_mb": 0.0
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/config.json",
+      "size_mb": 0.07
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/.cache/huggingface/.gitignore",
+      "size_mb": 0.0
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/.cache/huggingface/download/model.safetensors.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/.cache/huggingface/download/README.md.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/.cache/huggingface/download/config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/.cache/huggingface/download/.gitattributes.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/.cache/huggingface/download/preprocessor_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/.cache/huggingface/download/tf_model.h5.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "convnextv2-tiny/snapshot/.cache/huggingface/download/pytorch_model.bin.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-tiny/snapshot/pytorch_model.bin",
+      "size_mb": 113.47
+    },
+    {
+      "path": "swinv2-tiny/snapshot/preprocessor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-tiny/snapshot/.gitattributes",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-tiny/snapshot/README.md",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-tiny/snapshot/config.json",
+      "size_mb": 0.07
+    },
+    {
+      "path": "swinv2-tiny/snapshot/.cache/huggingface/.gitignore",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-tiny/snapshot/.cache/huggingface/download/README.md.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-tiny/snapshot/.cache/huggingface/download/config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-tiny/snapshot/.cache/huggingface/download/.gitattributes.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-tiny/snapshot/.cache/huggingface/download/preprocessor_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-tiny/snapshot/.cache/huggingface/download/pytorch_model.bin.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-base/snapshot/pytorch_model.bin",
+      "size_mb": 351.83
+    },
+    {
+      "path": "swinv2-base/snapshot/preprocessor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-base/snapshot/.gitattributes",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-base/snapshot/README.md",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-base/snapshot/config.json",
+      "size_mb": 0.07
+    },
+    {
+      "path": "swinv2-base/snapshot/.cache/huggingface/.gitignore",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-base/snapshot/.cache/huggingface/download/README.md.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-base/snapshot/.cache/huggingface/download/config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-base/snapshot/.cache/huggingface/download/.gitattributes.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-base/snapshot/.cache/huggingface/download/preprocessor_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-base/snapshot/.cache/huggingface/download/pytorch_model.bin.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-n/snapshot/model.safetensors",
+      "size_mb": 15.28
+    },
+    {
+      "path": "dfine-n/snapshot/preprocessor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-n/snapshot/.gitattributes",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-n/snapshot/README.md",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-n/snapshot/config.json",
+      "size_mb": 0.01
+    },
+    {
+      "path": "dfine-n/snapshot/.cache/huggingface/.gitignore",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-n/snapshot/.cache/huggingface/download/model.safetensors.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-n/snapshot/.cache/huggingface/download/README.md.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-n/snapshot/.cache/huggingface/download/config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-n/snapshot/.cache/huggingface/download/.gitattributes.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-n/snapshot/.cache/huggingface/download/preprocessor_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "medsam/snapshot/pytorch_model.bin",
+      "size_mb": 375.05
+    },
+    {
+      "path": "medsam/snapshot/preprocessor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "medsam/snapshot/.gitattributes",
+      "size_mb": 0.0
+    },
+    {
+      "path": "medsam/snapshot/README.md",
+      "size_mb": 0.0
+    },
+    {
+      "path": "medsam/snapshot/config.json",
+      "size_mb": 0.01
+    },
+    {
+      "path": "medsam/snapshot/.cache/huggingface/.gitignore",
+      "size_mb": 0.0
+    },
+    {
+      "path": "medsam/snapshot/.cache/huggingface/download/README.md.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "medsam/snapshot/.cache/huggingface/download/config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "medsam/snapshot/.cache/huggingface/download/.gitattributes.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "medsam/snapshot/.cache/huggingface/download/preprocessor_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "medsam/snapshot/.cache/huggingface/download/pytorch_model.bin.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-large/snapshot/pytorch_model.bin",
+      "size_mb": 915.25
+    },
+    {
+      "path": "swinv2-large/snapshot/preprocessor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-large/snapshot/.gitattributes",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-large/snapshot/README.md",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-large/snapshot/config.json",
+      "size_mb": 1.14
+    },
+    {
+      "path": "swinv2-large/snapshot/.cache/huggingface/.gitignore",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-large/snapshot/.cache/huggingface/download/README.md.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-large/snapshot/.cache/huggingface/download/config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-large/snapshot/.cache/huggingface/download/.gitattributes.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-large/snapshot/.cache/huggingface/download/preprocessor_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "swinv2-large/snapshot/.cache/huggingface/download/pytorch_model.bin.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-s/snapshot/model.safetensors",
+      "size_mb": 41.5
+    },
+    {
+      "path": "dfine-s/snapshot/preprocessor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-s/snapshot/.gitattributes",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-s/snapshot/README.md",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-s/snapshot/config.json",
+      "size_mb": 0.01
+    },
+    {
+      "path": "dfine-s/snapshot/.cache/huggingface/.gitignore",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-s/snapshot/.cache/huggingface/download/model.safetensors.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-s/snapshot/.cache/huggingface/download/README.md.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-s/snapshot/.cache/huggingface/download/config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-s/snapshot/.cache/huggingface/download/.gitattributes.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-s/snapshot/.cache/huggingface/download/preprocessor_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/model.safetensors",
+      "size_mb": 933.4
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/pytorch_model.bin",
+      "size_mb": 936.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/preprocessor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/.gitattributes",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/README.md",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/special_tokens_map.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/tokenizer.json",
+      "size_mb": 0.71
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/tokenizer_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/vocab.txt",
+      "size_mb": 0.23
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/.cache/huggingface/.gitignore",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/.cache/huggingface/download/model.safetensors.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/.cache/huggingface/download/tokenizer.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/.cache/huggingface/download/README.md.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/.cache/huggingface/download/vocab.txt.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/.cache/huggingface/download/config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/.cache/huggingface/download/.gitattributes.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/.cache/huggingface/download/tokenizer_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/.cache/huggingface/download/preprocessor_config.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/.cache/huggingface/download/pytorch_model.bin.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "grounding-dino-swin-b/snapshot/.cache/huggingface/download/special_tokens_map.json.metadata",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-l-o365-coco/snapshot/model.safetensors",
+      "size_mb": 125.62
+    },
+    {
+      "path": "dfine-l-o365-coco/snapshot/preprocessor_config.json",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-l-o365-coco/snapshot/.gitattributes",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-l-o365-coco/snapshot/README.md",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-l-o365-coco/snapshot/config.json",
+      "size_mb": 0.01
+    },
+    {
+      "path": "dfine-l-o365-coco/snapshot/.cache/huggingface/.gitignore",
+      "size_mb": 0.0
+    },
+    {
+      "path": "dfine-l-o365-coco/snapshot/.cache/huggingface/CACHEDIR.TAG",
+      "size_mb": 0.0
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+/home/arash/PycharmProjects/VisionServeX/src/visionservex/cli/main.py:1131: UserWarning: Checkpoint for 'rfdetr-base' is not cached. Run: visionservex model pull rfdetr-base  (or pass auto_pull=True / --auto-pull)
+  result = model.predict(input_path, **kwargs)
+2026-05-18T21:17:50 INFO visionservex.engines.rfdetr :: loading RFDETRBase on device=cuda
+2026-05-18T21:17:52 INFO visionservex.engines.rfdetr :: RFDETRBase ready
+[2026-05-18 21:17:52] [WARNING] rf-detr - Model is not optimized for inference. Latency may be higher than expected. You can optimize the model for inference by calling model.optimize_for_inference().

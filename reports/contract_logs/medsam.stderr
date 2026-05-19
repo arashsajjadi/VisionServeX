@@ -1,0 +1,32 @@
+2026-05-18T21:19:26 INFO visionservex.engines.sam_hf :: loading medsam from wanglab/medsam-vit-base
+2026-05-18T21:19:26 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/wanglab/medsam-vit-base/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:26 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:26 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/main/chat_template.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:26 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/main/chat_template.jinja "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:26 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/main/audio_tokenizer_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:26 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:26 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:26 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/wanglab/medsam-vit-base/de8488bca37bb1d4fb190f612c516126d739ce3b/preprocessor_config.json "HTTP/1.1 200 OK"
+The image processor of type `SamImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+2026-05-18T21:19:26 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:27 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:27 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/wanglab/medsam-vit-base/de8488bca37bb1d4fb190f612c516126d739ce3b/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:27 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:27 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/wanglab/medsam-vit-base/de8488bca37bb1d4fb190f612c516126d739ce3b/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:27 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-18T21:19:27 INFO httpx :: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/wanglab/medsam-vit-base/de8488bca37bb1d4fb190f612c516126d739ce3b/config.json "HTTP/1.1 200 OK"
+2026-05-18T21:19:27 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/main/model.safetensors "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:27 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/main/model.safetensors.index.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:27 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/main/pytorch_model.bin "HTTP/1.1 302 Found"
+2026-05-18T21:19:27 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/main/model.safetensors "HTTP/1.1 404 Not Found"
+
+Loading weights:   0%|          | 0/315 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 315/315 [00:00<00:00, 66693.88it/s]
+The tied weights mapping and config for this model specifies to tie shared_image_embedding.positional_embedding to prompt_encoder.shared_embedding.positional_embedding, but both are present in the checkpoints, so we will NOT tie them. You should update the config with `tie_word_embeddings=False` to silence this warning
+2026-05-18T21:19:27 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/wanglab/medsam-vit-base "HTTP/1.1 200 OK"
+2026-05-18T21:19:27 INFO visionservex.engines.sam_hf :: medsam loaded
+2026-05-18T21:19:27 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/wanglab/medsam-vit-base/commits/main "HTTP/1.1 200 OK"
+2026-05-18T21:19:27 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/wanglab/medsam-vit-base/discussions?p=0 "HTTP/1.1 200 OK"
+2026-05-18T21:19:28 INFO httpx :: HTTP Request: GET https://huggingface.co/api/models/wanglab/medsam-vit-base/commits/refs%2Fpr%2F3 "HTTP/1.1 200 OK"
+2026-05-18T21:19:28 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/refs%2Fpr%2F3/model.safetensors.index.json "HTTP/1.1 404 Not Found"
+2026-05-18T21:19:28 INFO httpx :: HTTP Request: HEAD https://huggingface.co/wanglab/medsam-vit-base/resolve/refs%2Fpr%2F3/model.safetensors "HTTP/1.1 302 Found"

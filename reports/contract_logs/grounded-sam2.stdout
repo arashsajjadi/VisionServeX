@@ -1,0 +1,60 @@
+{
+  "kind": "segmentation",
+  "model_id": "grounded-sam2",
+  "task": "grounded_segment",
+  "image_size": [
+    640,
+    480
+  ],
+  "device": "cuda",
+  "precision": "fp32",
+  "backend": "composed_gd_sam2",
+  "model_loaded_from": null,
+  "cache_path": null,
+  "latency_ms": 473.02710700023454,
+  "fallback_reason": null,
+  "metadata": {
+    "detector_model_id": "grounding-dino-tiny",
+    "segmenter_model_id": "sam2-hiera-tiny",
+    "detector_device": "cuda",
+    "segmenter_device": "cuda",
+    "prompts": [
+      "person"
+    ]
+  },
+  "warnings": [],
+  "segments": [
+    {
+      "box": {
+        "x1": 98.91127014160156,
+        "y1": 39.203941345214844,
+        "x2": 162.04751586914062,
+        "y2": 281.3448486328125
+      },
+      "score": 0.37487098574638367,
+      "label": "person",
+      "class_id": null,
+      "mask_shape": [
+        480,
+        640
+      ],
+      "mask_pixels_on": 13910
+    },
+    {
+      "box": {
+        "x1": 299.3507385253906,
+        "y1": 169.3582763671875,
+        "x2": 552.2288818359375,
+        "y2": 381.69134521484375
+      },
+      "score": 0.3544802665710449,
+      "label": "person",
+      "class_id": null,
+      "mask_shape": [
+        480,
+        640
+      ],
+      "mask_pixels_on": 48641
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "status": "auth_required",
+  "code": "GROUNDING_DINO15_API_KEY_REQUIRED",
+  "extra": "grounding_dino15",
+  "installed": {
+    "transformers": "5.3.0",
+    "huggingface_hub": "1.7.2"
+  },
+  "missing": [],
+  "missing_detail": [],
+  "exact_install_command": "visionservex[open-vocab]",
+  "sidecar_recommended": false,
+  "next_action": "Request an API key from IDEA-Research and export it as DINO_X_API_KEY before using Grounding DINO 1.5/1.6.",
+  "official_repo": "https://github.com/IDEA-Research/Grounding-DINO-1.5-API",
+  "api_required": true,
+  "api_key_env_var": "DINO_X_API_KEY"
+}
