@@ -1,0 +1,6 @@
+rank,model_id,source_engine,mask_mAP50_95,mask_AP50,mask_AP75,latency_ms_p50,fps,n_images,n_predictions,status
+1,yolo26x-seg.pt,ultralytics,0.2728,0.5069,0.263,12.61,79.3,400,14940,benchmark_passed
+2,yolo11x-seg.pt,ultralytics,0.2597,0.4787,0.2492,12.63,79.2,400,14511,benchmark_passed
+3,yolov8x-seg.pt,ultralytics,0.2581,0.4707,0.2438,13.23,75.6,400,15839,benchmark_passed
+4,yolo11l-seg.pt,ultralytics,0.2504,0.4704,0.2424,9.08,110.1,400,15151,benchmark_passed
+5,rfdetr-seg-small,visionservex,0.0977,0.1527,0.104,14.07,71.1,400,8095,benchmark_passed

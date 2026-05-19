@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2026 Arash Sajjadi
-"""v2.28.0: `visionservex benchmark-segmentation` + `benchmark-promptable-segmentation`.
+"""v2.31.0: `visionservex benchmark-segmentation` + `benchmark-promptable-segmentation`.
 
-These CLIs frame the two protocols separately so VisionServeX never mixes
-them. Both currently emit structured blockers for VSX/SAM rows until the
-mask AP / promptable adapters are written. Ultralytics yolo*-seg models
-were already benchmarked in v2.27 (see segmentation_auto_instance_400_v227.json).
+v2.31 implements the first real RF-DETR-Seg mask-AP row via the
+``visionservex.runtime.rfdetr_seg_benchmark`` runner. Ultralytics rows
+were benchmarked in v2.27. Promptable SAM rows remain expected_blocker
+until the full COCO 400 promptable pass is implemented.
 """
 
 from __future__ import annotations
@@ -43,9 +43,30 @@ def _emit(payload: dict[str, Any], *, out: Path | None, fmt: str) -> None:
     console.print(f"[{color}]{payload.get('code', '')}[/{color}]")
 
 
+def _parse_dataset_path(dataset_str: str) -> tuple[str, str] | None:
+    """Parse ``coco-instance:PATH`` or bare path into (ann_file, images_dir).
+
+    Returns (ann_file, images_dir) or None if unparseable.
+    """
+
+    if dataset_str.startswith("coco-instance:"):
+        ann_file = dataset_str[len("coco-instance:") :]
+    else:
+        ann_file = dataset_str
+
+    ann_path = Path(ann_file)
+    if not ann_path.exists():
+        return None
+    images_dir = ann_path.parent / "images"
+    if not images_dir.exists():
+        alt = ann_path.parent.parent / "images" / "val2017"
+        images_dir = alt if alt.exists() else ann_path.parent
+    return str(ann_path), str(images_dir)
+
+
 @app_auto.callback(invoke_without_command=True)
 def benchmark_segmentation(
-    dataset: str = typer.Option(..., "--dataset", help="coco-instance:ANNOTATIONS.json"),
+    dataset: str = typer.Option(..., "--dataset", help="coco-instance:/path/to/annotations.json"),
     models: str = typer.Option(..., "--models", help="Comma-separated list."),
     device: str = typer.Option("cuda", "--device"),
     out: Path = typer.Option(..., "--out"),
@@ -53,38 +74,68 @@ def benchmark_segmentation(
     fmt: str = typer.Option("json", "--format"),
     sample_gpu: bool = typer.Option(False, "--sample-gpu"),
     isolate_process: bool = typer.Option(False, "--isolate-process"),
+    max_images: int = typer.Option(400, "--max-images"),
+    threshold: float = typer.Option(0.3, "--threshold"),
 ) -> None:
-    """v2.28.0: automatic instance segmentation.
+    """v2.31.0: automatic instance segmentation benchmark.
 
-    For Ultralytics yolo*-seg models, v2.27 already shipped a working
-    runner; v2.28 surfaces the same protocol via this command. For VSX
-    rfdetr-seg-* models, the mask-AP adapter is not yet written and the
-    command returns ``RFDETR_SEG_OUTPUT_SCHEMA_UNKNOWN`` per model.
+    RF-DETR-Seg models now run the full COCO RLE mask-AP pipeline via
+    ``visionservex.runtime.rfdetr_seg_benchmark``. Ultralytics rows are
+    reported from the v2.27 benchmark evidence. Other models return
+    structured expected_blocker with exact next-action.
     """
+    from visionservex.runtime.rfdetr_seg_benchmark import run_rfdetr_seg_benchmark
+
     model_list = [m.strip() for m in models.split(",") if m.strip()]
     rows: list[dict[str, Any]] = []
+
+    dataset_parsed = _parse_dataset_path(dataset)
+
     for m in model_list:
         if "rfdetr-seg" in m.lower():
-            # v2.29.0: schema probed. result.segments[i].mask is (H,W) uint8.
-            # Blocker is now pycocotools for COCO RLE mask-AP, not schema unknown.
-            rows.append(
-                {
-                    "model_id": m,
-                    "status": "expected_blocker",
-                    "code": "GT_MASKS_REQUIRED_FOR_MASK_METRICS",
-                    "task": "automatic_instance_segmentation",
-                    "mask_format": "segments_list_with_per_segment_mask",
-                    "mask_field_path": "result.segments[i].mask",
-                    "mask_dtype": "uint8",
-                    "schema_probe_report": "reports/rfdetr_seg_schema_probe_v229.json",
-                    "next_action": (
-                        "Schema confirmed v2.29.0: result.segments[i].mask is (H,W) uint8. "
-                        "Next step: implement COCO RLE conversion via pycocotools and run "
-                        "mask AP against COCO val2017 GT annotations."
-                    ),
-                    "install_command": "pip install pycocotools",
-                }
+            # License guard: Plus/XL/2XL sizes are PML 1.0 — skip by default
+            if any(tok in m.lower() for tok in ("xl", "2xl")):
+                rows.append(
+                    {
+                        "model_id": m,
+                        "status": "expected_blocker",
+                        "code": "RFDETR_PLUS_PML_NOT_DEFAULT_SAFE",
+                        "task": "automatic_instance_segmentation",
+                        "fix": "Use rfdetr-seg-small/medium/large (Apache-2.0) instead.",
+                    }
+                )
+                continue
+
+            if dataset_parsed is None:
+                rows.append(
+                    {
+                        "model_id": m,
+                        "status": "expected_blocker",
+                        "code": "COCO_INSTANCE_DATASET_REQUIRED",
+                        "task": "automatic_instance_segmentation",
+                        "dataset_given": dataset,
+                        "fix": (
+                            "Pass --dataset coco-instance:/path/to/instances_val2017.json "
+                            "and ensure the images directory exists alongside it."
+                        ),
+                    }
+                )
+                continue
+
+            ann_file_str, images_dir_str = dataset_parsed
+            draw_dir_model = (draw_dir / m.replace("/", "_")) if draw_dir else None
+
+            result = run_rfdetr_seg_benchmark(
+                ann_file=ann_file_str,
+                images_dir=images_dir_str,
+                model_id=m,
+                device=device,
+                threshold=threshold,
+                max_images=max_images,
+                draw_dir=draw_dir_model,
             )
+            rows.append(result.to_dict())
+
         elif "-seg" in m and ("yolo" in m or "ultralytics" in m):
             rows.append(
                 {
@@ -92,10 +143,10 @@ def benchmark_segmentation(
                     "status": "expected_blocker",
                     "code": "SEGMENTATION_BENCHMARK_NOT_IMPLEMENTED",
                     "task": "automatic_instance_segmentation",
-                    "next_action": (
-                        "Ultralytics yolo*-seg already benchmarked in v2.27 "
-                        "(segmentation_auto_instance_400_v227.json). The new "
-                        "package CLI wiring is deferred to v2.29."
+                    "note": (
+                        "Ultralytics yolo*-seg was benchmarked in v2.27 "
+                        "(segmentation_auto_instance_400_v227.json). "
+                        "CLI wiring for re-running is out of scope for v2.31."
                     ),
                     "evidence_artifact": "segmentation_auto_instance_400_v227.json",
                 }
@@ -107,31 +158,33 @@ def benchmark_segmentation(
                     "status": "expected_blocker",
                     "code": "SEGMENTATION_PIPELINE_NOT_WIRED",
                     "task": "automatic_instance_segmentation",
-                    "next_action": (
-                        "Model is not registered as a segmentation candidate in the v2.28 pipeline."
-                    ),
+                    "fix": "Model is not a segmentation candidate; use rfdetr-seg-* instead.",
                 }
             )
 
+    # Overall status: ok if any row ran successfully
+    has_ok = any(r.get("status") == "ok" for r in rows)
+    has_blocker = any(r.get("status") == "expected_blocker" for r in rows)
+
     payload = {
-        "status": "expected_blocker",
-        "code": "SEGMENTATION_BENCHMARK_NOT_IMPLEMENTED",
+        "status": "ok" if has_ok else "expected_blocker",
+        "code": "OK" if has_ok else "SEGMENTATION_BENCHMARK_NOT_IMPLEMENTED",
         "dataset": dataset,
         "device": device,
         "draw_dir": str(draw_dir) if draw_dir else "",
+        "max_images": max_images,
+        "threshold": threshold,
         "sample_gpu": sample_gpu,
-        "isolate_process": isolate_process,
         "n_rows": len(rows),
+        "n_ok": sum(1 for r in rows if r.get("status") == "ok"),
+        "n_blocked": sum(1 for r in rows if r.get("status") == "expected_blocker"),
         "rows": rows,
         "task": "automatic_instance_segmentation",
-        "version": "v2.29.0",
+        "version": "v2.31.0",
         "rfdetr_seg_schema_confirmed": True,
         "rfdetr_seg_schema_probe_report": "reports/rfdetr_seg_schema_probe_v229.json",
-        "message": (
-            "v2.29.0: rfdetr-seg schema probed (result.segments[i].mask, uint8 HxW). "
-            "Full mask-AP benchmark requires pycocotools + COCO val2017 GT masks."
-        ),
     }
+    del has_blocker  # used only for side-effect above
     _emit(payload, out=out, fmt=fmt)
 
 

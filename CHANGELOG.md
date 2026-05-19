@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.31.0] - 2026-05-18
+
+### Added: RF-DETR-Seg COCO mask AP — first real VisionServeX segmentation row
+
+- `src/visionservex/runtime/rfdetr_seg_benchmark.py`: standalone COCO
+  mask-AP runner for rfdetr-seg-* models. Converts
+  `result.segments[i].mask` (H x W uint8) to COCO RLE via pycocotools
+  `mask_utils.encode()`, computes area + bbox directly (no frPyObjects),
+  and runs COCOeval to produce mask mAP50:95 / AP50 / AP75 / APs/APm/APl.
+  All structured blockers (COCO_INSTANCE_DATASET_REQUIRED,
+  RFDETR_SEG_CHECKPOINT_REQUIRED, etc.) are returned correctly.
+
+- `src/visionservex/cli/segmentation_commands.py`: `benchmark-segmentation`
+  now runs the real mask-AP pipeline for `rfdetr-seg-*` models instead of
+  returning `GT_MASKS_REQUIRED_FOR_MASK_METRICS`. New flags: `--max-images`,
+  `--threshold`. License guard for XL/2XL (PML 1.0).
+
+**Benchmark result (COCO val2017, 400 images, threshold=0.3, device=cuda):**
+- rfdetr-seg-small: mask mAP50:95 = 0.0977, AP50 = 0.1527,
+  AP75 = 0.1040, latency p50 = 14.1 ms, FPS = 71.1
+- Ultralytics winners still lead (yolo26x-seg.pt = 0.2728); rfdetr-seg
+  is benchmarked for the first time with an honest number.
+
+**Tests (2 new files, 11 tests):**
+- tests/test_rfdetr_seg_coco_rle_conversion_v231.py
+- tests/test_rfdetr_segmentation_benchmark_v231.py
+
+**Reports:**
+- reports/rfdetr_segmentation_400_v231.json
+- reports/rfdetr_segmentation_leaderboard_400_v231.csv
+- reports/rfdetr_segmentation_failures_v231.csv (0 failures)
+- plots/rfdetr_segmentation_mask_ap_v231.png
+
 ## [2.30.0] - 2026-05-18
 
 ### Added: LibreYOLO smoke-matrix integration, canonical summary, audit CLIs, no-NaN rendering
