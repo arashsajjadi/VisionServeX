@@ -1,0 +1,6 @@
+dataset_id,task,path,source,license_status,benchmark_grade,smoke_only,n_images,has_boxes,has_masks,has_tracks,notes
+coco_val2017_400,"detection,segmentation",/home/arash/datasets/coco_val2017_400_vsx,"COCO 2017 val subset, CC BY 4.0",cc_by_4,True,False,400,True,True,False,400-image object-rich balanced subset
+smoke_coco_person_car,all,tests/assets/smoke/coco_person_car.jpg,synthetic,apache-2.0,False,True,1,False,False,False,Deterministic synthetic smoke image
+smoke_video,surveillance,tests/assets/smoke/tracking_sample.mp4,synthetic,apache-2.0,False,True,30,False,False,False,Synthetic 30-frame tracking video
+smoke_medical,medical,tests/assets/smoke/medical_box_sample.png,synthetic,apache-2.0,False,True,1,False,False,False,Synthetic medical-like grayscale image
+smoke_anomaly,anomaly,tests/assets/smoke/anomaly_simple,synthetic,apache-2.0,False,True,6,False,False,False,5 normal + 1 anomaly synthetic images

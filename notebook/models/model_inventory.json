@@ -1,0 +1,425 @@
+{
+  "total": 70,
+  "checkpoints": [
+    {
+      "file_name": "mobile_sam.pt",
+      "original_path": "notebook/mobile_sam.pt",
+      "new_path": "notebook/models/checkpoints/mobile_sam/mobile_sam.pt",
+      "size_mb": 40.7
+    },
+    {
+      "file_name": "sam_b.pt",
+      "original_path": "notebook/sam_b.pt",
+      "new_path": "notebook/models/checkpoints/sam/sam_b.pt",
+      "size_mb": 375.0
+    },
+    {
+      "file_name": "sam_l.pt",
+      "original_path": "notebook/sam_l.pt",
+      "new_path": "notebook/models/checkpoints/sam/sam_l.pt",
+      "size_mb": 1249.5
+    },
+    {
+      "file_name": "sam2_b.pt",
+      "original_path": "notebook/sam2_b.pt",
+      "new_path": "notebook/models/checkpoints/sam2/sam2_b.pt",
+      "size_mb": 161.9
+    },
+    {
+      "file_name": "sam2_l.pt",
+      "original_path": "notebook/sam2_l.pt",
+      "new_path": "notebook/models/checkpoints/sam2/sam2_l.pt",
+      "size_mb": 449.2
+    },
+    {
+      "file_name": "sam2_s.pt",
+      "original_path": "notebook/sam2_s.pt",
+      "new_path": "notebook/models/checkpoints/sam2/sam2_s.pt",
+      "size_mb": 92.3
+    },
+    {
+      "file_name": "sam2_t.pt",
+      "original_path": "notebook/sam2_t.pt",
+      "new_path": "notebook/models/checkpoints/sam2/sam2_t.pt",
+      "size_mb": 78.1
+    },
+    {
+      "file_name": "sam2.1_b.pt",
+      "original_path": "notebook/sam2.1_b.pt",
+      "new_path": "notebook/models/checkpoints/sam2/sam2.1_b.pt",
+      "size_mb": 161.9
+    },
+    {
+      "file_name": "sam2.1_l.pt",
+      "original_path": "notebook/sam2.1_l.pt",
+      "new_path": "notebook/models/checkpoints/sam2/sam2.1_l.pt",
+      "size_mb": 449.2
+    },
+    {
+      "file_name": "sam2.1_s.pt",
+      "original_path": "notebook/sam2.1_s.pt",
+      "new_path": "notebook/models/checkpoints/sam2/sam2.1_s.pt",
+      "size_mb": 92.3
+    },
+    {
+      "file_name": "sam2.1_t.pt",
+      "original_path": "notebook/sam2.1_t.pt",
+      "new_path": "notebook/models/checkpoints/sam2/sam2.1_t.pt",
+      "size_mb": 78.1
+    },
+    {
+      "file_name": "rf-detr-seg-small.pt",
+      "original_path": "notebook/rf-detr-seg-small.pt",
+      "new_path": "notebook/models/checkpoints/rfdetr_seg/rf-detr-seg-small.pt",
+      "size_mb": 135.0
+    },
+    {
+      "file_name": "rf-detr-base.pth",
+      "original_path": "notebook/rf-detr-base.pth",
+      "new_path": "notebook/models/checkpoints/rfdetr/rf-detr-base.pth",
+      "size_mb": 372.6
+    },
+    {
+      "file_name": "rf-detr-large-2026.pth",
+      "original_path": "notebook/rf-detr-large-2026.pth",
+      "new_path": "notebook/models/checkpoints/rfdetr/rf-detr-large-2026.pth",
+      "size_mb": 136.0
+    },
+    {
+      "file_name": "rf-detr-medium.pth",
+      "original_path": "notebook/rf-detr-medium.pth",
+      "new_path": "notebook/models/checkpoints/rfdetr/rf-detr-medium.pth",
+      "size_mb": 405.0
+    },
+    {
+      "file_name": "rf-detr-nano.pth",
+      "original_path": "notebook/rf-detr-nano.pth",
+      "new_path": "notebook/models/checkpoints/rfdetr/rf-detr-nano.pth",
+      "size_mb": 366.3
+    },
+    {
+      "file_name": "rf-detr-small.pth",
+      "original_path": "notebook/rf-detr-small.pth",
+      "new_path": "notebook/models/checkpoints/rfdetr/rf-detr-small.pth",
+      "size_mb": 386.0
+    },
+    {
+      "file_name": "rtdetr-l.pt",
+      "original_path": "notebook/rtdetr-l.pt",
+      "new_path": "notebook/models/checkpoints/rtdetr/rtdetr-l.pt",
+      "size_mb": 66.5
+    },
+    {
+      "file_name": "rtdetr-x.pt",
+      "original_path": "notebook/rtdetr-x.pt",
+      "new_path": "notebook/models/checkpoints/rtdetr/rtdetr-x.pt",
+      "size_mb": 135.8
+    },
+    {
+      "file_name": "yolo11l-seg.pt",
+      "original_path": "notebook/yolo11l-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolo11l-seg.pt",
+      "size_mb": 56.1
+    },
+    {
+      "file_name": "yolo11l.pt",
+      "original_path": "notebook/yolo11l.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo11l.pt",
+      "size_mb": 51.4
+    },
+    {
+      "file_name": "yolo11m-seg.pt",
+      "original_path": "notebook/yolo11m-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolo11m-seg.pt",
+      "size_mb": 45.4
+    },
+    {
+      "file_name": "yolo11m.pt",
+      "original_path": "notebook/yolo11m.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo11m.pt",
+      "size_mb": 40.7
+    },
+    {
+      "file_name": "yolo11n-seg.pt",
+      "original_path": "notebook/yolo11n-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolo11n-seg.pt",
+      "size_mb": 6.2
+    },
+    {
+      "file_name": "yolo11n.pt",
+      "original_path": "notebook/yolo11n.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo11n.pt",
+      "size_mb": 5.6
+    },
+    {
+      "file_name": "yolo11s-seg.pt",
+      "original_path": "notebook/yolo11s-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolo11s-seg.pt",
+      "size_mb": 20.7
+    },
+    {
+      "file_name": "yolo11s.pt",
+      "original_path": "notebook/yolo11s.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo11s.pt",
+      "size_mb": 19.3
+    },
+    {
+      "file_name": "yolo11x-seg.pt",
+      "original_path": "notebook/yolo11x-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolo11x-seg.pt",
+      "size_mb": 125.1
+    },
+    {
+      "file_name": "yolo11x.pt",
+      "original_path": "notebook/yolo11x.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo11x.pt",
+      "size_mb": 114.6
+    },
+    {
+      "file_name": "yolo12l.pt",
+      "original_path": "notebook/yolo12l.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo12l.pt",
+      "size_mb": 53.7
+    },
+    {
+      "file_name": "yolo12m.pt",
+      "original_path": "notebook/yolo12m.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo12m.pt",
+      "size_mb": 40.9
+    },
+    {
+      "file_name": "yolo12n.pt",
+      "original_path": "notebook/yolo12n.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo12n.pt",
+      "size_mb": 5.6
+    },
+    {
+      "file_name": "yolo12s.pt",
+      "original_path": "notebook/yolo12s.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo12s.pt",
+      "size_mb": 19.0
+    },
+    {
+      "file_name": "yolo12x.pt",
+      "original_path": "notebook/yolo12x.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo12x.pt",
+      "size_mb": 119.3
+    },
+    {
+      "file_name": "yolo26l-seg.pt",
+      "original_path": "notebook/yolo26l-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolo26l-seg.pt",
+      "size_mb": 63.7
+    },
+    {
+      "file_name": "yolo26l.pt",
+      "original_path": "notebook/yolo26l.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo26l.pt",
+      "size_mb": 53.2
+    },
+    {
+      "file_name": "yolo26m-seg.pt",
+      "original_path": "notebook/yolo26m-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolo26m-seg.pt",
+      "size_mb": 54.8
+    },
+    {
+      "file_name": "yolo26m.pt",
+      "original_path": "notebook/yolo26m.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo26m.pt",
+      "size_mb": 44.3
+    },
+    {
+      "file_name": "yolo26n-seg.pt",
+      "original_path": "notebook/yolo26n-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolo26n-seg.pt",
+      "size_mb": 6.7
+    },
+    {
+      "file_name": "yolo26n.pt",
+      "original_path": "notebook/yolo26n.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo26n.pt",
+      "size_mb": 5.5
+    },
+    {
+      "file_name": "yolo26s-seg.pt",
+      "original_path": "notebook/yolo26s-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolo26s-seg.pt",
+      "size_mb": 23.5
+    },
+    {
+      "file_name": "yolo26s.pt",
+      "original_path": "notebook/yolo26s.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo26s.pt",
+      "size_mb": 20.4
+    },
+    {
+      "file_name": "yolo26x-seg.pt",
+      "original_path": "notebook/yolo26x-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolo26x-seg.pt",
+      "size_mb": 142.1
+    },
+    {
+      "file_name": "yolo26x.pt",
+      "original_path": "notebook/yolo26x.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolo_new/yolo26x.pt",
+      "size_mb": 118.7
+    },
+    {
+      "file_name": "yolov10b.pt",
+      "original_path": "notebook/yolov10b.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov10/yolov10b.pt",
+      "size_mb": 41.7
+    },
+    {
+      "file_name": "yolov10l.pt",
+      "original_path": "notebook/yolov10l.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov10/yolov10l.pt",
+      "size_mb": 52.4
+    },
+    {
+      "file_name": "yolov10m.pt",
+      "original_path": "notebook/yolov10m.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov10/yolov10m.pt",
+      "size_mb": 33.6
+    },
+    {
+      "file_name": "yolov10n.pt",
+      "original_path": "notebook/yolov10n.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov10/yolov10n.pt",
+      "size_mb": 5.9
+    },
+    {
+      "file_name": "yolov10s.pt",
+      "original_path": "notebook/yolov10s.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov10/yolov10s.pt",
+      "size_mb": 16.6
+    },
+    {
+      "file_name": "yolov10x.pt",
+      "original_path": "notebook/yolov10x.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov10/yolov10x.pt",
+      "size_mb": 64.4
+    },
+    {
+      "file_name": "yolov5lu.pt",
+      "original_path": "notebook/yolov5lu.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov5/yolov5lu.pt",
+      "size_mb": 106.9
+    },
+    {
+      "file_name": "yolov5mu.pt",
+      "original_path": "notebook/yolov5mu.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov5/yolov5mu.pt",
+      "size_mb": 50.6
+    },
+    {
+      "file_name": "yolov5nu.pt",
+      "original_path": "notebook/yolov5nu.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov5/yolov5nu.pt",
+      "size_mb": 5.6
+    },
+    {
+      "file_name": "yolov5su.pt",
+      "original_path": "notebook/yolov5su.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov5/yolov5su.pt",
+      "size_mb": 18.6
+    },
+    {
+      "file_name": "yolov5xu.pt",
+      "original_path": "notebook/yolov5xu.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov5/yolov5xu.pt",
+      "size_mb": 195.1
+    },
+    {
+      "file_name": "yolov8l-seg.pt",
+      "original_path": "notebook/yolov8l-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolov8l-seg.pt",
+      "size_mb": 92.4
+    },
+    {
+      "file_name": "yolov8l.pt",
+      "original_path": "notebook/yolov8l.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov8/yolov8l.pt",
+      "size_mb": 87.8
+    },
+    {
+      "file_name": "yolov8m-seg.pt",
+      "original_path": "notebook/yolov8m-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolov8m-seg.pt",
+      "size_mb": 54.9
+    },
+    {
+      "file_name": "yolov8m.pt",
+      "original_path": "notebook/yolov8m.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov8/yolov8m.pt",
+      "size_mb": 52.1
+    },
+    {
+      "file_name": "yolov8n-seg.pt",
+      "original_path": "notebook/yolov8n-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolov8n-seg.pt",
+      "size_mb": 7.1
+    },
+    {
+      "file_name": "yolov8n.pt",
+      "original_path": "notebook/yolov8n.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov8/yolov8n.pt",
+      "size_mb": 6.5
+    },
+    {
+      "file_name": "yolov8s-seg.pt",
+      "original_path": "notebook/yolov8s-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolov8s-seg.pt",
+      "size_mb": 23.9
+    },
+    {
+      "file_name": "yolov8s.pt",
+      "original_path": "notebook/yolov8s.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov8/yolov8s.pt",
+      "size_mb": 22.6
+    },
+    {
+      "file_name": "yolov8x-seg.pt",
+      "original_path": "notebook/yolov8x-seg.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_seg/yolov8x-seg.pt",
+      "size_mb": 144.1
+    },
+    {
+      "file_name": "yolov8x.pt",
+      "original_path": "notebook/yolov8x.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov8/yolov8x.pt",
+      "size_mb": 136.9
+    },
+    {
+      "file_name": "yolov9c.pt",
+      "original_path": "notebook/yolov9c.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov9/yolov9c.pt",
+      "size_mb": 51.8
+    },
+    {
+      "file_name": "yolov9e.pt",
+      "original_path": "notebook/yolov9e.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov9/yolov9e.pt",
+      "size_mb": 117.5
+    },
+    {
+      "file_name": "yolov9m.pt",
+      "original_path": "notebook/yolov9m.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov9/yolov9m.pt",
+      "size_mb": 41.0
+    },
+    {
+      "file_name": "yolov9s.pt",
+      "original_path": "notebook/yolov9s.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov9/yolov9s.pt",
+      "size_mb": 15.4
+    },
+    {
+      "file_name": "yolov9t.pt",
+      "original_path": "notebook/yolov9t.pt",
+      "new_path": "notebook/models/checkpoints/ultralytics_yolov9/yolov9t.pt",
+      "size_mb": 5.0
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+[
+  {
+    "dataset_id": "coco_val2017_400",
+    "task": "detection,segmentation",
+    "path": "/home/arash/datasets/coco_val2017_400_vsx",
+    "source": "COCO 2017 val subset, CC BY 4.0",
+    "license_status": "cc_by_4",
+    "benchmark_grade": true,
+    "smoke_only": false,
+    "n_images": 400,
+    "has_boxes": true,
+    "has_masks": true,
+    "has_tracks": false,
+    "notes": "400-image object-rich balanced subset"
+  },
+  {
+    "dataset_id": "smoke_coco_person_car",
+    "task": "all",
+    "path": "tests/assets/smoke/coco_person_car.jpg",
+    "source": "synthetic",
+    "license_status": "apache-2.0",
+    "benchmark_grade": false,
+    "smoke_only": true,
+    "n_images": 1,
+    "has_boxes": false,
+    "has_masks": false,
+    "has_tracks": false,
+    "notes": "Deterministic synthetic smoke image"
+  },
+  {
+    "dataset_id": "smoke_video",
+    "task": "surveillance",
+    "path": "tests/assets/smoke/tracking_sample.mp4",
+    "source": "synthetic",
+    "license_status": "apache-2.0",
+    "benchmark_grade": false,
+    "smoke_only": true,
+    "n_images": 30,
+    "has_boxes": false,
+    "has_masks": false,
+    "has_tracks": false,
+    "notes": "Synthetic 30-frame tracking video"
+  },
+  {
+    "dataset_id": "smoke_medical",
+    "task": "medical",
+    "path": "tests/assets/smoke/medical_box_sample.png",
+    "source": "synthetic",
+    "license_status": "apache-2.0",
+    "benchmark_grade": false,
+    "smoke_only": true,
+    "n_images": 1,
+    "has_boxes": false,
+    "has_masks": false,
+    "has_tracks": false,
+    "notes": "Synthetic medical-like grayscale image"
+  },
+  {
+    "dataset_id": "smoke_anomaly",
+    "task": "anomaly",
+    "path": "tests/assets/smoke/anomaly_simple",
+    "source": "synthetic",
+    "license_status": "apache-2.0",
+    "benchmark_grade": false,
+    "smoke_only": true,
+    "n_images": 6,
+    "has_boxes": false,
+    "has_masks": false,
+    "has_tracks": false,
+    "notes": "5 normal + 1 anomaly synthetic images"
+  }
+]

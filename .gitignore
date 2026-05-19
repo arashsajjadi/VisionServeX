@@ -118,3 +118,26 @@ cert.pem
 # cloudflared credential files (UUID-named)
 [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]-*.json
 tunnel*.yaml
+
+# VisionServeX notebook generated artifacts
+notebook/.venv/
+notebook/.venv_pypi_*/
+notebook/**/*_EXECUTED.ipynb
+notebook/**/reports/
+notebook/**/plots/
+notebook/**/visuals/
+notebook/**/commands/
+notebook/models/checkpoints/
+notebook/datasets/coco_val2017_400/
+notebook/archive_legacy/
+notebook/**/*.mp4
+notebook/**/*.avi
+notebook/**/*.pt
+notebook/**/*.pth
+notebook/**/*.ckpt
+notebook/**/*.safetensors
+notebook/**/*.onnx
+notebook/**/*.engine
+notebook/**/*.trt
+notebook/**/.ipynb_checkpoints/
+notebook/shared/__pycache__/

@@ -1,0 +1,9 @@
+{
+  "not_wired_count": 0,
+  "raw_nan_count": 0,
+  "old_version_markers": 0,
+  "bad_failed_runtime": 0,
+  "total_bad": 0,
+  "status": "PASS",
+  "offending_items": []
+}

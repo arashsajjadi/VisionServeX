@@ -1,0 +1,21 @@
+project_root: /home/arash/PycharmProjects/VisionServeX
+notebook_root: /home/arash/PycharmProjects/VisionServeX/notebook
+model_root: /home/arash/PycharmProjects/VisionServeX/notebook/models
+dataset_root: /home/arash/PycharmProjects/VisionServeX/notebook/datasets
+output_policy: write_to_task_folder
+device: cuda
+max_images_detection: 400
+max_images_segmentation: 400
+max_instances_promptable: 30
+run_heavy_models: true
+allow_downloads: false
+allow_noncommercial: false
+allow_gpl: false
+allow_manual_checkpoints: false
+fail_on_forbidden_strings: true
+forbidden_strings: ["NOT_WIRED", "v20:", "v2.16", "UNAVAILABLE_OR_FAILED"]
+coco_400_ann: /home/arash/datasets/coco_val2017_400_vsx/annotations.json
+coco_400_images: /home/arash/datasets/coco_val2017_400_vsx/images
+smoke_img: /home/arash/PycharmProjects/VisionServeX/tests/assets/smoke/coco_person_car.jpg
+smoke_ann: /home/arash/PycharmProjects/VisionServeX/tests/assets/smoke/coco_instance_sample.json
+smoke_video: /home/arash/PycharmProjects/VisionServeX/tests/assets/smoke/tracking_sample.mp4
