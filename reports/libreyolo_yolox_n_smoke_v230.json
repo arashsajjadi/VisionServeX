@@ -1,0 +1,27 @@
+{
+  "status": "ok",
+  "code": "OK",
+  "model_id": "libreyolo-yolox-n",
+  "family": "yolox",
+  "image": "tests/assets/smoke/coco_person_car.jpg",
+  "device": "cuda",
+  "n_predictions": 1,
+  "forward_seconds": 0.286,
+  "predictions": [
+    {
+      "xyxy": [
+        299.8656311035156,
+        168.21670532226562,
+        554.3682250976562,
+        389.31903076171875
+      ],
+      "score": 0.27111437916755676,
+      "class_id": 4,
+      "category_id": null,
+      "class_name": "class_4",
+      "source_engine": "libreyolo"
+    }
+  ],
+  "source_engine": "libreyolo",
+  "libreyolo_version": "1.1.1"
+}

@@ -1,0 +1,2415 @@
+{
+  "version": "v2.30.0",
+  "scanned_files": 49851,
+  "total_findings": 1842,
+  "findings_by_string": {
+    "NOT_WIRED": 162,
+    "v20: clean detection candidates": 8,
+    "v2.16": 44,
+    "UNAVAILABLE_OR_FAILED": 140,
+    "NaN": 1306,
+    "failed_runtime": 182
+  },
+  "findings": [
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42024,
+      "offending_string": "NOT_WIRED",
+      "snippet": "\"  deim-m: NOT_WIRED\\n\",",
+      "reason": "notebook still emits NOT_WIRED \u2014 must consume v2.29 smoke matrix instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42025,
+      "offending_string": "NOT_WIRED",
+      "snippet": "\"  deim-s: NOT_WIRED\\n\",",
+      "reason": "notebook still emits NOT_WIRED \u2014 must consume v2.29 smoke matrix instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42026,
+      "offending_string": "NOT_WIRED",
+      "snippet": "\"  deimv2-atto: NOT_WIRED\\n\",",
+      "reason": "notebook still emits NOT_WIRED \u2014 must consume v2.29 smoke matrix instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42027,
+      "offending_string": "NOT_WIRED",
+      "snippet": "\"  deimv2-femto: NOT_WIRED\\n\",",
+      "reason": "notebook still emits NOT_WIRED \u2014 must consume v2.29 smoke matrix instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42028,
+      "offending_string": "NOT_WIRED",
+      "snippet": "\"  deimv2-l: NOT_WIRED\\n\",",
+      "reason": "notebook still emits NOT_WIRED \u2014 must consume v2.29 smoke matrix instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42029,
+      "offending_string": "NOT_WIRED",
+      "snippet": "\"  deimv2-m: NOT_WIRED\\n\",",
+      "reason": "notebook still emits NOT_WIRED \u2014 must consume v2.29 smoke matrix instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42030,
+      "offending_string": "NOT_WIRED",
+      "snippet": "\"  deimv2-n: NOT_WIRED\\n\",",
+      "reason": "notebook still emits NOT_WIRED \u2014 must consume v2.29 smoke matrix instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42031,
+      "offending_string": "NOT_WIRED",
+      "snippet": "\"  deimv2-pico: NOT_WIRED\\n\",",
+      "reason": "notebook still emits NOT_WIRED \u2014 must consume v2.29 smoke matrix instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42032,
+      "offending_string": "NOT_WIRED",
+      "snippet": "\"  deimv2-s: NOT_WIRED\\n\",",
+      "reason": "notebook still emits NOT_WIRED \u2014 must consume v2.29 smoke matrix instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42033,
+      "offending_string": "NOT_WIRED",
+      "snippet": "\"  deimv2-x: NOT_WIRED\\n\"",
+      "reason": "notebook still emits NOT_WIRED \u2014 must consume v2.29 smoke matrix instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42012,
+      "offending_string": "v20: clean detection candidates",
+      "snippet": "\"v20: clean detection candidates from package: 10 models\\n\",",
+      "reason": "legacy v20 status table is being reconstructed; remove cell",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42062,
+      "offending_string": "v20: clean detection candidates",
+      "snippet": "\"        print(f'v20: clean detection candidates from package: {len(_v20_clean_models)} models')\\n\",",
+      "reason": "legacy v20 status table is being reconstructed; remove cell",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 687,
+      "offending_string": "v2.16",
+      "snippet": "\"# Prefer package-side v2.16 GPU profiler; fallback to notebook local profiler.\\n\",",
+      "reason": "stale v2.16 version reference; update to current package version",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 1068,
+      "offending_string": "v2.16",
+      "snippet": "\"## 2. Package capability audit from VisionServeX v2.16\"",
+      "reason": "stale v2.16 version reference; update to current package version",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42222,
+      "offending_string": "v2.16",
+      "snippet": "\"VisionServeX detection benchmark uses v2.16 package-level benchmark-detection first.\\n\",",
+      "reason": "stale v2.16 version reference; update to current package version",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 43095,
+      "offending_string": "v2.16",
+      "snippet": "\"    \\\"\\\"\\\"Extract v2.16 model-level rows from benchmark-detection JSON without pretending diagnostics are full benchmar",
+      "reason": "stale v2.16 version reference; update to current package version",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 43220,
+      "offending_string": "v2.16",
+      "snippet": "\"    \\\"\\\"\\\"Local safety filter matching v2.16 report-clean logic if package command is unavailable.\\\"\\\"\\\"\\n\",",
+      "reason": "stale v2.16 version reference; update to current package version",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 43251,
+      "offending_string": "v2.16",
+      "snippet": "\"    print(\\\"VisionServeX detection benchmark uses v2.16 package-level benchmark-detection first.\\\")\\n\",",
+      "reason": "stale v2.16 version reference; update to current package version",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 43317,
+      "offending_string": "v2.16",
+      "snippet": "\"# Prefer package-side report-clean introduced in v2.16.\\n\",",
+      "reason": "stale v2.16 version reference; update to current package version",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 46006,
+      "offending_string": "v2.16",
+      "snippet": "\"    \\\"\\\"\\\"Notebook-side classifier mirroring v2.16 command-result hygiene.\\\"\\\"\\\"\\n\",",
+      "reason": "stale v2.16 version reference; update to current package version",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 46598,
+      "offending_string": "v2.16",
+      "snippet": "\"    # v2.16 notebook-safe commands; no repo-local scripts.\\n\",",
+      "reason": "stale v2.16 version reference; update to current package version",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 46614,
+      "offending_string": "v2.16",
+      "snippet": "\"    # v2.16 annotate-video must provide structured result diagnostics and no empty-error failure.\\n\",",
+      "reason": "stale v2.16 version reference; update to current package version",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 47471,
+      "offending_string": "v2.16",
+      "snippet": "\"    plt.title(\\\"Per-family command status \u2014 v2.16 contract-aware\\\")\\n\",",
+      "reason": "stale v2.16 version reference; update to current package version",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45489,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"      <td>UNAVAILABLE_OR_FAILED</td>\\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45513,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"      <td>UNAVAILABLE_OR_FAILED</td>\\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45537,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"      <td>UNAVAILABLE_OR_FAILED</td>\\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45561,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"      <td>UNAVAILABLE_OR_FAILED</td>\\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45585,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"      <td>UNAVAILABLE_OR_FAILED</td>\\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45609,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"      <td>UNAVAILABLE_OR_FAILED</td>\\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45633,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"      <td>UNAVAILABLE_OR_FAILED</td>\\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45657,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"      <td>UNAVAILABLE_OR_FAILED</td>\\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45683,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"0  Ultralytics  YOLO12-seg  yolo12n-seg.pt  UNAVAILABLE_OR_FAILED   \\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45684,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"1  Ultralytics  YOLO12-seg  yolo12s-seg.pt  UNAVAILABLE_OR_FAILED   \\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45685,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"2  Ultralytics  YOLO12-seg  yolo12m-seg.pt  UNAVAILABLE_OR_FAILED   \\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45686,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"3  Ultralytics  YOLO12-seg  yolo12l-seg.pt  UNAVAILABLE_OR_FAILED   \\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45687,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"4  Ultralytics  YOLO12-seg  yolo12x-seg.pt  UNAVAILABLE_OR_FAILED   \\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45688,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"5  Ultralytics        SAM3         sam3.pt  UNAVAILABLE_OR_FAILED   \\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45689,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"6  Ultralytics        SAM3       sam3_t.pt  UNAVAILABLE_OR_FAILED   \\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45690,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"7  Ultralytics        SAM3       sam3_b.pt  UNAVAILABLE_OR_FAILED   \\n\",",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45777,
+      "offending_string": "UNAVAILABLE_OR_FAILED",
+      "snippet": "\"                    segmentation_failures.append({\\\"source\\\": \\\"Ultralytics\\\", \\\"family\\\": family, \\\"model\\\": model_nam",
+      "reason": "old failure category; use expected_blocker + blocker_code instead",
+      "fix_action": "delete legacy cell or update to consume canonical_smoke_summary_v230"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 802,
+      "offending_string": "NaN",
+      "snippet": "\"            # Backfill NaN/None with the default value, but only for string-like cells.\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42348,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42360,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42372,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42384,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42396,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42408,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42420,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42432,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42444,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42456,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42468,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42480,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42492,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42504,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42516,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42528,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42540,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42552,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42564,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42576,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42588,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42600,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42612,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42624,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42636,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42648,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42660,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42672,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42684,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42696,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42768,
+      "offending_string": "NaN",
+      "snippet": "\"0           NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42769,
+      "offending_string": "NaN",
+      "snippet": "\"1           NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42770,
+      "offending_string": "NaN",
+      "snippet": "\"2           NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42771,
+      "offending_string": "NaN",
+      "snippet": "\"3           NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42772,
+      "offending_string": "NaN",
+      "snippet": "\"4           NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42773,
+      "offending_string": "NaN",
+      "snippet": "\"5           NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42774,
+      "offending_string": "NaN",
+      "snippet": "\"6           NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42775,
+      "offending_string": "NaN",
+      "snippet": "\"7           NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42776,
+      "offending_string": "NaN",
+      "snippet": "\"8           NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42777,
+      "offending_string": "NaN",
+      "snippet": "\"9           NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42778,
+      "offending_string": "NaN",
+      "snippet": "\"10          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42779,
+      "offending_string": "NaN",
+      "snippet": "\"11          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42780,
+      "offending_string": "NaN",
+      "snippet": "\"12          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42781,
+      "offending_string": "NaN",
+      "snippet": "\"13          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42782,
+      "offending_string": "NaN",
+      "snippet": "\"14          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42783,
+      "offending_string": "NaN",
+      "snippet": "\"15          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42784,
+      "offending_string": "NaN",
+      "snippet": "\"16          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42785,
+      "offending_string": "NaN",
+      "snippet": "\"17          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42786,
+      "offending_string": "NaN",
+      "snippet": "\"18          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42787,
+      "offending_string": "NaN",
+      "snippet": "\"19          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42788,
+      "offending_string": "NaN",
+      "snippet": "\"20          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42789,
+      "offending_string": "NaN",
+      "snippet": "\"21          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42790,
+      "offending_string": "NaN",
+      "snippet": "\"22          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42791,
+      "offending_string": "NaN",
+      "snippet": "\"23          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42792,
+      "offending_string": "NaN",
+      "snippet": "\"24          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42793,
+      "offending_string": "NaN",
+      "snippet": "\"25          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42794,
+      "offending_string": "NaN",
+      "snippet": "\"26          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42795,
+      "offending_string": "NaN",
+      "snippet": "\"27          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42796,
+      "offending_string": "NaN",
+      "snippet": "\"28          NaN  \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 42797,
+      "offending_string": "NaN",
+      "snippet": "\"29          NaN  \"",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44523,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44524,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44534,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44535,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44547,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44548,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44558,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44559,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44571,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44572,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44582,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44583,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44595,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44596,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44606,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44607,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44619,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44620,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44630,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44631,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44643,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44644,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44654,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44655,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44667,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44668,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44678,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44679,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44691,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44692,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44702,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44703,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44715,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44716,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44726,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44727,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44739,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44740,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44750,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44751,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44763,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44764,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44774,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44775,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44787,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44788,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44798,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44799,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44811,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44812,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44822,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44823,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44835,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44836,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44846,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44847,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44859,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44860,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44870,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44871,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44883,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44884,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44894,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44895,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44907,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44908,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44918,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44919,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44931,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44932,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44942,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44943,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44955,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44956,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44966,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44967,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44979,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44980,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44990,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 44991,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45003,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45004,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45014,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45015,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45027,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45028,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45038,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45039,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45051,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45052,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45062,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45063,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45075,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45076,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45086,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45087,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45099,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45100,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45110,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45111,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45123,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45124,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45134,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45135,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45145,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45158,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45159,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45169,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45182,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45183,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45193,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45206,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45207,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45217,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45230,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45231,
+      "offending_string": "NaN",
+      "snippet": "\"      <td>NaN</td>\\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45268,
+      "offending_string": "NaN",
+      "snippet": "\"26  VisionServeX  Segmentation/SAM    sam2-hiera-tiny  4913.956404      NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45269,
+      "offending_string": "NaN",
+      "snippet": "\"27  VisionServeX  Segmentation/SAM  sam2.1-hiera-tiny  4778.097630      NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45270,
+      "offending_string": "NaN",
+      "snippet": "\"28  VisionServeX  Segmentation/SAM             medsam  5189.817905      NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45271,
+      "offending_string": "NaN",
+      "snippet": "\"29  VisionServeX  Segmentation/SAM   rfdetr-seg-small  4437.515736      NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45274,
+      "offending_string": "NaN",
+      "snippet": "\"0      ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45275,
+      "offending_string": "NaN",
+      "snippet": "\"1      ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45276,
+      "offending_string": "NaN",
+      "snippet": "\"2      ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45277,
+      "offending_string": "NaN",
+      "snippet": "\"3      ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45278,
+      "offending_string": "NaN",
+      "snippet": "\"4      ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45279,
+      "offending_string": "NaN",
+      "snippet": "\"5      ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45280,
+      "offending_string": "NaN",
+      "snippet": "\"6      ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45281,
+      "offending_string": "NaN",
+      "snippet": "\"7      ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45282,
+      "offending_string": "NaN",
+      "snippet": "\"8      ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45283,
+      "offending_string": "NaN",
+      "snippet": "\"9      ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45284,
+      "offending_string": "NaN",
+      "snippet": "\"10     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45285,
+      "offending_string": "NaN",
+      "snippet": "\"11     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45286,
+      "offending_string": "NaN",
+      "snippet": "\"12     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45287,
+      "offending_string": "NaN",
+      "snippet": "\"13     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45288,
+      "offending_string": "NaN",
+      "snippet": "\"14     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45289,
+      "offending_string": "NaN",
+      "snippet": "\"15     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45290,
+      "offending_string": "NaN",
+      "snippet": "\"16     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45291,
+      "offending_string": "NaN",
+      "snippet": "\"17     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45292,
+      "offending_string": "NaN",
+      "snippet": "\"18     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45293,
+      "offending_string": "NaN",
+      "snippet": "\"19     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45294,
+      "offending_string": "NaN",
+      "snippet": "\"20     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45295,
+      "offending_string": "NaN",
+      "snippet": "\"21     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45296,
+      "offending_string": "NaN",
+      "snippet": "\"22     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45297,
+      "offending_string": "NaN",
+      "snippet": "\"23     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45298,
+      "offending_string": "NaN",
+      "snippet": "\"24     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45299,
+      "offending_string": "NaN",
+      "snippet": "\"25     ok                                                NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45306,
+      "offending_string": "NaN",
+      "snippet": "\"0                                                 NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45307,
+      "offending_string": "NaN",
+      "snippet": "\"1                                                 NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45308,
+      "offending_string": "NaN",
+      "snippet": "\"2                                                 NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45309,
+      "offending_string": "NaN",
+      "snippet": "\"3                                                 NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45310,
+      "offending_string": "NaN",
+      "snippet": "\"4                                                 NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45311,
+      "offending_string": "NaN",
+      "snippet": "\"5                                                 NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45312,
+      "offending_string": "NaN",
+      "snippet": "\"6                                                 NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45313,
+      "offending_string": "NaN",
+      "snippet": "\"7                                                 NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45314,
+      "offending_string": "NaN",
+      "snippet": "\"8                                                 NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45315,
+      "offending_string": "NaN",
+      "snippet": "\"9                                                 NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45316,
+      "offending_string": "NaN",
+      "snippet": "\"10                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45317,
+      "offending_string": "NaN",
+      "snippet": "\"11                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45318,
+      "offending_string": "NaN",
+      "snippet": "\"12                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45319,
+      "offending_string": "NaN",
+      "snippet": "\"13                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45320,
+      "offending_string": "NaN",
+      "snippet": "\"14                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45321,
+      "offending_string": "NaN",
+      "snippet": "\"15                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45322,
+      "offending_string": "NaN",
+      "snippet": "\"16                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45323,
+      "offending_string": "NaN",
+      "snippet": "\"17                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45324,
+      "offending_string": "NaN",
+      "snippet": "\"18                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45325,
+      "offending_string": "NaN",
+      "snippet": "\"19                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45326,
+      "offending_string": "NaN",
+      "snippet": "\"20                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45327,
+      "offending_string": "NaN",
+      "snippet": "\"21                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45328,
+      "offending_string": "NaN",
+      "snippet": "\"22                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45329,
+      "offending_string": "NaN",
+      "snippet": "\"23                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45330,
+      "offending_string": "NaN",
+      "snippet": "\"24                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45331,
+      "offending_string": "NaN",
+      "snippet": "\"25                                                NaN  12_segmentation        \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45370,
+      "offending_string": "NaN",
+      "snippet": "\"0             True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45371,
+      "offending_string": "NaN",
+      "snippet": "\"1             True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45372,
+      "offending_string": "NaN",
+      "snippet": "\"2             True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45373,
+      "offending_string": "NaN",
+      "snippet": "\"3             True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45374,
+      "offending_string": "NaN",
+      "snippet": "\"4             True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45375,
+      "offending_string": "NaN",
+      "snippet": "\"5             True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45376,
+      "offending_string": "NaN",
+      "snippet": "\"6             True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45377,
+      "offending_string": "NaN",
+      "snippet": "\"7             True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45378,
+      "offending_string": "NaN",
+      "snippet": "\"8             True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45379,
+      "offending_string": "NaN",
+      "snippet": "\"9             True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45380,
+      "offending_string": "NaN",
+      "snippet": "\"10            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45381,
+      "offending_string": "NaN",
+      "snippet": "\"11            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45382,
+      "offending_string": "NaN",
+      "snippet": "\"12            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45383,
+      "offending_string": "NaN",
+      "snippet": "\"13            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45384,
+      "offending_string": "NaN",
+      "snippet": "\"14            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45385,
+      "offending_string": "NaN",
+      "snippet": "\"15            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45386,
+      "offending_string": "NaN",
+      "snippet": "\"16            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45387,
+      "offending_string": "NaN",
+      "snippet": "\"17            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45388,
+      "offending_string": "NaN",
+      "snippet": "\"18            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45389,
+      "offending_string": "NaN",
+      "snippet": "\"19            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45390,
+      "offending_string": "NaN",
+      "snippet": "\"20            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45391,
+      "offending_string": "NaN",
+      "snippet": "\"21            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45392,
+      "offending_string": "NaN",
+      "snippet": "\"22            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45393,
+      "offending_string": "NaN",
+      "snippet": "\"23            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45394,
+      "offending_string": "NaN",
+      "snippet": "\"24            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45395,
+      "offending_string": "NaN",
+      "snippet": "\"25            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    },
+    {
+      "file": "notebook/VisionServeX_Colab_Universal_Model_Audit_Benchmark_EXECUTED_v29.ipynb",
+      "line": 45396,
+      "offending_string": "NaN",
+      "snippet": "\"26            True           False             False     NaN       NaN   \\n\",",
+      "reason": "raw NaN visible to user \u2014 use render_nullable",
+      "fix_action": "wrap value with render_nullable before display"
+    }
+  ]
+}

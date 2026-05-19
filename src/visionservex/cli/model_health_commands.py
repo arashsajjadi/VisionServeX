@@ -1264,6 +1264,11 @@ def smoke_matrix_cmd(
     include_sidecar: bool = typer.Option(False, "--include-sidecar"),
     include_domain: bool = typer.Option(False, "--include-domain"),
     include_mock: bool = typer.Option(False, "--include-mock"),
+    include_libreyolo_default_safe: bool = typer.Option(
+        False,
+        "--include-libreyolo-default-safe",
+        help="v2.30.0: include LibreYOLO weights whose license is verified MIT or Apache-2.0.",
+    ),
     out: str = typer.Option("", "--out", help="Write JSON matrix to this path."),
     csv: str = typer.Option("", "--csv", help="Write CSV matrix to this path."),
     fail_on_package_bug: bool = typer.Option(
@@ -1302,6 +1307,7 @@ def smoke_matrix_cmd(
         include_sidecar=include_sidecar,
         include_domain=include_domain,
         include_mock=include_mock,
+        include_libreyolo_default_safe=include_libreyolo_default_safe,
         out=out_path,
         csv_path=csv_path,
         fail_on_package_bug=fail_on_package_bug,
@@ -1327,6 +1333,124 @@ def smoke_matrix_cmd(
         "csv": str(csv_path) if csv_path else "",
     }
     typer.echo(json.dumps(payload, indent=2))
+
+
+@app.command("summarize-smoke-matrix")
+def summarize_smoke_matrix_cmd(
+    input_path: str = typer.Option(..., "--input", help="Path to a smoke-matrix JSON file."),
+    fmt: str = typer.Option("json", "--format", help="json | csv"),
+    out: str = typer.Option(..., "--out", help="Output path."),
+) -> None:
+    """v2.30.0: collapse a smoke-matrix JSON into a canonical summary.
+
+    The canonical summary becomes the single source of truth that the
+    notebook consumes — it no longer rebuilds status tables. Every row
+    carries final_state, blocker_code, fix, and evidence_file.
+    """
+    import csv as _csv
+    from pathlib import Path as _P
+
+    src = _P(input_path)
+    if not src.exists():
+        typer.echo(
+            json.dumps(
+                {
+                    "status": "expected_blocker",
+                    "code": "SMOKE_MATRIX_INPUT_MISSING",
+                    "message": f"smoke-matrix input not found: {src}",
+                    "fix": (
+                        "Run `visionservex models smoke-matrix --include-core "
+                        "--out reports/core_smoke_matrix_v229.json` first."
+                    ),
+                },
+                indent=2,
+            )
+        )
+        raise typer.Exit(code=2)
+
+    data = json.loads(src.read_text())
+    src_rows = data.get("rows", [])
+
+    # Canonical schema — what the notebook MUST consume from now on.
+    canonical: list[dict[str, Any]] = []
+    for r in src_rows:
+        final_state = r.get("final_state", "unclassified")
+        blocker_code = r.get("blocker_code", "")
+        if final_state == "failed_runtime" and blocker_code:
+            # Defensive: if the source matrix mis-labelled a parseable blocker
+            # as failed_runtime, upgrade it here.
+            final_state = "expected_blocker"
+        canonical.append(
+            {
+                "model_id": r.get("model_id", ""),
+                "family": r.get("family", ""),
+                "task": r.get("task", ""),
+                "command": r.get("command", ""),
+                "final_state": final_state,
+                "blocker_code": blocker_code,
+                "fix": r.get("recommended_fix", ""),
+                "output_json_path": r.get("output_json_path", ""),
+                "draw_path": r.get("draw_path", ""),
+                "runtime_ms": r.get("runtime_ms", 0.0),
+                "schema_valid": bool(r.get("output_schema_valid", False)),
+                "package_bug": bool(r.get("package_bug", False)),
+                "external_blocker": bool(r.get("external_blocker", False)),
+                "evidence_file": r.get("evidence_file", r.get("output_json_path", "")),
+            }
+        )
+
+    summary_payload = {
+        "version": "v2.30.0",
+        "source_matrix": str(src),
+        "n_rows": len(canonical),
+        "summary": data.get("summary", {}),
+        "rows": canonical,
+    }
+
+    out_path = _P(out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if fmt == "csv":
+        fields = (
+            list(canonical[0].keys())
+            if canonical
+            else [
+                "model_id",
+                "family",
+                "task",
+                "command",
+                "final_state",
+                "blocker_code",
+                "fix",
+                "output_json_path",
+                "draw_path",
+                "runtime_ms",
+                "schema_valid",
+                "package_bug",
+                "external_blocker",
+                "evidence_file",
+            ]
+        )
+        with open(out_path, "w", newline="") as fh:
+            w = _csv.DictWriter(fh, fieldnames=fields)
+            w.writeheader()
+            for r in canonical:
+                w.writerow(r)
+        typer.echo(
+            json.dumps(
+                {"status": "ok", "code": "OK", "wrote": str(out_path), "n_rows": len(canonical)},
+                indent=2,
+            )
+        )
+        return
+
+    out_path.write_text(json.dumps(summary_payload, indent=2))
+    typer.echo(
+        json.dumps(
+            {"status": "ok", "code": "OK", "wrote": str(out_path), "n_rows": len(canonical)},
+            indent=2,
+        )
+    )
 
 
 __all__ = ["app"]

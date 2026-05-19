@@ -530,4 +530,86 @@ def benchmark_cmd(
     _emit(payload, out=None, fmt=fmt)
 
 
+_DEIMV2_VARIANTS: list[dict[str, Any]] = [
+    {"model_id": "deimv2-atto", "AP": 23.8, "params_M": 0.5, "GFLOPs": 0.8, "input_size": 320},
+    {"model_id": "deimv2-femto", "AP": 31.0, "params_M": 1.0, "GFLOPs": 1.7, "input_size": 416},
+    {"model_id": "deimv2-pico", "AP": 38.5, "params_M": 1.5, "GFLOPs": 5.2, "input_size": 640},
+    {"model_id": "deimv2-n", "AP": 43.0, "params_M": 3.6, "GFLOPs": 6.8, "input_size": 640},
+    {"model_id": "deimv2-s", "AP": 50.9, "params_M": 9.7, "GFLOPs": 25.6, "input_size": 640},
+    {"model_id": "deimv2-m", "AP": 53.0, "params_M": 18.1, "GFLOPs": 52.2, "input_size": 640},
+    {"model_id": "deimv2-l", "AP": 56.0, "params_M": 32.2, "GFLOPs": 96.7, "input_size": 640},
+    {"model_id": "deimv2-x", "AP": 57.8, "params_M": 50.3, "GFLOPs": 151.6, "input_size": 640},
+]
+
+
+@app.command("audit-hf")
+def audit_hf_cmd(
+    repo: str = typer.Option(
+        "Intellindust/DEIMv2_DINOv3_S_COCO",
+        "--repo",
+        help="Anchor HF repo for DEIMv2 (S variant). Other variants follow the same pattern.",
+    ),
+    fmt: str = typer.Option("json", "--format"),
+    out: Path = typer.Option(..., "--out"),
+) -> None:
+    """v2.30.0: enumerate DEIMv2 variants + HF download routes.
+
+    For every variant, return the canonical filename, expected load command,
+    and final_state (benchmarked / benchmark_candidate / checkpoint_required).
+    Never NOT_WIRED.
+    """
+    cache_root = Path.home() / ".cache" / "visionservex" / "deimv2"
+    rows: list[dict[str, Any]] = []
+    for v in _DEIMV2_VARIANTS:
+        model_id = v["model_id"]
+        size_part = model_id.replace("deimv2-", "")
+        ckpt_name = f"deimv2_dinov3_{size_part}_coco.pth"
+        expected_cache = cache_root / ckpt_name
+        is_benchmarked = model_id == "deimv2-s"
+        rows.append(
+            {
+                "model_id": model_id,
+                "hf_repo": repo if size_part == "s" else "",
+                "pth_filename": ckpt_name,
+                "onnx_filename": ckpt_name.replace(".pth", ".onnx"),
+                "engine_filename": ckpt_name.replace(".pth", ".engine"),
+                "AP": v["AP"],
+                "params_M": v["params_M"],
+                "GFLOPs": v["GFLOPs"],
+                "input_size": v["input_size"],
+                "license": "Apache-2.0",
+                "expected_cache_path": str(expected_cache),
+                "load_command": (
+                    f"from huggingface_hub import hf_hub_download; "
+                    f"ckpt = hf_hub_download('{repo}', '{ckpt_name}')"
+                ),
+                "smoke_command": (
+                    f"visionservex deimv2 smoke-test --model {model_id} "
+                    f"--image tests/assets/smoke/coco_person_car.jpg --device cuda --format json "
+                    f"--out reports/deimv2_{model_id}_smoke_v230.json"
+                ),
+                "benchmark_command": (
+                    f"visionservex deimv2 benchmark --model {model_id} "
+                    f"--device cuda --format json "
+                    f"--out reports/deimv2_{model_id}_benchmark_v230.json"
+                ),
+                "final_state": "benchmarked" if is_benchmarked else "benchmark_candidate",
+                "evidence_v226": (
+                    "reports/deimv2_s_benchmark_20_v226.json" if is_benchmarked else ""
+                ),
+            }
+        )
+
+    payload = {
+        "status": "ok",
+        "code": "OK",
+        "version": "v2.30.0",
+        "repo_anchor": repo,
+        "n_variants": len(rows),
+        "license": "Apache-2.0",
+        "rows": rows,
+    }
+    _emit(payload, out=out, fmt=fmt)
+
+
 __all__ = ["app"]

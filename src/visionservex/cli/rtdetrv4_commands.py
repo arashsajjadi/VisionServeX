@@ -847,4 +847,78 @@ def checkpoint_state_cmd(
     _emit(payload, out=out, fmt=fmt)
 
 
+@app.command("audit-checkpoints")
+def audit_checkpoints_cmd(
+    out: Path = typer.Option(..., "--out"),
+    fmt: str = typer.Option("json", "--format"),
+) -> None:
+    """v2.30.0: per-variant RT-DETRv4 checkpoint audit.
+
+    Returns the canonical row schema spec'd for v2.30:
+      model_id, config_path, expected_cache_path, validate_command,
+      smoke_command, benchmark_command, final_state, blocker_code.
+
+    All variants default to ``manual_checkpoint_required`` (never NOT_WIRED).
+    """
+    cache_root = Path.home() / ".cache" / "visionservex" / "sidecars" / "rtdetrv4" / "checkpoints"
+    rows: list[dict[str, Any]] = []
+    for model_id, info in RTDETRV4_CHECKPOINTS.items():
+        gid = info["gdrive_id"]
+        cache_path = cache_root / f"{model_id}.pth"
+        present = cache_path.exists()
+        manual_browser_url = f"https://drive.google.com/file/d/{gid}/view?usp=sharing"
+        gdown_command = f"gdown -O {cache_path} https://drive.google.com/uc?id={gid}"
+        rows.append(
+            {
+                "model_id": model_id,
+                "config_path": info.get("config", ""),
+                "official_checkpoint_source": "google_drive",
+                "google_drive_id": gid,
+                "manual_browser_url": manual_browser_url,
+                "gdown_command": gdown_command,
+                "expected_filename": f"{model_id}.pth",
+                "expected_cache_path": str(cache_path),
+                "checkpoint_present": present,
+                "validate_command": (
+                    f"visionservex rtdetrv4 validate-checkpoint {model_id} "
+                    f"--checkpoint {cache_path} --format json "
+                    f"--out reports/rtdetrv4_{model_id}_validate_v230.json"
+                ),
+                "smoke_command": (
+                    f"visionservex rtdetrv4 smoke-test {model_id} "
+                    f"tests/assets/smoke/coco_person_car.jpg "
+                    f"--checkpoint {cache_path} --device cuda --backend torch --format json "
+                    f"--out reports/rtdetrv4_{model_id}_smoke_v230.json "
+                    f"--draw reports/rtdetrv4_{model_id}_smoke_v230.jpg"
+                ),
+                "benchmark_command": (
+                    f"visionservex benchmark-detection --dataset coco:COCO400 "
+                    f"--models {model_id} --backend sidecar-rtdetrv4 --device cuda "
+                    f"--require-gpu --format json "
+                    f"--out reports/rtdetrv4_{model_id}_benchmark_v230.json"
+                ),
+                "final_state": "manual_checkpoint_required",
+                "blocker_code": "MANUAL_CHECKPOINT_REQUIRED",
+                "license": RTDETRV4_LICENSE,
+                "upstream_repo": RTDETRV4_UPSTREAM_REPO,
+                "tensorrt_warning": (
+                    "RT-DETRv4 + TensorRT on RTX 5080 has reported accuracy "
+                    "degradation; default backend MUST stay 'torch'. Use "
+                    "--experimental-tensorrt only with explicit opt-in."
+                ),
+            }
+        )
+
+    payload = {
+        "status": "ok",
+        "code": "OK",
+        "version": "v2.30.0",
+        "n_variants": len(rows),
+        "license": RTDETRV4_LICENSE,
+        "upstream_repo": RTDETRV4_UPSTREAM_REPO,
+        "rows": rows,
+    }
+    _emit(payload, out=out, fmt=fmt)
+
+
 __all__ = ["app"]

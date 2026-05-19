@@ -1,0 +1,7 @@
+{
+  "status": "expected_blocker",
+  "code": "CHECKPOINT_REQUIRED",
+  "model_id": "libreyolo-rtdetr-r50m",
+  "expected_path": "/home/arash/.cache/visionservex/libreyolo/LibreRTDETRr50m.pt",
+  "message": "Weight not cached. Run `visionservex libreyolo pull libreyolo-rtdetr-r50m`."
+}

@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.30.0] - 2026-05-18
+
+### Added: LibreYOLO smoke-matrix integration, canonical summary, audit CLIs, no-NaN rendering
+
+Package-level stabilization pass. The v2.29 smoke matrix is now the
+single source of truth for downstream consumers; LibreYOLO permissive
+weights enter the same framework via a license gate.
+
+- `visionservex/reporting/rendering.py`: `render_nullable`,
+  `render_table_for_notebook`, NOT_APPLICABLE / NOT_COLLECTED /
+  NOT_FOUND / NOT_RUN / NOT_APPLICABLE_SMOKE constants.
+- `visionservex models summarize-smoke-matrix --input --format --out`:
+  consumes a smoke-matrix JSON and emits canonical schema.
+- `visionservex libreyolo build-model-map`: per-weight rows with
+  `default_safe`, smoke_command, benchmark_command, license_risk.
+- `visionservex deimv2 audit-hf`: 8 DEIMv2 variants enumerated.
+- `visionservex rtdetrv4 audit-checkpoints`: 4 variants
+  manual_checkpoint_required, TensorRT-on-5080 warning preserved.
+- `tools/audit_libreyolo_hf_models.py`: programmatic HF audit (70 repos).
+- `visionservex models smoke-matrix --include-libreyolo-default-safe`:
+  extends matrix with Apache-2.0 / MIT LibreYOLO weights only.
+- `pyproject.toml`: new `[libreyolo]` optional extra.
+
+**Reports:** `canonical_smoke_summary_v230.json|csv` (65 rows),
+`libreyolo_hf_full_audit_v230.json|csv` (70),
+`libreyolo_{doctor,model_discovery,license_audit,model_map}_v230.json`,
+`deimv2_hf_audit_v230.json` (8), `rtdetrv4_checkpoint_audit_v230.json`
+(4), `pre_v230_stale_output_scan.json` (49,851 files scanned),
+`model_smoke_matrix_v230.json|csv`.
+
+**14 new test files (62 tests).** Notebook patching is intentionally
+deferred — package-level smoke matrix is now stable; notebook v33 will
+consume `canonical_smoke_summary_v230.csv` in a follow-up pass.
+
 ## [2.23.0] - 2026-05-18
 
 ### Fixed: sidecar manager + RT-DETRv4 upstream-not-released blocker obsolete + COCO val2017 subset + synthetic datasets

@@ -24,10 +24,13 @@ def _run(args: list[str], timeout: int = 30) -> subprocess.CompletedProcess:
     )
 
 
-def test_version_is_2_29_0() -> None:
+def test_version_is_at_least_2_29_0() -> None:
+    """The v2.29.0 contract must remain valid for any version >= 2.29."""
     import visionservex
 
-    assert visionservex.__version__ == "2.29.0", visionservex.__version__
+    parts = visionservex.__version__.split(".")
+    major, minor = int(parts[0]), int(parts[1])
+    assert (major, minor) >= (2, 29), visionservex.__version__
 
 
 def test_models_smoke_matrix_command_registered() -> None:

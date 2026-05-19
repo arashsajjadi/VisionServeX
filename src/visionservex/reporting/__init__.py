@@ -14,6 +14,16 @@ Anything outside these modules that builds a final "winner" table is a
 v2.28 regression.
 """
 
+from visionservex.reporting.rendering import (
+    NOT_APPLICABLE,
+    NOT_APPLICABLE_SMOKE,
+    NOT_COLLECTED,
+    NOT_FOUND,
+    NOT_RUN,
+    is_nullish,
+    render_nullable,
+    render_table_for_notebook,
+)
 from visionservex.reporting.status_vocab import (
     ALLOWED_FINAL_STATES,
     FORBIDDEN_FINAL_STATES,
@@ -25,7 +35,15 @@ from visionservex.reporting.status_vocab import (
 __all__ = [
     "ALLOWED_FINAL_STATES",
     "FORBIDDEN_FINAL_STATES",
+    "NOT_APPLICABLE",
+    "NOT_APPLICABLE_SMOKE",
+    "NOT_COLLECTED",
+    "NOT_FOUND",
+    "NOT_RUN",
     "STALE_MARKERS",
     "WINNER_CONTEXT_STALE_MARKERS",
+    "is_nullish",
     "legacy_status_to_canonical",
+    "render_nullable",
+    "render_table_for_notebook",
 ]

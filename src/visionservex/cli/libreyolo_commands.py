@@ -642,4 +642,97 @@ def smoke_test_cmd(
     _emit(payload, out=out, fmt=fmt)
 
 
+@app.command("build-model-map")
+def build_model_map_cmd(
+    hf_audit: Path | None = typer.Option(
+        None,
+        "--hf-audit",
+        help="Path to reports/libreyolo_hf_full_audit_v230.json (optional context).",
+    ),
+    out: Path = typer.Option(..., "--out"),
+    fmt: str = typer.Option("json", "--format"),
+) -> None:
+    """v2.30.0: build the canonical LibreYOLO model-map.
+
+    Produces one row per default-safe weight with:
+      hf_model_id, weight_filename, libreyolo_load_name,
+      VisionServeX_model_id, task, smoke_command, benchmark_command,
+      license, source_url.
+    """
+    avail, ver = _libreyolo_available()
+    if not avail:
+        _emit(
+            {
+                "status": "expected_blocker",
+                "code": "LIBREYOLO_REQUIRED",
+                "message": "libreyolo is not installed",
+                "fix": "pip install 'visionservex[libreyolo]'",
+            },
+            out=out,
+            fmt=fmt,
+        )
+        return
+
+    weights = _all_discovered_weights()
+    rows: list[dict[str, Any]] = []
+    for w in weights:
+        verdict = _license_verdict_for_family(w["family"])
+        license_str = (verdict.get("weight_license") or "").upper()
+        risk = (verdict.get("license_risk") or "").lower()
+        default_safe = risk == "none" and any(
+            ok in license_str for ok in ("APACHE-2.0", "APACHE 2.0", "MIT")
+        )
+
+        # Compose hf_model_id heuristically from upstream URL
+        url = w.get("url", "")
+        hf_model_id = ""
+        if "huggingface.co/" in url:
+            rest = url.split("huggingface.co/", 1)[1]
+            parts = rest.split("/resolve/", 1)
+            if parts:
+                hf_model_id = parts[0]
+
+        rows.append(
+            {
+                "hf_model_id": hf_model_id,
+                "weight_filename": w.get("filename", ""),
+                "libreyolo_load_name": w.get("filename", ""),
+                "visionservex_model_id": w.get("model_id", ""),
+                "family": w.get("family", ""),
+                "size": w.get("size", ""),
+                "task": w.get("task", ""),
+                "input_size": w.get("input_size"),
+                "license": verdict.get("weight_license", ""),
+                "license_risk": verdict.get("license_risk", ""),
+                "source_url": url,
+                "code_license": verdict.get("code_license", "MIT"),
+                "default_safe": default_safe,
+                "smoke_command": (
+                    f"visionservex libreyolo smoke-test {w.get('model_id', '')} "
+                    f"tests/assets/smoke/coco_person_car.jpg --device cuda --format json "
+                    f"--out reports/libreyolo_{w.get('model_id', '')}_smoke_v230.json"
+                ),
+                "benchmark_command": (
+                    f"visionservex benchmark-detection --dataset coco:COCO400 "
+                    f"--models {w.get('model_id', '')} --backend libreyolo --device cuda "
+                    f"--format json --out reports/libreyolo_{w.get('model_id', '')}_bench_v230.json"
+                ),
+            }
+        )
+
+    by_default_safe = sum(1 for r in rows if r["default_safe"])
+    payload = {
+        "status": "ok",
+        "code": "OK",
+        "version": "v2.30.0",
+        "libreyolo_version": ver,
+        "n_weights": len(rows),
+        "n_default_safe": by_default_safe,
+        "n_blocked": len(rows) - by_default_safe,
+        "hf_audit_input": str(hf_audit) if hf_audit else "",
+        "rows": rows,
+    }
+    _emit(payload, out=out, fmt=fmt)
+
+
 __all__ = ["app"]

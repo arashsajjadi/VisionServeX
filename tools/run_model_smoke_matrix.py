@@ -95,8 +95,15 @@ def _get_advertised_models(
     include_sidecar: bool = False,
     include_domain: bool = False,
     include_mock: bool = False,
+    include_libreyolo_default_safe: bool = False,
 ) -> list[dict[str, Any]]:
-    """Return the advertised model list from the package registry."""
+    """Return the advertised model list from the package registry.
+
+    v2.30.0: when ``include_libreyolo_default_safe`` is True, LibreYOLO
+    weights with verified MIT or Apache-2.0 weight_license are appended as
+    pseudo-registry entries; they share the smoke-matrix execution path via
+    `visionservex libreyolo smoke-test`.
+    """
     from visionservex.registry import default_registry
 
     reg = default_registry()
@@ -146,10 +153,63 @@ def _get_advertised_models(
                     "implementation_status": impl,
                     "is_sidecar": is_sidecar,
                     "is_domain": is_domain_only,
+                    "source": "registry",
                 }
             )
 
+    if include_libreyolo_default_safe:
+        result.extend(_get_libreyolo_default_safe_models())
+
     return result
+
+
+def _get_libreyolo_default_safe_models() -> list[dict[str, Any]]:
+    """Return LibreYOLO weights with verified MIT/Apache-2.0 license."""
+    try:
+        from visionservex.cli.libreyolo_commands import (
+            _all_discovered_weights,
+            _libreyolo_available,
+            _license_verdict_for_family,
+        )
+    except Exception:
+        return []
+
+    avail, _ = _libreyolo_available()
+    if not avail:
+        return []
+
+    try:
+        weights = _all_discovered_weights()
+    except Exception:
+        return []
+
+    if not weights:
+        return []
+
+    safe: list[dict[str, Any]] = []
+    for w in weights:
+        verdict = _license_verdict_for_family(w["family"])
+        wl = (verdict.get("weight_license") or "").upper()
+        risk = (verdict.get("license_risk") or "").lower()
+        # Default-safe: MIT or Apache-2.0 and license_risk == "none"
+        if risk == "none" and any(ok in wl for ok in ("APACHE-2.0", "APACHE 2.0", "MIT")):
+            safe.append(
+                {
+                    "model_id": w.get("model_id", ""),
+                    "family": w.get("family", "libreyolo"),
+                    "task": w.get("task", "detect"),
+                    "advertised": True,
+                    "backend": "libreyolo",
+                    "implementation_status": "wired",
+                    "is_sidecar": False,
+                    "is_domain": False,
+                    "source": "libreyolo",
+                    "weight_license": verdict.get("weight_license", ""),
+                    "weight_filename": w.get("filename", ""),
+                    "weight_url": w.get("url", ""),
+                }
+            )
+    return safe
 
 
 # ---------------------------------------------------------------------------
@@ -275,6 +335,35 @@ def build_smoke_command(
 
     # Fallback
     return [*base, "predict", model_id, img, "--device", device, "--json", *save_flag]
+
+
+def _build_libreyolo_smoke_command(
+    model_id: str,
+    task: str,
+    *,
+    device: str = "cuda",
+    out_json: str = "",
+    draw_path: str = "",
+) -> list[str]:
+    """v2.30.0: synthesise `visionservex libreyolo smoke-test` for a LibreYOLO weight."""
+    base = [sys.executable, "-m", "visionservex"]
+    img = _smoke_image(task)
+    cmd = [
+        *base,
+        "libreyolo",
+        "smoke-test",
+        model_id,
+        img,
+        "--device",
+        device,
+        "--format",
+        "json",
+    ]
+    if out_json and out_json != "/dev/null":
+        cmd += ["--out", out_json]
+    if draw_path:
+        cmd += ["--draw", draw_path]
+    return cmd
 
 
 # ---------------------------------------------------------------------------
@@ -519,6 +608,7 @@ def run_smoke_matrix(
     include_sidecar: bool = False,
     include_domain: bool = False,
     include_mock: bool = False,
+    include_libreyolo_default_safe: bool = False,
     out: Path | None = None,
     csv_path: Path | None = None,
     fail_on_package_bug: bool = False,
@@ -538,6 +628,7 @@ def run_smoke_matrix(
         include_sidecar=include_sidecar,
         include_domain=include_domain,
         include_mock=include_mock,
+        include_libreyolo_default_safe=include_libreyolo_default_safe,
     )
 
     rows: list[SmokeRow] = []
@@ -552,13 +643,22 @@ def run_smoke_matrix(
         out_json_path = Path("/tmp") / f"vsx_smoke_{safe_id}.json"
         draw_path_str = str(Path("/tmp") / f"vsx_smoke_{safe_id}_draw.jpg")
 
-        cmd = build_smoke_command(
-            model_id,
-            task,
-            device=device,
-            out_json=str(out_json_path),
-            draw_path=draw_path_str,
-        )
+        if m.get("source") == "libreyolo":
+            cmd = _build_libreyolo_smoke_command(
+                model_id,
+                task,
+                device=device,
+                out_json=str(out_json_path),
+                draw_path=draw_path_str,
+            )
+        else:
+            cmd = build_smoke_command(
+                model_id,
+                task,
+                device=device,
+                out_json=str(out_json_path),
+                draw_path=draw_path_str,
+            )
 
         row = SmokeRow(
             model_id=model_id,
@@ -684,6 +784,9 @@ def main() -> None:
     p.add_argument("--include-sidecar", action="store_true", default=False)
     p.add_argument("--include-domain", action="store_true", default=False)
     p.add_argument("--include-mock", action="store_true", default=False)
+    p.add_argument(
+        "--include-libreyolo-default-safe", action="store_true", default=False
+    )
     p.add_argument("--out", type=Path, default=None)
     p.add_argument("--csv", type=Path, default=None)
     p.add_argument("--fail-on-package-bug", action="store_true", default=False)
@@ -699,6 +802,7 @@ def main() -> None:
         include_sidecar=args.include_sidecar,
         include_domain=args.include_domain,
         include_mock=args.include_mock,
+        include_libreyolo_default_safe=args.include_libreyolo_default_safe,
         out=args.out,
         csv_path=args.csv,
         fail_on_package_bug=args.fail_on_package_bug,

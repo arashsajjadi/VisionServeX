@@ -1,0 +1,53 @@
+{
+  "status": "ok",
+  "code": "OK",
+  "model_id": "libreyolo-dfine-s",
+  "family": "dfine",
+  "image": "tests/assets/smoke/coco_person_car.jpg",
+  "device": "cuda",
+  "n_predictions": 3,
+  "forward_seconds": 0.3357,
+  "predictions": [
+    {
+      "xyxy": [
+        309.1427001953125,
+        339.5716552734375,
+        371.6787109375,
+        380.9194030761719
+      ],
+      "score": 0.5752667188644409,
+      "class_id": 32,
+      "category_id": null,
+      "class_name": "class_32",
+      "source_engine": "libreyolo"
+    },
+    {
+      "xyxy": [
+        489.28070068359375,
+        339.45123291015625,
+        551.4791870117188,
+        380.94061279296875
+      ],
+      "score": 0.4909372925758362,
+      "class_id": 32,
+      "category_id": null,
+      "class_name": "class_32",
+      "source_engine": "libreyolo"
+    },
+    {
+      "xyxy": [
+        308.08221435546875,
+        338.6795959472656,
+        551.78369140625,
+        382.3485412597656
+      ],
+      "score": 0.26167112588882446,
+      "class_id": 0,
+      "category_id": null,
+      "class_name": "class_0",
+      "source_engine": "libreyolo"
+    }
+  ],
+  "source_engine": "libreyolo",
+  "libreyolo_version": "1.1.1"
+}
