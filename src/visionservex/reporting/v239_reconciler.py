@@ -249,7 +249,9 @@ def _scan_task_reports(task_reports_root: Path) -> dict[str, dict[str, Any]]:
                 else str(p)
             )
 
-            if status == "ok" and (map95 is not None or iou_mean is not None):
+            if status in {"ok", "benchmark_passed", "benchmarked"} and (
+                map95 is not None or iou_mean is not None
+            ):
                 _add(
                     mid,
                     "benchmark_passed",
@@ -258,6 +260,9 @@ def _scan_task_reports(task_reports_root: Path) -> dict[str, dict[str, Any]]:
                     map50_95=map95,
                     mean_iou=iou_mean,
                 )
+            elif status in {"benchmark_passed", "benchmarked"}:
+                # leaderboard row that says it benchmark_passed without numeric metric column
+                _add(mid, "benchmark_passed", str(p), evidence_artifact=evidence_artifact)
             elif status in {"ok", "smoke_passed"}:
                 _add(
                     mid,
@@ -339,6 +344,117 @@ def _registry_status_for(mid: str) -> str:
     return "stub"
 
 
+def _infer_task_from_model_id(mid: str) -> str:
+    """Best-guess task/family inference for models absent from the manifest."""
+    m = (mid or "").lower()
+    if m.endswith("-seg.pt") or "-seg-" in m or m.endswith("-seg"):
+        return "segment"
+    if m.endswith(".pt"):
+        return "detect"
+    if (
+        "sam2" in m
+        or "sam-vit" in m
+        or "sam3" in m
+        or m.startswith("sam")
+        or "fastsam" in m
+        or "edgesam" in m
+        or "efficientsam" in m
+        or "hq-sam" in m
+        or "mobilesam" in m
+        or "medsam" in m
+    ):
+        return "foundation_segment"
+    if "owl" in m or "groundingdino" in m or "grounding-dino" in m or "florence" in m:
+        return "open_vocab"
+    if "clip" in m or "siglip" in m or "dinov" in m:
+        return "embed"
+    if "swin" in m or "convnext" in m or "internimage" in m or "maxvit" in m:
+        return "classify"
+    if (
+        "deim" in m
+        or "dfine" in m
+        or "rtdetr" in m
+        or "rfdetr" in m
+        or "yolo" in m
+        or "libreyolo" in m
+    ):
+        return "detect"
+    if "oneformer" in m or "maskdino" in m or "co-dino" in m or "seem" in m:
+        return "segment"
+    if "rtmdet" in m and ("-r-" in m or "-r2-" in m):
+        return "obb"
+    if "rtmpose" in m:
+        return "pose"
+    if "bytetrack" in m or "osnet" in m:
+        return "surveillance"
+    if "nnunet" in m or "totalsegmentator" in m or "prithvi" in m or "agriclip" in m:
+        return "medical"
+    if "anomalib" in m:
+        return "anomaly"
+    return ""
+
+
+def _infer_family_from_model_id(mid: str) -> str:
+    m = (mid or "").lower()
+    for prefix, fam in (
+        ("rtdetrv4", "rtdetrv4"),
+        ("rfdetr-seg", "rfdetr_seg"),
+        ("rfdetr", "rfdetr"),
+        ("dfine", "dfine"),
+        ("deimv2", "deimv2"),
+        ("deim-", "deim"),
+        ("libreyolo-", "libreyolo"),
+        ("yolo26", "ultralytics"),
+        ("yolo11", "ultralytics"),
+        ("yolov10", "ultralytics"),
+        ("yolov8", "ultralytics"),
+        ("yolo-world", "yolo_world"),
+        ("sam2.1", "sam2"),
+        ("sam2-", "sam2"),
+        ("sam-vit", "sam"),
+        ("fastsam", "fastsam"),
+        ("hq-sam", "hq_sam"),
+        ("mobilesam", "mobilesam"),
+        ("edgesam", "edgesam"),
+        ("efficientsam", "efficientsam"),
+        ("medsam2", "medsam2"),
+        ("medsam", "medsam"),
+        ("sam3", "sam3"),
+        ("oneformer", "oneformer"),
+        ("maskdino", "maskdino"),
+        ("co-dino", "codetr"),
+        ("seem", "seem"),
+        ("rtmdet", "rtmdet"),
+        ("rtmpose", "rtmpose"),
+        ("internimage", "internimage"),
+        ("swinv2", "swinv2"),
+        ("convnextv2", "convnextv2"),
+        ("clip-", "clip"),
+        ("siglip2", "siglip2"),
+        ("siglip", "siglip"),
+        ("dinov2", "dinov2"),
+        ("dinov3", "dinov3"),
+        ("dino-x", "dino_x"),
+        ("grounding-dino", "grounding_dino"),
+        ("groundingdino", "grounding_dino"),
+        ("florence", "florence"),
+        ("owlv2", "owlv2"),
+        ("owlvit", "owlvit"),
+        ("maxvit", "maxvit"),
+        ("anomalib", "anomalib"),
+        ("bytetrack", "bytetrack"),
+        ("osnet", "osnet"),
+        ("nnunet", "nnunet"),
+        ("totalsegmentator", "totalsegmentator"),
+        ("prithvi", "prithvi"),
+        ("agriclip", "agriclip"),
+        ("mock", "mock"),
+    ):
+        if m.startswith(prefix):
+            return fam
+    return ""
+
+
 def _registry_default_state(mid: str) -> tuple[str, str]:
     """Map a registry-only model to its proper non-stub final state + blocker."""
     info = _registry_row_for(mid)
@@ -415,8 +531,20 @@ def _resolve_one_model(
     # 5) registry baseline (uses precise default state, not raw 'stub')
     reg_state, reg_blocker = _registry_default_state(mid)
 
-    # Determine the winner by priority — but corrections always trump generic states
+    # Determine the winner by priority — but corrections always trump generic states.
+    # CORRECTIONS that explicitly say loader_missing / wrong_registry_entry /
+    # upstream_deprecated / opt_in_license_required win over the registry's
+    # "wired" default, even though both have priority 40.
     candidates: list[tuple[str, str, str, str, str]] = []
+    CORRECTION_HARD_OVERRIDE_STATES = {
+        "loader_missing",
+        "wrong_registry_entry",
+        "upstream_deprecated",
+        "opt_in_license_required",
+        "license_blocked",
+        "manual_checkpoint_required",
+        "checkpoint_downloaded",
+    }
     if correction_state:
         candidates.append(
             (correction_state, correction_blocker, ev_artifact or matrix_artifact, "correction", "")
@@ -439,7 +567,11 @@ def _resolve_one_model(
             "blocked",
         )
 
-    winner = max(candidates, key=lambda t: _priority(t[0]))
+    # If the correction explicitly demands a hard-override state, use it
+    if correction_state in CORRECTION_HARD_OVERRIDE_STATES:
+        winner = candidates[0]  # correction is always first
+    else:
+        winner = max(candidates, key=lambda t: _priority(t[0]))
     final_state, blocker, artifact, source, run_mode = winner
 
     # run_mode mapping
@@ -571,10 +703,38 @@ def reconcile(
             }:
                 missing_reason = final_state
 
+        # Task / family fallback for absent_from_manifest models
+        row_family = (
+            reg.get("family")
+            or matrix_map.get(mid, {}).get("family")
+            or _infer_family_from_model_id(mid)
+        )
+        row_task = (
+            reg.get("task") or matrix_map.get(mid, {}).get("task") or _infer_task_from_model_id(mid)
+        )
+
+        # Determine if any current-run call exists
+        current_run_calls = (
+            [nc for nc in notebook_calls if nc.get("run_id") == current_run_id]
+            if current_run_id
+            else []
+        )
+        has_current_run_call = bool(current_run_calls)
+        has_current_run_artifact = any(nc.get("output_artifact_exists") for nc in current_run_calls)
+        # Classify evidence source kind
+        if has_current_run_call:
+            evidence_source_kind = "current_run"
+        elif evidence_map.get(mid):
+            evidence_source_kind = "historical"
+        elif KNOWN_CORRECTIONS.get(mid):
+            evidence_source_kind = "correction"
+        else:
+            evidence_source_kind = "registry"
+
         row = ReconciledRow(
             model_id=mid,
-            family=reg.get("family", matrix_map.get(mid, {}).get("family", "")),
-            task=reg.get("task", matrix_map.get(mid, {}).get("task", "")),
+            family=row_family or "",
+            task=row_task or "",
             license_status=reg.get("license", ""),
             default_safe=reg.get("license_risk", "") in ("", "none"),
             registry_status=reg_status or "absent_from_manifest",
@@ -595,6 +755,21 @@ def reconcile(
             output_artifact_exists=output_exists,
             current_run_id=current_run_id,
             missing_from_notebook_reason=missing_reason,
+        )
+        # v2.40: current-run vs historical evidence flags
+        row.extras["evidence_source_kind"] = evidence_source_kind
+        row.extras["current_run_call_count"] = len(current_run_calls)
+        row.extras["current_run_artifact_exists"] = has_current_run_artifact
+        row.extras["called_in_current_notebook_run"] = has_current_run_call
+        row.extras["historical_artifact_used_as_fallback"] = (
+            evidence_source_kind == "historical"
+            and final_state
+            in {
+                "benchmark_passed",
+                "smoke_passed",
+                "demo_passed_sidecar",
+                "contract_passed",
+            }
         )
         # blocker category from v239_blockers
         from visionservex.reporting.v239_blockers import categorize_blocker
@@ -659,6 +834,14 @@ def _row_to_dict(row: ReconciledRow) -> dict[str, Any]:
         "cuda_required": row.cuda_required,
         "cuda_observed": row.cuda_observed,
         "manual_fix_command": row.manual_fix_command,
+        # v2.40 current-run columns
+        "evidence_source_kind": row.extras.get("evidence_source_kind", ""),
+        "called_in_current_notebook_run": row.extras.get("called_in_current_notebook_run", False),
+        "current_run_call_count": row.extras.get("current_run_call_count", 0),
+        "current_run_artifact_exists": row.extras.get("current_run_artifact_exists", False),
+        "historical_artifact_used_as_fallback": row.extras.get(
+            "historical_artifact_used_as_fallback", False
+        ),
     }
 
 

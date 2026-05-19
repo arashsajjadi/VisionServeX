@@ -251,14 +251,27 @@ def classify_failure_cmd(
 # ----------------------------------------------------------------------
 
 _CLEAN_PATTERNS_DEFAULT: tuple[str, ...] = (
+    # Per-task generated outputs (incl. 99_final_report/reports/*)
     "**/reports/*.json",
     "**/reports/*.csv",
     "**/reports/*.md",
     "**/plots/*",
     "**/visuals/*",
     "**/commands/*",
+    # Executed-notebook artifacts at any depth (v234..v240+ etc.)
     "**/*_EXECUTED.ipynb",
     "**/*_EXECUTED_*.ipynb",
+    "*_EXECUTED.ipynb",
+    "*_EXECUTED_*.ipynb",
+    # Historical version-tagged final-report artifacts in 99_final_report/reports
+    "**/reports/environment_v*.json",
+    "**/reports/coverage_cleanliness_v*.json",
+    "**/reports/v*_final_report_consistency.json",
+    "**/reports/v*_stale_final_table_audit.json",
+    "**/reports/v*_final_report_consistency.csv",
+    "**/reports/quality_scan.json",
+    "**/reports/environment_report.json",
+    "**/reports/root_cleanliness_report.json",
 )
 
 _PRESERVE_DEFAULT_DIRS: tuple[str, ...] = (
@@ -266,6 +279,8 @@ _PRESERVE_DEFAULT_DIRS: tuple[str, ...] = (
     "models/checkpoints",
     "datasets",
     ".ipynb_checkpoints",
+    "archive_legacy",
+    "shared",
 )
 
 # Always-preserve absolute prefixes (extra-careful list)

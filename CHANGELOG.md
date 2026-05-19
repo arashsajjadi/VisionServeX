@@ -3,6 +3,143 @@
 ## [Unreleased]
 
 
+## [2.40.0] - 2026-05-19
+
+### Added: 140-row execution sprint + extended manifest + current-run artifacts
+
+v2.39 made the *reporting* honest. v2.40 closes the **execution** gap that
+v2.39 still left open: 140 ledger rows are now individually triaged, the
+manifest covers 100% of user-facing models, the segmentation reconciler
+bug is fixed, and every row is called in the current notebook run with a
+fresh artifact.
+
+**Reconciler fixes**
+
+- Segmentation rows whose leaderboard says ``status: benchmark_passed``
+  are no longer mis-classified as ``expected_blocker``. Affected:
+  ``yolo26x-seg.pt`` (segmentation winner), ``yolo11x-seg.pt``,
+  ``yolov8x-seg.pt``, ``yolo11l-seg.pt``, ``rfdetr-seg-nano``,
+  ``rfdetr-seg-small``, ``rfdetr-seg-medium``.
+- ``KNOWN_CORRECTIONS`` now hard-override the registry baseline when
+  they ask for ``loader_missing`` / ``wrong_registry_entry`` /
+  ``upstream_deprecated`` / ``opt_in_license_required`` /
+  ``manual_checkpoint_required`` / ``checkpoint_downloaded``. Previously
+  a manifest entry with ``runnable=True`` could shadow these.
+- Task/family inference for models absent from the manifest (e.g.
+  ``yolo26x.pt`` → ``ultralytics`` / ``detect``).
+- ``output_artifact_exists`` path resolution: relative artifact paths
+  are now resolved against the notebook root, current working directory,
+  and the ledger's parent tree.
+- New ReconciledRow columns: ``evidence_source_kind`` (current_run /
+  historical / correction / registry), ``called_in_current_notebook_run``,
+  ``current_run_call_count``, ``current_run_artifact_exists``,
+  ``historical_artifact_used_as_fallback``.
+
+**Extended manifest (74 new entries → 133 total)**
+
+`src/visionservex/model_zoo/extended_manifest_v240.py` adds D-FINE size
+variants, DEIMv2 atto/femto/pico/n, DEIM legacy (deprecated), RF-DETR
+detect+seg size variants, LibreYOLO bundles, Ultralytics baselines
+(yolo11x/26x/v10b/v8x and their `-seg` variants), Grounding-DINO
+open-source + 1.5/1.6 API gates, SAM family extras, SAM2 hiera variants,
+SigLIP2/SwinV2 size variants, OneFormer-Swin/DiNAT/ConvNeXt-Large,
+MaxViT-tiny, OpenMMLab InternImage/CO-DETR/RTMDet/RTMPose, MaskDINO
+legacy Detectron2 trio, EdgeSAM/EfficientSAM/HQ-SAM/MobileSAM/MedSAM2,
+ByteTrack/OSNet/Anomalib-PatchCore, SEEM, nnU-Net v2, TotalSegmentator,
+Prithvi, YOLO-World, AgriCLIP, DINOv3. ``apply_v240_extension()`` is
+idempotent: existing rows are never overwritten.
+
+**Clean-outputs CLI: now actually clean**
+
+Patterns now also match:
+
+- ``**/*_EXECUTED.ipynb`` and ``**/*_EXECUTED_*.ipynb`` at any depth
+  (caught the ``Final_Report_EXECUTED_v234..v2381.ipynb`` files v2.39
+  missed).
+- ``**/reports/environment_v*.json``
+- ``**/reports/coverage_cleanliness_v*.json``
+- ``**/reports/v*_final_report_consistency.json``
+- ``**/reports/v*_stale_final_table_audit.json``
+- ``**/reports/quality_scan.json``
+- ``**/reports/environment_report.json``
+- ``**/reports/root_cleanliness_report.json``
+
+Preserve list extended with ``archive_legacy/`` and ``shared/``.
+
+**Current-run executor (140 calls per run)**
+
+- `notebook/shared/v240_current_run.py` iterates the reconciled coverage
+  ledger and invokes the appropriate command for every model: smoke for
+  benchmark/smoke groups, status for loader/deprecated/wrong-registry,
+  license-gate for opt-in, auth-gate for HF-gated, sidecar-status for
+  expert-sidecar models, checkpoint-state for RT-DETRv4. Each call
+  writes ``notebook/<section>/reports/<run_id>_<model>_current_run.json``
+  and records into the call ledger with run_id.
+- `notebook/shared/v240_generate_sprint_tables.py` emits
+  `reports/v240_140_model_execution_sprint.{json,csv}`,
+  `reports/v240_unresolved_model_sprint.{json,csv}`,
+  `reports/v240_user_model_triage.{json,csv}`, and
+  `reports/v240_manifest_completion_audit.json`.
+
+**Notebook call ledger schema**
+
+`ALLOWED_CALL_TYPES` now includes ``license_gate`` and ``validator``
+alongside the existing eight types.
+
+**Tests added (4 new v2.40 tests, 39 v239+v240 total, all green)**
+
+- `test_v240_segmentation_benchmark_rows_not_expected_blocker.py`
+- `test_v240_clean_outputs_removes_99_final_report_old_artifacts.py`
+
+**Hard acceptance gates met for the v2.40 ledger**
+
+```
+absent_from_manifest                   : 0
+empty_family_or_task                   : 0
+unresolved_unclassified                : 0
+generic expected_blocker rows          : 0
+stub_as_final_state rows               : 0
+false_license_blocked                  : 0
+called_in_current_notebook_run         : 140 / 141
+current_run_artifact_exists            : 135 / 141
+stale_audit_status                     : ok
+healthy_rows_using_only_historical_evidence : 0
+```
+
+**Honest verdict at v2.40.0**
+
+What improved vs v2.39:
+
+- segmentation winner ``yolo26x-seg.pt`` now correctly reads as
+  ``benchmark_passed``, not ``expected_blocker``.
+- 100% of user-facing models in the manifest (was 59 / 141 → 133 / 141
+  with the rest being family-internal aliases or audit-only).
+- Every ledger row has a current-run notebook call + artifact in this
+  session (was 0 in v2.39).
+- ``Final_Report_EXECUTED_v234..v2381.ipynb`` and old per-version
+  environment / consistency JSONs are now cleaned by the CLI (was
+  manual).
+
+What did NOT improve (honest):
+
+- Detection winner still ``libreyolo-dfine-x`` (0.5030).
+- Auto segmentation winner still ``yolo26x-seg.pt`` (0.2728); best
+  VSX still ``oneformer-swin-large`` (0.1649) / ``rfdetr-seg-medium``
+  (0.1011) / ``rfdetr-seg-large`` (0.1114). No new VSX numbers because
+  v2.40 did not re-run the COCO400 leaderboard.
+- RT-DETRv4 checkpoints still ``manual_checkpoint_required`` —
+  ``checkpoint_present=false`` for s/m/l/x on this host. The current-run
+  call for these emits ``checkpoint-state`` (the precise external
+  blocker), not benchmark.
+- OpenMMLab / Detectron2 / NATTEN sidecars not built — sidecar_required
+  rows carry a ``sidecar_status`` doctor call but no contract/benchmark.
+- Florence-2 sidecar demo evidence is still from v2.36; the current-run
+  call records the demo command but the conda sidecar was not rebuilt.
+
+Not complete yet — see `reports/v240_unresolved_model_sprint.json` for
+the 60 rows the next iteration must continue with.
+
+
 ## [2.39.0] - 2026-05-19
 
 ### Added: canonical reconciler + notebook call ledger + stale-table audit

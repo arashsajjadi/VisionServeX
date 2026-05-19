@@ -17,6 +17,9 @@ from visionservex.model_zoo.domain_zoo import (
     list_domains,
     recommend_for_domain,
 )
+
+# v2.40: merge the extended block so the canonical manifest covers all 140 ledger rows.
+from visionservex.model_zoo.extended_manifest_v240 import apply_v240_extension as _apply_v240
 from visionservex.model_zoo.manifest import (
     SOURCE_MANIFEST,
     ModelSource,
@@ -24,6 +27,8 @@ from visionservex.model_zoo.manifest import (
     list_all_models,
     verify_manifest,
 )
+
+_apply_v240()
 
 __all__ = [
     "DOMAIN_ZOO",

@@ -29,7 +29,9 @@ ALLOWED_CALL_TYPES: frozenset[str] = frozenset(
         "status",
         "checkpoint_state",
         "auth_gate",
+        "license_gate",
         "sidecar_status",
+        "validator",
         "skipped_with_reason",
     }
 )
@@ -258,7 +260,19 @@ def record_model_call(
     led = _resolve_ledger(ledger)
     existed = output_artifact_exists
     if existed is None and evidence_artifact:
-        existed = Path(evidence_artifact).exists()
+        p = Path(evidence_artifact)
+        if p.is_absolute() and p.exists():
+            existed = True
+        else:
+            # Try common notebook roots
+            cands = [
+                p,
+                Path.cwd() / p,
+                led.path.parent.parent.parent / p,  # NB root from <nb>/99_final_report/reports/
+                led.path.parent.parent / p,
+                Path.cwd() / "notebook" / p,
+            ]
+            existed = any(c.exists() for c in cands)
     call = NotebookCall(
         model_id=model_id,
         family=family,

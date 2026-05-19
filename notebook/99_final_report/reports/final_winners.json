@@ -9,14 +9,18 @@
   "segmentation_best_overall": "yolo26x-seg.pt (0.2728)",
   "segmentation_best_vsx": "oneformer-swin-large (0.1649)",
   "detection_best_overall_evidence": [
+    "deimv2-atto",
+    "deimv2-femto",
     "deimv2-l",
     "deimv2-m",
-    "deimv2-s",
-    "deimv2-x",
-    "dfine-l-o365-coco"
+    "deimv2-pico"
   ],
   "segmentation_best_overall_evidence": [
-    "rfdetr-seg-large"
+    "rfdetr-seg-large",
+    "rfdetr-seg-medium",
+    "rfdetr-seg-nano",
+    "rfdetr-seg-small",
+    "yolo11l-seg.pt"
   ],
   "promptable_evidence": [
     "edgesam",
@@ -25,8 +29,8 @@
     "fastsam-x",
     "hq-sam"
   ],
-  "n_detection_benchmark_passed": 7,
-  "n_segmentation_benchmark_passed": 1,
-  "generated_at": "2026-05-19T10:15:44Z",
+  "n_detection_benchmark_passed": 19,
+  "n_segmentation_benchmark_passed": 8,
+  "generated_at": "2026-05-19T17:26:31Z",
   "schema_version": 2
 }
