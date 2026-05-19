@@ -1,0 +1,5 @@
+task,final_state,code,fix
+anomaly,expected_blocker,ANOMALIB_REQUIRED,
+tracker:bytetrack,expected_blocker,BYTETRACK_REQUIRED,pip install bytetrack
+tracker:oc-sort,expected_blocker,OCSORT_REQUIRED,pip install oc-sort
+video_annotate,smoke_passed,,

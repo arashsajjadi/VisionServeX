@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "visionservex"
-version = "2.31.0"
+version = "2.32.0"
 description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -140,6 +140,70 @@ dev = [
     "mypy>=1.10",
     "types-PyYAML>=6.0",
     "pre-commit>=3.7",
+]
+notebook = [
+    "jupyter>=1.0",
+    "nbconvert>=7.0",
+    "ipykernel>=6.0",
+    "matplotlib>=3.7",
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "pillow>=10.0",
+    "pycocotools>=2.0",
+    "tqdm>=4.64",
+]
+benchmark = [
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "pycocotools>=2.0",
+    "matplotlib>=3.7",
+    "pandas>=2.0",
+    "tqdm>=4.64",
+]
+segmentation = [
+    "rfdetr>=1.6",
+    "supervision>=0.22",
+    "pycocotools>=2.0",
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "pillow>=10.0",
+]
+"segmentation-full" = [
+    "rfdetr>=1.6",
+    "supervision>=0.22",
+    "pycocotools>=2.0",
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "transformers>=4.40",
+    "huggingface_hub>=0.24",
+    "pillow>=10.0",
+]
+promptable = [
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "transformers>=4.40",
+    "huggingface_hub>=0.24",
+    "pycocotools>=2.0",
+    "pillow>=10.0",
+]
+tracking = [
+    # Install tracking backends manually; these are optional heavy deps.
+    # bytetracker: pip install bytetracker
+    # ocsort: pip install ocsort
+    # torchreid: pip install torchreid
+    "opencv-python-headless>=4.8",
+]
+"vlm-legacy" = [
+    # Florence-2 requires transformers < 5.0. Install in a dedicated venv.
+    "transformers>=4.40,<5.0",
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "huggingface_hub>=0.24",
+    "safetensors>=0.4",
+    "accelerate>=0.28",
+]
+"all-benchmark" = [
+    "visionservex[server,hf,rfdetr,libreyolo,sam2,grounding,anomaly,video,notebook,benchmark,segmentation,promptable]",
 ]
 all = [
     "visionservex[server,cloudflare,onnx,hf]",

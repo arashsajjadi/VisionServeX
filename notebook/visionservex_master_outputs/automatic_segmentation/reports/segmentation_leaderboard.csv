@@ -1,0 +1,8 @@
+model_id,source_engine,n_images,n_predictions,mask_mAP50_95,mask_AP50,mask_AP75,latency_ms_p50,fps,invalid_mask_count,status,rank
+yolo26x-seg.pt,ultralytics,400,14940,0.2728,0.5069,0.263,12.61,,0,benchmark_passed,1
+yolo11x-seg.pt,ultralytics,400,14511,0.2597,0.4787,0.2492,12.63,,0,benchmark_passed,2
+yolov8x-seg.pt,ultralytics,400,15839,0.2581,0.4707,0.2438,13.23,,0,benchmark_passed,3
+yolo11l-seg.pt,ultralytics,400,15151,0.2504,0.4704,0.2424,9.08,,0,benchmark_passed,4
+rfdetr-seg-medium,visionservex,400,8291,0.10113816511347838,0.15736890405742796,0.11076924354943878,14.973347497289069,66.78533308473943,14,benchmark_passed,5
+rfdetr-seg-small,visionservex,400,8095,0.0977280131517908,0.1526685896421276,0.10401261999509823,14.069861492316704,71.0739050662355,43,benchmark_passed,6
+rfdetr-seg-nano,visionservex,400,7572,0.09238397959875123,0.14246446380702768,0.09863827278793856,12.104576999263372,82.6133783990019,85,benchmark_passed,7

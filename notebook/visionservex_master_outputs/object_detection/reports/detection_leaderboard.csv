@@ -1,0 +1,14 @@
+rank,model_id,source_engine,family,n_images,mAP50_95,AP50,AP75,latency_ms_p50,latency_ms_p95,runtime_s,status
+1,yolo26x.pt,ultralytics,ultralytics,400,0.4894,0.6612,0.5333,9.76,11.93,8.4,ok
+2,dfine-x-o365-coco,visionservex,dfine,400,0.4576,0.6185,0.502,,,,ok
+3,yolo11x.pt,ultralytics,ultralytics,400,0.4487,0.6129,0.4875,16.73,19.64,10.7,ok
+4,yolov10b.pt,ultralytics,ultralytics,400,0.4393,0.6087,0.4727,6.05,8.21,7.0,ok
+5,yolov8x.pt,ultralytics,ultralytics,400,0.4369,0.6014,0.4781,11.59,17.76,9.1,ok
+6,dfine-l-o365-coco,visionservex,dfine,400,0.4309,0.5873,0.4704,,,,ok
+7,libreyolo-dfine-s,libreyolo,dfine,400,0.4,0.5626,0.4343,11.14,12.72,6.6,ok
+8,rfdetr-large,visionservex,rfdetr,400,0.3647,0.5052,0.3873,,,,ok
+9,rfdetr-base,visionservex,rfdetr,400,0.3351,0.4713,0.3636,,,,ok
+10,deimv2-s,deimv2_sidecar,deimv2,400,0.3266,0.5039,0.3345,13.1,19.8,,ok
+11,libreyolo-dfine-n,libreyolo,dfine,400,0.318,0.4681,0.3404,10.38,11.81,6.2,ok
+12,libreyolo-yolox-s,libreyolo,yolox,400,0.2959,0.4455,0.3186,7.95,9.59,4.5,ok
+13,libreyolo-yolox-n,libreyolo,yolox,400,0.1394,0.2137,0.1498,7.94,8.96,4.5,ok

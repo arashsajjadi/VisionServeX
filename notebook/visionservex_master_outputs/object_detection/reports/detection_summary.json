@@ -1,0 +1,12 @@
+{
+  "dataset": "COCO val2017, 400-image object-rich subset",
+  "n_models": 13,
+  "best_overall": {
+    "model_id": "yolo26x.pt",
+    "mAP50_95": 0.4894
+  },
+  "best_vsx": {
+    "model_id": "dfine-x-o365-coco",
+    "mAP50_95": 0.4576
+  }
+}

@@ -1,0 +1,5 @@
+model_id,display,top1_label,top1_score,state,code,runtime_ms
+swinv2-tiny,SwinV2 Tiny,?,0.0000,smoke_passed,,4527.0
+convnextv2-tiny,ConvNeXtV2 Tiny,?,0.0000,smoke_passed,,4043.0
+maxvit-tiny-tf-224,MaxViT Tiny,?,0.0000,smoke_passed,,4485.0
+swinv2-small,SwinV2 Small,?,0.0000,smoke_passed,,4596.0

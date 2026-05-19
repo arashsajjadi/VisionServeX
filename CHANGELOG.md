@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.32.0] - 2026-05-18
+
+### Changed: Unified master benchmark notebook, RF-DETR-Seg family curves, package extras
+
+- `notebook/VisionServeX_Master_Benchmark_Demo.ipynb` — single authoritative
+  benchmark notebook covering all model families, one output tree.
+- `notebook/visionservex_master_outputs/` — clean task-separated output tree.
+- Old notebooks archived in `notebook/archive_legacy/`.
+- RF-DETR-Seg family benchmark expanded:
+  - rfdetr-seg-nano: mask mAP50:95 = 0.0924, FPS = 82.6
+  - rfdetr-seg-small: mask mAP50:95 = 0.0977, FPS = 71.1
+  - rfdetr-seg-medium: mask mAP50:95 = 0.1011, FPS = 66.8
+- `pyproject.toml`: new extras:
+  `notebook`, `benchmark`, `segmentation`, `segmentation-full`, `promptable`,
+  `tracking`, `vlm-legacy`, `all-benchmark`
+- `reports/rfdetr_seg_all_sizes_v232.json` — nano + medium family curves.
+
+**Model coverage:**
+- 65 core models attempted; 0 unaccounted; 0 package bugs.
+- First VisionServeX auto-segmentation family curve published.
+- Ultralytics still leads: yolo26x-seg (0.2728) vs rfdetr-seg-medium (0.1011).
+
 ## [2.31.0] - 2026-05-18
 
 ### Added: RF-DETR-Seg COCO mask AP — first real VisionServeX segmentation row

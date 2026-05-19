@@ -1,0 +1,5 @@
+model_id,prompt,final_state,n_detections,code
+owlv2-base-patch16,"person,car",smoke_passed,0,
+owlvit-base-patch32,"person,car",smoke_passed,0,
+grounding-dino-tiny,person . car,smoke_passed,1,
+florence-2-base,OD,smoke_passed,0,

@@ -1,0 +1,29 @@
+{
+  "status": "expected_blocker",
+  "code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
+  "dataset": "/home/arash/datasets/coco_val2017_400_vsx/annotations.json",
+  "images_dir": "/home/arash/datasets/coco_val2017_400_vsx/images",
+  "prompt_source": "gt-box",
+  "max_instances": 30,
+  "device": "cuda",
+  "draw_dir": "/home/arash/PycharmProjects/VisionServeX/notebook/visionservex_master_outputs/promptable_segmentation/visuals",
+  "n_models": 2,
+  "rows": [
+    {
+      "model_id": "sam2-hiera-tiny",
+      "status": "expected_blocker",
+      "code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
+      "message": "could not convert string to float: '.'",
+      "rows": []
+    },
+    {
+      "model_id": "sam2.1-hiera-tiny",
+      "status": "expected_blocker",
+      "code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
+      "message": "could not convert string to float: '.'",
+      "rows": []
+    }
+  ],
+  "task": "promptable_segmentation",
+  "version": "v2.29.0"
+}

@@ -1,0 +1,31 @@
+{
+  "output_dir": "/home/arash/PycharmProjects/VisionServeX/notebook/visionservex_master_outputs",
+  "wired_string_count": 1,
+  "metric_nan_count": 1,
+  "stale_v20_count": 0,
+  "stale_v216_count": 0,
+  "unavailable_count": 0,
+  "failed_runtime_bad_count": 2,
+  "counter_label_count": 0,
+  "offending_items": [
+    {
+      "file": "final/forbidden_string_scan.json",
+      "needle": "NOT_WIRED"
+    },
+    {
+      "file": "final/forbidden_string_scan.json",
+      "needle": "NaN"
+    },
+    {
+      "file": "final/forbidden_string_scan.json",
+      "needle": "failed_runtime_bad",
+      "line": "\"failed_runtime_bad_count\": 0,"
+    },
+    {
+      "file": "final/forbidden_string_scan.json",
+      "needle": "failed_runtime_bad",
+      "line": "\"failed_runtime_counter_ok\": 3,"
+    }
+  ],
+  "status": "FAIL"
+}
