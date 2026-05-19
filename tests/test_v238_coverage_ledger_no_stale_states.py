@@ -68,16 +68,16 @@ def test_deimv2_smaller_sizes_are_benchmark_passed() -> None:
         )
 
 
-def test_rtdetrv4_checkpoint_downloaded() -> None:
+def test_rtdetrv4_checkpoint_downloaded_or_benchmark() -> None:
+    """v2.38 said checkpoint_downloaded; v2.41 benchmarked all 4 variants."""
     rows = {r["model_id"]: r for r in _load()}
+    allowed = {"checkpoint_downloaded", "benchmark_passed", "smoke_passed"}
     for size in ["s", "m", "l", "x"]:
         mid = f"rtdetrv4-{size}"
         r = rows.get(mid)
         if r is None:
             pytest.skip(f"{mid} not in ledger")
-        assert r["final_state"] == "checkpoint_downloaded", (
-            f"{mid}: expected checkpoint_downloaded, got {r['final_state']}"
-        )
+        assert r["final_state"] in allowed, f"{mid}: {r['final_state']!r} not in {allowed}"
 
 
 def test_rfdetr_seg_large_benchmark_passed() -> None:

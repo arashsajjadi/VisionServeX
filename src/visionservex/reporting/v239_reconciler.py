@@ -851,14 +851,22 @@ def write_outputs(
     out_json: Path,
     out_csv: Path,
     final_winners: Path | None = None,
+    write_provenance: bool = False,
 ) -> None:
-    """Persist the reconciled payload to JSON, CSV and (optionally) final_winners.json."""
+    """Persist the reconciled payload to JSON, CSV and (optionally) final_winners.json.
+
+    If ``write_provenance=True``, writes ``.provenance.json`` sidecars for
+    each output file so integrity can be verified later.
+    """
+    run_id = payload.get("run_id", "")
+
     out_json.parent.mkdir(parents=True, exist_ok=True)
     out_json.write_text(json.dumps(payload, indent=2))
 
     out_csv.parent.mkdir(parents=True, exist_ok=True)
     rows = payload.get("rows", [])
     if rows:
+        # Always write ALL row keys — never truncate to old 11-column schema.
         fields = list(rows[0].keys())
         with out_csv.open("w", newline="") as fh:
             w = _csv.DictWriter(fh, fieldnames=fields)
@@ -867,6 +875,22 @@ def write_outputs(
                 w.writerow(r)
     else:
         out_csv.write_text("model_id,final_state\n")
+
+    if write_provenance and run_id:
+        from visionservex.reporting.v242_provenance import write_provenance as _wp
+
+        _wp(
+            out_json,
+            run_id=run_id,
+            source_artifacts=["notebook_model_call_ledger.json", "model_registry.yaml"],
+            extra={"row_count": len(rows), "column_count": len(rows[0]) if rows else 0},
+        )
+        _wp(
+            out_csv,
+            run_id=run_id,
+            source_artifacts=["notebook_model_call_ledger.json", "model_registry.yaml"],
+            extra={"row_count": len(rows), "column_count": len(rows[0]) if rows else 0},
+        )
 
     if final_winners:
         winners = _compute_final_winners(rows)

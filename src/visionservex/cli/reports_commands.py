@@ -208,6 +208,7 @@ def reconcile_model_states_cmd(
     ),
     fail_on_stale: bool = typer.Option(False, "--fail-on-stale"),
     fail_on_missing_notebook_calls: bool = typer.Option(False, "--fail-on-missing-notebook-calls"),
+    write_provenance: bool = typer.Option(False, "--write-provenance"),
 ) -> None:
     """v2.39.0: reconcile registry + task reports + matrix + ledger into a canonical ledger."""
     from visionservex.reporting.v239_reconciler import (
@@ -232,6 +233,7 @@ def reconcile_model_states_cmd(
         out_json=out_json,
         out_csv=out_csv,
         final_winners=final_winners,
+        write_provenance=write_provenance,
     )
     stale_issues = _fail_stale(payload)
     missing_issues = _fail_missing(payload)
@@ -301,6 +303,46 @@ def audit_stale_final_tables_cmd(
             console.print(f"  {k}: {v}")
     if fail_on_stale and payload["status"] != "ok":
         raise typer.Exit(5)
+
+
+@app.command("verify-generated-artifacts")
+def verify_generated_artifacts_cmd(
+    root: Path = typer.Option(..., "--root", help="Directory containing final report artifacts."),
+    run_id: str = typer.Option(
+        "", "--run-id", help="Expected run ID. If empty, skip run-id check."
+    ),
+    out: Path = typer.Option(..., "--out"),
+    fmt: str = typer.Option("json", "--format"),
+    fail_on_manual_edit: bool = typer.Option(
+        True, "--fail-on-manual-edit/--no-fail-on-manual-edit"
+    ),
+    fail_on_stale: bool = typer.Option(True, "--fail-on-stale/--no-fail-on-stale"),
+    min_rows: int = typer.Option(140, "--min-rows"),
+) -> None:
+    """v2.42.0: verify final-report artifacts were generated (not manually edited) in current run."""
+    from visionservex.reporting.v242_provenance import verify_generated_artifacts
+
+    payload = verify_generated_artifacts(
+        root,
+        run_id=run_id,
+        min_rows=min_rows,
+        fail_on_manual_edit=fail_on_manual_edit,
+        fail_on_stale=fail_on_stale,
+    )
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, indent=2))
+    if fmt == "json":
+        typer.echo(json.dumps(payload, indent=2))
+    else:
+        color = "green" if payload["status"] == "ok" else "red"
+        console.print(f"[{color}]{payload['status']}[/{color}]")
+        console.print(f"  artifacts_ok: {payload['artifacts_ok']} / {payload['artifacts_checked']}")
+        for r in payload["results"]:
+            if not r.get("ok"):
+                console.print(f"  [red]FAIL[/red] {r['artifact_path']}: {r['issues'][:2]}")
+    status = payload.get("status", "failed")
+    if status != "ok" and (fail_on_manual_edit or fail_on_stale):
+        raise typer.Exit(6)
 
 
 __all__ = ["app"]

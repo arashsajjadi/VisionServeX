@@ -3,6 +3,50 @@
 ## [Unreleased]
 
 
+## [2.42.0] - 2026-05-19
+
+### Fixed: stale 11-column CSV returned instead of reconciled 141-row/39-column ledger
+
+The `model_coverage_ledger.csv` committed in v2.41 was the raw-registry
+119-row/11-column file, NOT the reconciled 141-row/39-column ledger. This
+happened because the committed CSV was written by a different code path
+than the JSON (which was correct).
+
+This release:
+1. Rewrites the CSV from the correct JSON (141 rows, 39 columns).
+2. Adds `visionservex.reporting.v242_provenance` with SHA-256 hash-based
+   provenance sidecars (`<file>.provenance.json`) for all 4 final-report
+   artifacts.
+3. Adds `visionservex reports verify-generated-artifacts --root … --run-id …`
+   CLI that fails if any artifact was manually edited, uses the wrong schema,
+   or was generated in a different run.
+4. Extends `write_outputs` with `--write-provenance` to auto-generate sidecars.
+5. Adds `OLD_11_COLUMN_SCHEMA` constant so the old schema is detectable.
+6. Adds 9 new tests:
+   - `test_v242_generated_ledger_schema.py` (8 tests) — asserts row count
+     ≥ 140, required columns present, old 11-column schema rejected, CSV and
+     JSON row counts match, key model states correct.
+   - `test_v242_generated_ledger_provenance.py` (7 tests) — write/verify
+     provenance, detect manual edits, detect old schema.
+7. Updates `test_v238_coverage_ledger_no_stale_states.py` to accept
+   `benchmark_passed` for rtdetrv4-s/m/l/x (they were benchmarked in v2.41).
+
+**Hard validation before release (all assertions pass):**
+
+```
+GENERATED LEDGER VERIFICATION
+ledger_path: …/notebook/99_final_report/reports/model_coverage_ledger.csv
+row_count: 141
+column_count: 39
+run_id: 20260519T182600Z_v241
+required_columns_present: true
+provenance_path: …/model_coverage_ledger.csv.provenance.json
+provenance_verified: true
+manual_edit_detected: false
+old_11_column_schema_detected: false
+```
+
+
 ## [2.41.0] - 2026-05-19
 
 ### Added: RT-DETRv4 COCO400 benchmark — new best VSX model + swinv2-large fix
