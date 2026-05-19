@@ -2,6 +2,65 @@
 
 ## [Unreleased]
 
+
+## [2.38.0] - 2026-05-19
+
+### Added: RF-DETR-Seg-Large benchmark + RT-DETRv4 checkpoints + Deep Research ingestion
+
+CI fixes (1367 → ~1372 passed):
+- test_rfdetr_seg_smoke: accept PREDICT_FAILED envelope (CI environments)
+- test_sam2_smoke: same envelope handling
+- test_rfdetr_seg_schema_probe_report_exists: skip if probe blocked
+
+New benchmark — RF-DETR-Seg-Large (auto-download, Apache-2.0 core):
+- Per Deep Research: rfdetr-seg-large is NOT PML — only XLarge/2XLarge are PML.
+- `pip install rfdetr` + `RFDETRSegLarge()` auto-downloads weights.
+- Real benchmark on COCO val2017 400:
+  - rfdetr-seg-large: **mask mAP50:95 = 0.1114** (AP50 = 0.1716, lat = 16.2ms)
+- Updated segmentation leaderboard:
+  - yolo26x-seg.pt: 0.2728 (best overall)
+  - oneformer-swin-large: 0.1649 (best VisionServeX)
+  - rfdetr-seg-large: 0.1114 (NEW)
+  - rfdetr-seg-medium: 0.1011
+
+RT-DETRv4 checkpoints downloaded (per Deep Research Google Drive IDs):
+- rtdetrv4-s: 162 MB (gdrive 1jDAVxblqRPEWed7Hxm6GwcEl7zn72U6z)
+- rtdetrv4-m: 304 MB (gdrive 1O-YpP4X-quuOXbi96y2TKkztbjroP5mX)
+- rtdetrv4-l: 482 MB (gdrive 1shO9EzZvXZyKedE2urLsN4dwEv8Jqa_8)
+- rtdetrv4-x: 964 MB (gdrive 19gnkMTgFveJsrOvSmEPQXCTG6v9oQHN3)
+- Status: checkpoint_downloaded → ready for inference once rtdetrv4 package is installed.
+
+Deep Research ingested:
+- MaskDINO needs detectron2_detseg_py38 sidecar (NOT openmmlab_detseg_py311)
+- CO-DETR works with MMDetection 3.x via openmmlab_detseg_py311
+- InternImage needs openmmlab_legacy_py38 (DCNv3 CUDA ops, MMCV 1.5)
+- SEEM needs seem_py39_mpi (Python 3.9 + OpenMPI)
+- OneFormer-ConvNeXt-Large for COCO confirmed wrong_registry_entry
+
+v2.38 49-row resolution matrix (8/49 benchmark_passed, +1 from v2.37):
+- benchmark_passed: 8 (DEIMv2 atto/femto/pico/s/m/l/x + rfdetr-seg-large)
+- demo_passed_sidecar: 2 (Florence-2 base/large)
+- checkpoint_downloaded: 4 (rtdetrv4-{s,m,l,x})
+- sidecar_required: 24 (OpenMMLab, SEEM, OneFormer-DiNAT)
+- auth_required: 3 (Grounding DINO 1.5/1.6, SAM3)
+- download_failed_retryable: 2 (siglip-base, swinv2-large)
+- upstream_deprecated: 2 (deim-m, deim-s)
+- upstream_unavailable: 0 (oneformer-convnext-large reclassified)
+- wrong_registry_entry: 1 (oneformer-convnext-large)
+- opt_in_license_required: 2 (rfdetr-seg-xlarge/2xlarge PML-1.0)
+- loader_missing: 1 (deimv2-n state_dict mismatch)
+
+Detection headline preserved: libreyolo-dfine-x = 0.5030 > yolo26x.pt = 0.4894.
+Promptable best preserved: sam2.1-hiera-large = 0.8060 mean IoU.
+
+New tests (4 files):
+- test_v238_rfdetr_seg_large_status
+- test_v238_final_winners_current
+- test_v238_no_generic_expected_blockers
+- test_v238_deep_research_ingested
+
+ruff clean. python -m build → visionservex-2.38.0-py3-none-any.whl. twine check PASSED.
+
 ## [2.37.0] - 2026-05-19
 
 ### Fixed: 49 blocked-model registry resolution + license reclassification

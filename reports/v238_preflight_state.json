@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-05-19",
+  "current_git_status": "modified test files + version bump",
+  "latest_pypi_version": "2.37.0",
+  "v237_release_exists": true,
+  "latest_ci_status": "failure - 5 test issues (being fixed in v2.38)",
+  "current_detection_winner": "libreyolo-dfine-x = 0.5030",
+  "current_segmentation_winner": "yolo26x-seg.pt = 0.2728 (best VisionServeX = oneformer-swin-large = 0.1649)",
+  "current_promptable_winner": "sam2.1-hiera-large = 0.8060",
+  "current_49_row_resolution_summary": {
+    "benchmark_passed": 7,
+    "demo_passed_sidecar": 2,
+    "sidecar_required": 24,
+    "manual_checkpoint_required": 4,
+    "auth_required": 3,
+    "download_failed_retryable": 2,
+    "upstream_deprecated": 2,
+    "wrong_registry_entry": 0,
+    "loader_missing": 1,
+    "opt_in_license_required": 2,
+    "upstream_unavailable": 1,
+    "checkpoint_required": 1
+  },
+  "deep_research_result_available": true,
+  "blocking_items_for_v238": [
+    "CI failures: tests that need torch fail on CI without torch",
+    "RFDETR_LOAD_FAILED handling (added in v2.37)",
+    "PREDICT_FAILED envelope handling"
+  ]
+}

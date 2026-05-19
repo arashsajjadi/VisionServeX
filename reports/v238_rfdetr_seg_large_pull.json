@@ -1,0 +1,8 @@
+{
+  "status": "ok",
+  "code": "OK",
+  "model": "rfdetr-seg-large",
+  "n_detections": 0,
+  "has_masks": true,
+  "load_time_s": 3.3
+}

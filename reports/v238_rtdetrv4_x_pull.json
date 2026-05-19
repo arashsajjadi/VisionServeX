@@ -1,0 +1,10 @@
+{
+  "status": "ok",
+  "code": "CHECKPOINT_DOWNLOADED",
+  "model_id": "rtdetrv4-x",
+  "gdrive_id": "19gnkMTgFveJsrOvSmEPQXCTG6v9oQHN3",
+  "checkpoint_path": "/home/arash/.cache/visionservex/rtdetrv4/rtdetrv4_x.pth",
+  "size_mb": 1010.5,
+  "next_step": "Install rtdetrv4 package and run inference",
+  "official_repo": "https://github.com/RT-DETRs/RT-DETRv4"
+}

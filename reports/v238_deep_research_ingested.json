@@ -1,0 +1,29 @@
+{
+  "status": "ok",
+  "code": "OK",
+  "ingestion_date": "2026-05-19",
+  "source": "Deep Research v2.38 addendum",
+  "key_findings": {
+    "maskdino_needs_detectron2_py38_sidecar": true,
+    "co_detr_works_with_mmdetection_3x_py311": true,
+    "internimage_needs_legacy_py38_sidecar": true,
+    "rfdetr_seg_large_is_apache_core_not_pml": true,
+    "rt_detrv4_gdown_ids": {
+      "rtdetrv4-s": "1jDAVxblqRPEWed7Hxm6GwcEl7zn72U6z",
+      "rtdetrv4-m": "1O-YpP4X-quuOXbi96y2TKkztbjroP5mX",
+      "rtdetrv4-l": "1shO9EzZvXZyKedE2urLsN4dwEv8Jqa_8",
+      "rtdetrv4-x": "19gnkMTgFveJsrOvSmEPQXCTG6v9oQHN3"
+    },
+    "oneformer_convnext_for_coco_does_not_exist": true,
+    "seem_needs_python39_mpi_sidecar": true
+  },
+  "actions_taken_in_v238": {
+    "rfdetr-seg-large": "auto-downloaded + benchmarked: mask mAP = 0.1114",
+    "rtdetrv4-s/m/l/x": "checkpoints downloaded via gdown (162-964 MB each)",
+    "oneformer-convnext-large": "reclassified as wrong_registry_entry",
+    "maskdino": "sidecar target updated to detectron2_detseg_py38",
+    "internimage": "sidecar target updated to openmmlab_legacy_py38",
+    "co-detr": "sidecar target confirmed as openmmlab_detseg_py311",
+    "seem": "sidecar target updated to seem_py39_mpi"
+  }
+}

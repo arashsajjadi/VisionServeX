@@ -1,0 +1,11 @@
+{
+  "status": "wrong_registry_entry",
+  "code": "ONEFORMER_CONVNEXT_LARGE_NOT_OFFICIALLY_TRAINED_FOR_COCO",
+  "deep_research_finding": "SHI-Labs/OneFormer did NOT train ConvNeXt-Large for COCO. ConvNeXt backbones were used only for Cityscapes, Mapillary Vistas, and ADE20K. For COCO, SHI-Labs trained Swin-L and DiNAT-L (verified via official repo + HF model cards).",
+  "official_repo": "https://github.com/SHI-Labs/OneFormer",
+  "recommendation": "Use shi-labs/oneformer_coco_swin_large (already benchmarked at 0.1649) or shi-labs/oneformer_coco_dinat_large (needs NATTEN sidecar).",
+  "valid_hf_model_ids": [
+    "shi-labs/oneformer_coco_swin_large",
+    "shi-labs/oneformer_coco_dinat_large"
+  ]
+}

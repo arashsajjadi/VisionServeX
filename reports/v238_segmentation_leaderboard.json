@@ -1,0 +1,44 @@
+{
+  "version": "v2.38.0",
+  "dataset": "COCO val2017 400-image subset, instance masks",
+  "rows": [
+    {
+      "rank": 1,
+      "model_id": "yolo26x-seg.pt",
+      "mask_mAP50_95": 0.2728,
+      "source": "Ultralytics"
+    },
+    {
+      "rank": 2,
+      "model_id": "oneformer-swin-large",
+      "mask_mAP50_95": 0.1649,
+      "source": "VisionServeX"
+    },
+    {
+      "rank": 3,
+      "model_id": "rfdetr-seg-large",
+      "mask_mAP50_95": 0.1114,
+      "source": "VisionServeX (NEW v2.38)"
+    },
+    {
+      "rank": 4,
+      "model_id": "rfdetr-seg-medium",
+      "mask_mAP50_95": 0.1011,
+      "source": "VisionServeX"
+    },
+    {
+      "rank": 5,
+      "model_id": "rfdetr-seg-small",
+      "mask_mAP50_95": 0.0977,
+      "source": "VisionServeX"
+    },
+    {
+      "rank": 6,
+      "model_id": "rfdetr-seg-nano",
+      "mask_mAP50_95": 0.0924,
+      "source": "VisionServeX"
+    }
+  ],
+  "headline": "OneFormer-SwinLarge remains best VisionServeX auto-seg at 0.1649 mAP. rfdetr-seg-large (NEW) = 0.1114.",
+  "gap_to_yolo26x_seg": 0.1079
+}

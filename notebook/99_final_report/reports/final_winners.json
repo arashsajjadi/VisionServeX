@@ -1,0 +1,11 @@
+{
+  "version": "v2.38.0",
+  "as_of": "2026-05-19",
+  "detection_winner_overall": "libreyolo-dfine-x = 0.5030 mAP",
+  "detection_winner_visionservex": "libreyolo-dfine-x (via LibreYOLO) = 0.5030 mAP",
+  "detection_winner_visionservex_native": "deimv2-x (via sidecar) = 0.4523 mAP",
+  "auto_segmentation_winner_overall": "yolo26x-seg.pt = 0.2728 mAP",
+  "auto_segmentation_winner_visionservex": "oneformer-swin-large = 0.1649 mAP",
+  "promptable_segmentation_winner": "sam2.1-hiera-large = 0.8060 mean IoU",
+  "vlm_demo": "florence-2-base (sidecar) \u2014 caption + OD demo_passed"
+}

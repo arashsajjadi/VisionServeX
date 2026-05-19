@@ -1,0 +1,55 @@
+{
+  "version": "v2.38.0",
+  "dataset": "COCO val2017 400-image subset",
+  "rows": [
+    {
+      "rank": 1,
+      "model_id": "libreyolo-dfine-x",
+      "mAP50_95": 0.503,
+      "source": "LibreYOLO"
+    },
+    {
+      "rank": 2,
+      "model_id": "yolo26x.pt",
+      "mAP50_95": 0.4894,
+      "source": "Ultralytics"
+    },
+    {
+      "rank": 3,
+      "model_id": "libreyolo-dfine-l",
+      "mAP50_95": 0.4727,
+      "source": "LibreYOLO"
+    },
+    {
+      "rank": 4,
+      "model_id": "libreyolo-dfine-m",
+      "mAP50_95": 0.4596,
+      "source": "LibreYOLO"
+    },
+    {
+      "rank": 5,
+      "model_id": "dfine-x-o365-coco",
+      "mAP50_95": 0.4576,
+      "source": "VisionServeX"
+    },
+    {
+      "rank": 6,
+      "model_id": "libreyolo-rfdetr-l",
+      "mAP50_95": 0.4543,
+      "source": "LibreYOLO"
+    },
+    {
+      "rank": 7,
+      "model_id": "deimv2-x",
+      "mAP50_95": 0.4523,
+      "source": "DEIMv2/sidecar"
+    },
+    {
+      "rank": 8,
+      "model_id": "deimv2-l",
+      "mAP50_95": 0.439,
+      "source": "DEIMv2/sidecar"
+    }
+  ],
+  "headline": "libreyolo-dfine-x = 0.5030 beats yolo26x.pt (0.4894) by +0.014 mAP"
+}
