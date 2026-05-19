@@ -1,5 +1,0 @@
-model_id,n_images,n_predictions,mask_mAP50_95,mask_AP50,mask_AP75,latency_ms_p50,latency_ms_p95,runtime_s,status,task,source_engine
-yolo26x-seg.pt,400,14940,0.2728,0.5069,0.263,12.61,15.04,14.0,ok,instance_segmentation,ultralytics
-yolo11x-seg.pt,400,14511,0.2597,0.4787,0.2492,12.63,15.9,14.2,ok,instance_segmentation,ultralytics
-yolov8x-seg.pt,400,15839,0.2581,0.4707,0.2438,13.23,16.01,15.1,ok,instance_segmentation,ultralytics
-yolo11l-seg.pt,400,15151,0.2504,0.4704,0.2424,9.08,12.53,11.6,ok,instance_segmentation,ultralytics

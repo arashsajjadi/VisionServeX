@@ -1,4 +1,0 @@
-model_id,final_state,embedding_dim
-dinov2-base,smoke_passed,768
-clip-vit-base-patch32,smoke_passed,768
-siglip2-base-patch16-224,smoke_passed,768

@@ -1,6 +1,0 @@
-{
-  "code": "OCSORT_REQUIRED",
-  "tracker": "ocsort",
-  "install": "pip install ocsort  # or git clone https://github.com/noahcao/OC_SORT",
-  "status": "expected_blocker"
-}

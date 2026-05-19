@@ -1,6 +1,6 @@
 {
-  "status": "expected_blocker",
-  "code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
+  "status": "ok",
+  "code": "OK",
   "dataset": "/home/arash/datasets/coco_val2017_400_vsx/annotations.json",
   "images_dir": "/home/arash/datasets/coco_val2017_400_vsx/images",
   "prompt_source": "gt-box",
@@ -11,17 +11,623 @@
   "rows": [
     {
       "model_id": "sam2-hiera-tiny",
-      "status": "expected_blocker",
-      "code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
-      "message": "could not convert string to float: '.'",
-      "rows": []
+      "status": "ok",
+      "code": "OK",
+      "total_instances": 30,
+      "mean_iou": 0.7534,
+      "metric_status": "computed",
+      "rows": [
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 7915,
+          "image_id": 419974,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8967,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 8032,
+          "image_id": 329219,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9553,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 12414,
+          "image_id": 424162,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9109,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 14189,
+          "image_id": 279278,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8088,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 18979,
+          "image_id": 540502,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5404,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 19679,
+          "image_id": 127182,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8296,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 19751,
+          "image_id": 565776,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7243,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 20026,
+          "image_id": 575970,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7034,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 20865,
+          "image_id": 407614,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8077,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 20979,
+          "image_id": 522007,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6761,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 21865,
+          "image_id": 226984,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7923,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 22328,
+          "image_id": 37777,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7589,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 22674,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8259,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 22806,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8824,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 23607,
+          "image_id": 529568,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7789,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 26036,
+          "image_id": 226984,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9034,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 26288,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7176,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 26324,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.587,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 26341,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8083,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 26700,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.0022,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 27423,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7648,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 27879,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.3374,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 29249,
+          "image_id": 68833,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9286,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 33192,
+          "image_id": 440475,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8702,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 34096,
+          "image_id": 525083,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9062,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 36197,
+          "image_id": 17899,
+          "category": "bird",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5104,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 49229,
+          "image_id": 554291,
+          "category": "cat",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6957,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 52654,
+          "image_id": 491216,
+          "category": "cat",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8927,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 70383,
+          "image_id": 555050,
+          "category": "cow",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8822,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2-hiera-tiny",
+          "annotation_id": 78863,
+          "image_id": 465129,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9048,
+          "draw_path": ""
+        }
+      ]
     },
     {
       "model_id": "sam2.1-hiera-tiny",
-      "status": "expected_blocker",
-      "code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
-      "message": "could not convert string to float: '.'",
-      "rows": []
+      "status": "ok",
+      "code": "OK",
+      "total_instances": 30,
+      "mean_iou": 0.7487,
+      "metric_status": "computed",
+      "rows": [
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 7915,
+          "image_id": 419974,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8957,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 8032,
+          "image_id": 329219,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9563,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 12414,
+          "image_id": 424162,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9057,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 14189,
+          "image_id": 279278,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7928,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 18979,
+          "image_id": 540502,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5727,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 19679,
+          "image_id": 127182,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8244,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 19751,
+          "image_id": 565776,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7338,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 20026,
+          "image_id": 575970,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7173,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 20865,
+          "image_id": 407614,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8055,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 20979,
+          "image_id": 522007,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.645,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 21865,
+          "image_id": 226984,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7844,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 22328,
+          "image_id": 37777,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7054,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 22674,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8213,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 22806,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.825,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 23607,
+          "image_id": 529568,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7536,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 26036,
+          "image_id": 226984,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9017,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 26288,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6969,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 26324,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5478,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 26341,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7833,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 26700,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.0029,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 27423,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7737,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 27879,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.3231,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 29249,
+          "image_id": 68833,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9175,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 33192,
+          "image_id": 440475,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8029,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 34096,
+          "image_id": 525083,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9167,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 36197,
+          "image_id": 17899,
+          "category": "bird",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.548,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 49229,
+          "image_id": 554291,
+          "category": "cat",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8118,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 52654,
+          "image_id": 491216,
+          "category": "cat",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8996,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 70383,
+          "image_id": 555050,
+          "category": "cow",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.885,
+          "draw_path": ""
+        },
+        {
+          "model_id": "sam2.1-hiera-tiny",
+          "annotation_id": 78863,
+          "image_id": 465129,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9105,
+          "draw_path": ""
+        }
+      ]
     }
   ],
   "task": "promptable_segmentation",

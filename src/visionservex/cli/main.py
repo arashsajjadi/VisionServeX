@@ -129,6 +129,7 @@ app.add_typer(privacy_commands.app, name="privacy")
 app.add_typer(validation_commands.app, name="validation")
 app.add_typer(colab_commands.app, name="colab")
 app.add_typer(notebook_commands.app, name="notebook")
+app.add_typer(notebook_commands.ledger_app, name="notebook-call-ledger")
 app.add_typer(libreyolo_commands.app, name="libreyolo")
 app.add_typer(reports_commands.app, name="reports")
 app.add_typer(

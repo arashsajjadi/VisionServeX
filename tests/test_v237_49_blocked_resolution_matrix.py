@@ -1,12 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2026 Arash Sajjadi
 """v2.37.0: 49-row blocked-model resolution matrix."""
+
 from __future__ import annotations
 
 import json
 from pathlib import Path
-
-import pytest
 
 REPORT = Path(__file__).parent.parent / "reports/v237_49_blocked_resolution_matrix.json"
 
@@ -44,7 +43,8 @@ def test_v237_pml_correctly_classified() -> None:
     for r in d["rows"]:
         if "PML" in (r["current_license_status"] or "").upper():
             assert r["final_state_after_v237"] in (
-                "opt_in_license_required", "license_blocked",
+                "opt_in_license_required",
+                "license_blocked",
             ), f"{r['model_id']}: PML must be opt_in"
 
 

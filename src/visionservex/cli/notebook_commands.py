@@ -246,4 +246,205 @@ def classify_failure_cmd(
     console.print(f"[bold]blocker_code:[/bold] {blocker_code or '(none)'}")
 
 
-__all__ = ["app"]
+# ----------------------------------------------------------------------
+# v2.39.0: notebook output cleanup
+# ----------------------------------------------------------------------
+
+_CLEAN_PATTERNS_DEFAULT: tuple[str, ...] = (
+    "**/reports/*.json",
+    "**/reports/*.csv",
+    "**/reports/*.md",
+    "**/plots/*",
+    "**/visuals/*",
+    "**/commands/*",
+    "**/*_EXECUTED.ipynb",
+    "**/*_EXECUTED_*.ipynb",
+)
+
+_PRESERVE_DEFAULT_DIRS: tuple[str, ...] = (
+    ".venv",
+    "models/checkpoints",
+    "datasets",
+    ".ipynb_checkpoints",
+)
+
+# Always-preserve absolute prefixes (extra-careful list)
+_PRESERVE_ABS_PREFIXES = (
+    str(Path.home() / ".cache" / "visionservex" / "models"),
+    str(Path.home() / ".cache" / "visionservex" / "sidecars"),
+    str(Path.home() / ".cache" / "huggingface"),
+    "/home/arash/datasets",
+)
+
+
+def _is_preserved(path: Path, preserve_dirs: tuple[str, ...]) -> bool:
+    parts = set(path.parts)
+    for p in preserve_dirs:
+        if p in parts:
+            return True
+        if p in str(path):
+            return True
+    s = str(path.resolve())
+    return any(s.startswith(prefix) for prefix in _PRESERVE_ABS_PREFIXES)
+
+
+def _iter_to_delete(
+    root: Path,
+    patterns: tuple[str, ...],
+    preserve_dirs: tuple[str, ...],
+) -> list[Path]:
+    out: list[Path] = []
+    for pattern in patterns:
+        for candidate in root.glob(pattern):
+            if _is_preserved(candidate, preserve_dirs):
+                continue
+            out.append(candidate)
+    # de-dup preserving order
+    seen: set[str] = set()
+    deduped: list[Path] = []
+    for p in out:
+        s = str(p)
+        if s not in seen:
+            seen.add(s)
+            deduped.append(p)
+    return deduped
+
+
+def _size_of(path: Path) -> int:
+    try:
+        if path.is_file():
+            return path.stat().st_size
+        if path.is_dir():
+            return sum(p.stat().st_size for p in path.rglob("*") if p.is_file())
+    except OSError:
+        return 0
+    return 0
+
+
+@app.command("clean-outputs")
+def clean_outputs_cmd(
+    root: Path = typer.Option(Path("notebook"), "--root"),
+    preserve_model_cache: bool = typer.Option(
+        True, "--preserve-model-cache/--no-preserve-model-cache"
+    ),
+    preserve_datasets: bool = typer.Option(True, "--preserve-datasets/--no-preserve-datasets"),
+    preserve_env: bool = typer.Option(True, "--preserve-env/--no-preserve-env"),
+    preserve_checkpoints: bool = typer.Option(
+        True, "--preserve-checkpoints/--no-preserve-checkpoints"
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run"),
+    fmt: str = typer.Option("json", "--format"),
+    out: Path | None = typer.Option(None, "--out"),
+    extra_pattern: list[str] = typer.Option(
+        [], "--extra-pattern", help="Additional glob patterns to delete."
+    ),
+) -> None:
+    """v2.39.0: clean generated outputs while preserving models, datasets, env."""
+    preserve_dirs = list(_PRESERVE_DEFAULT_DIRS)
+    if not preserve_env:
+        preserve_dirs.remove(".venv")
+    if not preserve_checkpoints:
+        preserve_dirs = [d for d in preserve_dirs if d != "models/checkpoints"]
+    if not preserve_datasets:
+        preserve_dirs = [d for d in preserve_dirs if d != "datasets"]
+
+    patterns = tuple(_CLEAN_PATTERNS_DEFAULT) + tuple(extra_pattern)
+    targets = _iter_to_delete(root, patterns, tuple(preserve_dirs))
+    bytes_freed = 0
+    deleted_files = 0
+    deleted_dirs = 0
+    sample: list[str] = []
+    for p in targets:
+        size = _size_of(p)
+        if not dry_run:
+            try:
+                if p.is_dir():
+                    import shutil as _shutil
+
+                    _shutil.rmtree(p, ignore_errors=True)
+                    deleted_dirs += 1
+                else:
+                    p.unlink(missing_ok=True)
+                    deleted_files += 1
+                bytes_freed += size
+            except OSError:
+                continue
+        else:
+            if p.is_dir():
+                deleted_dirs += 1
+            else:
+                deleted_files += 1
+            bytes_freed += size
+        if len(sample) < 20:
+            sample.append(str(p))
+
+    payload = {
+        "status": "ok",
+        "dry_run": dry_run,
+        "root": str(root),
+        "preserve_model_cache": preserve_model_cache,
+        "preserve_datasets": preserve_datasets,
+        "preserve_env": preserve_env,
+        "preserve_checkpoints": preserve_checkpoints,
+        "preserved_paths": preserve_dirs + list(_PRESERVE_ABS_PREFIXES),
+        "patterns": list(patterns),
+        "deleted_files_count": deleted_files,
+        "deleted_dirs_count": deleted_dirs,
+        "bytes_freed": bytes_freed,
+        "deleted_paths_sample": sample,
+        "run_id": os.environ.get("VISIONSERVEX_NOTEBOOK_RUN_ID", ""),
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2))
+    if fmt == "json":
+        typer.echo(json.dumps(payload, indent=2))
+    else:
+        console.print(
+            f"[green]deleted_files={deleted_files} dirs={deleted_dirs} bytes_freed={bytes_freed}[/]"
+        )
+
+
+# ----------------------------------------------------------------------
+# v2.39.0: notebook call ledger init
+# ----------------------------------------------------------------------
+
+ledger_app = typer.Typer(help="v2.39.0: notebook model-call ledger.", no_args_is_help=True)
+
+
+@ledger_app.command("init")
+def ledger_init_cmd(
+    out: Path = typer.Option(..., "--out"),
+    run_id: str = typer.Option("", "--run-id"),
+) -> None:
+    """Initialise (or reset) the notebook model-call ledger for this run."""
+    from visionservex.reporting.notebook_calls import NotebookCallLedger
+
+    led = NotebookCallLedger.init(out, run_id=run_id)
+    payload = {
+        "status": "ok",
+        "run_id": led.run_id,
+        "path": str(out),
+        "schema_version": 1,
+    }
+    typer.echo(json.dumps(payload, indent=2))
+
+
+@ledger_app.command("summary")
+def ledger_summary_cmd(
+    ledger: Path = typer.Option(..., "--ledger"),
+    out: Path | None = typer.Option(None, "--out"),
+) -> None:
+    """Print a coverage summary of the current notebook call ledger."""
+    from visionservex.reporting.notebook_calls import NotebookCallLedger
+
+    led = NotebookCallLedger.load(ledger)
+    summary = led.coverage_summary()
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(summary, indent=2))
+    typer.echo(json.dumps(summary, indent=2))
+
+
+__all__ = ["app", "ledger_app"]

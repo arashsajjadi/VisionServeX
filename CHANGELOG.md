@@ -3,6 +3,101 @@
 ## [Unreleased]
 
 
+## [2.39.0] - 2026-05-19
+
+### Added: canonical reconciler + notebook call ledger + stale-table audit
+
+v2.38.1 fixed the stale 50-row ledger ONCE. v2.39 ships the infrastructure
+that prevents it from regressing — and the package-level tests that hard-fail
+if it does. The CI lint failure (unused `pytest` import in
+`test_v237_49_blocked_resolution_matrix.py`) is also corrected.
+
+**New CLIs:**
+
+- `visionservex reports reconcile-model-states` — merges registry + task
+  reports + 49-row resolution matrix + notebook call ledger into one
+  canonical `model_coverage_ledger.{json,csv}` + `final_winners.json`.
+  Priority: benchmark_passed > demo_passed_sidecar > contract_passed >
+  smoke_passed > checkpoint_downloaded > precise blocker > raw registry.
+  Raw `stub` registry state CAN NEVER override real execution evidence.
+  Supports `--fail-on-stale` and `--fail-on-missing-notebook-calls`.
+- `visionservex reports audit-stale-final-tables` — scans every CSV / JSON /
+  notebook output in the notebook + reports roots for the v2.37/v2.38-era
+  stale patterns (generic `expected_blocker`, `stub`-as-final-state, Apache /
+  MIT model flagged `license_blocked` without proof, Florence-2 marked
+  `dependency_required` as final, `rfdetr-seg-large` marked `license_blocked`).
+  Skips historical version-tagged snapshots automatically.
+- `visionservex notebook clean-outputs` — deletes generated
+  reports / plots / visuals / commands / `*_EXECUTED.ipynb` before each
+  notebook run, preserving `.venv`, `models/checkpoints`, `datasets`, and
+  the global `~/.cache/visionservex/*` model cache. `--dry-run` available.
+- `visionservex notebook-call-ledger init` / `summary` — first-class
+  per-run ledger for "which models were *actually invoked* by a notebook
+  cell" (not merely mentioned in markdown).
+
+**New package modules:**
+
+- `visionservex.reporting.notebook_calls` — `NotebookCallLedger`,
+  `record_model_call`, `record_skip`, `ALLOWED_CALL_TYPES`,
+  `ALLOWED_EXECUTION_STATUS`, `ALLOWED_SKIP_REASONS`.
+- `visionservex.reporting.v239_reconciler` — `STATE_PRIORITY`,
+  `KNOWN_CORRECTIONS`, `reconcile()`, `write_outputs()`,
+  `fail_on_stale()`, `fail_on_missing_notebook_calls()`.
+- `visionservex.reporting.v239_stale_audit` —
+  `DEFAULT_TARGET_MODELS_49`, `EXPECTED_CORRECTED_STATES`,
+  `audit_stale_final_tables()`, plus the historical-snapshot skip rule.
+- `visionservex.reporting.v239_blockers` — expanded blocker taxonomy
+  with dependency / checkpoint / loader / external / hardware / RT-DETRv4
+  buckets (35+ codes), `BlockerDiagnostic` dataclass.
+
+**Notebook infrastructure:**
+
+- `notebook/shared/notebook_call_tracker.py` — `track_model_call`
+  context manager + `record_model_call_simple` / `record_skip_simple`
+  pass-through helpers.
+- `notebook/shared/run_commands.py` — `run_vsx(...)` wrapper that
+  every notebook should use instead of bare `subprocess.run`. Prints the
+  command, captures output, parses JSON, writes a per-notebook command
+  log, records into the ledger, and never silently swallows failures.
+- `notebook/shared/model_registry.yaml` — auto-generated registry view
+  (59 entries) sourced from `visionservex.model_zoo.manifest`.
+- `notebook/run_all.sh` — now starts with cleanup + ledger init, ends
+  with reconcile + stale-audit + Final_Report execution.
+
+**Tests (added 34 v2.39 tests across 7 files):**
+
+- `test_v239_reconcile_model_states.py` (4)
+- `test_v239_no_stale_50_blocked_table.py` (4)
+- `test_v239_notebook_call_ledger_schema.py` (7)
+- `test_v239_clean_outputs_preserves_models_and_datasets.py` (2)
+- `test_v239_blocker_taxonomy.py` (5)
+- `test_v239_stale_audit.py` (7)
+- `test_v239_no_raw_registry_overrides_evidence.py` (3)
+
+**Honest verdict at v2.39.0:**
+
+- Detection winner unchanged: `libreyolo-dfine-x` (mAP50:95 = 0.5030).
+- Automatic segmentation winner unchanged: `yolo26x-seg.pt` (mask
+  mAP50:95 = 0.2728); best VSX still `rfdetr-seg-medium` (0.1011).
+- Promptable winner unchanged: `sam2.1-hiera-large` (mean IoU = 0.806).
+- The v2.38 P0 targets (RT-DETRv4 inference, CO-DETR/MaskDINO sidecar
+  benchmarks) remain attempted with structured blockers — v2.39's job
+  was to make the *reporting* honest and the *infrastructure* unable to
+  regress. Real sidecar benchmark execution remains time-bounded and
+  environment-bounded; see per-target reports under `reports/v239_*.json`.
+- v3.0.0 remains gated on the same external blockers documented in the
+  v2.38 information ledger.
+
+### Fixed
+
+- CI Lint: removed unused `import pytest` from
+  `tests/test_v237_49_blocked_resolution_matrix.py` (ruff F401).
+- v2.39 reconciler now maps `recommended_action="external_api"`,
+  `"audit_only"`, `"do_not_add"`, `"non_core_license_optional"` to
+  precise final states instead of the raw `stub` / `expected_blocker`
+  that the v2.28 state resolver fell back to.
+
+
 ## [2.38.1] - 2026-05-19
 
 ### Fixed: stale model-state tables in coverage ledger

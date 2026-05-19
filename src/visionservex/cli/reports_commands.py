@@ -172,4 +172,135 @@ def information_ledger_cmd(
     typer.echo(json.dumps({"status": "ok", "code": "OK", "wrote": out, "n_rows": len(rows)}))
 
 
+@app.command("reconcile-model-states")
+def reconcile_model_states_cmd(
+    registry: Path = typer.Option(
+        None,
+        "--registry",
+        help="Path to notebook/shared/model_registry.yaml (informational).",
+    ),
+    task_reports: Path = typer.Option(
+        Path("notebook"),
+        "--task-reports",
+        help="Root to walk for per-task reports (default: ./notebook).",
+    ),
+    resolution: Path = typer.Option(
+        Path("reports/v238_49_blocked_resolution_matrix.json"),
+        "--resolution",
+        help="Latest 49-row resolution matrix.",
+    ),
+    notebook_call_ledger: Path = typer.Option(
+        Path("notebook/99_final_report/reports/notebook_model_call_ledger.json"),
+        "--notebook-call-ledger",
+        help="Notebook call ledger JSON.",
+    ),
+    out_json: Path = typer.Option(
+        Path("notebook/99_final_report/reports/model_coverage_ledger.json"),
+        "--out-json",
+    ),
+    out_csv: Path = typer.Option(
+        Path("notebook/99_final_report/reports/model_coverage_ledger.csv"),
+        "--out-csv",
+    ),
+    final_winners: Path = typer.Option(
+        Path("notebook/99_final_report/reports/final_winners.json"),
+        "--final-winners",
+    ),
+    fail_on_stale: bool = typer.Option(False, "--fail-on-stale"),
+    fail_on_missing_notebook_calls: bool = typer.Option(False, "--fail-on-missing-notebook-calls"),
+) -> None:
+    """v2.39.0: reconcile registry + task reports + matrix + ledger into a canonical ledger."""
+    from visionservex.reporting.v239_reconciler import (
+        fail_on_missing_notebook_calls as _fail_missing,
+    )
+    from visionservex.reporting.v239_reconciler import (
+        fail_on_stale as _fail_stale,
+    )
+    from visionservex.reporting.v239_reconciler import (
+        reconcile,
+        write_outputs,
+    )
+
+    payload = reconcile(
+        registry_path=registry,
+        task_reports_root=task_reports,
+        resolution_matrix_path=resolution if resolution.exists() else None,
+        notebook_call_ledger_path=notebook_call_ledger if notebook_call_ledger.exists() else None,
+    )
+    write_outputs(
+        payload,
+        out_json=out_json,
+        out_csv=out_csv,
+        final_winners=final_winners,
+    )
+    stale_issues = _fail_stale(payload)
+    missing_issues = _fail_missing(payload)
+    summary = {
+        "status": "ok"
+        if (not stale_issues or not fail_on_stale)
+        and (not missing_issues or not fail_on_missing_notebook_calls)
+        else "failed",
+        "out_json": str(out_json),
+        "out_csv": str(out_csv),
+        "final_winners": str(final_winners),
+        "total_rows": payload.get("total", 0),
+        "stale_issues_count": len(stale_issues),
+        "stale_issues_sample": stale_issues[:10],
+        "missing_notebook_calls_count": len(missing_issues),
+        "missing_notebook_calls_sample": missing_issues[:10],
+        "n_called_in_notebook": payload.get("n_called_in_notebook", 0),
+    }
+    typer.echo(json.dumps(summary, indent=2))
+    if fail_on_stale and stale_issues:
+        raise typer.Exit(3)
+    if fail_on_missing_notebook_calls and missing_issues:
+        raise typer.Exit(4)
+
+
+@app.command("audit-stale-final-tables")
+def audit_stale_final_tables_cmd(
+    notebook_root: Path = typer.Option(Path("notebook"), "--notebook-root"),
+    reports_root: Path | None = typer.Option(None, "--reports-root"),
+    target_models_file: Path | None = typer.Option(
+        None,
+        "--target-models",
+        help="Optional file with one model_id per line. Defaults to DEFAULT_TARGET_MODELS_49.",
+    ),
+    out: Path = typer.Option(..., "--out"),
+    fmt: str = typer.Option("json", "--format"),
+    fail_on_stale: bool = typer.Option(False, "--fail-on-stale"),
+) -> None:
+    """v2.39.0: scan every CSV/JSON/MD/notebook for stale 49-target rows."""
+    from visionservex.reporting.v239_stale_audit import (
+        DEFAULT_TARGET_MODELS_49,
+        audit_stale_final_tables,
+    )
+
+    target_models: list[str] = list(DEFAULT_TARGET_MODELS_49)
+    if target_models_file and target_models_file.exists():
+        target_models = [
+            line.strip()
+            for line in target_models_file.read_text().splitlines()
+            if line.strip() and not line.startswith("#")
+        ]
+
+    payload = audit_stale_final_tables(
+        notebook_root=notebook_root,
+        reports_root=reports_root,
+        target_models=target_models,
+    )
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, indent=2))
+    if fmt == "json":
+        typer.echo(json.dumps(payload, indent=2))
+    else:
+        console.print(
+            f"[{'green' if payload['status'] == 'ok' else 'red'}]stale={payload['total_issues']}[/]"
+        )
+        for k, v in payload["counts"].items():
+            console.print(f"  {k}: {v}")
+    if fail_on_stale and payload["status"] != "ok":
+        raise typer.Exit(5)
+
+
 __all__ = ["app"]

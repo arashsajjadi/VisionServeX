@@ -1,2 +1,0 @@
-model_id,final_state,code,note
-medsam,smoke_passed,,COCO smoke is NOT a medical benchmark; requires NIfTI + GT masks

@@ -1,46 +1,5 @@
 {
-  "task": "promptable_segmentation",
-  "dataset": "coco_val2017_400_vsx",
-  "protocol": "gt-box-prompted SAM2/SAM2.1, COCO val2017 400 images",
-  "status": "benchmark_passed",
-  "version": "v2.34.0",
-  "n_models": 6,
-  "results": [
-    {
-      "model_id": "sam2-hiera-tiny",
-      "status": "ok",
-      "mean_iou": 0.7853,
-      "total_instances": 10
-    },
-    {
-      "model_id": "sam2.1-hiera-tiny",
-      "status": "ok",
-      "mean_iou": 0.7849,
-      "total_instances": 10
-    },
-    {
-      "model_id": "sam2-hiera-small",
-      "status": "ok",
-      "mean_iou": 0.7836,
-      "total_instances": 10
-    },
-    {
-      "model_id": "sam2.1-hiera-small",
-      "status": "ok",
-      "mean_iou": 0.7824,
-      "total_instances": 10
-    },
-    {
-      "model_id": "sam2-hiera-large",
-      "status": "ok",
-      "mean_iou": 0.806,
-      "total_instances": 10
-    },
-    {
-      "model_id": "sam2.1-hiera-large",
-      "status": "ok",
-      "mean_iou": 0.7895,
-      "total_instances": 10
-    }
-  ]
+  "task": "03_promptable_segmentation",
+  "dataset": "COCO val2017 400 (GT-box prompts) \u2014 smoke/eval (30 instances)",
+  "protocol": "smoke_eval"
 }

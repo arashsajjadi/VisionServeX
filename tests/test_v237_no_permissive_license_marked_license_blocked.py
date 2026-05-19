@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v2.37.0: permissive licenses must never be license_blocked."""
+
 from __future__ import annotations
 
 import json

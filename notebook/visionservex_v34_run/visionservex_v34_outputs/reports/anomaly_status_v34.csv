@@ -1,2 +1,0 @@
-task,final_state,blocker_code,fix,anomalib_installed
-anomaly,expected_blocker,ANOMALIB_REQUIRED,pip install 'visionservex[anomaly]',False

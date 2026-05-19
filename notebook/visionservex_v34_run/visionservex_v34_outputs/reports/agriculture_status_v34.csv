@@ -1,2 +1,0 @@
-task,status,evidence,note
-agriculture,smoke/demo only,/home/arash/PycharmProjects/VisionServeX/tests/assets/smoke/crop_weed_sample.jpg,No labelled crop/weed dataset supplied; real benchmark requires explicit GT.

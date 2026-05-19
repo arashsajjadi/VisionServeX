@@ -1,3 +1,0 @@
-domain,final_state,note,code
-agriculture,smoke,No labelled crop/weed dataset; demo only. Use benchmark-agriculture for crops.,
-aerial_obb,dataset_required,DOTA/VisDrone are non-commercial. Provide permissive OBB dataset to benchmark.,OBB_DATASET_NOT_AUDITED

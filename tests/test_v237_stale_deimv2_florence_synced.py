@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v2.37.0: stale DEIMv2 and Florence-2 rows must reflect v2.35/v2.36 evidence."""
+
 from __future__ import annotations
 
 import json
@@ -25,9 +26,7 @@ def test_deimv2_smaller_variants_attempted() -> None:
     for size in ["atto", "femto", "pico", "n"]:
         mid = f"deimv2-{size}"
         final = rows[mid]["final_state_after_v237"]
-        assert final not in ("", "expected_blocker", "stub", "unknown"), (
-            f"{mid}: {final!r}"
-        )
+        assert final not in ("", "expected_blocker", "stub", "unknown"), f"{mid}: {final!r}"
 
 
 def test_florence_sidecar_marked() -> None:

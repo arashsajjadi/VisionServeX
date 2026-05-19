@@ -141,3 +141,7 @@ notebook/**/*.engine
 notebook/**/*.trt
 notebook/**/.ipynb_checkpoints/
 notebook/shared/__pycache__/
+
+# v2.39.0: notebook visual outputs are generated artifacts (run-only)
+visuals/
+
