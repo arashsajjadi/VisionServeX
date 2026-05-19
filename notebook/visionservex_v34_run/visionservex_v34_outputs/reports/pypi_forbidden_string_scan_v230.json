@@ -1,0 +1,13 @@
+{
+  "version": "v34",
+  "pypi_version": "2.30.0",
+  "executed_notebook": "notebook/VisionServeX_Clean_Task_Benchmark_EXECUTED_PYPI_v34.ipynb",
+  "raw_nan_count": 0,
+  "not_wired_count": 0,
+  "stale_v20_count": 0,
+  "stale_v216_count": 0,
+  "unavailable_or_failed_count": 0,
+  "failed_runtime_bad_count": 0,
+  "failed_runtime_counter_label_count": 2,
+  "offending_items": []
+}
