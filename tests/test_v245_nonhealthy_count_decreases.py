@@ -9,10 +9,15 @@ from pathlib import Path
 
 import pytest
 
-LEDGER_CSV = Path(__file__).resolve().parent.parent / "notebook/99_final_report/reports/model_coverage_ledger.csv"
+LEDGER_CSV = (
+    Path(__file__).resolve().parent.parent
+    / "notebook/99_final_report/reports/model_coverage_ledger.csv"
+)
 PLAN_CSV = Path(__file__).resolve().parent.parent / "reports/v245_exact_51_recovery_plan.csv"
 
-HEALTHY_STATES = frozenset({"benchmark_passed", "smoke_passed", "demo_passed_sidecar", "contract_passed"})
+HEALTHY_STATES = frozenset(
+    {"benchmark_passed", "smoke_passed", "demo_passed_sidecar", "contract_passed"}
+)
 
 V244_BASELINE_HEALTHY = 90  # from v2.44 docs
 
@@ -53,9 +58,11 @@ def test_contract_passed_count_at_least_2():
 def test_license_gate_cli_accessible():
     """visionservex license-gate check must be a callable command."""
     import subprocess
+
     result = subprocess.run(
         ["visionservex", "license-gate", "--help"],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     assert result.returncode == 0, "license-gate command not accessible"
     assert "check" in result.stdout.lower()
@@ -64,8 +71,10 @@ def test_license_gate_cli_accessible():
 def test_registry_validate_cli_accessible():
     """visionservex registry validate must be a callable command."""
     import subprocess
+
     result = subprocess.run(
         ["visionservex", "registry", "--help"],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     assert result.returncode == 0, "registry command not accessible"

@@ -10,13 +10,23 @@ import sys
 
 def test_license_gate_check_agpl_model_blocked():
     proc = subprocess.run(
-        [sys.executable, "-m", "visionservex.__main__", "license-gate", "check",
-         "yolo26x.pt", "--format", "json"],
-        capture_output=True, text=True,
+        [
+            sys.executable,
+            "-m",
+            "visionservex.__main__",
+            "license-gate",
+            "check",
+            "yolo26x.pt",
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
     )
     # Should exit 1 (license gate not passed)
     assert proc.returncode == 1
     import json
+
     d = json.loads(proc.stdout)
     assert d["code"] == "LICENSE_GATE_NOT_PASSED"
     assert d["license"] == "AGPL-3.0"
@@ -26,24 +36,45 @@ def test_license_gate_check_agpl_model_blocked():
 
 def test_license_gate_check_agpl_model_allowed_with_flag():
     proc = subprocess.run(
-        [sys.executable, "-m", "visionservex.__main__", "license-gate", "check",
-         "yolo26x.pt", "--accept-agpl", "--format", "json"],
-        capture_output=True, text=True,
+        [
+            sys.executable,
+            "-m",
+            "visionservex.__main__",
+            "license-gate",
+            "check",
+            "yolo26x.pt",
+            "--accept-agpl",
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
     )
     assert proc.returncode == 0
     import json
+
     d = json.loads(proc.stdout)
     assert d["code"] == "OPT_IN_ACCEPTED"
 
 
 def test_license_gate_check_default_safe_model():
     proc = subprocess.run(
-        [sys.executable, "-m", "visionservex.__main__", "license-gate", "check",
-         "dfine-x", "--format", "json"],
-        capture_output=True, text=True,
+        [
+            sys.executable,
+            "-m",
+            "visionservex.__main__",
+            "license-gate",
+            "check",
+            "dfine-x",
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
     )
     assert proc.returncode == 0
     import json
+
     d = json.loads(proc.stdout)
     assert d["code"] == "DEFAULT_SAFE"
     assert d["default_safe"] is True
@@ -51,12 +82,22 @@ def test_license_gate_check_default_safe_model():
 
 def test_registry_validate_deprecated_model():
     proc = subprocess.run(
-        [sys.executable, "-m", "visionservex.__main__", "registry", "validate",
-         "deim-m", "--format", "json"],
-        capture_output=True, text=True,
+        [
+            sys.executable,
+            "-m",
+            "visionservex.__main__",
+            "registry",
+            "validate",
+            "deim-m",
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
     )
     assert proc.returncode == 0
     import json
+
     d = json.loads(proc.stdout)
     assert d["final_state"] == "upstream_deprecated"
     assert d["can_benchmark"] is False
@@ -64,11 +105,21 @@ def test_registry_validate_deprecated_model():
 
 def test_registry_validate_wrong_entry():
     proc = subprocess.run(
-        [sys.executable, "-m", "visionservex.__main__", "registry", "validate",
-         "oneformer-convnext-large", "--format", "json"],
-        capture_output=True, text=True,
+        [
+            sys.executable,
+            "-m",
+            "visionservex.__main__",
+            "registry",
+            "validate",
+            "oneformer-convnext-large",
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
     )
     assert proc.returncode == 0
     import json
+
     d = json.loads(proc.stdout)
     assert d["final_state"] == "wrong_registry_entry"
