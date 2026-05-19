@@ -1,0 +1,642 @@
+#!/usr/bin/env python
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Arash Sajjadi
+"""v2.45.0: generate the exact 51-model recovery plan."""
+
+from __future__ import annotations
+
+import csv
+import json
+import time
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+
+RECOVERY_PLAN: list[dict] = [
+    # CHECKPOINT
+    {
+        "model_id": "deimv2-n",
+        "current_final_state": "checkpoint_required",
+        "blocker_code": "CHECKPOINT_REQUIRED",
+        "blocker_category": "checkpoint",
+        "exact_current_problem": "No checkpoint at Intellindust/DEIMv2_DINOv3_N_COCO on HuggingFace. N-size variant not published.",
+        "exact_v245_action": "Verify HF repo exists; if published, pull and run contract-test.",
+        "command_to_run": "visionservex deimv2 audit-official deimv2-n && visionservex deimv2 checkpoint-state deimv2-n",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/deimv2_n_checkpoint_state.json",
+        "expected_success_state": "smoke_passed",
+        "fallback_state_if_failed": "checkpoint_required",
+        "package_side_fix_possible": "no",
+        "external_requirement": "checkpoint",
+        "priority": "P1",
+        "worth_v246_followup": "true",
+    },
+    # SIDECAR
+    {
+        "model_id": "bytetrack",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "SIDECAR_ENV_MISSING",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "Python 3.13 system env: lap build fails. Need Python 3.10 conda env.",
+        "exact_v245_action": "conda create -n vsx-bytetrack python=3.10 && pip install bytetracker",
+        "command_to_run": "conda create -n vsx-bytetrack python=3.10 -y && conda run -n vsx-bytetrack pip install bytetracker lapx",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/bytetrack_smoke.json",
+        "expected_success_state": "smoke_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "sidecar",
+        "priority": "P1",
+        "worth_v246_followup": "true",
+    },
+    {
+        "model_id": "co-dino-inst-vit-l-coco",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "CODETR_CONFIG_NOT_FOUND",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "vsx-openmmlab-py310 (mmdet 3.3.0) healthy. Missing: Sense-X/Co-DETR repo clone + Google Drive checkpoint.",
+        "exact_v245_action": "git clone Sense-X/Co-DETR; download checkpoint; run with mmdet sidecar.",
+        "command_to_run": "git clone https://github.com/Sense-X/Co-DETR ~/.cache/visionservex/sidecars/codetr && conda run -n vsx-openmmlab-py310 python ~/.cache/visionservex/sidecars/codetr/demo.py",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/codetr_coco_contract.json",
+        "expected_success_state": "contract_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "checkpoint",
+        "priority": "P0",
+        "worth_v246_followup": "true",
+    },
+    {
+        "model_id": "co-dino-inst-vit-l-lvis",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "CODETR_CONFIG_NOT_FOUND",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "Same as co-dino-inst-vit-l-coco. LVIS variant needs different checkpoint.",
+        "exact_v245_action": "After coco variant works, try lvis variant with separate checkpoint.",
+        "command_to_run": "conda run -n vsx-openmmlab-py310 python ~/.cache/visionservex/sidecars/codetr/demo_lvis.py",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/codetr_lvis_contract.json",
+        "expected_success_state": "contract_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "checkpoint",
+        "priority": "P1",
+        "worth_v246_followup": "true",
+    },
+    {
+        "model_id": "edgesam",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "PACKAGE_NOT_FOUND",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "Not on PyPI. Requires git clone from https://github.com/chongzhou96/EdgeSAM.",
+        "exact_v245_action": "conda create -n vsx-edgesam python=3.10; git clone EdgeSAM; pip install -e .; run smoke.",
+        "command_to_run": "conda create -n vsx-edgesam python=3.10 -y && conda run -n vsx-edgesam pip install git+https://github.com/chongzhou96/EdgeSAM.git",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/edgesam_smoke.json",
+        "expected_success_state": "smoke_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "sidecar",
+        "priority": "P1",
+        "worth_v246_followup": "true",
+    },
+    {
+        "model_id": "internimage-b",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "OPENMMLAB_REQUIRED",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "InternImage not in timm. Try direct HF route (OpenGVLab/internimage_b_1k_224) first.",
+        "exact_v245_action": "pip install transformers; try AutoModel.from_pretrained('OpenGVLab/internimage_b_1k_224')",
+        "command_to_run": "python -c \"from transformers import AutoModelForImageClassification; m = AutoModelForImageClassification.from_pretrained('OpenGVLab/internimage_b_1k_224')\"",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/internimage_b_hf_check.json",
+        "expected_success_state": "smoke_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "sidecar",
+        "priority": "P0",
+        "worth_v246_followup": "true",
+    },
+    {
+        "model_id": "internimage-h",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "OPENMMLAB_REQUIRED",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "H variant is very large (1B+ params). May need special HF access.",
+        "exact_v245_action": "Try OpenGVLab/internimage_h_22kto1k_384 via HF; likely access restricted.",
+        "command_to_run": "python -c \"from transformers import AutoModelForImageClassification; m = AutoModelForImageClassification.from_pretrained('OpenGVLab/internimage_h_22kto1k_384')\"",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/internimage_h_hf_check.json",
+        "expected_success_state": "smoke_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "sidecar",
+        "priority": "P1",
+        "worth_v246_followup": "true",
+    },
+    {
+        "model_id": "internimage-l",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "OPENMMLAB_REQUIRED",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "L variant: try OpenGVLab/internimage_l_22kto1k_384.",
+        "exact_v245_action": "Try HF direct route; fall back to OpenMMLab sidecar.",
+        "command_to_run": "python -c \"from transformers import AutoModelForImageClassification; m = AutoModelForImageClassification.from_pretrained('OpenGVLab/internimage_l_22kto1k_384')\"",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/internimage_l_hf_check.json",
+        "expected_success_state": "smoke_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "sidecar",
+        "priority": "P0",
+        "worth_v246_followup": "true",
+    },
+    {
+        "model_id": "internimage-s",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "OPENMMLAB_REQUIRED",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "S variant: try OpenGVLab/internimage_s_1k_224 via HF.",
+        "exact_v245_action": "Try HF direct route with transformers AutoModelForImageClassification.",
+        "command_to_run": "python -c \"from transformers import AutoModelForImageClassification; m = AutoModelForImageClassification.from_pretrained('OpenGVLab/internimage_s_1k_224')\"",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/internimage_s_hf_check.json",
+        "expected_success_state": "smoke_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "sidecar",
+        "priority": "P0",
+        "worth_v246_followup": "true",
+    },
+    {
+        "model_id": "internimage-t",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "OPENMMLAB_REQUIRED",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "T (tiny) variant: try OpenGVLab/internimage_t_1k_224 via HF.",
+        "exact_v245_action": "Try HF direct route with transformers; best chance due to small size.",
+        "command_to_run": "python -c \"from transformers import AutoModelForImageClassification; m = AutoModelForImageClassification.from_pretrained('OpenGVLab/internimage_t_1k_224')\"",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/internimage_t_hf_check.json",
+        "expected_success_state": "smoke_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "sidecar",
+        "priority": "P0",
+        "worth_v246_followup": "true",
+    },
+    {
+        "model_id": "maskdino-r50-coco",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "OPENMMLAB_REQUIRED",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "Incorrectly routed through OpenMMLab. MaskDINO needs Detectron2 sidecar. Blackwell sm_120 incompatible with legacy torch 1.9.",
+        "exact_v245_action": "Build maskdino_detectron2_py310 with modern Detectron2; try CPU contract if CUDA fails.",
+        "command_to_run": "conda create -n maskdino-d2 python=3.10 -y && conda run -n maskdino-d2 pip install torch torchvision && conda run -n maskdino-d2 pip install 'git+https://github.com/facebookresearch/detectron2.git'",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/maskdino_r50_coco_contract.json",
+        "expected_success_state": "contract_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "sidecar",
+        "priority": "P1",
+        "worth_v246_followup": "true",
+    },
+    {
+        "model_id": "maskdino-r50-panoptic",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "OPENMMLAB_REQUIRED",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "Same as maskdino-r50-coco. Panoptic needs additional panoptic head checkpoint.",
+        "exact_v245_action": "After coco variant works, try panoptic checkpoint.",
+        "command_to_run": "Same detectron2 sidecar + panoptic config/checkpoint.",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/maskdino_r50_panoptic_contract.json",
+        "expected_success_state": "contract_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "checkpoint",
+        "priority": "P2",
+        "worth_v246_followup": "true",
+    },
+    {
+        "model_id": "maskdino-swinl-coco",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "SIDECAR_ENV_MISSING",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "SwinL backbone variant of MaskDINO. Large model, same Detectron2 requirement.",
+        "exact_v245_action": "Same Detectron2 sidecar; larger checkpoint required.",
+        "command_to_run": "Same detectron2 sidecar + SwinL config/checkpoint from MaskDINO releases.",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/maskdino_swinl_coco_contract.json",
+        "expected_success_state": "contract_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "checkpoint",
+        "priority": "P2",
+        "worth_v246_followup": "true",
+    },
+    {
+        "model_id": "medsam2",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "SIDECAR_ENV_MISSING",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "MedSAM2 official repo requires 3D/NIfTI medical data. No standard pip package.",
+        "exact_v245_action": "pip install MedSAM from PyPI if available; smoke test with synthetic NIFTI or skip with dataset_required blocker.",
+        "command_to_run": "pip install 'git+https://github.com/bowang-lab/MedSAM.git' || pip install segment-anything",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/medsam2_smoke.json",
+        "expected_success_state": "smoke_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "sidecar",
+        "priority": "P2",
+        "worth_v246_followup": "false",
+    },
+    {
+        "model_id": "oneformer-dinat-large",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "NATTEN_BUILD_FAILED",
+        "blocker_category": "dependency",
+        "exact_current_problem": "NATTEN 0.21.6 source build fails for torch 2.11+cu130. Check natten.org for cu130 wheels.",
+        "exact_v245_action": "pip install natten==0.21.6+torch2110cu130 -f https://whl.natten.org",
+        "command_to_run": "pip install natten==0.21.6+torch2110cu130 -f https://whl.natten.org",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/oneformer_dinat_natten_check.json",
+        "expected_success_state": "contract_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "none",
+        "priority": "P1",
+        "worth_v246_followup": "true",
+    },
+    # OBB
+    *[
+        {
+            "model_id": mid,
+            "current_final_state": "sidecar_required",
+            "blocker_code": "OPENMMLAB_REQUIRED",
+            "blocker_category": "sidecar",
+            "exact_current_problem": "mmcv build fails for torch 2.11+cu130. Need legacy OBB env: Python 3.9 + torch 1.13 + mmcv-full 1.7.2 + mmrotate 0.3.4.",
+            "exact_v245_action": "conda create -n vsx-obb-legacy python=3.9 -y && pip install torch==1.13.1+cu117 && mim install mmcv-full==1.7.2 && mim install mmrotate==0.3.4",
+            "command_to_run": 'conda run -n vsx-obb-legacy python -c "import mmrotate; print(mmrotate.__version__)"',
+            "evidence_expected_path": f"notebook/_runs/<RUN_ID>/reports/{mid.replace('-', '_')}_contract.json",
+            "expected_success_state": "contract_passed",
+            "fallback_state_if_failed": "sidecar_required",
+            "package_side_fix_possible": "yes",
+            "external_requirement": "sidecar",
+            "priority": "P0",
+            "worth_v246_followup": "true",
+        }
+        for mid in [
+            "rtmdet-r-l",
+            "rtmdet-r-m",
+            "rtmdet-r-s",
+            "rtmdet-r-t",
+            "rtmdet-r2-l",
+            "rtmdet-r2-m",
+            "rtmdet-r2-s",
+            "rtmdet-r2-t",
+        ]
+    ],
+    {
+        "model_id": "seem-davit-d3",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "SIDECAR_REQUIRED",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "SEEM needs OpenMPI + X-Decoder + SEEM repos. Complex multi-repo setup.",
+        "exact_v245_action": "pip install openmpi-dev; clone X-Decoder + SEEM repos; install dependencies; pull checkpoints.",
+        "command_to_run": "pip install mpi4py && git clone https://github.com/UX-Decoder/Segment-Everything-Everywhere-All-At-Once /tmp/seem",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/seem_davit_d3_contract.json",
+        "expected_success_state": "contract_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "sidecar",
+        "priority": "P1",
+        "worth_v246_followup": "true",
+    },
+    {
+        "model_id": "seem-focal-t",
+        "current_final_state": "sidecar_required",
+        "blocker_code": "SIDECAR_REQUIRED",
+        "blocker_category": "sidecar",
+        "exact_current_problem": "Same as seem-davit-d3. Focal-T is lighter variant.",
+        "exact_v245_action": "Same SEEM sidecar; lighter checkpoint.",
+        "command_to_run": "conda run -n seem-py39 python /tmp/seem/demo.py --task seg --model seem --prompt person",
+        "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/seem_focal_t_contract.json",
+        "expected_success_state": "contract_passed",
+        "fallback_state_if_failed": "sidecar_required",
+        "package_side_fix_possible": "yes",
+        "external_requirement": "sidecar",
+        "priority": "P1",
+        "worth_v246_followup": "true",
+    },
+    # AUTH / EXTERNAL API
+    *[
+        {
+            "model_id": mid,
+            "current_final_state": fs,
+            "blocker_code": bc,
+            "blocker_category": "auth" if fs == "auth_required" else "external_api",
+            "exact_current_problem": problem,
+            "exact_v245_action": f"Run auth-gate check; if {env_var} set, run contract-test.",
+            "command_to_run": f"visionservex open-vocab auth-check {mid} --format json",
+            "evidence_expected_path": f"notebook/_runs/<RUN_ID>/reports/{mid.replace('-', '_').replace('.', '_')}_auth_check.json",
+            "expected_success_state": "contract_passed",
+            "fallback_state_if_failed": fs,
+            "package_side_fix_possible": "no",
+            "external_requirement": "auth",
+            "priority": "P3",
+            "worth_v246_followup": "false",
+        }
+        for mid, fs, bc, problem, env_var in [
+            (
+                "dino-x-api",
+                "external_api_only",
+                "EXTERNAL_API_REQUIRED",
+                "DINO-X requires DeepDataSpace API key.",
+                "DINO_X_API_KEY",
+            ),
+            (
+                "grounding-dino-1.5",
+                "auth_required",
+                "EXTERNAL_API_REQUIRED",
+                "Grounding-DINO 1.5 requires official API token.",
+                "GDINO_API_KEY",
+            ),
+            (
+                "grounding-dino-1.5-pro",
+                "external_api_only",
+                "EXTERNAL_API_REQUIRED",
+                "Pro variant requires subscription API key.",
+                "GDINO_API_KEY",
+            ),
+            (
+                "grounding-dino-1.6",
+                "auth_required",
+                "EXTERNAL_API_REQUIRED",
+                "Grounding-DINO 1.6 requires official API token.",
+                "GDINO_API_KEY",
+            ),
+            (
+                "grounding-dino-1.6-pro",
+                "external_api_only",
+                "EXTERNAL_API_REQUIRED",
+                "Pro variant requires subscription API key.",
+                "GDINO_API_KEY",
+            ),
+            (
+                "sam3-base",
+                "auth_required",
+                "HF_AUTH_REQUIRED",
+                "SAM3 is gated on HuggingFace. Requires HF_TOKEN.",
+                "HF_TOKEN",
+            ),
+        ]
+    ],
+    # LICENSE / OPT-IN
+    *[
+        {
+            "model_id": mid,
+            "current_final_state": "opt_in_license_required",
+            "blocker_code": bc,
+            "blocker_category": "license",
+            "exact_current_problem": f"{license_desc}. Excluded from default-safe benchmark by policy.",
+            "exact_v245_action": f"Run license-gate check; provide opt-in command with {flag}.",
+            "command_to_run": f"visionservex license-gate check {mid} --format json",
+            "evidence_expected_path": f"notebook/_runs/<RUN_ID>/reports/{mid.replace('-', '_').replace('.', '_')}_license_gate.json",
+            "expected_success_state": "opt_in_smoke_passed",
+            "fallback_state_if_failed": "opt_in_license_required",
+            "package_side_fix_possible": "yes",
+            "external_requirement": "license_opt_in",
+            "priority": "P3",
+            "worth_v246_followup": "false",
+        }
+        for mid, bc, license_desc, flag in [
+            ("fastsam-s", "LICENSE_RESTRICTION_TRIGGERED", "FastSAM AGPL-3.0", "--accept-agpl"),
+            ("fastsam-x", "LICENSE_RESTRICTION_TRIGGERED", "FastSAM AGPL-3.0", "--accept-agpl"),
+            (
+                "prithvi-eo-2.0",
+                "OPT_IN_LICENSE_REQUIRED",
+                "Prithvi non-core optional license",
+                "--accept-non-core-license",
+            ),
+            (
+                "rfdetr-seg-2xlarge",
+                "OPT_IN_LICENSE_REQUIRED",
+                "RF-DETR-Seg 2XL PML-1.0 Plus subscription",
+                "--accept-pml",
+            ),
+            (
+                "rfdetr-seg-xlarge",
+                "OPT_IN_LICENSE_REQUIRED",
+                "RF-DETR-Seg XL PML-1.0 Plus subscription",
+                "--accept-pml",
+            ),
+            (
+                "totalsegmentator",
+                "OPT_IN_LICENSE_REQUIRED",
+                "TotalSegmentator non-core optional medical",
+                "--accept-non-core-license",
+            ),
+            (
+                "yolo11l-seg.pt",
+                "LICENSE_RESTRICTION_TRIGGERED",
+                "Ultralytics AGPL-3.0",
+                "--accept-agpl",
+            ),
+            (
+                "yolo11x-seg.pt",
+                "LICENSE_RESTRICTION_TRIGGERED",
+                "Ultralytics AGPL-3.0",
+                "--accept-agpl",
+            ),
+            (
+                "yolo11x.pt",
+                "LICENSE_RESTRICTION_TRIGGERED",
+                "Ultralytics AGPL-3.0",
+                "--accept-agpl",
+            ),
+            (
+                "yolo26x-seg.pt",
+                "LICENSE_RESTRICTION_TRIGGERED",
+                "Ultralytics AGPL-3.0",
+                "--accept-agpl",
+            ),
+            (
+                "yolo26x.pt",
+                "LICENSE_RESTRICTION_TRIGGERED",
+                "Ultralytics AGPL-3.0",
+                "--accept-agpl",
+            ),
+            (
+                "yolov10b.pt",
+                "LICENSE_RESTRICTION_TRIGGERED",
+                "Ultralytics AGPL-3.0",
+                "--accept-agpl",
+            ),
+            (
+                "yolov8x-seg.pt",
+                "LICENSE_RESTRICTION_TRIGGERED",
+                "Ultralytics AGPL-3.0",
+                "--accept-agpl",
+            ),
+            (
+                "yolov8x.pt",
+                "LICENSE_RESTRICTION_TRIGGERED",
+                "Ultralytics AGPL-3.0",
+                "--accept-agpl",
+            ),
+        ]
+    ]
+    + [
+        {
+            "model_id": "yolo-world",
+            "current_final_state": "license_blocked",
+            "blocker_code": "LICENSE_RESTRICTION_TRIGGERED",
+            "blocker_category": "license",
+            "exact_current_problem": "YOLO-World uses AGPL/restricted commercial license. Blocked by default.",
+            "exact_v245_action": "Implement --accept-agpl CLI flag; if set, run with Ultralytics engine.",
+            "command_to_run": "visionservex license-gate check yolo-world --format json",
+            "evidence_expected_path": "notebook/_runs/<RUN_ID>/reports/yolo_world_license_gate.json",
+            "expected_success_state": "opt_in_smoke_passed",
+            "fallback_state_if_failed": "license_blocked",
+            "package_side_fix_possible": "yes",
+            "external_requirement": "license_opt_in",
+            "priority": "P3",
+            "worth_v246_followup": "false",
+        }
+    ],
+    # REGISTRY / UPSTREAM
+    *[
+        {
+            "model_id": mid,
+            "current_final_state": fs,
+            "blocker_code": bc,
+            "blocker_category": "registry",
+            "exact_current_problem": problem,
+            "exact_v245_action": "Run registry validate command; confirm status; exclude from benchmarks.",
+            "command_to_run": f"visionservex registry validate {mid} --format json",
+            "evidence_expected_path": f"notebook/_runs/<RUN_ID>/reports/{mid.replace('-', '_')}_registry_validate.json",
+            "expected_success_state": fs,
+            "fallback_state_if_failed": fs,
+            "package_side_fix_possible": "no",
+            "external_requirement": "none",
+            "priority": "P3",
+            "worth_v246_followup": "false",
+        }
+        for mid, fs, bc, problem in [
+            (
+                "agriclip",
+                "not_advertised",
+                "AUDIT_ONLY",
+                "AgriCLIP is audit-only; no official VisionServeX integration.",
+            ),
+            (
+                "deim-m",
+                "upstream_deprecated",
+                "UPSTREAM_DEPRECATED",
+                "DEIM v1 deprecated upstream; use DEIMv2 instead.",
+            ),
+            (
+                "deim-s",
+                "upstream_deprecated",
+                "UPSTREAM_DEPRECATED",
+                "DEIM v1 deprecated upstream; use DEIMv2 instead.",
+            ),
+            (
+                "dinov3-vitb16",
+                "not_advertised",
+                "AUDIT_ONLY",
+                "DINOv3 vit-b/16 awaits official open weights publication.",
+            ),
+            (
+                "oneformer-convnext-large",
+                "wrong_registry_entry",
+                "WRONG_REGISTRY_ENTRY",
+                "SHI-Labs has no oneformer_coco_convnext_large COCO checkpoint. Use swin or dinat variant.",
+            ),
+        ]
+    ],
+]
+
+
+def main() -> int:
+    out_dir = REPO_ROOT / "reports"
+    out_dir.mkdir(exist_ok=True)
+
+    # Validate all 51 are present
+    expected_ids = {
+        "deimv2-n",
+        "bytetrack",
+        "co-dino-inst-vit-l-coco",
+        "co-dino-inst-vit-l-lvis",
+        "edgesam",
+        "internimage-b",
+        "internimage-h",
+        "internimage-l",
+        "internimage-s",
+        "internimage-t",
+        "maskdino-r50-coco",
+        "maskdino-r50-panoptic",
+        "maskdino-swinl-coco",
+        "medsam2",
+        "oneformer-dinat-large",
+        "rtmdet-r-l",
+        "rtmdet-r-m",
+        "rtmdet-r-s",
+        "rtmdet-r-t",
+        "rtmdet-r2-l",
+        "rtmdet-r2-m",
+        "rtmdet-r2-s",
+        "rtmdet-r2-t",
+        "seem-davit-d3",
+        "seem-focal-t",
+        "dino-x-api",
+        "grounding-dino-1.5",
+        "grounding-dino-1.5-pro",
+        "grounding-dino-1.6",
+        "grounding-dino-1.6-pro",
+        "sam3-base",
+        "fastsam-s",
+        "fastsam-x",
+        "prithvi-eo-2.0",
+        "rfdetr-seg-2xlarge",
+        "rfdetr-seg-xlarge",
+        "totalsegmentator",
+        "yolo-world",
+        "yolo11l-seg.pt",
+        "yolo11x-seg.pt",
+        "yolo11x.pt",
+        "yolo26x-seg.pt",
+        "yolo26x.pt",
+        "yolov10b.pt",
+        "yolov8x-seg.pt",
+        "yolov8x.pt",
+        "agriclip",
+        "deim-m",
+        "deim-s",
+        "dinov3-vitb16",
+        "oneformer-convnext-large",
+    }
+    found_ids = {r["model_id"] for r in RECOVERY_PLAN}
+    missing = expected_ids - found_ids
+    extra = found_ids - expected_ids
+    if missing:
+        print(f"MISSING from plan: {sorted(missing)}")
+        return 1
+    if extra:
+        print(f"EXTRA in plan: {sorted(extra)}")
+
+    payload = {
+        "schema_version": 1,
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "total": len(RECOVERY_PLAN),
+        "rows": RECOVERY_PLAN,
+    }
+    (out_dir / "v245_exact_51_recovery_plan.json").write_text(json.dumps(payload, indent=2))
+
+    fields = list(RECOVERY_PLAN[0].keys())
+    with (out_dir / "v245_exact_51_recovery_plan.csv").open("w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=fields)
+        w.writeheader()
+        for row in RECOVERY_PLAN:
+            w.writerow(row)
+
+    print(f"Wrote {len(RECOVERY_PLAN)} rows to v245_exact_51_recovery_plan.{{json,csv}}")
+    # Summary by priority
+    by_p: dict[str, int] = {}
+    for r in RECOVERY_PLAN:
+        by_p[r["priority"]] = by_p.get(r["priority"], 0) + 1
+    for k, v in sorted(by_p.items()):
+        print(f"  {k}: {v}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

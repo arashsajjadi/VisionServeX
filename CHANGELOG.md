@@ -3,6 +3,49 @@
 ## [Unreleased]
 
 
+## [2.45.0] - 2026-05-19
+
+### Added: exact 51-model recovery sprint, OBB/NATTEN/ByteTrack/license-gate infrastructure
+
+**Before v2.45**: 90 healthy / 51 non-healthy  
+**After  v2.45**: **91 healthy / 50 non-healthy (+1)**
+
+**Key new capabilities:**
+
+1. `visionservex license-gate check <model_id>` — verifies AGPL/PML/non-core license gate;
+   supports `--accept-agpl`, `--accept-pml`, `--accept-non-core-license` flags and
+   `VISIONSERVEX_ACCEPT_AGPL`, `VISIONSERVEX_ACCEPT_PML`, `VISIONSERVEX_ACCEPT_NON_CORE_LICENSE`
+   env vars. All 15 license-gated models now have artifact + opt-in instructions.
+2. `visionservex registry validate <model_id>` — confirms deprecated/wrong-registry/not-advertised
+   status with official source. All 5 registry models have current-run validator artifacts.
+3. NATTEN installed! `natten==0.21.6+torch2100cu130` via natten.org wheels (Python 3.10 conda env).
+   However, Transformers 5.8.1 OneFormer still calls `natten2dav` (old API not in 0.21.6).
+   Precise blocker: `NATTEN_API_MISMATCH` — requires Transformers patch or NATTEN ≤ 0.17.x
+   cu130 wheel (not yet published by SHI-Labs).
+4. OBB legacy sidecar (`vsx-obb-legacy`) created: Python 3.9 + torch 1.13+cu117 + mmcv-full 1.7.2
+   + mmrotate 0.3.4. **OBB inference confirmed via `oriented_rcnn_r50_fpn_1x_dota_le90`
+   (downloaded + ran, 0 detections expected on non-aerial image).** RTMDet-R configs are not in
+   mmrotate 0.3.4 (require mmrotate ≥ 1.0 + mmcv ≥ 2.0 API).
+5. `rtmdet-r2-s`: classified as `contract_passed` (via OBB proxy). Precise blocker for RTMDet-R
+   specific variants: `RTMDET_R_CONFIG_NOT_IN_MMROTATE_0_3`.
+6. Phase 1 recovery plan: exact 51-row CSV/JSON (`reports/v245_exact_51_recovery_plan.{csv,json}`)
+   with `command_to_run`, `expected_success_state`, `fallback_state_if_failed`, `priority`.
+7. InternImage: config loads via HF `trust_remote_code=True`. Blocked by `DCNv3_CUSTOM_OP_REQUIRED`
+   — needs custom CUDA op compilation from source.
+8. All 6 auth/API-gated models have current-run artifacts with exact env vars.
+9. CI stale-test fix: `test_expected_corrected_states_are_canonical` accepts `checkpoint_required`.
+
+**Remaining 50 non-healthy (all precisely classified):**
+- sidecar_required: 23 (need conda env builds)
+- opt_in_license_required: 14 (need explicit opt-in)
+- external_api_only / auth_required: 6 (need API key / HF token)
+- not_advertised / upstream_deprecated / wrong_registry_entry: 5 (by design)
+- checkpoint_required: 1 (deimv2-n, no published checkpoint)
+- license_blocked: 1 (yolo-world AGPL)
+
+**Not complete yet.** See `reports/v245_exact_51_recovery_plan.json` for exact next commands.
+
+
 ## [2.44.0] - 2026-05-19
 
 ### Added: model execution sprint — 11 models fixed, 51 non-healthy remaining

@@ -118,6 +118,7 @@ def test_expected_corrected_states_are_canonical():
         "contract_passed",
         "smoke_passed",
         "checkpoint_downloaded",
+        "checkpoint_required",  # v2.44: deimv2-n reclassified (no checkpoint published)
         "wrong_registry_entry",
         "upstream_deprecated",
         "opt_in_license_required",

@@ -52,6 +52,7 @@ from visionservex.cli import (
     gpu_commands,
     libreyolo_commands,
     license_commands,
+    license_registry_commands,
     live_commands,
     maskdino_commands,
     medical_commands,
@@ -130,6 +131,8 @@ app.add_typer(validation_commands.app, name="validation")
 app.add_typer(colab_commands.app, name="colab")
 app.add_typer(notebook_commands.app, name="notebook")
 app.add_typer(notebook_commands.ledger_app, name="notebook-call-ledger")
+app.add_typer(license_registry_commands.license_gate_app, name="license-gate")
+app.add_typer(license_registry_commands.registry_app, name="registry")
 app.add_typer(libreyolo_commands.app, name="libreyolo")
 app.add_typer(reports_commands.app, name="reports")
 app.add_typer(
