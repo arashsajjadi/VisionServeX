@@ -1,13 +1,32 @@
 {
-  "detection_winner_overall": "libreyolo-dfine-x (mAP50:95=0.5030)",
-  "detection_winner_visionservex": "dfine-x-o365-coco (mAP50:95=0.4576)",
-  "auto_segmentation_winner_overall": "yolo26x-seg.pt (mask_mAP50_95=0.2728)",
-  "auto_segmentation_winner_visionservex": "oneformer-swin-large (mask_mAP50_95=0.1649)",
-  "promptable_segmentation_winner": "sam2.1-hiera-large (mean_iou=0.806)",
-  "detection_best_overall": "libreyolo-dfine-x (0.5030)",
-  "detection_best_vsx": "dfine-x-o365-coco (0.4576)",
-  "segmentation_best_overall": "yolo26x-seg.pt (0.2728)",
-  "segmentation_best_vsx": "oneformer-swin-large (0.1649)",
+  "schema_version": 3,
+  "generated_at": "2026-05-20T04:18:57Z",
+  "libreyolo_treated_as_core": true,
+  "external_restricted_baselines_excluded_from_core": true,
+  "detection_core_winner": "deimv2-atto",
+  "detection_core_winner_note": "libreyolo-* models are core VisionServeX permissive models, not external competitors.",
+  "detection_external_restricted_baseline_winner": "no_benchmark_data",
+  "detection_core_benchmark_passed_count": 34,
+  "detection_external_restricted_baseline_count": 0,
+  "detection_core_top5": [
+    "deimv2-atto",
+    "deimv2-femto",
+    "deimv2-l",
+    "deimv2-m",
+    "deimv2-pico"
+  ],
+  "detection_external_restricted_top5": [],
+  "auto_segmentation_core_winner": "rfdetr-seg-large",
+  "auto_segmentation_external_restricted_baseline_winner": "no_benchmark_data",
+  "auto_segmentation_core_benchmark_passed_count": 4,
+  "auto_segmentation_core_top5": [
+    "rfdetr-seg-large",
+    "rfdetr-seg-medium",
+    "rfdetr-seg-nano",
+    "rfdetr-seg-small"
+  ],
+  "promptable_segmentation_core_winner": "edgesam",
+  "promptable_segmentation_external_restricted_baseline_winner": "fastsam-s",
   "detection_best_overall_evidence": [
     "deimv2-atto",
     "deimv2-femto",
@@ -28,8 +47,9 @@
     "fastsam-x",
     "hq-sam"
   ],
-  "n_detection_benchmark_passed": 19,
+  "n_detection_benchmark_passed": 34,
   "n_segmentation_benchmark_passed": 4,
-  "generated_at": "2026-05-20T03:41:01Z",
-  "schema_version": 2
+  "detection_headline_core": "libreyolo-dfine-x (mAP50:95=0.5030, MIT/Apache-2.0, COCO 400-image)",
+  "detection_headline_external_restricted": "yolo26x.pt (mAP50:95=0.4894, AGPL-3.0, excluded from core)",
+  "segmentation_headline_external_restricted": "yolo26x-seg.pt (mask_mAP50_95=0.2728, AGPL-3.0, excluded from core)"
 }
