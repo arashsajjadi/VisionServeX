@@ -209,6 +209,15 @@ def reconcile_model_states_cmd(
     fail_on_stale: bool = typer.Option(False, "--fail-on-stale"),
     fail_on_missing_notebook_calls: bool = typer.Option(False, "--fail-on-missing-notebook-calls"),
     write_provenance: bool = typer.Option(False, "--write-provenance"),
+    historical_fallback_ledger: Path | None = typer.Option(
+        None,
+        "--historical-fallback-ledger",
+        help=(
+            "v2.46: path to a previous model_coverage_ledger.csv. Defaults "
+            "to the existing --out-csv so reruns don't lose benchmark_passed "
+            "rows whose per-model evidence was cleaned."
+        ),
+    ),
 ) -> None:
     """v2.39.0: reconcile registry + task reports + matrix + ledger into a canonical ledger."""
     from visionservex.reporting.v239_reconciler import (
@@ -222,11 +231,15 @@ def reconcile_model_states_cmd(
         write_outputs,
     )
 
+    fallback_path = historical_fallback_ledger
+    if fallback_path is None and out_csv.exists():
+        fallback_path = out_csv
     payload = reconcile(
         registry_path=registry,
         task_reports_root=task_reports,
         resolution_matrix_path=resolution if resolution.exists() else None,
         notebook_call_ledger_path=notebook_call_ledger if notebook_call_ledger.exists() else None,
+        historical_fallback_ledger=fallback_path,
     )
     write_outputs(
         payload,

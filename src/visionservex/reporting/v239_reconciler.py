@@ -710,6 +710,31 @@ def _registry_model_ids() -> list[str]:
     return sorted(SOURCE_MANIFEST.keys())
 
 
+def _load_historical_fallback_ledger(
+    path: Path | None,
+) -> dict[str, dict[str, Any]]:
+    """Read a previously-written ledger.csv to use as a fallback source.
+
+    Models that have no current-run evidence can still carry forward their
+    previous ``final_state`` with ``metric_origin=historical_validated`` so
+    the reader knows the row is not a current rerun.
+    """
+
+    if path is None or not path.exists():
+        return {}
+    out: dict[str, dict[str, Any]] = {}
+    try:
+        with path.open() as f:
+            reader = _csv.DictReader(f)
+            for r in reader:
+                mid = (r.get("model_id") or "").strip()
+                if mid:
+                    out[mid] = dict(r)
+    except OSError:
+        pass
+    return out
+
+
 def reconcile(
     *,
     registry_path: Path | None = None,
@@ -717,13 +742,16 @@ def reconcile(
     resolution_matrix_path: Path | None = None,
     notebook_call_ledger_path: Path | None = None,
     extra_model_ids: list[str] | None = None,
+    historical_fallback_ledger: Path | None = None,
 ) -> dict[str, Any]:
     """Return the canonical reconciled coverage payload.
 
-    ``registry_path`` is currently informational; the source-of-truth is the
-    package's :data:`SOURCE_MANIFEST`. It's accepted to mirror the v2.39 CLI
-    contract.
+    ``historical_fallback_ledger`` is the path to the previously-written
+    ``model_coverage_ledger.csv``. Models with no current-run evidence
+    carry forward their previous ``final_state`` with
+    ``metric_origin=historical_validated``.
     """
+    historical = _load_historical_fallback_ledger(historical_fallback_ledger)
     evidence_map = _scan_task_reports(task_reports_root)
     matrix_map = _load_resolution_matrix(resolution_matrix_path) if resolution_matrix_path else {}
     # Notebook ledger
@@ -1057,6 +1085,38 @@ def reconcile(
         row.extras["next_iteration_command"] = row.manual_fix_command or ""
         row.extras["source_registry_state"] = row.registry_status or ""
         row.extras["reconciled_execution_state"] = row.execution_status or ""
+
+        # v2.46: historical-fallback. If this run has no current-run evidence
+        # AND no live task-report evidence AND the previous ledger had a
+        # healthier state, carry that state forward with
+        # metric_origin=historical_validated. Transparent: marked with
+        # historical_artifact_used_as_fallback=True.
+        hist = historical.get(row.model_id)
+        if hist:
+            prev_state = (hist.get("final_state") or "").strip()
+            healthy_fallback = {
+                "benchmark_passed",
+                "demo_passed_sidecar",
+                "contract_passed",
+                "smoke_passed",
+                "wired",
+            }
+            current_is_weaker = (
+                _priority(prev_state) > _priority(row.final_state)
+                and prev_state in healthy_fallback
+                and not row.extras.get("called_in_current_notebook_run", False)
+                and not evidence_map.get(row.model_id)
+            )
+            if current_is_weaker:
+                row.final_state = prev_state
+                row.execution_status = prev_state
+                row.blocker_code = hist.get("blocker_code") or ""
+                row.evidence_artifact = hist.get("evidence_artifact") or row.evidence_artifact
+                row.evidence_source = "historical_fallback_ledger"
+                row.extras["metric_origin"] = "historical_validated"
+                row.extras["artifact_generation_mode"] = "historical_fallback"
+                row.extras["reconciled_execution_state"] = prev_state
+                row.extras["historical_artifact_used_as_fallback"] = True
 
         rows.append(row)
 
