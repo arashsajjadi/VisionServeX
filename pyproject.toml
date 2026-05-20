@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "visionservex"
-version = "2.45.0"
+version = "2.46.0.dev0"
 description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
 readme = "README.md"
 license = { file = "LICENSE" }

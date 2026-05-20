@@ -1,0 +1,772 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Arash Sajjadi
+#
+# VisionServeX v2.46.0 runtime specs.
+#
+# Each runtime declares the python_version, env_type, dependencies, repos,
+# license/auth gates, and the exact commands the runtime broker will execute
+# when the user runs `visionservex run <model_id>`. The broker is the only
+# entry point the user touches; this file is the only file engineers update
+# when a new sidecar appears.
+#
+# Fields:
+#   id: short snake_case identifier; matched against runtime_id in recovery plan.
+#   description: one-line summary; surfaced by `runtime list`.
+#   env_type: venv | conda | docker | subprocess | http
+#   python_version: required interpreter version (string, conda will create it).
+#   torch_version: install spec (loose); broker may resolve concrete pin.
+#   cuda_version: install spec; "any" if torch wheel is universal.
+#   pip_packages: list of pip specs to install in the env.
+#   conda_packages: list of conda specs to install (with channels).
+#   git_repos: list of {url, target, ref, post_install} entries cloned by broker.
+#   custom_ops: list of build steps (commands relative to the cloned repo).
+#   checkpoint_sources: list of {url, sha256, target_path, env_var_token}.
+#   license_gate: env var that must be set for the broker to proceed.
+#   auth_gate: env var (e.g. HF_TOKEN) that must be set for the broker to proceed.
+#   output_adapter: module:function that maps the model's native output -> VisionServeX schema.
+#   smoke_command: list[str] template (with {model_id}, {input}, {device} placeholders).
+#   contract_command: list[str] template.
+#   benchmark_command: list[str] template.
+#   known_failure_modes: list of {code, description, next_action} entries.
+#   fallback_runtime: id of a runtime to try if this one fails.
+#   supported_models: list of model_ids resolved by this runtime.
+
+schema_version: v246.runtime_specs.v1
+release_version: 2.46.0
+
+runtimes:
+
+  - id: core_py311
+    description: "Host VisionServeX environment (Python 3.11, torch >=2.6). Default for models that need no sidecar."
+    env_type: subprocess
+    python_version: "3.11"
+    torch_version: ">=2.6"
+    cuda_version: any
+    pip_packages: []
+    conda_packages: []
+    git_repos: []
+    custom_ops: []
+    checkpoint_sources: []
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.core:to_canonical"
+    smoke_command: ["visionservex", "doctor", "smoke", "{model_id}", "--input", "{input}", "--device", "{device}"]
+    contract_command: ["visionservex", "models", "contract-run", "{model_id}", "--input", "{input}", "--device", "{device}"]
+    benchmark_command: ["visionservex", "benchmark-detection", "--models", "{model_id}", "--device", "{device}"]
+    known_failure_modes:
+      - code: CORE_CHECKPOINT_NOT_FOUND
+        description: "Host environment lacks the model checkpoint."
+        next_action: "visionservex pull {model_id}"
+    fallback_runtime: null
+    supported_models:
+      - deimv2-n
+      - deim-m
+      - deim-s
+      - dinov3-vitb16
+      - agriclip
+      - oneformer-convnext-large
+      - prithvi-eo-2.0
+      - grounding-dino-1.5
+      - grounding-dino-1.6
+
+  - id: rtdetrv4_py311_torch
+    description: "RT-DETRv4 sidecar (Python 3.11, torch >=2.6, gdown checkpoint pull)."
+    env_type: conda
+    python_version: "3.11"
+    torch_version: ">=2.6"
+    cuda_version: cu130
+    pip_packages:
+      - "torch>=2.6"
+      - "torchvision"
+      - "gdown"
+      - "transformers>=4.46"
+    conda_packages: []
+    git_repos:
+      - url: "https://github.com/RT-DETRs/RT-DETRv4"
+        target: "~/.cache/visionservex/sidecars/rtdetrv4/RT-DETRv4"
+        ref: main
+        post_install: "pip install -r requirements.txt"
+    custom_ops: []
+    checkpoint_sources:
+      - url: "manual_gdown_required"
+        target_path: "~/.cache/visionservex/checkpoints/rtdetrv4/"
+        env_var_token: null
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.sidecars.rtdetrv4_normalize:normalize_rtdetrv4_output"
+    smoke_command: ["visionservex", "rtdetrv4", "smoke-test", "--model", "{model_id}", "--input", "{input}"]
+    contract_command: ["visionservex", "rtdetrv4", "contract-run", "--model", "{model_id}", "--input", "{input}"]
+    benchmark_command: ["visionservex", "benchmark-detection", "--models", "{model_id}", "--engine", "rtdetrv4"]
+    known_failure_modes:
+      - code: RTDETRV4_CHECKPOINT_DOWNLOAD_FAILED
+        description: "gdown rejected by Google Drive abuse filter."
+        next_action: "User must manually download checkpoint with browser session."
+    fallback_runtime: null
+    supported_models: []
+
+  - id: codetr_openmmlab_py310
+    description: "Co-DETR + OpenMMLab sidecar (Python 3.10, torch 2.1 + cu121, mmcv 2.x, mmdet 3.x, Sense-X/Co-DETR repo)."
+    env_type: conda
+    python_version: "3.10"
+    torch_version: "==2.1.2"
+    cuda_version: cu121
+    pip_packages:
+      - "torch==2.1.2"
+      - "torchvision==0.16.2"
+      - "openmim"
+    conda_packages: []
+    git_repos:
+      - url: "https://github.com/Sense-X/Co-DETR"
+        target: "~/.cache/visionservex/sidecars/codetr/Sense-X-Co-DETR"
+        ref: main
+        post_install: "pip install -r requirements.txt"
+    custom_ops:
+      - "mim install mmengine"
+      - "mim install 'mmcv>=2.0.0,<2.2.0'"
+      - "mim install 'mmdet>=3.0.0,<4.0.0'"
+    checkpoint_sources:
+      - url: "https://github.com/Sense-X/Co-DETR/releases"
+        target_path: "~/.cache/visionservex/checkpoints/codetr/"
+        env_var_token: null
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.codetr:to_canonical"
+    smoke_command: ["visionservex", "codetr", "smoke", "--model", "{model_id}", "--input", "{input}", "--device", "{device}"]
+    contract_command: ["visionservex", "codetr", "contract-run", "--model", "{model_id}", "--input", "{input}", "--device", "{device}"]
+    benchmark_command: ["visionservex", "benchmark-detection", "--models", "{model_id}", "--engine", "codetr", "--device", "{device}"]
+    known_failure_modes:
+      - code: CODETR_REPO_CLONE_FAILED
+        description: "git clone of Sense-X/Co-DETR failed (network or auth)."
+        next_action: "Set GIT_PROXY or retry; user can mirror to local path."
+      - code: CODETR_CONFIG_NOT_FOUND
+        description: "Cloned repo missing expected config path."
+        next_action: "Repo HEAD may have moved; pin ref in runtime_specs.yaml."
+      - code: CODETR_CHECKPOINT_NOT_FOUND
+        description: "Checkpoint URL no longer responds."
+        next_action: "Use HF mirror or local pre-staged file."
+      - code: CODETR_HF_PULL_FAILED
+        description: "HuggingFace mirror returned non-200."
+        next_action: "Verify HF availability and retry."
+      - code: CODETR_GDRIVE_PULL_FAILED
+        description: "Google Drive mirror rejected gdown."
+        next_action: "Manual download required."
+      - code: CODETR_STATE_DICT_MISMATCH
+        description: "Checkpoint keys do not match model architecture."
+        next_action: "Verify checkpoint version matches config; check label-space (COCO vs LVIS)."
+      - code: CODETR_OUTPUT_ADAPTER_MISSING
+        description: "Output adapter not registered for this Co-DETR variant."
+        next_action: "Add mapping in runtime_broker.adapters.codetr."
+      - code: CODETR_CUDA_OOM
+        description: "VRAM exhausted on RTX 5080 (16 GB)."
+        next_action: "Try --device cpu fallback or smaller crop."
+    fallback_runtime: null
+    supported_models:
+      - co-dino-inst-vit-l-coco
+      - co-dino-inst-vit-l-lvis
+
+  - id: internimage_dcnv3_py310
+    description: "InternImage + DCNv3 sidecar (Python 3.10, torch 2.1 + cu121, custom DCNv3 build OR trust_remote_code CPU fallback)."
+    env_type: conda
+    python_version: "3.10"
+    torch_version: "==2.1.2"
+    cuda_version: cu121
+    pip_packages:
+      - "torch==2.1.2"
+      - "torchvision==0.16.2"
+      - "transformers>=4.46"
+      - "timm"
+      - "openmim"
+    conda_packages:
+      - "conda-forge::gcc>=11"
+      - "conda-forge::ninja"
+    git_repos:
+      - url: "https://github.com/OpenGVLab/InternImage"
+        target: "~/.cache/visionservex/sidecars/internimage/InternImage"
+        ref: master
+        post_install: null
+    custom_ops:
+      - "mim install mmengine"
+      - "mim install 'mmcv>=2.0.0,<2.2.0'"
+      - "mim install 'mmpretrain>=1.0.0'"
+      - "cd classification/ops_dcnv3 && python setup.py build install"
+    checkpoint_sources:
+      - url: "https://huggingface.co/OpenGVLab/InternImage"
+        target_path: "~/.cache/visionservex/checkpoints/internimage/"
+        env_var_token: null
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.internimage:to_canonical"
+    smoke_command: ["visionservex", "internimage", "smoke", "--model", "{model_id}", "--input", "{input}", "--device", "{device}"]
+    contract_command: ["visionservex", "internimage", "contract-run", "--model", "{model_id}", "--input", "{input}"]
+    benchmark_command: ["visionservex", "benchmark-classification", "--models", "{model_id}"]
+    known_failure_modes:
+      - code: DCNV3_BUILD_FAILED
+        description: "DCNv3 setup.py build failed (toolchain mismatch)."
+        next_action: "Verify gcc/ninja installed; fallback to trust_remote_code CPU path."
+      - code: DCNV3_CUDA_VERSION_UNSUPPORTED
+        description: "Host CUDA not compatible with built op."
+        next_action: "Use trust_remote_code CPU fallback."
+      - code: INTERNIMAGE_HF_MODEL_NOT_FOUND
+        description: "Specific InternImage variant repo missing on HF."
+        next_action: "Check exact variant name on OpenGVLab HF org."
+      - code: INTERNIMAGE_REMOTE_CODE_FAILED
+        description: "trust_remote_code=True instantiation raised."
+        next_action: "Pin transformers to 4.46 or use mmpretrain config."
+      - code: INTERNIMAGE_CHECKPOINT_NOT_FOUND
+        description: "Checkpoint missing locally and HF pull failed."
+        next_action: "Run runtime prepare to pull again."
+      - code: INTERNIMAGE_OUTPUT_ADAPTER_MISSING
+        description: "Output adapter missing for this variant."
+        next_action: "Register in runtime_broker.adapters.internimage."
+    fallback_runtime: core_py311
+    supported_models:
+      - internimage-t
+      - internimage-s
+      - internimage-b
+      - internimage-l
+      - internimage-h
+
+  - id: obb_rtmdetr2_py310
+    description: "RTMDet-R and RTMDet-R2 OBB sidecar (Python 3.10, MMRotate 1.x + MMDet 3.x; Zeba-Xie/RTMDet-R2 for R2 variants)."
+    env_type: conda
+    python_version: "3.10"
+    torch_version: "==2.1.2"
+    cuda_version: cu121
+    pip_packages:
+      - "torch==2.1.2"
+      - "torchvision==0.16.2"
+      - "openmim"
+    conda_packages: []
+    git_repos:
+      - url: "https://github.com/open-mmlab/mmrotate"
+        target: "~/.cache/visionservex/sidecars/mmrotate/mmrotate"
+        ref: "main"
+        post_install: "pip install -e ."
+      - url: "https://github.com/Zeba-Xie/RTMDet-R2"
+        target: "~/.cache/visionservex/sidecars/rtmdetr2/RTMDet-R2"
+        ref: main
+        post_install: null
+    custom_ops:
+      - "mim install mmengine"
+      - "mim install 'mmcv>=2.0.0,<2.2.0'"
+      - "mim install 'mmdet>=3.0.0,<4.0.0'"
+    checkpoint_sources:
+      - url: "https://github.com/open-mmlab/mmrotate/releases"
+        target_path: "~/.cache/visionservex/checkpoints/mmrotate/"
+        env_var_token: null
+      - url: "https://github.com/Zeba-Xie/RTMDet-R2/releases"
+        target_path: "~/.cache/visionservex/checkpoints/rtmdetr2/"
+        env_var_token: null
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.rtmdetr:to_canonical_obb"
+    smoke_command: ["visionservex", "obb", "smoke", "--model", "{model_id}", "--input", "{input}", "--device", "{device}"]
+    contract_command: ["visionservex", "obb", "contract-run", "--model", "{model_id}", "--input", "{input}", "--device", "{device}"]
+    benchmark_command: ["visionservex", "benchmark-aerial", "--models", "{model_id}", "--device", "{device}"]
+    known_failure_modes:
+      - code: RTMDETR2_REPO_CLONE_FAILED
+        description: "git clone of Zeba-Xie/RTMDet-R2 failed."
+        next_action: "Retry or use mirror."
+      - code: RTMDETR2_CONFIG_NOT_FOUND
+        description: "Cloned repo missing expected config."
+        next_action: "Pin ref in runtime_specs.yaml."
+      - code: RTMDETR2_CHECKPOINT_NOT_FOUND
+        description: "Checkpoint missing on releases page."
+        next_action: "Verify release URL."
+      - code: RTMDETR2_IMPORT_FAILED
+        description: "Import of RTMDet-R2 custom modules failed."
+        next_action: "Verify PYTHONPATH includes the cloned repo."
+      - code: MMYOLO_ROTATED_CONFIG_NOT_FOUND
+        description: "MMYOLO/MMRotate config missing for requested variant."
+        next_action: "Check MMRotate 1.x has the rotated_rtmdet config tree."
+      - code: MMROTATE_1X_ENV_FAILED
+        description: "MMRotate 1.x install failed."
+        next_action: "Verify torch/cu121 match and rerun mim install."
+      - code: OBB_OUTPUT_ADAPTER_MISSING
+        description: "OBB output adapter not registered for variant."
+        next_action: "Register in runtime_broker.adapters.rtmdetr."
+    fallback_runtime: obb_mmrotate_legacy_py39
+    supported_models:
+      - rtmdet-r-l
+      - rtmdet-r-m
+      - rtmdet-r-s
+      - rtmdet-r-t
+      - rtmdet-r2-l
+      - rtmdet-r2-m
+      - rtmdet-r2-t
+
+  - id: obb_mmrotate_legacy_py39
+    description: "Legacy MMRotate 0.3.4 sidecar (Python 3.9). Kept for oriented_rcnn proxy only. NOT a valid runtime for RTMDet-R real recovery."
+    env_type: conda
+    python_version: "3.9"
+    torch_version: "==1.13.1"
+    cuda_version: cu117
+    pip_packages:
+      - "torch==1.13.1"
+      - "torchvision==0.14.1"
+      - "openmim"
+    conda_packages: []
+    git_repos: []
+    custom_ops:
+      - "mim install mmengine==0.7.4"
+      - "mim install 'mmcv-full==1.7.1'"
+      - "mim install 'mmdet==2.28.2'"
+      - "mim install 'mmrotate==0.3.4'"
+    checkpoint_sources: []
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.oriented_rcnn:to_canonical_obb"
+    smoke_command: ["visionservex", "obb", "smoke", "--model", "oriented-rcnn", "--input", "{input}"]
+    contract_command: ["visionservex", "obb", "contract-run", "--model", "oriented-rcnn", "--input", "{input}"]
+    benchmark_command: ["visionservex", "benchmark-aerial", "--models", "oriented-rcnn"]
+    known_failure_modes:
+      - code: OBB_PROXY_NOT_REAL_MODEL
+        description: "This runtime is the oriented_rcnn proxy. It cannot prove real RTMDet-R execution."
+        next_action: "Use obb_rtmdetr2_py310 for real RTMDet-R recovery."
+    fallback_runtime: null
+    supported_models: []
+
+  - id: pose_mmpose_py310
+    description: "RTMPose sidecar (Python 3.10, MMPose). Not used by the 50-model v2.46 plan but pre-defined for completeness."
+    env_type: conda
+    python_version: "3.10"
+    torch_version: "==2.1.2"
+    cuda_version: cu121
+    pip_packages:
+      - "torch==2.1.2"
+      - "torchvision==0.16.2"
+      - "openmim"
+    conda_packages: []
+    git_repos: []
+    custom_ops:
+      - "mim install mmengine"
+      - "mim install 'mmcv>=2.0.0,<2.2.0'"
+      - "mim install 'mmpose>=1.0.0'"
+    checkpoint_sources: []
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.mmpose:to_canonical"
+    smoke_command: ["visionservex", "pose", "smoke", "--model", "{model_id}", "--input", "{input}", "--device", "{device}"]
+    contract_command: ["visionservex", "pose", "contract-run", "--model", "{model_id}", "--input", "{input}"]
+    benchmark_command: ["visionservex", "benchmark-pose", "--models", "{model_id}"]
+    known_failure_modes:
+      - code: MMPOSE_IMPORT_FAILED
+        description: "MMPose import failed; likely mmcv/torch mismatch."
+        next_action: "Rerun mim install with matching torch."
+    fallback_runtime: null
+    supported_models: []
+
+  - id: oneformer_natten_py310
+    description: "OneFormer DiNAT + NATTEN compat shim sidecar (Python 3.10). Ships natten_compat shim that monkeypatches natten2dqkrpb to na2d_qk so Transformers 5.x DiNAT works."
+    env_type: conda
+    python_version: "3.10"
+    torch_version: "==2.1.2"
+    cuda_version: cu121
+    pip_packages:
+      - "torch==2.1.2"
+      - "torchvision==0.16.2"
+      - "transformers>=4.46,<5.0"
+      - "natten>=0.17,<0.22"
+    conda_packages: []
+    git_repos:
+      - url: "https://github.com/SHI-Labs/OneFormer"
+        target: "~/.cache/visionservex/sidecars/oneformer/OneFormer"
+        ref: main
+        post_install: null
+    custom_ops: []
+    checkpoint_sources:
+      - url: "https://huggingface.co/shi-labs/oneformer_ade20k_dinat_large"
+        target_path: "~/.cache/visionservex/checkpoints/oneformer/"
+        env_var_token: null
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.oneformer:to_canonical"
+    smoke_command: ["visionservex", "oneformer", "smoke", "--model", "{model_id}", "--input", "{input}", "--device", "{device}", "--apply-natten-shim"]
+    contract_command: ["visionservex", "oneformer", "contract-run", "--model", "{model_id}", "--input", "{input}", "--device", "{device}", "--apply-natten-shim"]
+    benchmark_command: ["visionservex", "benchmark-segmentation", "--models", "{model_id}", "--device", "{device}"]
+    known_failure_modes:
+      - code: NATTEN_API_MISMATCH_UNPATCHABLE
+        description: "Transformers DiNAT path uses an API the natten_compat shim cannot cover."
+        next_action: "Pin transformers<5.0 in user env or use CPU fallback."
+      - code: TRANSFORMERS_DINAT_VERSION_INCOMPATIBLE
+        description: "Installed transformers version incompatible with both shims."
+        next_action: "Downgrade transformers to 4.46.x range."
+      - code: ONEFORMER_CHECKPOINT_NOT_FOUND
+        description: "HF checkpoint pull failed."
+        next_action: "Check HF availability."
+      - code: ONEFORMER_OUTPUT_ADAPTER_MISSING
+        description: "Output adapter missing for this variant."
+        next_action: "Register in runtime_broker.adapters.oneformer."
+    fallback_runtime: null
+    supported_models:
+      - oneformer-dinat-large
+
+  - id: maskdino_detectron2_py310
+    description: "MaskDINO + Detectron2 sidecar (Python 3.10, torch 2.1 + cu121). CPU fallback supported for smoke."
+    env_type: conda
+    python_version: "3.10"
+    torch_version: "==2.1.2"
+    cuda_version: cu121
+    pip_packages:
+      - "torch==2.1.2"
+      - "torchvision==0.16.2"
+      - "git+https://github.com/facebookresearch/detectron2.git"
+    conda_packages: []
+    git_repos:
+      - url: "https://github.com/IDEA-Research/MaskDINO"
+        target: "~/.cache/visionservex/sidecars/maskdino/MaskDINO"
+        ref: main
+        post_install: "pip install -r requirements.txt"
+    custom_ops:
+      - "cd ~/.cache/visionservex/sidecars/maskdino/MaskDINO/maskdino/modeling/pixel_decoder/ops && sh make.sh"
+    checkpoint_sources:
+      - url: "https://github.com/IDEA-Research/MaskDINO/releases"
+        target_path: "~/.cache/visionservex/checkpoints/maskdino/"
+        env_var_token: null
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.maskdino:to_canonical"
+    smoke_command: ["visionservex", "maskdino", "smoke", "--model", "{model_id}", "--input", "{input}", "--device", "{device}"]
+    contract_command: ["visionservex", "maskdino", "contract-run", "--model", "{model_id}", "--input", "{input}", "--device", "{device}"]
+    benchmark_command: ["visionservex", "benchmark-segmentation", "--models", "{model_id}", "--device", "{device}"]
+    known_failure_modes:
+      - code: DETECTRON2_BUILD_FAILED
+        description: "Detectron2 build failed (toolchain or torch mismatch)."
+        next_action: "Verify gcc/torch match and rerun pip install."
+      - code: MASKDINO_REPO_CLONE_FAILED
+        description: "git clone failed."
+        next_action: "Retry or mirror."
+      - code: MASKDINO_CHECKPOINT_NOT_FOUND
+        description: "Checkpoint missing."
+        next_action: "Verify URL or stage locally."
+      - code: MASKDINO_CONFIG_NOT_FOUND
+        description: "Config path missing in cloned repo."
+        next_action: "Check ref/branch."
+      - code: MASKDINO_CPU_CONTRACT_FAILED
+        description: "CPU contract run failed at inference time."
+        next_action: "Capture stderr; check checkpoint label-space match."
+      - code: MASKDINO_OUTPUT_ADAPTER_MISSING
+        description: "Output adapter missing."
+        next_action: "Register in runtime_broker.adapters.maskdino."
+    fallback_runtime: null
+    supported_models:
+      - maskdino-r50-coco
+      - maskdino-r50-panoptic
+      - maskdino-swinl-coco
+
+  - id: tracking_bytetrack_py310
+    description: "ByteTrack tracking sidecar (Python 3.10). Multi-stage: numpy pre-install -> lap from conda-forge -> ByteTrack clone."
+    env_type: conda
+    python_version: "3.10"
+    torch_version: "==2.1.2"
+    cuda_version: cu121
+    pip_packages:
+      - "numpy>=1.24"
+      - "cython"
+      - "cython_bbox"
+      - "lap>=0.4.0"
+      - "torch==2.1.2"
+      - "torchvision==0.16.2"
+    conda_packages:
+      - "conda-forge::lap"
+    git_repos:
+      - url: "https://github.com/FoundationVision/ByteTrack"
+        target: "~/.cache/visionservex/sidecars/bytetrack/ByteTrack"
+        ref: main
+        post_install: "pip install -r requirements.txt && python setup.py develop"
+    custom_ops: []
+    checkpoint_sources: []
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.bytetrack:to_canonical_track"
+    smoke_command: ["visionservex", "tracking", "smoke", "--model", "bytetrack", "--input", "{input}"]
+    contract_command: ["visionservex", "tracking", "contract-run", "--model", "bytetrack", "--input", "{input}"]
+    benchmark_command: ["visionservex", "benchmark-surveillance", "--models", "bytetrack"]
+    known_failure_modes:
+      - code: BYTETRACK_REPO_CLONE_FAILED
+        description: "Clone of FoundationVision/ByteTrack failed."
+        next_action: "Retry or mirror."
+      - code: LAP_PREINSTALL_FAILED
+        description: "lap rebuild failed despite conda-forge install."
+        next_action: "Ensure numpy is in env BEFORE lap install."
+      - code: BYTETRACK_IMPORT_FAILED
+        description: "ByteTrack import failed after install."
+        next_action: "Verify ByteTrack repo is on PYTHONPATH and setup.py develop ran."
+      - code: TRACKING_SAMPLE_VIDEO_MISSING
+        description: "Sample video missing in tests/assets/smoke."
+        next_action: "Stage tests/assets/smoke/sample_video.mp4."
+      - code: TRACKING_OUTPUT_ADAPTER_MISSING
+        description: "Output adapter missing."
+        next_action: "Register in runtime_broker.adapters.bytetrack."
+    fallback_runtime: null
+    supported_models:
+      - bytetrack
+
+  - id: promptable_edgesam_py310
+    description: "EdgeSAM promptable segmentation sidecar (Python 3.10)."
+    env_type: conda
+    python_version: "3.10"
+    torch_version: "==2.1.2"
+    cuda_version: cu121
+    pip_packages:
+      - "torch==2.1.2"
+      - "torchvision==0.16.2"
+      - "opencv-python"
+    conda_packages: []
+    git_repos:
+      - url: "https://github.com/chongzhou96/EdgeSAM"
+        target: "~/.cache/visionservex/sidecars/edgesam/EdgeSAM"
+        ref: main
+        post_install: "pip install -e ."
+    custom_ops: []
+    checkpoint_sources:
+      - url: "https://huggingface.co/spaces/chongzhou/EdgeSAM/resolve/main/weights/edge_sam.pth"
+        target_path: "~/.cache/visionservex/checkpoints/edgesam/edge_sam.pth"
+        env_var_token: null
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.edgesam:to_canonical_promptable"
+    smoke_command: ["visionservex", "promptable", "smoke", "--model", "edgesam", "--input", "{input}", "--point", "{point}"]
+    contract_command: ["visionservex", "promptable", "contract-run", "--model", "edgesam", "--input", "{input}", "--point", "{point}"]
+    benchmark_command: ["visionservex", "benchmark-promptable-segmentation", "--models", "edgesam"]
+    known_failure_modes:
+      - code: EDGESAM_REPO_CLONE_FAILED
+        description: "Clone of chongzhou96/EdgeSAM failed."
+        next_action: "Retry or mirror."
+      - code: EDGESAM_CHECKPOINT_NOT_FOUND
+        description: "Checkpoint pull from HF spaces failed."
+        next_action: "Verify HF URL responds."
+      - code: EDGESAM_IMPORT_FAILED
+        description: "EdgeSAM import failed after install."
+        next_action: "Verify PYTHONPATH and re-run pip install -e."
+      - code: EDGESAM_OUTPUT_ADAPTER_MISSING
+        description: "Output adapter missing."
+        next_action: "Register in runtime_broker.adapters.edgesam."
+    fallback_runtime: null
+    supported_models:
+      - edgesam
+
+  - id: medical_medsam2_py310
+    description: "MedSAM2 medical 3D segmentation sidecar (Python 3.10, torch 2.0)."
+    env_type: conda
+    python_version: "3.10"
+    torch_version: "==2.0.1"
+    cuda_version: cu118
+    pip_packages:
+      - "torch==2.0.1"
+      - "torchvision==0.15.2"
+      - "connected-components-3d"
+      - "PyQt5"
+      - "nibabel"
+      - "SimpleITK"
+    conda_packages: []
+    git_repos:
+      - url: "https://github.com/bowang-lab/MedSAM2"
+        target: "~/.cache/visionservex/sidecars/medsam2/MedSAM2"
+        ref: main
+        post_install: "pip install -e ."
+    custom_ops: []
+    checkpoint_sources:
+      - url: "https://huggingface.co/wanglab/MedSAM2"
+        target_path: "~/.cache/visionservex/checkpoints/medsam2/"
+        env_var_token: null
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.medsam2:to_canonical_medical"
+    smoke_command: ["visionservex", "medical", "smoke", "--model", "medsam2", "--input", "{input}"]
+    contract_command: ["visionservex", "medical", "contract-run", "--model", "medsam2", "--input", "{input}"]
+    benchmark_command: ["visionservex", "benchmark-medical-segmentation", "--models", "medsam2"]
+    known_failure_modes:
+      - code: MEDSAM2_REPO_CLONE_FAILED
+        description: "Clone failed."
+        next_action: "Retry or mirror."
+      - code: MEDSAM2_CHECKPOINT_NOT_FOUND
+        description: "HF checkpoint pull failed."
+        next_action: "Verify HF URL."
+      - code: MEDSAM2_DATA_FORMAT_REQUIRED
+        description: "Input not in NIfTI or DICOM format."
+        next_action: "Convert input or provide medical asset."
+      - code: MEDSAM2_OUTPUT_ADAPTER_MISSING
+        description: "Output adapter missing."
+        next_action: "Register in runtime_broker.adapters.medsam2."
+    fallback_runtime: null
+    supported_models:
+      - medsam2
+
+  - id: seem_xdecoder_container
+    description: "SEEM + X-Decoder universal-segmentation sidecar. Container path strongly recommended due to OpenMPI + multi-repo complexity."
+    env_type: docker
+    python_version: "3.9"
+    torch_version: "==1.13.1"
+    cuda_version: cu117
+    pip_packages: []
+    conda_packages: []
+    git_repos:
+      - url: "https://github.com/UX-Decoder/Segment-Everything-Everywhere-All-At-Once"
+        target: "~/.cache/visionservex/sidecars/seem/SEEM"
+        ref: main
+        post_install: "pip install -r assets/requirements/requirements.txt"
+      - url: "https://github.com/microsoft/X-Decoder"
+        target: "~/.cache/visionservex/sidecars/seem/X-Decoder"
+        ref: main
+        post_install: null
+    custom_ops: []
+    checkpoint_sources: []
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.seem:to_canonical"
+    smoke_command: ["visionservex", "seem", "smoke", "--model", "{model_id}", "--input", "{input}", "--prompt", "{prompt}"]
+    contract_command: ["visionservex", "seem", "contract-run", "--model", "{model_id}", "--input", "{input}", "--prompt", "{prompt}"]
+    benchmark_command: ["visionservex", "benchmark-open-vocab", "--models", "{model_id}"]
+    known_failure_modes:
+      - code: SEEM_CONTAINER_BUILD_FAILED
+        description: "Docker/Apptainer build failed."
+        next_action: "Check docker context and Dockerfile."
+      - code: SEEM_REPO_CLONE_FAILED
+        description: "SEEM repo clone failed."
+        next_action: "Retry or mirror."
+      - code: XDECODER_REPO_CLONE_FAILED
+        description: "X-Decoder repo clone failed."
+        next_action: "Retry or mirror."
+      - code: OPENMPI_MISSING
+        description: "OpenMPI not installed in container."
+        next_action: "Use the SEEM Dockerfile which preinstalls openmpi."
+      - code: SEEM_CHECKPOINT_NOT_FOUND
+        description: "Checkpoint missing."
+        next_action: "Pull from SEEM releases."
+      - code: SEEM_OUTPUT_ADAPTER_MISSING
+        description: "Output adapter missing."
+        next_action: "Register in runtime_broker.adapters.seem."
+    fallback_runtime: null
+    supported_models:
+      - seem-davit-d3
+      - seem-focal-t
+
+  - id: license_gate_runtime
+    description: "License gate runtime. Models behind AGPL-3.0, PML 1.0, or other restrictive licenses route here. Refuses unless user supplied matching --accept-* flag and env var."
+    env_type: subprocess
+    python_version: "3.11"
+    torch_version: ">=2.6"
+    cuda_version: any
+    pip_packages: []
+    conda_packages: []
+    git_repos: []
+    custom_ops: []
+    checkpoint_sources: []
+    license_gate: VISIONSERVEX_ACCEPT_LICENSE
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.licensed:to_canonical"
+    smoke_command: ["visionservex", "license-gate", "smoke", "--model", "{model_id}", "--input", "{input}"]
+    contract_command: ["visionservex", "license-gate", "contract-run", "--model", "{model_id}", "--input", "{input}"]
+    benchmark_command: ["visionservex", "license-gate", "benchmark", "--model", "{model_id}"]
+    known_failure_modes:
+      - code: LICENSE_OPT_IN_NOT_PROVIDED
+        description: "User has not set the matching --accept-* flag or env var for this model's license."
+        next_action: "Re-run with --accept-agpl / --accept-pml / --accept-non-commercial as appropriate."
+      - code: LICENSE_UNCONFIGURED_FOR_MODEL
+        description: "Model is in license_gate_runtime but no license rule attached."
+        next_action: "Add license rule in license_rules.yaml."
+    fallback_runtime: null
+    supported_models:
+      - fastsam-s
+      - fastsam-x
+      - rfdetr-seg-2xlarge
+      - rfdetr-seg-xlarge
+      - totalsegmentator
+      - yolo-world
+      - yolo11l-seg.pt
+      - yolo11x-seg.pt
+      - yolo11x.pt
+      - yolo26x-seg.pt
+      - yolo26x.pt
+      - yolov10b.pt
+      - yolov8x-seg.pt
+      - yolov8x.pt
+
+  - id: auth_gate_runtime
+    description: "Auth gate runtime for HF-gated or terms-of-service-gated models. Requires HF_TOKEN or model-specific env var."
+    env_type: subprocess
+    python_version: "3.11"
+    torch_version: ">=2.6"
+    cuda_version: any
+    pip_packages: []
+    conda_packages: []
+    git_repos: []
+    custom_ops: []
+    checkpoint_sources: []
+    license_gate: null
+    auth_gate: HF_TOKEN
+    output_adapter: "visionservex.runtime_broker.adapters.auth:to_canonical"
+    smoke_command: ["visionservex", "auth-gate", "smoke", "--model", "{model_id}", "--input", "{input}"]
+    contract_command: ["visionservex", "auth-gate", "contract-run", "--model", "{model_id}", "--input", "{input}"]
+    benchmark_command: ["visionservex", "auth-gate", "benchmark", "--model", "{model_id}"]
+    known_failure_modes:
+      - code: AUTH_TOKEN_NOT_PROVIDED
+        description: "Required auth env var is unset."
+        next_action: "Set HF_TOKEN, DINO_X_API_KEY, GDINO_API_KEY, etc."
+      - code: AUTH_TOS_NOT_ACCEPTED
+        description: "User must accept ToS on upstream platform before token works."
+        next_action: "Visit HF model card and click Accept."
+    fallback_runtime: null
+    supported_models:
+      - sam3-base
+
+  - id: external_api_runtime
+    description: "External cloud-only API runtime. No local execution. Used for DINO-X-API and Grounding-DINO 1.5/1.6 Pro models."
+    env_type: http
+    python_version: "3.11"
+    torch_version: null
+    cuda_version: null
+    pip_packages: []
+    conda_packages: []
+    git_repos: []
+    custom_ops: []
+    checkpoint_sources: []
+    license_gate: null
+    auth_gate: DEEPDATASPACE_API_KEY
+    output_adapter: "visionservex.runtime_broker.adapters.deepdataspace:to_canonical"
+    smoke_command: ["visionservex", "api", "smoke", "--model", "{model_id}", "--input", "{input}"]
+    contract_command: ["visionservex", "api", "contract-run", "--model", "{model_id}", "--input", "{input}"]
+    benchmark_command: ["visionservex", "api", "benchmark", "--model", "{model_id}"]
+    known_failure_modes:
+      - code: API_KEY_NOT_PROVIDED
+        description: "User has not set the API key env var."
+        next_action: "Set DINO_X_API_KEY or GDINO_API_KEY."
+      - code: API_ENDPOINT_UNREACHABLE
+        description: "Cloud endpoint returned non-200."
+        next_action: "Check network and api.deepdataspace.com availability."
+      - code: API_QUOTA_EXCEEDED
+        description: "Cloud quota exhausted."
+        next_action: "Upgrade plan or wait for quota reset."
+    fallback_runtime: null
+    supported_models:
+      - dino-x-api
+      - grounding-dino-1.5-pro
+      - grounding-dino-1.6-pro
+
+  - id: registry_audit_runtime
+    description: "Audit-only runtime for upstream-deprecated or wrong-registry-entry rows. Emits structured blockers; does not execute."
+    env_type: subprocess
+    python_version: "3.11"
+    torch_version: null
+    cuda_version: null
+    pip_packages: []
+    conda_packages: []
+    git_repos: []
+    custom_ops: []
+    checkpoint_sources: []
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.registry_audit:to_canonical"
+    smoke_command: ["visionservex", "registry", "validate", "{model_id}"]
+    contract_command: ["visionservex", "registry", "validate", "{model_id}"]
+    benchmark_command: ["visionservex", "registry", "validate", "{model_id}"]
+    known_failure_modes:
+      - code: REGISTRY_AUDIT_DEPRECATED
+        description: "Model is upstream-deprecated; runtime_audit emits terminal blocker."
+        next_action: "Map to successor model_id."
+      - code: REGISTRY_AUDIT_WRONG_ENTRY
+        description: "Registry entry is wrong (e.g., missing HF dataset prefix)."
+        next_action: "Update registry entry."
+    fallback_runtime: null
+    supported_models: []

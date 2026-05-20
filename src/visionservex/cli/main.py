@@ -67,6 +67,7 @@ from visionservex.cli import (
     replacement_map_commands,
     reports_commands,
     rtdetrv4_commands,
+    runtime_broker_commands,
     sam3_commands,
     sam_family_commands,
     security_commands,
@@ -158,6 +159,7 @@ app.add_typer(dataset_validators.app, name="dataset")
 app.add_typer(deimv2_commands.app, name="deimv2")
 app.add_typer(rtdetrv4_commands.app, name="rtdetrv4")
 app.add_typer(sidecar_commands.app, name="sidecar")
+app.add_typer(runtime_broker_commands.app, name="runtime")
 app.add_typer(domain_benchmarks.app_medical, name="benchmark-medical", invoke_without_command=True)
 app.add_typer(
     domain_benchmarks.app_agriculture, name="benchmark-agriculture", invoke_without_command=True
@@ -384,6 +386,55 @@ def version(json_: bool = typer.Option(False, "--json")) -> None:
         json_mode=json_,
         summary=f"VisionServeX {__version__} — by Arash Sajjadi (Apache-2.0)",
     )
+
+
+# ---------- top-level v2.46 broker `run` ----------
+
+
+@app.command(
+    name="run",
+    help=(
+        "v2.46.0 universal model runner. Routes to the right sidecar/runtime automatically. "
+        "Users should not need to know which env, repo, or checkpoint is required."
+    ),
+)
+def run(
+    model_id: str = typer.Argument(..., help="Model id (e.g. 'co-dino-inst-vit-l-coco')."),
+    input_path: Path = typer.Argument(..., help="Input image or video path."),
+    task: str | None = typer.Option(None, "--task"),
+    device: str = typer.Option("auto", "--device"),
+    execute: bool = typer.Option(False, "--execute"),
+    accept_license: bool = typer.Option(False, "--accept-license"),
+    accept_agpl: bool = typer.Option(False, "--accept-agpl"),
+    accept_pml: bool = typer.Option(False, "--accept-pml"),
+    accept_non_commercial: bool = typer.Option(False, "--accept-non-commercial"),
+    accept_meta_license: bool = typer.Option(False, "--accept-meta-license"),
+    api_key: str | None = typer.Option(None, "--api-key"),
+    json_: bool = typer.Option(False, "--json"),
+    out: Path | None = typer.Option(None, "--out"),
+) -> None:
+    payload = runtime_broker_commands.run_cmd(
+        model_id,
+        input_path,
+        task=task,
+        device=device,
+        execute=execute,
+        accept_license=(
+            accept_license
+            or accept_agpl
+            or accept_pml
+            or accept_non_commercial
+            or accept_meta_license
+        ),
+        api_key=api_key,
+    )
+    text = json.dumps(payload, indent=2, default=str)
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(text)
+    typer.echo(text if json_ else json.dumps(payload, default=str))
+    if not payload.get("ok") and execute:
+        raise typer.Exit(code=1)
 
 
 # ---------- doctor ----------
