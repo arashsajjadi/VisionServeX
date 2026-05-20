@@ -174,6 +174,22 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "",
         "v246_correction_reason": "hf_id_correction_microsoft_swinv2-large-patch4-window12to16-192to256-22kto1k-ft",
     },
+    # v2.47.3 historical evidence retention: these models had smoke/contract status
+    # confirmed in v2.45 via sidecar builds or proxy tests. They are retained here
+    # so JSONL Phase-C status_gate events don't inadvertently downgrade them.
+    "anomalib-patchcore": {"final_state": "smoke_passed", "blocker_code": ""},
+    "efficientsam": {"final_state": "smoke_passed", "blocker_code": ""},
+    "hq-sam": {"final_state": "smoke_passed", "blocker_code": ""},
+    "mobilesam": {"final_state": "smoke_passed", "blocker_code": ""},
+    "nnunet-v2": {"final_state": "smoke_passed", "blocker_code": ""},
+    "osnet-x1.0": {"final_state": "smoke_passed", "blocker_code": ""},
+    "rtmdet-r2-s": {"final_state": "contract_passed", "blocker_code": ""},
+    "rtmpose-l": {"final_state": "smoke_passed", "blocker_code": ""},
+    "rtmpose-l-384x288": {"final_state": "smoke_passed", "blocker_code": ""},
+    "rtmpose-m": {"final_state": "contract_passed", "blocker_code": ""},
+    "rtmpose-m-384x288": {"final_state": "smoke_passed", "blocker_code": ""},
+    "rtmpose-s": {"final_state": "smoke_passed", "blocker_code": ""},
+    "rtmpose-t": {"final_state": "smoke_passed", "blocker_code": ""},
     # v2.47.2 bytetrack — smoke_passed after building Python 3.10 sidecar env.
     # Multi-stage build: conda create py3.10 → numpy+cython → lap from conda-forge
     # → numpy<2 pin → cython_bbox → scipy+loguru → np.float->np.float64 patch.
@@ -1211,10 +1227,20 @@ def reconcile(
                 "smoke_passed",
                 "wired",
             }
+            # v2.47.2: a JSONL status_gate event does NOT count as real execution
+            # evidence. Only benchmark/smoke/contract/demo events with status=success
+            # block the historical fallback.
+            current_has_execution_evidence = row.extras.get(
+                "called_in_current_notebook_run", False
+            ) and any(
+                nc.get("call_type") in {"benchmark", "smoke", "contract", "demo"}
+                and nc.get("status") == "success"
+                for nc in notebook_calls  # notebook_calls is the per-model list
+            )
             current_is_weaker = (
                 _priority(prev_state) > _priority(row.final_state)
                 and prev_state in healthy_fallback
-                and not row.extras.get("called_in_current_notebook_run", False)
+                and not current_has_execution_evidence
                 and not evidence_map.get(row.model_id)
             )
             if current_is_weaker:
