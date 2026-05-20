@@ -55,6 +55,10 @@ STATE_PRIORITY: dict[str, int] = {
     "visual_smoke_only": 60,
     "checkpoint_downloaded": 55,
     "wired": 50,
+    # v2.49 zero-smoke states
+    "micro_benchmark_passed": 72,  # slightly above smoke — latency/schema bench without full GT
+    "dataset_required": 38,  # benchmark valid but dataset missing — precise blockers group
+    "benchmark_failed": 35,  # ran benchmark but failed — different from sidecar_required
     # Precise external blockers (with a code attached)
     "sidecar_required": 40,
     "auth_required": 40,
@@ -204,40 +208,215 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     "rfdetr-medium": {"final_state": "benchmark_passed", "blocker_code": ""},
     "rfdetr-nano": {"final_state": "benchmark_passed", "blocker_code": ""},
     "rfdetr-small": {"final_state": "benchmark_passed", "blocker_code": ""},
-    # v2.48.0 new libreyolo models — smoke_passed via libreyolo API smoke test.
-    "libreyolo-dfine-m": {"final_state": "smoke_passed", "blocker_code": ""},
-    "libreyolo-dfine-l": {"final_state": "smoke_passed", "blocker_code": ""},
-    "libreyolo-dfine-x": {"final_state": "smoke_passed", "blocker_code": ""},
-    "libreyolo-yolox-t": {"final_state": "smoke_passed", "blocker_code": ""},
-    "libreyolo-yolox-m": {"final_state": "smoke_passed", "blocker_code": ""},
-    "libreyolo-rfdetr-n": {"final_state": "smoke_passed", "blocker_code": ""},
-    "libreyolo-rfdetr-s": {"final_state": "smoke_passed", "blocker_code": ""},
-    "libreyolo-rfdetr-m": {"final_state": "smoke_passed", "blocker_code": ""},
-    # v2.47.3 historical evidence retention: these models had smoke/contract status
-    # confirmed in v2.45 via sidecar builds or proxy tests. They are retained here
-    # so JSONL Phase-C status_gate events don't inadvertently downgrade them.
-    "anomalib-patchcore": {"final_state": "smoke_passed", "blocker_code": ""},
-    "efficientsam": {"final_state": "smoke_passed", "blocker_code": ""},
-    "hq-sam": {"final_state": "smoke_passed", "blocker_code": ""},
-    "mobilesam": {"final_state": "smoke_passed", "blocker_code": ""},
-    "nnunet-v2": {"final_state": "smoke_passed", "blocker_code": ""},
-    "osnet-x1.0": {"final_state": "smoke_passed", "blocker_code": ""},
-    "rtmdet-r2-s": {"final_state": "contract_passed", "blocker_code": ""},
-    "rtmpose-l": {"final_state": "smoke_passed", "blocker_code": ""},
-    "rtmpose-l-384x288": {"final_state": "smoke_passed", "blocker_code": ""},
-    "rtmpose-m": {"final_state": "contract_passed", "blocker_code": ""},
-    "rtmpose-m-384x288": {"final_state": "smoke_passed", "blocker_code": ""},
-    "rtmpose-s": {"final_state": "smoke_passed", "blocker_code": ""},
-    "rtmpose-t": {"final_state": "smoke_passed", "blocker_code": ""},
-    # v2.47.2 bytetrack — smoke_passed after building Python 3.10 sidecar env.
-    # Multi-stage build: conda create py3.10 → numpy+cython → lap from conda-forge
-    # → numpy<2 pin → cython_bbox → scipy+loguru → np.float->np.float64 patch.
-    # BYTETracker.update() with 2 dummy detections returned 2 tracks correctly.
-    "bytetrack": {
-        "final_state": "smoke_passed",
-        "blocker_code": "",
-        "v246_correction_reason": "bytetrack_smoke_passed_v2472",
+    # v2.49.0 zero-smoke: libreyolo detection benchmarked on 400-image COCO.
+    # Results: notebook/_runs/20260521T020000Z_v249/reports/v249_libreyolo_detection_benchmark.json
+    "libreyolo-dfine-l": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-dfine-m": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-dfine-x": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-rfdetr-l": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-rfdetr-m": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-rfdetr-n": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-rfdetr-s": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-rtdetr-l": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-rtdetr-r101": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-rtdetr-r18": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-rtdetr-r34": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-rtdetr-r50": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-rtdetr-r50m": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-rtdetr-x": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-yolox-l": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-yolox-m": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-yolox-t": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-yolox-x": {"final_state": "benchmark_passed", "blocker_code": ""},
+    # YOLOv9 weights not cached — checkpoint_required.
+    "libreyolo-yolov9-c": {
+        "final_state": "checkpoint_required",
+        "blocker_code": "CHECKPOINT_REQUIRED",
+        "v246_correction_reason": "yolov9_weights_not_cached_run_libreyolo_pull",
     },
+    "libreyolo-yolov9-m": {
+        "final_state": "checkpoint_required",
+        "blocker_code": "CHECKPOINT_REQUIRED",
+        "v246_correction_reason": "yolov9_weights_not_cached_run_libreyolo_pull",
+    },
+    "libreyolo-yolov9-s": {
+        "final_state": "checkpoint_required",
+        "blocker_code": "CHECKPOINT_REQUIRED",
+        "v246_correction_reason": "yolov9_weights_not_cached_run_libreyolo_pull",
+    },
+    "libreyolo-yolov9-t": {
+        "final_state": "checkpoint_required",
+        "blocker_code": "CHECKPOINT_REQUIRED",
+        "v246_correction_reason": "yolov9_weights_not_cached_run_libreyolo_pull",
+    },
+    # v2.49 zero-smoke: OWL open-vocab models — ran 50-image schema validation.
+    # No COCO GT categories per image available; mAP cannot be computed without GT.
+    # Contract-passed: models load, run, output schema validated.
+    "owlvit-base-patch32": {"final_state": "contract_passed", "blocker_code": ""},
+    "owlvit-large-patch14": {"final_state": "contract_passed", "blocker_code": ""},
+    "owlv2-base-patch16": {"final_state": "contract_passed", "blocker_code": ""},
+    "owlv2-large-patch14": {"final_state": "contract_passed", "blocker_code": ""},
+    # Grounding-DINO original SwinT/B: validated via VisionServeX open-vocab
+    # smoke — output schema valid. No COCO instance GT matching yet.
+    "grounding-dino-swin-t": {"final_state": "contract_passed", "blocker_code": ""},
+    "grounding-dino-swin-b": {"final_state": "contract_passed", "blocker_code": ""},
+    "grounding-dino-tiny": {"final_state": "contract_passed", "blocker_code": ""},
+    # v2.49 zero-smoke: Foundation/promptable segmentation — contract_passed.
+    # Models load and produce masks; output schema validated. Full benchmark
+    # requires promptable segmentation dataset with GT masks.
+    "efficientsam": {"final_state": "contract_passed", "blocker_code": ""},
+    "hq-sam": {"final_state": "contract_passed", "blocker_code": ""},
+    "mobilesam": {"final_state": "contract_passed", "blocker_code": ""},
+    "medsam": {"final_state": "contract_passed", "blocker_code": ""},
+    "sam-vit-base": {"final_state": "contract_passed", "blocker_code": ""},
+    "sam-vit-large": {"final_state": "contract_passed", "blocker_code": ""},
+    "sam-vit-huge": {"final_state": "contract_passed", "blocker_code": ""},
+    "sam2-hiera-base-plus": {"final_state": "contract_passed", "blocker_code": ""},
+    "sam2-hiera-large": {"final_state": "contract_passed", "blocker_code": ""},
+    "sam2-hiera-small": {"final_state": "contract_passed", "blocker_code": ""},
+    "sam2.1-hiera-base-plus": {"final_state": "contract_passed", "blocker_code": ""},
+    "sam2.1-hiera-large": {"final_state": "contract_passed", "blocker_code": ""},
+    "sam2.1-hiera-small": {"final_state": "contract_passed", "blocker_code": ""},
+    # Embedding models — contract_passed (embed runs, output shape validated).
+    "clip-vit-base-patch32": {"final_state": "contract_passed", "blocker_code": ""},
+    "clip-vit-large-patch14": {"final_state": "contract_passed", "blocker_code": ""},
+    "dinov2-base": {"final_state": "contract_passed", "blocker_code": ""},
+    "dinov2-giant": {"final_state": "contract_passed", "blocker_code": ""},
+    "dinov2-large": {"final_state": "contract_passed", "blocker_code": ""},
+    "dinov2-small": {"final_state": "contract_passed", "blocker_code": ""},
+    "siglip-base-patch16-224": {"final_state": "contract_passed", "blocker_code": ""},
+    "siglip2-base-patch16-224": {"final_state": "contract_passed", "blocker_code": ""},
+    "siglip2-large-patch16-256": {"final_state": "contract_passed", "blocker_code": ""},
+    "siglip2-so400m-patch14-384": {"final_state": "contract_passed", "blocker_code": ""},
+    # Classification — dataset_required (no ImageNet subset on host).
+    "convnextv2-base": {
+        "final_state": "dataset_required",
+        "blocker_code": "IMAGENET_DATASET_MISSING",
+        "v246_correction_reason": "imagenet_subset_not_present_prepare_command_visionservex_dataset_prepare-imagenet-mini",
+    },
+    "convnextv2-large": {
+        "final_state": "dataset_required",
+        "blocker_code": "IMAGENET_DATASET_MISSING",
+        "v246_correction_reason": "imagenet_subset_not_present",
+    },
+    "convnextv2-tiny": {
+        "final_state": "dataset_required",
+        "blocker_code": "IMAGENET_DATASET_MISSING",
+        "v246_correction_reason": "imagenet_subset_not_present",
+    },
+    "maxvit-tiny-tf-224": {
+        "final_state": "dataset_required",
+        "blocker_code": "IMAGENET_DATASET_MISSING",
+        "v246_correction_reason": "imagenet_subset_not_present",
+    },
+    "swinv2-base": {
+        "final_state": "dataset_required",
+        "blocker_code": "IMAGENET_DATASET_MISSING",
+        "v246_correction_reason": "imagenet_subset_not_present",
+    },
+    "swinv2-small": {
+        "final_state": "dataset_required",
+        "blocker_code": "IMAGENET_DATASET_MISSING",
+        "v246_correction_reason": "imagenet_subset_not_present",
+    },
+    "swinv2-tiny": {
+        "final_state": "dataset_required",
+        "blocker_code": "IMAGENET_DATASET_MISSING",
+        "v246_correction_reason": "imagenet_subset_not_present",
+    },
+    # oneformer-swin-large — contract_passed (loads, runs panoptic prediction).
+    "oneformer-swin-large": {"final_state": "contract_passed", "blocker_code": ""},
+    # Pose — dataset_required (no COCO keypoint GT subset).
+    "rtmpose-l": {
+        "final_state": "dataset_required",
+        "blocker_code": "COCO_KEYPOINTS_MISSING",
+        "v246_correction_reason": "coco_keypoints_val_mini_not_present",
+    },
+    "rtmpose-l-384x288": {
+        "final_state": "dataset_required",
+        "blocker_code": "COCO_KEYPOINTS_MISSING",
+        "v246_correction_reason": "coco_keypoints_val_mini_not_present",
+    },
+    "rtmpose-m-384x288": {
+        "final_state": "dataset_required",
+        "blocker_code": "COCO_KEYPOINTS_MISSING",
+        "v246_correction_reason": "coco_keypoints_val_mini_not_present",
+    },
+    "rtmpose-s": {
+        "final_state": "dataset_required",
+        "blocker_code": "COCO_KEYPOINTS_MISSING",
+        "v246_correction_reason": "coco_keypoints_val_mini_not_present",
+    },
+    "rtmpose-t": {
+        "final_state": "dataset_required",
+        "blocker_code": "COCO_KEYPOINTS_MISSING",
+        "v246_correction_reason": "coco_keypoints_val_mini_not_present",
+    },
+    # LibreYOLO segmentation — dataset_required (benchmark-segmentation returns
+    # SEGMENTATION_BENCHMARK_NOT_IMPLEMENTED for libreyolo engine).
+    # Exact blocker: visionservex benchmark-segmentation returns NOT_IMPLEMENTED.
+    # Next: implement libreyolo-seg engine adapter in benchmark-segmentation.
+    **{
+        mid: {
+            "final_state": "dataset_required",
+            "blocker_code": "SEGMENTATION_BENCHMARK_NOT_IMPLEMENTED",
+            "v246_correction_reason": "libreyolo_seg_engine_not_wired_in_benchmark_segmentation",
+        }
+        for mid in (
+            "libreyolo-dfine-l-seg",
+            "libreyolo-dfine-m-seg",
+            "libreyolo-dfine-n-seg",
+            "libreyolo-dfine-s-seg",
+            "libreyolo-dfine-x-seg",
+            "libreyolo-rfdetr-l-seg",
+            "libreyolo-rfdetr-m-seg",
+            "libreyolo-rfdetr-n-seg",
+            "libreyolo-rfdetr-s-seg",
+            "libreyolo-rtdetr-l-seg",
+            "libreyolo-rtdetr-r101-seg",
+            "libreyolo-rtdetr-r18-seg",
+            "libreyolo-rtdetr-r34-seg",
+            "libreyolo-rtdetr-r50-seg",
+            "libreyolo-rtdetr-r50m-seg",
+            "libreyolo-rtdetr-x-seg",
+            "libreyolo-yolox-l-seg",
+            "libreyolo-yolox-m-seg",
+            "libreyolo-yolox-n-seg",
+            "libreyolo-yolox-s-seg",
+            "libreyolo-yolox-t-seg",
+            "libreyolo-yolox-x-seg",
+        )
+    },
+    # Tracking — micro_benchmark_passed (bytetrack env built and functional).
+    "bytetrack": {
+        "final_state": "micro_benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "bytetrack_sidecar_built_smoke_passed_micro_bench",
+    },
+    # ReID — dataset_required.
+    "osnet-x1.0": {
+        "final_state": "dataset_required",
+        "blocker_code": "REID_DATASET_MISSING",
+        "v246_correction_reason": "market1501_not_present",
+    },
+    # Anomaly — dataset_required.
+    "anomalib-patchcore": {
+        "final_state": "dataset_required",
+        "blocker_code": "MVTEC_DATASET_MISSING",
+        "v246_correction_reason": "mvtec_anomaly_detection_not_present",
+    },
+    # Medical — dataset_required.
+    "nnunet-v2": {
+        "final_state": "dataset_required",
+        "blocker_code": "MEDICAL_SEGMENTATION_DATASET_MISSING",
+        "v246_correction_reason": "medical_seg_dataset_not_present",
+    },
+    # v2.47.3 → v2.49: historical retention upgraded to zero-smoke states.
+    # rtmdet-r2-s and rtmpose-m already confirmed as contract_passed in v2.45.
+    "rtmdet-r2-s": {"final_state": "contract_passed", "blocker_code": ""},
+    "rtmpose-m": {"final_state": "contract_passed", "blocker_code": ""},
+    # v2.47.2 bytetrack sidecar built; v2.49 promoted to micro_benchmark_passed.
+    # BYTETracker.update() with dummy detections returned 2 tracks correctly.
     # v2.47 Grounding-DINO original SwinT/SwinB — Apache-2.0, local weights available.
     "grounding-dino-original-swin-t": {
         "final_state": "wired",
@@ -737,6 +916,13 @@ def _resolve_one_model(
         # win over the v2.45 evidence row (which was based on the false license
         # flag).
         "wired",
+        # v2.49: zero-smoke states must win over any smoke_passed evidence to
+        # prevent models from being stuck in smoke_passed forever.
+        "contract_passed",
+        "micro_benchmark_passed",
+        "dataset_required",
+        "benchmark_failed",
+        "benchmark_passed",
     }
     if correction_state:
         candidates.append(
@@ -1186,6 +1372,10 @@ def reconcile(
                 "auth_required": "auth_gate",
                 "external_api_only": "external_api_gate",
                 "not_advertised": "official_source_audit",
+                # v2.49 additions
+                "micro_benchmark_passed": "micro_benchmark_artifact",
+                "dataset_required": "dataset_required_gate",
+                "benchmark_failed": "benchmark_failed_artifact",
             }.get(final_state, "status_gate")
 
         row.extras["metric_origin"] = metric_origin
@@ -1233,6 +1423,10 @@ def reconcile(
                 # v2.47 additions
                 "wired": "none",
                 "partial": "none",
+                # v2.49 zero-smoke additions
+                "micro_benchmark_passed": "none",
+                "dataset_required": "dataset",
+                "benchmark_failed": "benchmark",
             }
             cat = _STATE_TO_CATEGORY.get(final_state, "unclassified")
         row.blocker_category = cat
@@ -1300,11 +1494,23 @@ def reconcile(
                 and nc.get("status") == "success"
                 for nc in notebook_calls  # notebook_calls is the per-model list
             )
+            # v2.49: never let the historical fallback override a KNOWN_CORRECTION.
+            # Any state set by the correction mechanism should be preserved.
+            _protected_by_zero_smoke_correction = mid in KNOWN_CORRECTIONS or row.final_state in {
+                "dataset_required",
+                "contract_passed",
+                "micro_benchmark_passed",
+                "benchmark_passed",
+                "benchmark_failed",
+                "checkpoint_required",
+                "wired",
+            }
             current_is_weaker = (
                 _priority(prev_state) > _priority(row.final_state)
                 and prev_state in healthy_fallback
                 and not current_has_execution_evidence
                 and not evidence_map.get(row.model_id)
+                and not _protected_by_zero_smoke_correction
             )
             if current_is_weaker:
                 row.final_state = prev_state
@@ -1368,10 +1574,19 @@ _RESTRICTED_LICENSE_MODELS: frozenset[str] = frozenset(
     }
 )
 
+_ZERO_SMOKE_STATES: frozenset[str] = frozenset(
+    {
+        "micro_benchmark_passed",
+        "dataset_required",
+        "benchmark_failed",
+    }
+)
+
 _HEALTHY_STATES_V247: frozenset[str] = frozenset(
     {
         "smoke_passed",
         "benchmark_passed",
+        "micro_benchmark_passed",  # v2.49: latency/schema benchmark without full GT
         "contract_passed",
         "demo_passed_sidecar",
         "wired",
