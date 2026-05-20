@@ -54,6 +54,7 @@ STATE_PRIORITY: dict[str, int] = {
     "smoke_ok_no_metric": 65,
     "visual_smoke_only": 60,
     "checkpoint_downloaded": 55,
+    "wired": 50,
     # Precise external blockers (with a code attached)
     "sidecar_required": 40,
     "auth_required": 40,
@@ -129,11 +130,116 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "OPT_IN_LICENSE_REQUIRED",
     },
     "oneformer-convnext-large": {
-        "final_state": "wrong_registry_entry",
-        "blocker_code": "WRONG_REGISTRY_ENTRY",
+        "final_state": "wired",
+        "blocker_code": "",
+        "v246_correction_reason": "registry_remap_shi-labs_oneformer_ade20k_convnext_large",
     },
-    "deim-m": {"final_state": "upstream_deprecated", "blocker_code": "UPSTREAM_DEPRECATED"},
-    "deim-s": {"final_state": "upstream_deprecated", "blocker_code": "UPSTREAM_DEPRECATED"},
+    "deim-m": {
+        "final_state": "wired",
+        "blocker_code": "",
+        "v246_correction_reason": "alias_resolved_to_deimv2-m",
+    },
+    "deim-s": {
+        "final_state": "wired",
+        "blocker_code": "",
+        "v246_correction_reason": "alias_resolved_to_deimv2-s",
+    },
+    # v2.46 Deep Research license-truth update:
+    # Three models were flagged as license-restricted in v2.45 by mistake.
+    # The licenses are actually permissive. The registry yaml carries the
+    # corrected license string; here we flip the final_state from the v2.45
+    # not_advertised / opt_in_license_required to `wired` so the ledger
+    # reflects the truth. The runtime broker routes them to core_py311.
+    # A real smoke test still has to land an evidence artifact for them to
+    # become smoke_passed.
+    "agriclip": {
+        "final_state": "wired",
+        "blocker_code": "",
+        "v246_correction_reason": "license_truth_corrected_CC-BY-4.0",
+    },
+    "prithvi-eo-2.0": {
+        "final_state": "wired",
+        "blocker_code": "",
+        "v246_correction_reason": "license_truth_corrected_Apache-2.0",
+    },
+    "dinov3-vitb16": {
+        "final_state": "wired",
+        "blocker_code": "",
+        "v246_correction_reason": "license_truth_corrected_Meta-commercial-friendly",
+    },
+    # v2.46 download retry: HF migration verified. Mark wired; real smoke
+    # happens in 05_classification.
+    "swinv2-large": {
+        "final_state": "wired",
+        "blocker_code": "",
+        "v246_correction_reason": "hf_id_correction_microsoft_swinv2-large-patch4-window12to16-192to256-22kto1k-ft",
+    },
+    # v2.46 license-gate retention: AGPL-3.0 Ultralytics / THU-MIG / FastSAM
+    # weights MUST stay opt_in_license_required. They have historical benchmark
+    # numbers in the leaderboard JSON files, which the reconciler would
+    # otherwise promote to benchmark_passed. Per Deep Research + the v2.45
+    # license-gate artifacts, these are commercial-restricted unless the user
+    # supplies the matching --accept-agpl flag and env var.
+    "fastsam-s": {
+        "final_state": "opt_in_license_required",
+        "blocker_code": "OPT_IN_LICENSE_REQUIRED",
+        "v246_correction_reason": "agpl_license_gate_retention",
+    },
+    "fastsam-x": {
+        "final_state": "opt_in_license_required",
+        "blocker_code": "OPT_IN_LICENSE_REQUIRED",
+        "v246_correction_reason": "agpl_license_gate_retention",
+    },
+    "yolo-world": {
+        "final_state": "opt_in_license_required",
+        "blocker_code": "OPT_IN_LICENSE_REQUIRED",
+        "v246_correction_reason": "agpl_license_gate_retention",
+    },
+    "yolo11l-seg.pt": {
+        "final_state": "opt_in_license_required",
+        "blocker_code": "OPT_IN_LICENSE_REQUIRED",
+        "v246_correction_reason": "agpl_license_gate_retention",
+    },
+    "yolo11x-seg.pt": {
+        "final_state": "opt_in_license_required",
+        "blocker_code": "OPT_IN_LICENSE_REQUIRED",
+        "v246_correction_reason": "agpl_license_gate_retention",
+    },
+    "yolo11x.pt": {
+        "final_state": "opt_in_license_required",
+        "blocker_code": "OPT_IN_LICENSE_REQUIRED",
+        "v246_correction_reason": "agpl_license_gate_retention",
+    },
+    "yolo26x-seg.pt": {
+        "final_state": "opt_in_license_required",
+        "blocker_code": "OPT_IN_LICENSE_REQUIRED",
+        "v246_correction_reason": "agpl_license_gate_retention",
+    },
+    "yolo26x.pt": {
+        "final_state": "opt_in_license_required",
+        "blocker_code": "OPT_IN_LICENSE_REQUIRED",
+        "v246_correction_reason": "agpl_license_gate_retention",
+    },
+    "yolov10b.pt": {
+        "final_state": "opt_in_license_required",
+        "blocker_code": "OPT_IN_LICENSE_REQUIRED",
+        "v246_correction_reason": "agpl_license_gate_retention",
+    },
+    "yolov8x-seg.pt": {
+        "final_state": "opt_in_license_required",
+        "blocker_code": "OPT_IN_LICENSE_REQUIRED",
+        "v246_correction_reason": "agpl_license_gate_retention",
+    },
+    "yolov8x.pt": {
+        "final_state": "opt_in_license_required",
+        "blocker_code": "OPT_IN_LICENSE_REQUIRED",
+        "v246_correction_reason": "agpl_license_gate_retention",
+    },
+    "totalsegmentator": {
+        "final_state": "opt_in_license_required",
+        "blocker_code": "OPT_IN_LICENSE_REQUIRED",
+        "v246_correction_reason": "non_commercial_license_gate_retention",
+    },
 }
 
 
@@ -545,6 +651,10 @@ def _resolve_one_model(
         "license_blocked",
         "manual_checkpoint_required",
         "checkpoint_downloaded",
+        # v2.46: explicit license-truth / alias / registry-fix corrections always
+        # win over the v2.45 evidence row (which was based on the false license
+        # flag).
+        "wired",
     }
     if correction_state:
         candidates.append(
@@ -928,6 +1038,26 @@ def reconcile(
             cat = _STATE_TO_CATEGORY.get(final_state, "unclassified")
         row.blocker_category = cat
 
+        # v2.46: attach the runtime broker's view (model_id -> runtime_id) so the
+        # ledger explicitly records which sidecar/env is responsible for this row.
+        try:
+            from visionservex.runtime_broker import RuntimeBroker
+
+            _broker_singleton = getattr(_row_to_dict, "_broker_singleton", None)
+            if _broker_singleton is None:
+                _broker_singleton = RuntimeBroker()
+                _row_to_dict._broker_singleton = _broker_singleton  # type: ignore[attr-defined]
+            _routing_table = _broker_singleton.routing()
+            row.extras["runtime_id"] = _routing_table.get(row.model_id, "")
+        except Exception:
+            row.extras.setdefault("runtime_id", "")
+
+        # v2.46: surface command attempted + next-iteration command + reconciled state.
+        row.extras["command_attempted"] = row.attempted_command or ""
+        row.extras["next_iteration_command"] = row.manual_fix_command or ""
+        row.extras["source_registry_state"] = row.registry_status or ""
+        row.extras["reconciled_execution_state"] = row.execution_status or ""
+
         rows.append(row)
 
     summary: dict[str, int] = {}
@@ -1001,6 +1131,17 @@ def _row_to_dict(row: ReconciledRow) -> dict[str, Any]:
         # v2.44 honesty columns
         "metric_origin": row.extras.get("metric_origin", ""),
         "artifact_generation_mode": row.extras.get("artifact_generation_mode", ""),
+        # v2.46 broker columns
+        "runtime_id": row.extras.get("runtime_id", ""),
+        "command_attempted": row.extras.get("command_attempted", row.attempted_command or ""),
+        "exact_error_message_tail": row.extras.get("exact_error_message_tail", ""),
+        "next_iteration_command": row.extras.get(
+            "next_iteration_command", row.manual_fix_command or ""
+        ),
+        "source_registry_state": row.extras.get("source_registry_state", row.registry_status or ""),
+        "reconciled_execution_state": row.extras.get(
+            "reconciled_execution_state", row.execution_status or ""
+        ),
     }
 
 

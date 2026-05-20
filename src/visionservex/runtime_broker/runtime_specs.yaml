@@ -68,6 +68,10 @@ runtimes:
       - prithvi-eo-2.0
       - grounding-dino-1.5
       - grounding-dino-1.6
+      - anomalib-patchcore
+      - florence-2-base
+      - florence-2-large
+      - swinv2-large
 
   - id: rtdetrv4_py311_torch
     description: "RT-DETRv4 sidecar (Python 3.11, torch >=2.6, gdown checkpoint pull)."
@@ -293,6 +297,7 @@ runtimes:
       - rtmdet-r-t
       - rtmdet-r2-l
       - rtmdet-r2-m
+      - rtmdet-r2-s
       - rtmdet-r2-t
 
   - id: obb_mmrotate_legacy_py39
@@ -354,7 +359,13 @@ runtimes:
         description: "MMPose import failed; likely mmcv/torch mismatch."
         next_action: "Rerun mim install with matching torch."
     fallback_runtime: null
-    supported_models: []
+    supported_models:
+      - rtmpose-l
+      - rtmpose-l-384x288
+      - rtmpose-m
+      - rtmpose-m-384x288
+      - rtmpose-s
+      - rtmpose-t
 
   - id: oneformer_natten_py310
     description: "OneFormer DiNAT + NATTEN compat shim sidecar (Python 3.10). Ships natten_compat shim that monkeypatches natten2dqkrpb to na2d_qk so Transformers 5.x DiNAT works."
@@ -545,6 +556,9 @@ runtimes:
     fallback_runtime: null
     supported_models:
       - edgesam
+      - efficientsam
+      - hq-sam
+      - mobilesam
 
   - id: medical_medsam2_py310
     description: "MedSAM2 medical 3D segmentation sidecar (Python 3.10, torch 2.0)."
@@ -592,6 +606,7 @@ runtimes:
     fallback_runtime: null
     supported_models:
       - medsam2
+      - nnunet-v2
 
   - id: seem_xdecoder_container
     description: "SEEM + X-Decoder universal-segmentation sidecar. Container path strongly recommended due to OpenMPI + multi-repo complexity."
@@ -641,6 +656,55 @@ runtimes:
     supported_models:
       - seem-davit-d3
       - seem-focal-t
+
+  - id: reid_torchreid_py310
+    description: "OSNet / Person-ReID sidecar (Python 3.10, torchreid from KaiyangZhou/deep-person-reid)."
+    env_type: conda
+    python_version: "3.10"
+    torch_version: "==2.1.2"
+    cuda_version: cu121
+    pip_packages:
+      - "torch==2.1.2"
+      - "torchvision==0.16.2"
+      - "opencv-python"
+      - "Cython"
+      - "gdown"
+      - "tb-nightly"
+      - "yacs"
+      - "future"
+    conda_packages: []
+    git_repos:
+      - url: "https://github.com/KaiyangZhou/deep-person-reid"
+        target: "~/.cache/visionservex/sidecars/torchreid/deep-person-reid"
+        ref: master
+        post_install: "pip install -e ."
+    custom_ops: []
+    checkpoint_sources:
+      - url: "https://drive.google.com/uc?id=1vduhq5DpN2q1g4fYEZfPI17MJeh9qyrA"
+        target_path: "~/.cache/visionservex/checkpoints/torchreid/osnet_x1_0_imagenet.pth"
+        env_var_token: null
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.torchreid:to_canonical_reid"
+    smoke_command: ["visionservex", "reid", "smoke", "--model", "{model_id}", "--input", "{input}"]
+    contract_command: ["visionservex", "reid", "contract-run", "--model", "{model_id}", "--input", "{input}"]
+    benchmark_command: ["visionservex", "reid", "benchmark", "--models", "{model_id}"]
+    known_failure_modes:
+      - code: TORCHREID_REPO_CLONE_FAILED
+        description: "Clone of KaiyangZhou/deep-person-reid failed."
+        next_action: "Retry or mirror."
+      - code: TORCHREID_IMPORT_FAILED
+        description: "torchreid import failed after install."
+        next_action: "Verify pip install -e . succeeded; check PYTHONPATH."
+      - code: TORCHREID_CHECKPOINT_NOT_FOUND
+        description: "OSNet checkpoint not at expected path."
+        next_action: "Use the repo's MODEL_ZOO links to fetch."
+      - code: TORCHREID_OUTPUT_ADAPTER_MISSING
+        description: "Output adapter for ReID embeddings not registered."
+        next_action: "Register in runtime_broker.adapters.torchreid."
+    fallback_runtime: null
+    supported_models:
+      - osnet-x1.0
 
   - id: license_gate_runtime
     description: "License gate runtime. Models behind AGPL-3.0, PML 1.0, or other restrictive licenses route here. Refuses unless user supplied matching --accept-* flag and env var."
