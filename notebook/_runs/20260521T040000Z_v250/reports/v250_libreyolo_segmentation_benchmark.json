@@ -1,0 +1,323 @@
+{
+  "benchmark_type": "libreyolo_coco_instance_segmentation",
+  "dataset": "coco-instance-seg:/home/arash/datasets/coco_val2017_400_vsx/annotations.json",
+  "n_images": 400,
+  "models": [
+    {
+      "model_id": "libreyolo-rfdetr-n-seg",
+      "status": "ok",
+      "code": "OK",
+      "mask_mAP50_95": 0.0003,
+      "mask_AP50": 0.0004,
+      "mask_AP75": 0.0004,
+      "mean_iou": null,
+      "latency_ms_p50": 11.8,
+      "fps": 74.6,
+      "n_images": 400,
+      "observed_schema": {
+        "has_boxes": true,
+        "has_masks": true,
+        "n_classes": 80
+      },
+      "error": null
+    },
+    {
+      "model_id": "libreyolo-rfdetr-s-seg",
+      "status": "ok",
+      "code": "OK",
+      "mask_mAP50_95": 0.0008,
+      "mask_AP50": 0.0012,
+      "mask_AP75": 0.0007,
+      "mean_iou": null,
+      "latency_ms_p50": 12.9,
+      "fps": 71.7,
+      "n_images": 400,
+      "observed_schema": {
+        "has_boxes": true,
+        "has_masks": true,
+        "n_classes": 80
+      },
+      "error": null
+    },
+    {
+      "model_id": "libreyolo-rfdetr-m-seg",
+      "status": "ok",
+      "code": "OK",
+      "mask_mAP50_95": 0.0002,
+      "mask_AP50": 0.0003,
+      "mask_AP75": 0.0003,
+      "mean_iou": null,
+      "latency_ms_p50": 14.4,
+      "fps": 65.5,
+      "n_images": 400,
+      "observed_schema": {
+        "has_boxes": true,
+        "has_masks": true,
+        "n_classes": 80
+      },
+      "error": null
+    },
+    {
+      "model_id": "libreyolo-rfdetr-l-seg",
+      "status": "ok",
+      "code": "OK",
+      "mask_mAP50_95": 0.0002,
+      "mask_AP50": 0.0003,
+      "mask_AP75": 0.0003,
+      "mean_iou": null,
+      "latency_ms_p50": 15.5,
+      "fps": 64.4,
+      "n_images": 400,
+      "observed_schema": {
+        "has_boxes": true,
+        "has_masks": true,
+        "n_classes": 80
+      },
+      "error": null
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r18-seg",
+      "status": "capability_mismatch",
+      "code": "LIBREYOLO_SEG_MASK_OUTPUT_NOT_AVAILABLE",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {
+        "has_boxes": true,
+        "has_masks": false,
+        "n_classes": 80
+      },
+      "error": "Weight stem has -seg suffix but model.predict().masks is None. This model only emits detection boxes, no segmentation masks."
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r34-seg",
+      "status": "capability_mismatch",
+      "code": "LIBREYOLO_SEG_MASK_OUTPUT_NOT_AVAILABLE",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {
+        "has_boxes": true,
+        "has_masks": false,
+        "n_classes": 80
+      },
+      "error": "Weight stem has -seg suffix but model.predict().masks is None. This model only emits detection boxes, no segmentation masks."
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r50-seg",
+      "status": "capability_mismatch",
+      "code": "LIBREYOLO_SEG_MASK_OUTPUT_NOT_AVAILABLE",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {
+        "has_boxes": true,
+        "has_masks": false,
+        "n_classes": 80
+      },
+      "error": "Weight stem has -seg suffix but model.predict().masks is None. This model only emits detection boxes, no segmentation masks."
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r50m-seg",
+      "status": "capability_mismatch",
+      "code": "LIBREYOLO_SEG_MASK_OUTPUT_NOT_AVAILABLE",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {
+        "has_boxes": true,
+        "has_masks": false,
+        "n_classes": 80
+      },
+      "error": "Weight stem has -seg suffix but model.predict().masks is None. This model only emits detection boxes, no segmentation masks."
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r101-seg",
+      "status": "capability_mismatch",
+      "code": "LIBREYOLO_SEG_MASK_OUTPUT_NOT_AVAILABLE",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {
+        "has_boxes": true,
+        "has_masks": false,
+        "n_classes": 80
+      },
+      "error": "Weight stem has -seg suffix but model.predict().masks is None. This model only emits detection boxes, no segmentation masks."
+    },
+    {
+      "model_id": "libreyolo-dfine-n-seg",
+      "status": "failed",
+      "code": "CHECKPOINT_NOT_PUBLISHED",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {},
+      "error": "Weight not in cache; not published on HF: LibreDFINEn-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-dfine-s-seg",
+      "status": "failed",
+      "code": "CHECKPOINT_NOT_PUBLISHED",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {},
+      "error": "Weight not in cache; not published on HF: LibreDFINEs-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-dfine-m-seg",
+      "status": "failed",
+      "code": "CHECKPOINT_NOT_PUBLISHED",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {},
+      "error": "Weight not in cache; not published on HF: LibreDFINEm-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-dfine-l-seg",
+      "status": "failed",
+      "code": "CHECKPOINT_NOT_PUBLISHED",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {},
+      "error": "Weight not in cache; not published on HF: LibreDFINEl-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-dfine-x-seg",
+      "status": "failed",
+      "code": "CHECKPOINT_NOT_PUBLISHED",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {},
+      "error": "Weight not in cache; not published on HF: LibreDFINEx-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-yolox-n-seg",
+      "status": "failed",
+      "code": "CHECKPOINT_NOT_PUBLISHED",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {},
+      "error": "Weight not in cache; not published on HF: LibreYOLOXn-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-yolox-t-seg",
+      "status": "failed",
+      "code": "CHECKPOINT_NOT_PUBLISHED",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {},
+      "error": "Weight not in cache; not published on HF: LibreYOLOXt-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-yolox-s-seg",
+      "status": "failed",
+      "code": "CHECKPOINT_NOT_PUBLISHED",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {},
+      "error": "Weight not in cache; not published on HF: LibreYOLOXs-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-yolox-m-seg",
+      "status": "failed",
+      "code": "CHECKPOINT_NOT_PUBLISHED",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {},
+      "error": "Weight not in cache; not published on HF: LibreYOLOXm-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-yolox-l-seg",
+      "status": "failed",
+      "code": "CHECKPOINT_NOT_PUBLISHED",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {},
+      "error": "Weight not in cache; not published on HF: LibreYOLOXl-seg.pt"
+    },
+    {
+      "model_id": "libreyolo-yolox-x-seg",
+      "status": "failed",
+      "code": "CHECKPOINT_NOT_PUBLISHED",
+      "mask_mAP50_95": null,
+      "mask_AP50": null,
+      "mask_AP75": null,
+      "mean_iou": null,
+      "latency_ms_p50": null,
+      "fps": null,
+      "n_images": 400,
+      "observed_schema": {},
+      "error": "Weight not in cache; not published on HF: LibreYOLOXx-seg.pt"
+    }
+  ]
+}

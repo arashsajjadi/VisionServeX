@@ -59,6 +59,10 @@ STATE_PRIORITY: dict[str, int] = {
     "micro_benchmark_passed": 72,  # slightly above smoke — latency/schema bench without full GT
     "dataset_required": 38,  # benchmark valid but dataset missing — precise blockers group
     "benchmark_failed": 35,  # ran benchmark but failed — different from sidecar_required
+    # v2.50 capability states
+    "model_capability_mismatch": 36,  # weight name claims capability that model doesn't support
+    "checkpoint_not_published": 37,  # weight file not published on HF (401/404)
+    "benchmark_implementation_required": 34,  # adapter implementation needed
     # Precise external blockers (with a code attached)
     "sidecar_required": 40,
     "auth_required": 40,
@@ -153,8 +157,7 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     "libreyolo-yolox-n": {"final_state": "benchmark_passed", "blocker_code": ""},
     "libreyolo-yolox-s": {"final_state": "benchmark_passed", "blocker_code": ""},
     # SAM2 tiny variants — contract_passed (output schema validated)
-    "sam2-hiera-tiny": {"final_state": "contract_passed", "blocker_code": ""},
-    "sam2.1-hiera-tiny": {"final_state": "contract_passed", "blocker_code": ""},
+    # sam2-hiera-tiny/sam2.1-hiera-tiny moved to benchmark_passed in v2.50 (see SAM block below)
     "rfdetr-seg-xlarge": {
         "final_state": "opt_in_license_required",
         "blocker_code": "OPT_IN_LICENSE_REQUIRED",
@@ -278,22 +281,30 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     "grounding-dino-swin-t": {"final_state": "contract_passed", "blocker_code": ""},
     "grounding-dino-swin-b": {"final_state": "contract_passed", "blocker_code": ""},
     "grounding-dino-tiny": {"final_state": "contract_passed", "blocker_code": ""},
-    # v2.49 zero-smoke: Foundation/promptable segmentation — contract_passed.
-    # Models load and produce masks; output schema validated. Full benchmark
-    # requires promptable segmentation dataset with GT masks.
+    # v2.50 SAM family — promotable to benchmark_passed via COCO bbox-prompt benchmark.
+    # 12 SAM variants benchmarked on COCO val2017 instance masks with mean_iou:
+    #   sam-vit-base (0.7612), sam-vit-large (0.7707), sam-vit-huge (0.7705),
+    #   sam2-hiera-tiny (0.7620), sam2-hiera-small (0.7491), sam2-hiera-base-plus (0.7753),
+    #   sam2-hiera-large (0.7794), sam2.1-hiera-tiny (0.7554), sam2.1-hiera-small (0.7628),
+    #   sam2.1-hiera-base-plus (0.7652), sam2.1-hiera-large (0.7815), medsam (0.4981).
+    # Artifact: notebook/_runs/20260521T040000Z_v250/reports/v250_promptable_segmentation_benchmark.json
+    "sam-vit-base": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "sam-vit-large": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "sam-vit-huge": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "sam2-hiera-tiny": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "sam2-hiera-small": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "sam2-hiera-base-plus": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "sam2-hiera-large": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "sam2.1-hiera-tiny": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "sam2.1-hiera-small": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "sam2.1-hiera-base-plus": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "sam2.1-hiera-large": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "medsam": {"final_state": "benchmark_passed", "blocker_code": ""},
+    # Distilled SAM variants — benchmark returned expected_blocker (dep issue);
+    # contract validated via smoke test in earlier session.
     "efficientsam": {"final_state": "contract_passed", "blocker_code": ""},
     "hq-sam": {"final_state": "contract_passed", "blocker_code": ""},
     "mobilesam": {"final_state": "contract_passed", "blocker_code": ""},
-    "medsam": {"final_state": "contract_passed", "blocker_code": ""},
-    "sam-vit-base": {"final_state": "contract_passed", "blocker_code": ""},
-    "sam-vit-large": {"final_state": "contract_passed", "blocker_code": ""},
-    "sam-vit-huge": {"final_state": "contract_passed", "blocker_code": ""},
-    "sam2-hiera-base-plus": {"final_state": "contract_passed", "blocker_code": ""},
-    "sam2-hiera-large": {"final_state": "contract_passed", "blocker_code": ""},
-    "sam2-hiera-small": {"final_state": "contract_passed", "blocker_code": ""},
-    "sam2.1-hiera-base-plus": {"final_state": "contract_passed", "blocker_code": ""},
-    "sam2.1-hiera-large": {"final_state": "contract_passed", "blocker_code": ""},
-    "sam2.1-hiera-small": {"final_state": "contract_passed", "blocker_code": ""},
     # Embedding models — contract_passed (embed runs, output shape validated).
     "clip-vit-base-patch32": {"final_state": "contract_passed", "blocker_code": ""},
     "clip-vit-large-patch14": {"final_state": "contract_passed", "blocker_code": ""},
@@ -369,15 +380,51 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "COCO_KEYPOINTS_MISSING",
         "v246_correction_reason": "coco_keypoints_val_mini_not_present",
     },
-    # LibreYOLO segmentation — dataset_required (benchmark-segmentation returns
-    # SEGMENTATION_BENCHMARK_NOT_IMPLEMENTED for libreyolo engine).
-    # Exact blocker: visionservex benchmark-segmentation returns NOT_IMPLEMENTED.
-    # Next: implement libreyolo-seg engine adapter in benchmark-segmentation.
+    # v2.50 LibreYOLO segmentation — adapter implemented in scripts/libreyolo_coco_seg_benchmark.py.
+    # Capability probe revealed three distinct classes of -seg weights:
+    # 1. RFDETR-seg (n/s/m/l): mask output is present, benchmark passed on 400-image COCO.
+    "libreyolo-rfdetr-n-seg": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v250_libreyolo_seg_adapter_rfdetr_mask_benchmark",
+    },
+    "libreyolo-rfdetr-s-seg": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v250_libreyolo_seg_adapter_rfdetr_mask_benchmark",
+    },
+    "libreyolo-rfdetr-m-seg": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v250_libreyolo_seg_adapter_rfdetr_mask_benchmark",
+    },
+    "libreyolo-rfdetr-l-seg": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v250_libreyolo_seg_adapter_rfdetr_mask_benchmark",
+    },
+    # 2. RTDETR-seg (r18/r34/r50/r50m/r101): weight file ends with -seg but
+    # model.predict().masks is None — only emits detection boxes. capability_mismatch.
     **{
         mid: {
-            "final_state": "dataset_required",
-            "blocker_code": "SEGMENTATION_BENCHMARK_NOT_IMPLEMENTED",
-            "v246_correction_reason": "libreyolo_seg_engine_not_wired_in_benchmark_segmentation",
+            "final_state": "model_capability_mismatch",
+            "blocker_code": "LIBREYOLO_SEG_MASK_OUTPUT_NOT_AVAILABLE",
+            "v246_correction_reason": "v250_libreyolo_rtdetr_seg_no_mask_output",
+        }
+        for mid in (
+            "libreyolo-rtdetr-r18-seg",
+            "libreyolo-rtdetr-r34-seg",
+            "libreyolo-rtdetr-r50-seg",
+            "libreyolo-rtdetr-r50m-seg",
+            "libreyolo-rtdetr-r101-seg",
+        )
+    },
+    # 3. YOLOX-seg + DFINE-seg + RTDETR-{l,x}-seg + RFDETR-x-seg: not published on HF (401/404).
+    **{
+        mid: {
+            "final_state": "checkpoint_not_published",
+            "blocker_code": "HF_404_OR_401",
+            "v246_correction_reason": "v250_libreyolo_seg_weight_not_published_on_hf",
         }
         for mid in (
             "libreyolo-dfine-l-seg",
@@ -385,16 +432,7 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
             "libreyolo-dfine-n-seg",
             "libreyolo-dfine-s-seg",
             "libreyolo-dfine-x-seg",
-            "libreyolo-rfdetr-l-seg",
-            "libreyolo-rfdetr-m-seg",
-            "libreyolo-rfdetr-n-seg",
-            "libreyolo-rfdetr-s-seg",
             "libreyolo-rtdetr-l-seg",
-            "libreyolo-rtdetr-r101-seg",
-            "libreyolo-rtdetr-r18-seg",
-            "libreyolo-rtdetr-r34-seg",
-            "libreyolo-rtdetr-r50-seg",
-            "libreyolo-rtdetr-r50m-seg",
             "libreyolo-rtdetr-x-seg",
             "libreyolo-yolox-l-seg",
             "libreyolo-yolox-m-seg",
@@ -940,6 +978,11 @@ def _resolve_one_model(
         "dataset_required",
         "benchmark_failed",
         "benchmark_passed",
+        # v2.50: capability/adapter states are evidence-grounded and must win
+        # over any default fallback states.
+        "model_capability_mismatch",
+        "checkpoint_not_published",
+        "benchmark_implementation_required",
     }
     if correction_state:
         candidates.append(
@@ -1393,6 +1436,10 @@ def reconcile(
                 "micro_benchmark_passed": "micro_benchmark_artifact",
                 "dataset_required": "dataset_required_gate",
                 "benchmark_failed": "benchmark_failed_artifact",
+                # v2.50 capability/adapter states
+                "model_capability_mismatch": "capability_mismatch_artifact",
+                "checkpoint_not_published": "checkpoint_not_published_gate",
+                "benchmark_implementation_required": "implementation_required_gate",
             }.get(final_state, "status_gate")
 
         row.extras["metric_origin"] = metric_origin
@@ -1444,6 +1491,10 @@ def reconcile(
                 "micro_benchmark_passed": "none",
                 "dataset_required": "dataset",
                 "benchmark_failed": "benchmark",
+                # v2.50 capability/adapter states
+                "model_capability_mismatch": "model_capability",
+                "checkpoint_not_published": "checkpoint_source",
+                "benchmark_implementation_required": "adapter_implementation",
             }
             cat = _STATE_TO_CATEGORY.get(final_state, "unclassified")
         row.blocker_category = cat
@@ -1476,6 +1527,15 @@ def reconcile(
         # v2.47: derive next_iteration_command from final_state when still blank.
         if not row.extras["next_iteration_command"]:
             row.extras["next_iteration_command"] = row.extras["command_attempted"]
+
+        # v2.50: derive dataset_prepare_command for dataset_required rows.
+        if row.final_state == "dataset_required" and not row.extras.get("dataset_prepare_command"):
+            row.extras["dataset_prepare_command"] = _derive_dataset_prepare_command(
+                row.model_id, row.blocker_code
+            )
+            # Replace generic next_iteration_command with the prepare command.
+            if "models status" in row.extras.get("next_iteration_command", ""):
+                row.extras["next_iteration_command"] = row.extras["dataset_prepare_command"]
 
         # v2.47: populate execution_origin from metric_origin + final_state.
         row.extras["execution_origin"] = _derive_execution_origin(
@@ -1521,6 +1581,10 @@ def reconcile(
                 "benchmark_failed",
                 "checkpoint_required",
                 "wired",
+                # v2.50: capability/adapter states must also be preserved
+                "model_capability_mismatch",
+                "checkpoint_not_published",
+                "benchmark_implementation_required",
             }
             current_is_weaker = (
                 _priority(prev_state) > _priority(row.final_state)
@@ -1610,6 +1674,43 @@ _HEALTHY_STATES_V247: frozenset[str] = frozenset(
         "partial",
     }
 )
+
+
+def _derive_dataset_prepare_command(model_id: str, blocker_code: str) -> str:
+    """v2.50: derive exact dataset preparation command for dataset_required rows.
+
+    Maps blocker_code → concrete `visionservex dataset prepare-*` invocation.
+    """
+    mapping = {
+        "IMAGENET_DATASET_MISSING": (
+            "visionservex dataset prepare-imagenette-mini --download-if-missing "
+            "--classes 10 --images-per-class 50 "
+            "--out /home/arash/datasets/imagenette_mini_vsx"
+        ),
+        "COCO_KEYPOINTS_MISSING": (
+            "visionservex dataset prepare-coco-keypoints-mini "
+            "--coco-root /home/arash/datasets/coco --split val2017 --limit 400 "
+            "--out /home/arash/datasets/coco_keypoints_val_mini_vsx"
+        ),
+        "REID_DATASET_MISSING": (
+            "visionservex dataset prepare-market1501-mini "
+            "--source /home/arash/datasets/Market-1501-v15.09.15 "
+            "--query-per-id 2 --gallery-per-id 5 "
+            "--out /home/arash/datasets/market1501_mini_vsx"
+        ),
+        "MVTEC_DATASET_MISSING": (
+            "visionservex dataset prepare-mvtec-mini "
+            "--source /home/arash/datasets/mvtec_anomaly_detection "
+            "--categories bottle,cable,hazelnut --max-test 100 "
+            "--out /home/arash/datasets/mvtec_ad_mini_vsx"
+        ),
+        "MEDICAL_SEGMENTATION_DATASET_MISSING": (
+            "visionservex dataset prepare-medical-seg-mini "
+            "--source /home/arash/datasets/medical_segmentation "
+            "--out /home/arash/datasets/medical_seg_mini_vsx"
+        ),
+    }
+    return mapping.get(blocker_code, "")
 
 
 def _derive_command_attempted(
@@ -1766,6 +1867,8 @@ def _row_to_dict(row: ReconciledRow) -> dict[str, Any]:
         "next_iteration_command": row.extras.get(
             "next_iteration_command", row.manual_fix_command or ""
         ),
+        # v2.50: explicit dataset prep command for dataset_required rows.
+        "dataset_prepare_command": row.extras.get("dataset_prepare_command", ""),
         "source_registry_state": row.extras.get("source_registry_state", row.registry_status or ""),
         "reconciled_execution_state": row.extras.get(
             "reconciled_execution_state", row.execution_status or ""
@@ -1917,6 +2020,29 @@ def _compute_final_winners(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "detection_headline_external_restricted": "yolo26x.pt (mAP50:95=0.4894, AGPL-3.0, excluded from core)",
         "segmentation_headline_external_restricted": "yolo26x-seg.pt (mask_mAP50_95=0.2728, AGPL-3.0, excluded from core)",
     }
+
+
+def validate_artifact_run_id(payload: dict[str, Any], run_id: str) -> list[str]:
+    """v2.50: validate that benchmark_passed + current_rerun rows reference the current run_id.
+
+    Returns a list of complaints; empty list means OK. Used after RUN_ALL to
+    catch rows that claim current execution but point at historical artifacts.
+    """
+    issues: list[str] = []
+    if not run_id:
+        return issues
+    for r in payload.get("rows", []):
+        if r.get("final_state") != "benchmark_passed":
+            continue
+        if r.get("metric_origin") != "current_rerun":
+            continue
+        artifact = str(r.get("evidence_artifact") or "")
+        if run_id not in artifact and artifact:
+            issues.append(
+                f"{r['model_id']}: benchmark_passed + current_rerun but evidence_artifact "
+                f"({artifact!r}) does not contain current RUN_ID {run_id!r}"
+            )
+    return issues
 
 
 def fail_on_stale(payload: dict[str, Any]) -> list[str]:
