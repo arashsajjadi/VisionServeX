@@ -37,6 +37,7 @@ MMPOSE_MODEL_CONFIGS = {
         "config": str(CONFIGS_DIR / "rtmpose-t_8xb256-420e_coco-256x192.py"),
         "checkpoint": str(CONFIGS_DIR / "rtmpose-tiny_simcc-aic-coco_pt-aic-coco_420e-256x192-cfc8f33d_20230126.pth"),
         "input_size": (256, 192),
+        "config_source": "github:open-mmlab/mmpose/configs/body_2d_keypoint/rtmpose/coco/",
     },
     "rtmpose-s": {
         "config": str(CONFIGS_DIR / "rtmpose-s_8xb256-420e_coco-256x192.py"),
@@ -56,16 +57,16 @@ MMPOSE_MODEL_CONFIGS = {
     # 384x288 configs not available in mim registry for this mmpose version.
     # Marked as RTMPOSE_CONFIG_NOT_IN_MIM_REGISTRY.
     "rtmpose-m-384x288": {
-        "config": None,
-        "checkpoint": None,
+        "config": str(CONFIGS_DIR / "rtmpose-m_8xb256-420e_aic-coco-384x288.py"),
+        "checkpoint": str(CONFIGS_DIR / "rtmpose-m_simcc-aic-coco_pt-aic-coco_420e-384x288-a62a0b32_20230228.pth"),
         "input_size": (384, 288),
-        "unavailable": "RTMPOSE_CONFIG_NOT_IN_MIM_REGISTRY",
+        "config_source": "github:open-mmlab/mmpose/configs/body_2d_keypoint/rtmpose/coco/",
     },
     "rtmpose-l-384x288": {
-        "config": None,
-        "checkpoint": None,
+        "config": str(CONFIGS_DIR / "rtmpose-l_8xb256-420e_aic-coco-384x288.py"),
+        "checkpoint": str(CONFIGS_DIR / "rtmpose-l_simcc-aic-coco_pt-aic-coco_420e-384x288-97d6cb0f_20230228.pth"),
         "input_size": (384, 288),
-        "unavailable": "RTMPOSE_CONFIG_NOT_IN_MIM_REGISTRY",
+        "config_source": "github:open-mmlab/mmpose/configs/body_2d_keypoint/rtmpose/coco/",
     },
 }
 
@@ -118,7 +119,7 @@ def _run_model(model_id: str, coco_gt, img_ids: list) -> dict:
         return result
 
     import torch
-    device = "cpu"  # Force CPU: openmmlab env torch (cu121) incompatible with RTX5080 (sm_120)
+    device = "cpu"  # mmcv ABI incompatible with cu130; GPU latency measured separately
     result["device"] = device
 
     try:

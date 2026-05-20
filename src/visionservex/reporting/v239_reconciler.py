@@ -483,23 +483,24 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "",
         "v246_correction_reason": "v253_coco_kp_oks_ap=0.7248_gt_box_topdown",
     },
-    # rtmpose-t config downloaded by mim is CrowdPose (14-kp), not COCO.
-    # Correct COCO config name not found in mim registry for mmpose 1.3.x.
+    # rtmpose-t: mim config is CrowdPose (14-kp); AIC-COCO config backbone mismatches checkpoint.
+    # No matching COCO config+checkpoint pair resolvable from mim or GitHub for mmpose 1.3.x.
     "rtmpose-t": {
         "final_state": "benchmark_failed",
-        "blocker_code": "RTMPOSE_T_CONFIG_CROWDPOSE_MISLABELED",
-        "v246_correction_reason": "v253_mim_downloaded_crowdpose_config_instead_of_coco",
+        "blocker_code": "RTMPOSE_T_CONFIG_CHECKPOINT_MISMATCH",
+        "v246_correction_reason": "v254_aic_coco_config_backbone_24ch_vs_checkpoint_12ch_mismatch",
     },
-    # 384x288 configs not in mim registry for mmpose 1.3.x.
+    # v2.54: 384x288 models benchmarked on COCO keypoints mini (AIC-COCO config from mim).
+    # GT-box top-down, CPU (mmcv ABI incompatible with cu130 for GPU).
     "rtmpose-m-384x288": {
-        "final_state": "benchmark_failed",
-        "blocker_code": "RTMPOSE_CONFIG_NOT_IN_MIM_REGISTRY",
-        "v246_correction_reason": "v253_384x288_config_missing_mim_registry_mmpose_1.3.x",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v254_coco_kp_oks_ap=0.7344_gt_box_topdown_cpu",
     },
     "rtmpose-l-384x288": {
-        "final_state": "benchmark_failed",
-        "blocker_code": "RTMPOSE_CONFIG_NOT_IN_MIM_REGISTRY",
-        "v246_correction_reason": "v253_384x288_config_missing_mim_registry_mmpose_1.3.x",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v254_coco_kp_oks_ap=0.7446_gt_box_topdown_cpu",
     },
     # v2.50 LibreYOLO segmentation — adapter implemented in scripts/libreyolo_coco_seg_benchmark.py.
     # Capability probe revealed three distinct classes of -seg weights:
