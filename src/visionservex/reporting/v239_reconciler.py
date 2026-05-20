@@ -138,6 +138,23 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "",
     },
     "rfdetr-seg-large": {"final_state": "benchmark_passed", "blocker_code": ""},
+    # v2.48 benchmarks (also the canonical IDs for alias-referenced models)
+    "dfine-l-o365-coco": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "dfine-x-o365-coco": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "rfdetr-base": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "rfdetr-large": {"final_state": "benchmark_passed", "blocker_code": ""},
+    # v2.49 zero-smoke: rfdetr seg models — contract_passed (output schema validated)
+    "rfdetr-seg-medium": {"final_state": "contract_passed", "blocker_code": ""},
+    "rfdetr-seg-nano": {"final_state": "contract_passed", "blocker_code": ""},
+    "rfdetr-seg-small": {"final_state": "contract_passed", "blocker_code": ""},
+    # v2.48/v2.49 libreyolo detection benchmarks (canonical IDs)
+    "libreyolo-dfine-n": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-dfine-s": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-yolox-n": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "libreyolo-yolox-s": {"final_state": "benchmark_passed", "blocker_code": ""},
+    # SAM2 tiny variants — contract_passed (output schema validated)
+    "sam2-hiera-tiny": {"final_state": "contract_passed", "blocker_code": ""},
+    "sam2.1-hiera-tiny": {"final_state": "contract_passed", "blocker_code": ""},
     "rfdetr-seg-xlarge": {
         "final_state": "opt_in_license_required",
         "blocker_code": "OPT_IN_LICENSE_REQUIRED",
