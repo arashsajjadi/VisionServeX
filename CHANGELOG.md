@@ -3,6 +3,89 @@
 ## [Unreleased]
 
 
+## [2.47.0] - 2026-05-20
+
+### Added: runtime broker + ledger integrity sprint + model-scope correction
+
+**Before v2.46.x dev**: 91 healthy / 50 non-healthy (v2.45 baseline)
+**After  v2.47.0**:      **97 core healthy / 30 core non-healthy** (127 core rows after removing 14 restricted-license baselines)
+
+#### Pipeline integrity (static-ledger regression KILLED)
+
+The critical bug: `Final_Report.ipynb` cell 3 was hardcoded to read
+`archive_legacy/outputs/visionservex_master_outputs/final/model_coverage_ledger.csv`
+(the OLD 119×11-column static ledger) and then overwrite the reconciled detailed
+ledger. Every notebook run silently clobbered the schema. Fixed permanently:
+
+- `Final_Report.ipynb` rewritten as a read-only consumer with hard schema validation;
+  raises on `implementation_status` columns (old schema marker).
+- `RUN_ALL.ipynb` rewritten from a 3-cell wrapper to a real 10-cell orchestrator:
+  mints RUN_ID, cleans outputs, initialises call ledger, runs all task notebooks,
+  runs reconciler, validates schema (old-schema detection raises), runs benchmark-coverage
+  audit, generates external-restricted-baseline split, executes Final_Report, prints
+  verification block.
+- `clean-outputs --preserve-historical-evidence` (default True): preserves per-model
+  `*_current_run.json`, leaderboard CSVs/JSONs, and the reconciled ledger across runs
+  so the reconciler's historical_fallback never loses benchmark_passed evidence.
+
+#### New ledger columns (52 total, was 44)
+
+- `runtime_id` — which sidecar/env the broker routes this model to.
+- `command_attempted` — exact planned command (non-blank for all 127+ rows).
+- `next_iteration_command` — alias of command_attempted or manual_fix_command.
+- `exact_error_message_tail`, `source_registry_state`, `reconciled_execution_state`.
+- `covered_by_notebook` — True for all healthy + terminal-gated rows.
+- `execution_origin` — one of: current_run_executed, current_run_status_gate,
+  historical_validated, excluded_restricted_license, auth_required,
+  external_api_required, registry_alias, upstream_deprecated, official_source_not_found.
+
+#### Model-scope correction: 14 restricted-license models moved to external baselines
+
+`visionservex reports generate-external-baselines` splits the ledger:
+- **Core ledger** (127 rows): permissive-license VisionServeX models only.
+- **External restricted baselines** (14 rows): AGPL-3.0 Ultralytics (11),
+  PML-1.0 RF-DETR-Seg-XL/2XL (2), non-commercial TotalSegmentator (1).
+  These may appear in notebooks as EXTERNAL BASELINES; they are NOT counted
+  as healthy/non-healthy.
+
+Core healthy breakdown post-split:
+- smoke_passed + benchmark_passed + contract_passed + demo + wired: **97**
+- sidecar_required: 23; auth_required: 3; external_api_only: 3; checkpoint_required: 1; other: 0
+
+#### New models (3 added)
+
+- `grounding-dino-original-swin-t` — Apache-2.0, local weights available, `wired`.
+- `grounding-dino-original-swin-b` — Apache-2.0, local weights available, `wired`.
+- `grounding-dino-2-audit` — `not_advertised / OFFICIAL_SOURCE_NOT_FOUND`. No official
+  Grounding-DINO 2 source exists as of 2026-05-20 (GitHub, HF, arXiv, DeepDataSpace checked).
+
+#### v2.46 corrections carried forward (all still apply)
+
+- `agriclip`: CC-BY 4.0 → `wired` (not AUDIT_ONLY).
+- `prithvi-eo-2.0`: Apache-2.0 → `wired` (not OPT_IN).
+- `dinov3-vitb16`: Meta-commercial-friendly → `wired`.
+- `deim-m` / `deim-s`: aliased to deimv2-m/s → `wired`.
+- `oneformer-convnext-large`: HF id remap → `wired`.
+- AGPL/PML retention: 12 Ultralytics + 2 RF-DETR-Seg-XL pinned to `opt_in_license_required`.
+
+#### Runtime broker (v2.46 prep, fully functional in v2.47)
+
+- 18 runtime specs in `runtime_specs.yaml` covering all 50 non-healthy models.
+- `visionservex runtime {list, doctor, explain, prepare, run, clean, export-locks}`.
+- `visionservex run <model_id> <input> [--accept-agpl] [--api-key ...]`.
+- `broker._execute_prepare` runs commands serially with 30-min hard cap (no longer a stub).
+
+#### Tests
+
+100 v2.46/v2.47 tests pass (10 test files).
+
+**Core ledger counts (v2.47.0):**
+- core_row_count: 127
+- external_restricted_baseline_count: 14
+- core_healthy: 97
+- core_non_healthy: 30
+
+
 ## [2.45.0] - 2026-05-19
 
 ### Added: exact 51-model recovery sprint, OBB/NATTEN/ByteTrack/license-gate infrastructure

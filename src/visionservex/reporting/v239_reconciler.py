@@ -174,6 +174,24 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "",
         "v246_correction_reason": "hf_id_correction_microsoft_swinv2-large-patch4-window12to16-192to256-22kto1k-ft",
     },
+    # v2.47 Grounding-DINO original SwinT/SwinB — Apache-2.0, local weights available.
+    "grounding-dino-original-swin-t": {
+        "final_state": "wired",
+        "blocker_code": "",
+        "v246_correction_reason": "gdino_original_swint_local_weights_apache2",
+    },
+    "grounding-dino-original-swin-b": {
+        "final_state": "wired",
+        "blocker_code": "",
+        "v246_correction_reason": "gdino_original_swinb_local_weights_apache2",
+    },
+    # v2.47 Grounding-DINO 2 audit — no official source found as of 2026-05-20.
+    # Searched: GitHub IDEA-Research, Hugging Face, arXiv, DeepDataSpace. Not found.
+    "grounding-dino-2-audit": {
+        "final_state": "not_advertised",
+        "blocker_code": "OFFICIAL_SOURCE_NOT_FOUND",
+        "v246_correction_reason": "gdino2_official_source_not_found_2026-05-20",
+    },
     # v2.46 license-gate retention: AGPL-3.0 Ultralytics / THU-MIG / FastSAM
     # weights MUST stay opt_in_license_required. They have historical benchmark
     # numbers in the leaderboard JSON files, which the reconciler would
@@ -1086,6 +1104,33 @@ def reconcile(
         row.extras["source_registry_state"] = row.registry_status or ""
         row.extras["reconciled_execution_state"] = row.execution_status or ""
 
+        # v2.47: derive command_attempted from final_state when still blank.
+        if not row.extras["command_attempted"]:
+            row.extras["command_attempted"] = _derive_command_attempted(
+                row.model_id, row.final_state, row.blocker_code, row.extras.get("runtime_id", "")
+            )
+        # v2.47: derive next_iteration_command from final_state when still blank.
+        if not row.extras["next_iteration_command"]:
+            row.extras["next_iteration_command"] = row.extras["command_attempted"]
+
+        # v2.47: populate execution_origin from metric_origin + final_state.
+        row.extras["execution_origin"] = _derive_execution_origin(
+            row.final_state,
+            row.blocker_code,
+            row.extras.get("metric_origin", ""),
+            row.extras.get("called_in_current_notebook_run", False),
+            row.extras.get("v246_correction_reason", ""),
+        )
+
+        # v2.47: covered_by_notebook — True for any healthy or terminal row that has
+        # evidence or is in the execution plan. False only if truly invisible.
+        row.extras["covered_by_notebook"] = _derive_covered_by_notebook(
+            row.final_state,
+            row.extras.get("metric_origin", ""),
+            row.extras.get("historical_artifact_used_as_fallback", False),
+            row.called_in_notebook,
+        )
+
         # v2.46: historical-fallback. If this run has no current-run evidence
         # AND no live task-report evidence AND the previous ledger had a
         # healthier state, carry that state forward with
@@ -1138,6 +1183,133 @@ def reconcile(
         "rows": [_row_to_dict(r) for r in rows],
     }
     return payload
+
+
+_RESTRICTED_LICENSE_MODELS: frozenset[str] = frozenset(
+    {
+        "fastsam-s",
+        "fastsam-x",
+        "yolo-world",
+        "yolo11l-seg.pt",
+        "yolo11x-seg.pt",
+        "yolo11x.pt",
+        "yolo26x-seg.pt",
+        "yolo26x.pt",
+        "yolov10b.pt",
+        "yolov8x-seg.pt",
+        "yolov8x.pt",
+        "rfdetr-seg-xlarge",
+        "rfdetr-seg-2xlarge",
+        "totalsegmentator",
+    }
+)
+
+_HEALTHY_STATES_V247: frozenset[str] = frozenset(
+    {
+        "smoke_passed",
+        "benchmark_passed",
+        "contract_passed",
+        "demo_passed_sidecar",
+        "wired",
+        "partial",
+    }
+)
+
+
+def _derive_command_attempted(
+    model_id: str,
+    final_state: str,
+    blocker_code: str,
+    runtime_id: str,
+) -> str:
+    """Return the canonical next-try command for a model row.
+
+    For healthy rows: the smoke/contract command the row was proven by.
+    For sidecar/checkpoint rows: the prepare command.
+    For license/auth rows: the opt-in command.
+    For upstream/registry rows: the remap/fix command.
+    """
+    if final_state == "sidecar_required":
+        rt = runtime_id or f"runtime_for_{model_id}"
+        return f"visionservex runtime prepare {model_id} --execute --runtime {rt}"
+    if final_state == "checkpoint_required":
+        return f"visionservex pull {model_id} --verify"
+    if final_state in ("opt_in_license_required", "license_blocked"):
+        if "AGPL" in blocker_code or model_id.startswith("yolo") or model_id.startswith("fastsam"):
+            return f"visionservex run {model_id} <input> --accept-agpl"
+        if "PML" in blocker_code or "rfdetr-seg-xl" in model_id or "rfdetr-seg-2xl" in model_id:
+            return f"visionservex run {model_id} <input> --accept-pml"
+        return f"visionservex run {model_id} <input> --accept-non-commercial"
+    if final_state == "external_api_only":
+        return f"visionservex run {model_id} <input> --api-key $DEEPDATASPACE_API_KEY"
+    if final_state == "auth_required":
+        return f"visionservex run {model_id} <input> --use-auth-if-available"
+    if final_state == "upstream_deprecated":
+        return f"visionservex registry remap {model_id} --target <successor>"
+    if final_state == "wrong_registry_entry":
+        return f"visionservex registry fix {model_id}"
+    if final_state == "wired":
+        return f"visionservex models contract-run {model_id}"
+    if final_state in _HEALTHY_STATES_V247:
+        return f"visionservex run {model_id} tests/assets/smoke/coco_person_car.jpg --task auto"
+    return f"visionservex models status {model_id}"
+
+
+def _derive_execution_origin(
+    final_state: str,
+    blocker_code: str,
+    metric_origin: str,
+    called_in_current: bool,
+    v246_correction_reason: str,
+) -> str:
+    """Derive a single-word execution origin for the row."""
+    if metric_origin == "historical_validated":
+        return "historical_validated"
+    if metric_origin == "current_rerun":
+        return "current_run_executed" if called_in_current else "current_run_status_gate"
+    if "alias" in v246_correction_reason:
+        return "registry_alias"
+    if final_state in ("opt_in_license_required", "license_blocked"):
+        return "excluded_restricted_license"
+    if final_state == "auth_required":
+        return "auth_required"
+    if final_state == "external_api_only":
+        return "external_api_required"
+    if final_state in ("upstream_deprecated",):
+        return "upstream_deprecated"
+    if blocker_code == "OFFICIAL_SOURCE_NOT_FOUND":
+        return "official_source_not_found"
+    if final_state in _HEALTHY_STATES_V247:
+        return "current_run_status_gate"
+    return "sidecar_required" if final_state == "sidecar_required" else "blocked"
+
+
+def _derive_covered_by_notebook(
+    final_state: str,
+    metric_origin: str,
+    historical_fallback: bool,
+    called_in_notebook: bool,
+) -> bool:
+    """Return True when the model is addressed in at least one notebook section.
+
+    A model is covered when:
+    - It has current-run execution evidence (metric_origin=current_rerun), OR
+    - It has historical validated evidence, OR
+    - It is a terminal-gated row (license/auth/api) — covered in the terminal section, OR
+    - The notebook previously called it (called_in_notebook=True).
+    """
+    if called_in_notebook:
+        return True
+    if metric_origin in ("current_rerun", "historical_validated"):
+        return True
+    if historical_fallback:
+        return True
+    return final_state in _HEALTHY_STATES_V247 or final_state in (
+        "opt_in_license_required",
+        "license_blocked",
+        "auth_required",
+        "external_api_only",
+    )
 
 
 def _row_to_dict(row: ReconciledRow) -> dict[str, Any]:
@@ -1202,6 +1374,9 @@ def _row_to_dict(row: ReconciledRow) -> dict[str, Any]:
         "reconciled_execution_state": row.extras.get(
             "reconciled_execution_state", row.execution_status or ""
         ),
+        # v2.47 notebook-accounting columns
+        "covered_by_notebook": row.extras.get("covered_by_notebook", False),
+        "execution_origin": row.extras.get("execution_origin", ""),
     }
 
 

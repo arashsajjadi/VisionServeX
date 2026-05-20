@@ -358,4 +358,212 @@ def verify_generated_artifacts_cmd(
         raise typer.Exit(6)
 
 
+@app.command("generate-external-baselines")
+def generate_external_baselines_cmd(
+    ledger_csv: Path = typer.Option(
+        Path("notebook/99_final_report/reports/model_coverage_ledger.csv"),
+        "--ledger",
+        help="Source model_coverage_ledger.csv (may still contain restricted rows).",
+    ),
+    core_out_csv: Path = typer.Option(
+        Path("notebook/99_final_report/reports/model_coverage_ledger.csv"),
+        "--core-out-csv",
+        help="Output path for the CORE ledger (restricted rows removed). Overwrites in-place by default.",
+    ),
+    core_out_json: Path = typer.Option(
+        Path("notebook/99_final_report/reports/model_coverage_ledger.json"),
+        "--core-out-json",
+    ),
+    ext_out_csv: Path = typer.Option(
+        Path("notebook/99_final_report/reports/external_restricted_baselines.csv"),
+        "--ext-out-csv",
+    ),
+    ext_out_json: Path = typer.Option(
+        Path("notebook/99_final_report/reports/external_restricted_baselines.json"),
+        "--ext-out-json",
+    ),
+    fmt: str = typer.Option("json", "--format", "-f"),
+) -> None:
+    """v2.47.0: split the model_coverage_ledger into core (127) and external-restricted (14) files.
+
+    Restricted models (AGPL-3.0 Ultralytics / FastSAM, PML-1.0 RF-DETR-Seg-XL,
+    non-commercial TotalSegmentator) are moved to external_restricted_baselines.csv
+    so they are never counted as core VisionServeX health metrics. They may still
+    appear in notebook comparison tables clearly labelled as EXTERNAL BASELINES.
+    """
+
+    import csv as _csv
+
+    _RESTRICTED: frozenset[str] = frozenset(
+        {
+            "fastsam-s",
+            "fastsam-x",
+            "yolo-world",
+            "yolo11l-seg.pt",
+            "yolo11x-seg.pt",
+            "yolo11x.pt",
+            "yolo26x-seg.pt",
+            "yolo26x.pt",
+            "yolov10b.pt",
+            "yolov8x-seg.pt",
+            "yolov8x.pt",
+            "rfdetr-seg-xlarge",
+            "rfdetr-seg-2xlarge",
+            "totalsegmentator",
+        }
+    )
+
+    _RESTRICTION_REASONS: dict[str, dict[str, str]] = {
+        "fastsam-s": {
+            "license_status": "AGPL-3.0",
+            "reason_excluded_from_core": "AGPL-3.0 weights; commercial use without opt-in prohibited",
+            "allowed_use_in_this_project": "baseline_only_with_opt-in",
+            "warning_text": "FastSAM weights are AGPL-3.0. Run with --accept-agpl to opt in.",
+        },
+        "fastsam-x": {
+            "license_status": "AGPL-3.0",
+            "reason_excluded_from_core": "AGPL-3.0 weights; commercial use without opt-in prohibited",
+            "allowed_use_in_this_project": "baseline_only_with_opt-in",
+            "warning_text": "FastSAM weights are AGPL-3.0. Run with --accept-agpl to opt in.",
+        },
+        "yolo-world": {
+            "license_status": "AGPL-3.0",
+            "reason_excluded_from_core": "Ultralytics AGPL-3.0; not default-safe",
+            "allowed_use_in_this_project": "baseline_only_with_opt-in",
+            "warning_text": "YOLO-World weights are AGPL-3.0. Run with --accept-agpl to opt in.",
+        },
+        "rfdetr-seg-xlarge": {
+            "license_status": "PML-1.0",
+            "reason_excluded_from_core": "Roboflow Platform Model License 1.0; requires registered account",
+            "allowed_use_in_this_project": "baseline_only_with_pml_opt-in",
+            "warning_text": "RF-DETR-Seg-XLarge is PML-1.0. Run with --accept-pml to opt in.",
+        },
+        "rfdetr-seg-2xlarge": {
+            "license_status": "PML-1.0",
+            "reason_excluded_from_core": "Roboflow Platform Model License 1.0; requires registered account",
+            "allowed_use_in_this_project": "baseline_only_with_pml_opt-in",
+            "warning_text": "RF-DETR-Seg-2XLarge is PML-1.0. Run with --accept-pml to opt in.",
+        },
+        "totalsegmentator": {
+            "license_status": "Custom-NonCommercial",
+            "reason_excluded_from_core": "High-res weights are non-commercial only; commercial use requires contacting jakob.wasserthal@usb.ch",
+            "allowed_use_in_this_project": "baseline_only_with_non-commercial_opt-in",
+            "warning_text": "TotalSegmentator weights are non-commercial. Contact author for commercial license.",
+        },
+    }
+    _ULTRALYTICS_MODELS = {
+        "yolo11l-seg.pt",
+        "yolo11x-seg.pt",
+        "yolo11x.pt",
+        "yolo26x-seg.pt",
+        "yolo26x.pt",
+        "yolov10b.pt",
+        "yolov8x-seg.pt",
+        "yolov8x.pt",
+    }
+    for m in _ULTRALYTICS_MODELS:
+        _RESTRICTION_REASONS[m] = {
+            "license_status": "AGPL-3.0",
+            "reason_excluded_from_core": "Ultralytics AGPL-3.0 weights; not default-safe for commercial use",
+            "allowed_use_in_this_project": "external_comparison_baseline_only_with_opt-in",
+            "warning_text": "Ultralytics weights are AGPL-3.0. Run with --accept-agpl to opt in.",
+        }
+
+    if not ledger_csv.exists():
+        typer.echo(
+            json.dumps({"status": "error", "reason": f"ledger not found: {ledger_csv}"}, indent=2)
+        )
+        raise typer.Exit(1)
+
+    with ledger_csv.open() as f:
+        reader = _csv.DictReader(f)
+        all_rows = list(reader)
+        all_cols = reader.fieldnames or list(all_rows[0].keys())
+
+    core_rows = [r for r in all_rows if r["model_id"] not in _RESTRICTED]
+    ext_rows_raw = [r for r in all_rows if r["model_id"] in _RESTRICTED]
+
+    # Write core ledger.
+    core_out_csv.parent.mkdir(parents=True, exist_ok=True)
+    with core_out_csv.open("w", newline="") as f:
+        w = _csv.DictWriter(f, fieldnames=all_cols)
+        w.writeheader()
+        w.writerows(core_rows)
+
+    core_payload = {
+        "schema_version": "v247.core_ledger.v1",
+        "core_row_count": len(core_rows),
+        "rows": core_rows,
+    }
+    core_out_json.parent.mkdir(parents=True, exist_ok=True)
+    core_out_json.write_text(json.dumps(core_payload, indent=2))
+
+    # Build the external baselines rows with the extra columns.
+    ext_cols = [
+        "model_id",
+        "task",
+        "license_status",
+        "reason_excluded_from_core",
+        "allowed_use_in_this_project",
+        "used_as_baseline_only",
+        "excluded_from_core_healthy_count",
+        "excluded_from_default_safe_leaderboard",
+        "benchmark_metric_if_available",
+        "source_artifact",
+        "warning_text",
+        "final_state",
+    ]
+    ext_rows = []
+    for r in ext_rows_raw:
+        reason = _RESTRICTION_REASONS.get(
+            r["model_id"],
+            {
+                "license_status": r.get("license_status", "restricted"),
+                "reason_excluded_from_core": "License-restricted",
+                "allowed_use_in_this_project": "baseline_only_with_opt-in",
+                "warning_text": f"{r['model_id']} requires license opt-in.",
+            },
+        )
+        ext_rows.append(
+            {
+                "model_id": r["model_id"],
+                "task": r.get("task", ""),
+                "license_status": reason["license_status"],
+                "reason_excluded_from_core": reason["reason_excluded_from_core"],
+                "allowed_use_in_this_project": reason["allowed_use_in_this_project"],
+                "used_as_baseline_only": True,
+                "excluded_from_core_healthy_count": True,
+                "excluded_from_default_safe_leaderboard": True,
+                "benchmark_metric_if_available": r.get("evidence_artifact", ""),
+                "source_artifact": r.get("evidence_artifact", ""),
+                "warning_text": reason["warning_text"],
+                "final_state": r.get("final_state", ""),
+            }
+        )
+
+    ext_out_csv.parent.mkdir(parents=True, exist_ok=True)
+    with ext_out_csv.open("w", newline="") as f:
+        w = _csv.DictWriter(f, fieldnames=ext_cols)
+        w.writeheader()
+        w.writerows(ext_rows)
+
+    ext_payload = {
+        "schema_version": "v247.external_restricted_baselines.v1",
+        "external_restricted_baseline_count": len(ext_rows),
+        "rows": ext_rows,
+    }
+    ext_out_json.parent.mkdir(parents=True, exist_ok=True)
+    ext_out_json.write_text(json.dumps(ext_payload, indent=2))
+
+    summary = {
+        "status": "ok",
+        "original_row_count": len(all_rows),
+        "core_row_count": len(core_rows),
+        "external_restricted_baseline_count": len(ext_rows),
+        "core_out_csv": str(core_out_csv),
+        "ext_out_csv": str(ext_out_csv),
+    }
+    typer.echo(json.dumps(summary, indent=2))
+
+
 __all__ = ["app"]
