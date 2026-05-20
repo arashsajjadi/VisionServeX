@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-05-20T04:58:54Z",
+  "generated_at": "2026-05-20T05:27:00Z",
   "libreyolo_treated_as_core": true,
   "external_restricted_baselines_excluded_from_core": true,
   "detection_core_winner": "deimv2-atto",
@@ -16,14 +16,15 @@
     "deimv2-pico"
   ],
   "detection_external_restricted_top5": [],
-  "auto_segmentation_core_winner": "rfdetr-seg-large",
+  "auto_segmentation_core_winner": "libreyolo-rfdetr-l-seg",
   "auto_segmentation_external_restricted_baseline_winner": "no_benchmark_data",
-  "auto_segmentation_core_benchmark_passed_count": 4,
+  "auto_segmentation_core_benchmark_passed_count": 5,
   "auto_segmentation_core_top5": [
-    "rfdetr-seg-large",
-    "rfdetr-seg-medium",
-    "rfdetr-seg-nano",
-    "rfdetr-seg-small"
+    "libreyolo-rfdetr-l-seg",
+    "libreyolo-rfdetr-m-seg",
+    "libreyolo-rfdetr-n-seg",
+    "libreyolo-rfdetr-s-seg",
+    "rfdetr-seg-large"
   ],
   "promptable_segmentation_core_winner": "edgesam",
   "promptable_segmentation_external_restricted_baseline_winner": "fastsam-s",
@@ -35,10 +36,11 @@
     "deimv2-pico"
   ],
   "segmentation_best_overall_evidence": [
-    "rfdetr-seg-large",
-    "rfdetr-seg-medium",
-    "rfdetr-seg-nano",
-    "rfdetr-seg-small"
+    "libreyolo-rfdetr-l-seg",
+    "libreyolo-rfdetr-m-seg",
+    "libreyolo-rfdetr-n-seg",
+    "libreyolo-rfdetr-s-seg",
+    "rfdetr-seg-large"
   ],
   "promptable_evidence": [
     "edgesam",
@@ -48,7 +50,7 @@
     "hq-sam"
   ],
   "n_detection_benchmark_passed": 52,
-  "n_segmentation_benchmark_passed": 4,
+  "n_segmentation_benchmark_passed": 5,
   "detection_headline_core": "libreyolo-dfine-x (mAP50:95=0.5030, MIT/Apache-2.0, COCO 400-image)",
   "detection_headline_external_restricted": "yolo26x.pt (mAP50:95=0.4894, AGPL-3.0, excluded from core)",
   "segmentation_headline_external_restricted": "yolo26x-seg.pt (mask_mAP50_95=0.2728, AGPL-3.0, excluded from core)"
