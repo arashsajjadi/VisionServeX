@@ -1,6 +1,6 @@
 schema_version: 1
 source: auto-generated from visionservex.model_zoo.manifest.SOURCE_MANIFEST
-count: 59
+count: 62
 models:
 - model_id: agriclip
   family: agriclip
@@ -310,6 +310,34 @@ models:
   hf_repo: microsoft/Florence-2-large
   checkpoint_trust_level: official_hf
   domain: open_vocab
+# v2.47: original GroundingDINO (ECCV 2024) — SwinT/SwinB, Apache-2.0, local weights available.
+- model_id: grounding-dino-original-swin-t
+  family: grounding-dino
+  task: open_vocab_detect
+  license: Apache-2.0
+  license_risk: none
+  access_status: open
+  recommended_action: smoke_required_local
+  runnable_in_visionservex: false
+  hf_repo: 'IDEA-Research/grounding-dino-base'
+  checkpoint_trust_level: verified
+  domain: open_vocab
+  notes: 'Official ECCV 2024 SwinT variant. Checkpoint: groundingdino_swint_ogc.pth. Config: groundingdino/config/GroundingDINO_SwinT_OGC.py. License Apache-2.0.'
+- model_id: grounding-dino-original-swin-b
+  family: grounding-dino
+  task: open_vocab_detect
+  license: Apache-2.0
+  license_risk: none
+  access_status: open
+  recommended_action: smoke_required_local
+  runnable_in_visionservex: false
+  hf_repo: 'IDEA-Research/grounding-dino-base'
+  checkpoint_trust_level: verified
+  domain: open_vocab
+  notes: 'Official ECCV 2024 SwinB variant. Checkpoint: groundingdino_swinb_cogcoor.pth. Config: groundingdino/config/GroundingDINO_SwinB_cfg.py. License Apache-2.0.'
+# v2.47: Grounding DINO 1.5 Edge — local weights NOT publicly available as of 2026-05.
+#        GH issue IDEA-Research/Grounding-DINO-1.5-API#24 open since 2024-06, no response.
+#        Stays auth/api_required. Pro = API-only.
 - model_id: grounding-dino-1.5-pro
   family: grounding-dino
   task: open_vocab_detect
@@ -321,17 +349,20 @@ models:
   hf_repo: ''
   checkpoint_trust_level: unverified
   domain: open_vocab
-- model_id: grounding-dino-1.6-pro
+# v2.47: Grounding-DINO 2 audit row — no official source found as of 2026-05-20.
+# Searched: GitHub IDEA-Research, Hugging Face, arXiv, DeepDataSpace. Only GD1, GD1.5, GD1.6, DINO-X found.
+- model_id: grounding-dino-2-audit
   family: grounding-dino
   task: open_vocab_detect
-  license: Custom
-  license_risk: api_only
-  access_status: api_token
-  recommended_action: external_api
+  license: unknown
+  license_risk: unknown
+  access_status: unknown
+  recommended_action: audit_only
   runnable_in_visionservex: false
   hf_repo: ''
   checkpoint_trust_level: unverified
   domain: open_vocab
+  notes: 'Grounding-DINO 2 has no official release as of 2026-05-20. Do not confuse with Grounded-SAM-2 or DINO-X. Re-check when official source is released.'
 - model_id: hq-sam
   family: hq-sam
   task: foundation_segment

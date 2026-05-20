@@ -292,7 +292,31 @@ _PRESERVE_ABS_PREFIXES = (
 )
 
 
-def _is_preserved(path: Path, preserve_dirs: tuple[str, ...]) -> bool:
+# v2.46 historical evidence patterns — never delete these even under broad cleanup.
+_HISTORICAL_EVIDENCE_REGEX = re.compile(
+    "|".join(
+        [
+            r"_current_run\.json$",
+            r"^v\d{3}[a-z_]*\.(?:json|csv|md)$",
+            r"_v\d{3}[a-z_]*.*\.(?:json|csv|md)$",
+            r"(?:detection|segmentation|promptable|libreyolo)_leaderboard\.(?:json|csv)$",
+            r"final_winners\.json$",
+            r"model_coverage_ledger\.(?:json|csv)$",
+            r"notebook_model_call_ledger\.(?:json|jsonl)$",
+            r"benchmark_notebook_coverage_audit\.json$",
+            r"generated_artifact_integrity\.json$",
+            r"environment_v\d+\.json$",
+        ]
+    )
+)
+
+
+def _is_preserved(
+    path: Path,
+    preserve_dirs: tuple[str, ...],
+    *,
+    preserve_historical_evidence: bool = True,
+) -> bool:
     parts = set(path.parts)
     for p in preserve_dirs:
         if p in parts:
@@ -300,18 +324,30 @@ def _is_preserved(path: Path, preserve_dirs: tuple[str, ...]) -> bool:
         if p in str(path):
             return True
     s = str(path.resolve())
-    return any(s.startswith(prefix) for prefix in _PRESERVE_ABS_PREFIXES)
+    if any(s.startswith(prefix) for prefix in _PRESERVE_ABS_PREFIXES):
+        return True
+    return (
+        preserve_historical_evidence
+        and path.is_file()
+        and _HISTORICAL_EVIDENCE_REGEX.search(path.name) is not None
+    )
 
 
 def _iter_to_delete(
     root: Path,
     patterns: tuple[str, ...],
     preserve_dirs: tuple[str, ...],
+    *,
+    preserve_historical_evidence: bool = True,
 ) -> list[Path]:
     out: list[Path] = []
     for pattern in patterns:
         for candidate in root.glob(pattern):
-            if _is_preserved(candidate, preserve_dirs):
+            if _is_preserved(
+                candidate,
+                preserve_dirs,
+                preserve_historical_evidence=preserve_historical_evidence,
+            ):
                 continue
             out.append(candidate)
     # de-dup preserving order
@@ -353,8 +389,22 @@ def clean_outputs_cmd(
     extra_pattern: list[str] = typer.Option(
         [], "--extra-pattern", help="Additional glob patterns to delete."
     ),
+    preserve_historical_evidence: bool = typer.Option(
+        True,
+        "--preserve-historical-evidence/--no-preserve-historical-evidence",
+        help=(
+            "v2.46: keep per-model `*_current_run.json`, leaderboard csv/json, "
+            "and ledger artifacts so the reconciler can still see benchmark "
+            "evidence after cleanup. Default True. Pass --no-... to match "
+            "v2.45 behavior (full wipe)."
+        ),
+    ),
 ) -> None:
-    """v2.39.0: clean generated outputs while preserving models, datasets, env."""
+    """v2.39.0+: clean generated outputs while preserving models, datasets, env.
+
+    v2.46 update: preserves historical per-model evidence by default so the
+    reconciler can still see benchmark_passed rows after cleanup.
+    """
     preserve_dirs = list(_PRESERVE_DEFAULT_DIRS)
     if not preserve_env:
         preserve_dirs.remove(".venv")
@@ -364,7 +414,12 @@ def clean_outputs_cmd(
         preserve_dirs = [d for d in preserve_dirs if d != "datasets"]
 
     patterns = tuple(_CLEAN_PATTERNS_DEFAULT) + tuple(extra_pattern)
-    targets = _iter_to_delete(root, patterns, tuple(preserve_dirs))
+    targets = _iter_to_delete(
+        root,
+        patterns,
+        tuple(preserve_dirs),
+        preserve_historical_evidence=preserve_historical_evidence,
+    )
     bytes_freed = 0
     deleted_files = 0
     deleted_dirs = 0
@@ -460,6 +515,132 @@ def ledger_summary_cmd(
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(summary, indent=2))
     typer.echo(json.dumps(summary, indent=2))
+
+
+@app.command("audit-benchmark-coverage")
+def audit_benchmark_coverage(
+    ledger: Path = typer.Option(
+        Path("notebook/99_final_report/reports/model_coverage_ledger.csv"),
+        "--ledger",
+        help="Path to model_coverage_ledger.csv (v2.45+ schema).",
+    ),
+    notebook_root: Path = typer.Option(
+        Path("notebook"),
+        "--notebook-root",
+        help="Root directory under which to scan all .ipynb files.",
+    ),
+    out: Path | None = typer.Option(None, "--out"),
+    fail_on_missing: bool = typer.Option(
+        False,
+        "--fail-on-missing",
+        help="Exit non-zero if any benchmark_passed/contract_passed model is missing from notebooks.",
+    ),
+) -> None:
+    """v2.46.0 audit: every benchmark/contract/smoke model is referenced in a notebook.
+
+    The check walks every ``.ipynb`` under ``notebook_root``, scans every cell source
+    for the model_id substring, and joins against the ledger's ``final_state``. Any
+    ``benchmark_passed`` or ``contract_passed`` model that does not appear in *any*
+    notebook is flagged.
+
+    Output JSON includes ``benchmark_models_missing_from_notebook`` and
+    ``smoke_models_missing_from_notebook`` lists plus per-model evidence.
+    """
+
+    import csv
+
+    if not ledger.exists():
+        payload = {
+            "status": "ledger_missing",
+            "ledger_path": str(ledger),
+            "next_action": "Generate the ledger via the v2.45 sprint or pass --ledger.",
+        }
+        typer.echo(json.dumps(payload, indent=2))
+        if fail_on_missing:
+            raise typer.Exit(code=2)
+        return
+
+    rows: list[dict[str, str]] = []
+    with ledger.open() as f:
+        rows = list(csv.DictReader(f))
+
+    if not notebook_root.exists():
+        payload = {
+            "status": "notebook_root_missing",
+            "notebook_root": str(notebook_root),
+            "next_action": "Pass --notebook-root to the notebook directory.",
+        }
+        typer.echo(json.dumps(payload, indent=2))
+        if fail_on_missing:
+            raise typer.Exit(code=2)
+        return
+
+    notebooks = sorted(notebook_root.rglob("*.ipynb"))
+    notebook_text: dict[str, str] = {}
+    for nb in notebooks:
+        try:
+            data = json.loads(nb.read_text())
+        except Exception:
+            continue
+        text_chunks: list[str] = []
+        for cell in data.get("cells") or []:
+            src = cell.get("source")
+            if isinstance(src, list):
+                text_chunks.append("".join(src))
+            elif isinstance(src, str):
+                text_chunks.append(src)
+        notebook_text[str(nb.relative_to(notebook_root))] = "\n".join(text_chunks)
+
+    benchmark_missing: list[dict[str, Any]] = []
+    contract_missing: list[dict[str, Any]] = []
+    smoke_missing: list[dict[str, Any]] = []
+    per_model: list[dict[str, Any]] = []
+
+    for row in rows:
+        mid = row.get("model_id", "").strip()
+        if not mid:
+            continue
+        final_state = (row.get("final_state") or "").strip().lower()
+        present_in = [nb_path for nb_path, text in notebook_text.items() if mid in text]
+        record = {
+            "model_id": mid,
+            "final_state": final_state,
+            "appears_in_notebooks_count": len(present_in),
+            "appears_in_notebooks": present_in[:5],
+        }
+        per_model.append(record)
+        if not present_in:
+            if final_state == "benchmark_passed":
+                benchmark_missing.append(record)
+            elif final_state == "contract_passed":
+                contract_missing.append(record)
+            elif final_state == "smoke_passed":
+                smoke_missing.append(record)
+
+    payload = {
+        "schema_version": "v246.notebook_benchmark_coverage_audit.v1",
+        "ledger_path": str(ledger),
+        "notebook_root": str(notebook_root),
+        "notebooks_scanned": len(notebooks),
+        "ledger_rows": len(rows),
+        "benchmark_models_missing_from_notebook": benchmark_missing,
+        "contract_models_missing_from_notebook": contract_missing,
+        "smoke_models_missing_from_notebook": smoke_missing,
+        "missing_counts": {
+            "benchmark_passed": len(benchmark_missing),
+            "contract_passed": len(contract_missing),
+            "smoke_passed": len(smoke_missing),
+        },
+        "per_model": per_model,
+    }
+
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2))
+    typer.echo(json.dumps(payload, indent=2))
+
+    if fail_on_missing and (benchmark_missing or contract_missing):
+        raise typer.Exit(code=1)
 
 
 __all__ = ["app", "ledger_app"]
