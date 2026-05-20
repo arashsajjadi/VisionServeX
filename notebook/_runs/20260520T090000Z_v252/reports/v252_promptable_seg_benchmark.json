@@ -1,0 +1,36 @@
+{
+  "status": "expected_blocker",
+  "code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
+  "dataset": "/home/arash/datasets/coco_val2017_400_vsx/annotations.json",
+  "images_dir": "/home/arash/datasets/coco_val2017_400_vsx/images",
+  "prompt_source": "gt-box",
+  "max_instances": 100,
+  "device": "cuda",
+  "draw_dir": "",
+  "n_models": 3,
+  "rows": [
+    {
+      "model_id": "efficientsam",
+      "status": "expected_blocker",
+      "code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
+      "message": "unknown model 'efficientsam'. Run `visionservex list-models` to see options.",
+      "rows": []
+    },
+    {
+      "model_id": "hq-sam",
+      "status": "expected_blocker",
+      "code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
+      "message": "unknown model 'hq-sam'. Run `visionservex list-models` to see options.",
+      "rows": []
+    },
+    {
+      "model_id": "mobilesam",
+      "status": "expected_blocker",
+      "code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
+      "message": "unknown model 'mobilesam'. Run `visionservex list-models` to see options.",
+      "rows": []
+    }
+  ],
+  "task": "promptable_segmentation",
+  "version": "v2.29.0"
+}

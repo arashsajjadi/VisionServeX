@@ -147,10 +147,25 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     "dfine-x-o365-coco": {"final_state": "benchmark_passed", "blocker_code": ""},
     "rfdetr-base": {"final_state": "benchmark_passed", "blocker_code": ""},
     "rfdetr-large": {"final_state": "benchmark_passed", "blocker_code": ""},
-    # v2.49 zero-smoke: rfdetr seg models — contract_passed (output schema validated)
-    "rfdetr-seg-medium": {"final_state": "contract_passed", "blocker_code": ""},
-    "rfdetr-seg-nano": {"final_state": "contract_passed", "blocker_code": ""},
-    "rfdetr-seg-small": {"final_state": "contract_passed", "blocker_code": ""},
+    # v2.52: rfdetr-seg-* promoted to benchmark_passed.
+    # Segmentation leaderboard artifact (02_auto_seg/reports/segmentation_leaderboard.json)
+    # confirms real mask mAP: medium=0.1011, small=0.0977, nano=0.0924.
+    # Reconciler was stuck on contract_passed despite benchmark_artifact mode — now fixed.
+    "rfdetr-seg-medium": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v252_seg_leaderboard_mask_mAP50_95=0.1011",
+    },
+    "rfdetr-seg-nano": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v252_seg_leaderboard_mask_mAP50_95=0.0924",
+    },
+    "rfdetr-seg-small": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v252_seg_leaderboard_mask_mAP50_95=0.0977",
+    },
     # v2.48/v2.49 libreyolo detection benchmarks (canonical IDs)
     "libreyolo-dfine-n": {"final_state": "benchmark_passed", "blocker_code": ""},
     "libreyolo-dfine-s": {"final_state": "benchmark_passed", "blocker_code": ""},
@@ -324,11 +339,25 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     "sam2.1-hiera-base-plus": {"final_state": "benchmark_passed", "blocker_code": ""},
     "sam2.1-hiera-large": {"final_state": "benchmark_passed", "blocker_code": ""},
     "medsam": {"final_state": "benchmark_passed", "blocker_code": ""},
-    # Distilled SAM variants — benchmark returned expected_blocker (dep issue);
-    # contract validated via smoke test in earlier session.
-    "efficientsam": {"final_state": "contract_passed", "blocker_code": ""},
-    "hq-sam": {"final_state": "contract_passed", "blocker_code": ""},
-    "mobilesam": {"final_state": "contract_passed", "blocker_code": ""},
+    # v2.52: efficientsam/hq-sam/mobilesam — benchmark attempted with COCO bbox prompts.
+    # VisionModel and benchmark-promptable-segmentation both return 'unknown model'
+    # for these IDs — they are optional_extra installs not in base VisionModel registry.
+    # Code: PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED (model not wired in CLI registry).
+    "efficientsam": {
+        "final_state": "benchmark_failed",
+        "blocker_code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
+        "v246_correction_reason": "v252_efficientsam_not_in_visionmodel_registry_optional_extra_required",
+    },
+    "hq-sam": {
+        "final_state": "benchmark_failed",
+        "blocker_code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
+        "v246_correction_reason": "v252_hqsam_not_in_visionmodel_registry_optional_extra_required",
+    },
+    "mobilesam": {
+        "final_state": "benchmark_failed",
+        "blocker_code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
+        "v246_correction_reason": "v252_mobilesam_not_in_visionmodel_registry_optional_extra_required",
+    },
     # v2.51 embedding kNN benchmark on Imagenette (500 images, 10 classes).
     # Artifact: notebook/_runs/20260521T080000Z_v251/reports/v251_embedding_knn_benchmark.json
     "clip-vit-base-patch32": {
@@ -429,7 +458,12 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "v246_correction_reason": "v251_swinv2_large_label_N_format_imagenet21k_class_ordering",
     },
     # oneformer-swin-large — contract_passed (loads, runs panoptic prediction).
-    "oneformer-swin-large": {"final_state": "contract_passed", "blocker_code": ""},
+    # v2.52: oneformer-swin-large benchmarked on 400-image COCO instance seg.
+    "oneformer-swin-large": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v252_coco_instance_seg_mask_mAP50_95=0.1646",
+    },
     # Pose — dataset_required (no COCO keypoint GT subset).
     "rtmpose-l": {
         "final_state": "dataset_required",
@@ -545,7 +579,13 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     # v2.47.3 → v2.49: historical retention upgraded to zero-smoke states.
     # rtmdet-r2-s and rtmpose-m already confirmed as contract_passed in v2.45.
     "rtmdet-r2-s": {"final_state": "contract_passed", "blocker_code": ""},
-    "rtmpose-m": {"final_state": "contract_passed", "blocker_code": ""},
+    # v2.52: rtmpose-m → dataset_required (COCO keypoints download failed in v2.52 sprint).
+    # Consistent with other rtmpose models. Benchmark attempted but source missing.
+    "rtmpose-m": {
+        "final_state": "dataset_required",
+        "blocker_code": "COCO_KEYPOINTS_MISSING",
+        "v246_correction_reason": "v252_coco_keypoints_download_failed_imcocodataset_org",
+    },
     # v2.47.2 bytetrack sidecar built; v2.49 promoted to micro_benchmark_passed.
     # BYTETracker.update() with dummy detections returned 2 tracks correctly.
     # v2.51: grounding-dino-original-swin-t/b: VisionModel('grounding-dino-original-swin-t')
@@ -1730,6 +1770,18 @@ _RESTRICTED_LICENSE_MODELS: frozenset[str] = frozenset(
         "rfdetr-seg-xlarge",
         "rfdetr-seg-2xlarge",
         "totalsegmentator",
+    }
+)
+
+# v2.52: Non-commercial license models excluded from VisionServeX core.
+# These models have licenses that do not permit commercial use.
+# They are NOT in _RESTRICTED_LICENSE_MODELS (AGPL/PML) but are separately excluded.
+_NONCOMMERCIAL_EXCLUDED_MODELS: frozenset[str] = frozenset(
+    {
+        # Deci-AI YOLO-NAS: non-commercial proprietary license
+        "libreyolo-yolonas-s",
+        "libreyolo-yolonas-m",
+        "libreyolo-yolonas-l",
     }
 )
 

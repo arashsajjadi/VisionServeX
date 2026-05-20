@@ -480,8 +480,56 @@ def generate_external_baselines_cmd(
         all_rows = list(reader)
         all_cols = reader.fieldnames or list(all_rows[0].keys())
 
-    core_rows = [r for r in all_rows if r["model_id"] not in _RESTRICTED]
+    # v2.52: non-commercial models (Deci-AI YOLO-NAS) are excluded from BOTH
+    # core and external_restricted_baselines. They go to a separate excluded archive.
+    _NONCOMMERCIAL_EXCLUDED: frozenset[str] = frozenset(
+        {"libreyolo-yolonas-s", "libreyolo-yolonas-m", "libreyolo-yolonas-l"}
+    )
+
+    core_rows = [
+        r
+        for r in all_rows
+        if r["model_id"] not in _RESTRICTED and r["model_id"] not in _NONCOMMERCIAL_EXCLUDED
+    ]
     ext_rows_raw = [r for r in all_rows if r["model_id"] in _RESTRICTED]
+    nc_excluded_rows = [r for r in all_rows if r["model_id"] in _NONCOMMERCIAL_EXCLUDED]
+
+    # Write excluded non-commercial archive (separate from external_restricted_baselines).
+    _nc_out_csv = (
+        Path("notebook/99_final_report/reports/excluded_noncommercial_models.csv")
+    )
+    _nc_out_json = (
+        Path("notebook/99_final_report/reports/excluded_noncommercial_models.json")
+    )
+    _nc_cols = [
+        "model_id", "family", "task", "license_status", "commercial_safe",
+        "exclusion_reason", "removed_from_core", "removed_from_leaderboards",
+        "source_registry_state",
+    ]
+    nc_rows_out = []
+    for r in nc_excluded_rows:
+        nc_rows_out.append({
+            "model_id": r["model_id"],
+            "family": "libreyolo-yolonas",
+            "task": r.get("task", "detect"),
+            "license_status": "Deci-AI-non-commercial",
+            "commercial_safe": False,
+            "exclusion_reason": "Deci.AI proprietary non-commercial license — cannot be distributed as VisionServeX core.",
+            "removed_from_core": True,
+            "removed_from_leaderboards": True,
+            "source_registry_state": r.get("source_registry_state", "do_not_add"),
+        })
+    _nc_out_csv.parent.mkdir(parents=True, exist_ok=True)
+    with _nc_out_csv.open("w", newline="") as f:
+        w = _csv.DictWriter(f, fieldnames=_nc_cols)
+        w.writeheader()
+        w.writerows(nc_rows_out)
+    _nc_out_json.parent.mkdir(parents=True, exist_ok=True)
+    _nc_out_json.write_text(json.dumps(
+        {"schema_version": "v252.excluded_noncommercial.v1",
+         "excluded_count": len(nc_rows_out), "rows": nc_rows_out},
+        indent=2,
+    ))
 
     # Write core ledger.
     core_out_csv.parent.mkdir(parents=True, exist_ok=True)
@@ -560,6 +608,7 @@ def generate_external_baselines_cmd(
         "original_row_count": len(all_rows),
         "core_row_count": len(core_rows),
         "external_restricted_baseline_count": len(ext_rows),
+        "noncommercial_excluded_count": len(nc_rows_out),
         "core_out_csv": str(core_out_csv),
         "ext_out_csv": str(ext_out_csv),
     }
