@@ -1,0 +1,4 @@
+model_id,family,task,license_status,commercial_safe,exclusion_reason,removed_from_core,removed_from_leaderboards,source_registry_state
+libreyolo-yolonas-l,libreyolo-yolonas,detect,Deci-AI-non-commercial,False,Deci.AI proprietary non-commercial license,True,True,do_not_add
+libreyolo-yolonas-m,libreyolo-yolonas,detect,Deci-AI-non-commercial,False,Deci.AI proprietary non-commercial license,True,True,do_not_add
+libreyolo-yolonas-s,libreyolo-yolonas,detect,Deci-AI-non-commercial,False,Deci.AI proprietary non-commercial license,True,True,do_not_add
