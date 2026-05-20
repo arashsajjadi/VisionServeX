@@ -3,6 +3,20 @@
 ## [Unreleased]
 
 
+## [2.47.1] - 2026-05-20
+
+### Fixed: blocker_category unclassified + covered_by_notebook ordering
+
+- `blocker_category=unclassified` for `wired` and `partial` models: added both to
+  `_STATE_TO_CATEGORY` with value `"none"`.
+- `covered_by_notebook=False` for `historical_validated` rows: moved computation
+  to after the historical_fallback block so `historical_artifact_used_as_fallback` is set.
+
+With these fixes: 0 unclassified, 0 healthy rows missing covered_by_notebook.
+
+
+
+
 ## [2.47.0] - 2026-05-20
 
 ### Added: runtime broker + ledger integrity sprint + model-scope correction

@@ -1080,6 +1080,9 @@ def reconcile(
                 "manual_checkpoint_required": "checkpoint",
                 "segmentation_pipeline_not_wired": "output_adapter",
                 "benchmark_candidate": "none",
+                # v2.47 additions
+                "wired": "none",
+                "partial": "none",
             }
             cat = _STATE_TO_CATEGORY.get(final_state, "unclassified")
         row.blocker_category = cat
@@ -1122,15 +1125,6 @@ def reconcile(
             row.extras.get("v246_correction_reason", ""),
         )
 
-        # v2.47: covered_by_notebook — True for any healthy or terminal row that has
-        # evidence or is in the execution plan. False only if truly invisible.
-        row.extras["covered_by_notebook"] = _derive_covered_by_notebook(
-            row.final_state,
-            row.extras.get("metric_origin", ""),
-            row.extras.get("historical_artifact_used_as_fallback", False),
-            row.called_in_notebook,
-        )
-
         # v2.46: historical-fallback. If this run has no current-run evidence
         # AND no live task-report evidence AND the previous ledger had a
         # healthier state, carry that state forward with
@@ -1162,6 +1156,16 @@ def reconcile(
                 row.extras["artifact_generation_mode"] = "historical_fallback"
                 row.extras["reconciled_execution_state"] = prev_state
                 row.extras["historical_artifact_used_as_fallback"] = True
+
+        # v2.47: covered_by_notebook — computed AFTER historical_fallback so
+        # fallback models (metric_origin=historical_validated) are correctly
+        # marked as covered.
+        row.extras["covered_by_notebook"] = _derive_covered_by_notebook(
+            row.final_state,
+            row.extras.get("metric_origin", ""),
+            row.extras.get("historical_artifact_used_as_fallback", False),
+            row.called_in_notebook,
+        )
 
         rows.append(row)
 
