@@ -16,7 +16,10 @@
     "deimv2-pico"
   ],
   "segmentation_best_overall_evidence": [
-    "rfdetr-seg-large"
+    "rfdetr-seg-large",
+    "rfdetr-seg-medium",
+    "rfdetr-seg-nano",
+    "rfdetr-seg-small"
   ],
   "promptable_evidence": [
     "edgesam",
@@ -25,8 +28,8 @@
     "fastsam-x",
     "hq-sam"
   ],
-  "n_detection_benchmark_passed": 11,
-  "n_segmentation_benchmark_passed": 1,
-  "generated_at": "2026-05-19T23:27:39Z",
+  "n_detection_benchmark_passed": 19,
+  "n_segmentation_benchmark_passed": 4,
+  "generated_at": "2026-05-20T01:47:03Z",
   "schema_version": 2
 }
