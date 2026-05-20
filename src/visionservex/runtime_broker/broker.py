@@ -397,32 +397,55 @@ class RuntimeBroker:
         *,
         force: bool,
     ) -> BrokerResult:
-        # Delegated to the existing sidecar manager. Kept thin here so the
-        # broker code is reviewable independently of the execution path.
-        try:
-            from visionservex.sidecars.manager import SidecarManager
-        except Exception as exc:  # pragma: no cover - import guard
-            return BrokerResult(
-                model_id=model_id,
-                runtime_id=spec.id,
-                action="prepare",
-                executed=False,
-                commands=plan.commands,
-                blocker=BrokerBlocker(
-                    code="RUNTIME_PREPARE_FAILED",
-                    message=f"sidecar manager import failed: {exc}",
-                    runtime_id=spec.id,
-                    model_id=model_id,
-                    next_action="Verify visionservex.sidecars.manager imports.",
-                ),
-            )
+        """Run the planned commands serially with timeouts.
 
-        # Construct the sidecar manager but defer real subprocess execution
-        # to the follow-up session that actually builds the envs. The broker
-        # records the planned commands here so the manager's resource guard
-        # and lockfile policy stays the single source of truth.
-        _ = SidecarManager()
-        executed_at = list(plan.commands)
+        Each command runs under a 30-minute hard cap with output captured.
+        On the first failure, the broker returns a structured blocker with
+        the stderr tail and the failing command. The remaining commands
+        are NOT attempted (fail-fast). Resource_guard policy is up to the
+        host shell — the broker does not duplicate that here, but each
+        command is timeboxed so it cannot hang forever.
+        """
+        results: list[dict[str, Any]] = []
+        for idx, cmd in enumerate(plan.commands):
+            started = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=1800,
+                check=False,
+            )
+            entry = {
+                "cmd": cmd,
+                "returncode": started.returncode,
+                "stdout_tail": (started.stdout or "")[-2000:],
+                "stderr_tail": (started.stderr or "")[-2000:],
+            }
+            results.append(entry)
+            if started.returncode != 0:
+                return BrokerResult(
+                    model_id=model_id,
+                    runtime_id=spec.id,
+                    action="prepare",
+                    executed=True,
+                    commands=plan.commands,
+                    blocker=BrokerBlocker(
+                        code="RUNTIME_PREPARE_FAILED",
+                        message=(
+                            f"command {idx + 1}/{len(plan.commands)} exited with "
+                            f"{started.returncode}: {' '.join(cmd)[:200]}"
+                        ),
+                        runtime_id=spec.id,
+                        model_id=model_id,
+                        exception_tail=entry["stderr_tail"],
+                        next_action=(
+                            "Inspect the stderr tail and fix the underlying step. "
+                            "Most common: missing CUDA toolchain, network failure, or "
+                            "a stale conda env (try --force)."
+                        ),
+                    ),
+                    extra={"force": force, "executed_commands": results},
+                )
 
         return BrokerResult(
             model_id=model_id,
@@ -432,10 +455,10 @@ class RuntimeBroker:
             commands=plan.commands,
             extra={
                 "force": force,
-                "executed_commands": executed_at,
+                "executed_commands": results,
                 "note": (
-                    "Execute path delegates to visionservex.sidecars.manager. "
-                    "Follow-up session triggers the real build."
+                    "v2.46 execute path runs each planned command serially "
+                    "with a 30-minute hard cap per command."
                 ),
             },
         )
