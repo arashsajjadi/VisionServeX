@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-05-20T05:27:00Z",
+  "generated_at": "2026-05-20T05:41:16Z",
   "libreyolo_treated_as_core": true,
   "external_restricted_baselines_excluded_from_core": true,
   "detection_core_winner": "deimv2-atto",
