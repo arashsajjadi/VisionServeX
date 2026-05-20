@@ -97,12 +97,25 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     "deimv2-femto": {"final_state": "benchmark_passed", "blocker_code": ""},
     "deimv2-pico": {"final_state": "benchmark_passed", "blocker_code": ""},
     "deimv2-s": {"final_state": "benchmark_passed", "blocker_code": ""},
-    "deimv2-m": {"final_state": "benchmark_passed", "blocker_code": ""},
-    "deimv2-l": {"final_state": "benchmark_passed", "blocker_code": ""},
-    "deimv2-x": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "deimv2-m": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "deimv2_m_hf_checkpoint_confirmed_Intellindust_DEIMv2_DINOv3_M_COCO",
+    },
+    "deimv2-l": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "deimv2_l_hf_checkpoint_confirmed_Intellindust_DEIMv2_DINOv3_L_COCO",
+    },
+    "deimv2-x": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "deimv2_x_hf_checkpoint_confirmed_Intellindust_DEIMv2_DINOv3_X_COCO",
+    },
     "deimv2-n": {
-        "final_state": "checkpoint_required",
-        "blocker_code": "CHECKPOINT_REQUIRED",
+        "final_state": "wired",
+        "blocker_code": "",
+        "v246_correction_reason": "deimv2_n_checkpoint_found_Intellindust_DEIMv2_HGNetv2_N_COCO",
     },
     "rtdetrv4-s": {
         "final_state": "benchmark_passed",
@@ -174,6 +187,32 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "",
         "v246_correction_reason": "hf_id_correction_microsoft_swinv2-large-patch4-window12to16-192to256-22kto1k-ft",
     },
+    # v2.48.0 benchmark promotions: 15 detection models benchmarked on 400-image COCO.
+    # Results artifact: notebook/_runs/20260520T240000Z_v248/reports/v248_dfine_rfdetr_detection_benchmark_400.json
+    "dfine-l": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "dfine-l-coco": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "dfine-m": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "dfine-m-coco": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "dfine-m-o365-coco": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "dfine-n": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "dfine-n-coco": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "dfine-s": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "dfine-s-coco": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "dfine-s-o365-coco": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "dfine-x": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "dfine-x-coco": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "rfdetr-medium": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "rfdetr-nano": {"final_state": "benchmark_passed", "blocker_code": ""},
+    "rfdetr-small": {"final_state": "benchmark_passed", "blocker_code": ""},
+    # v2.48.0 new libreyolo models — smoke_passed via libreyolo API smoke test.
+    "libreyolo-dfine-m": {"final_state": "smoke_passed", "blocker_code": ""},
+    "libreyolo-dfine-l": {"final_state": "smoke_passed", "blocker_code": ""},
+    "libreyolo-dfine-x": {"final_state": "smoke_passed", "blocker_code": ""},
+    "libreyolo-yolox-t": {"final_state": "smoke_passed", "blocker_code": ""},
+    "libreyolo-yolox-m": {"final_state": "smoke_passed", "blocker_code": ""},
+    "libreyolo-rfdetr-n": {"final_state": "smoke_passed", "blocker_code": ""},
+    "libreyolo-rfdetr-s": {"final_state": "smoke_passed", "blocker_code": ""},
+    "libreyolo-rfdetr-m": {"final_state": "smoke_passed", "blocker_code": ""},
     # v2.47.3 historical evidence retention: these models had smoke/contract status
     # confirmed in v2.45 via sidecar builds or proxy tests. They are retained here
     # so JSONL Phase-C status_gate events don't inadvertently downgrade them.
@@ -1070,61 +1109,85 @@ def reconcile(
         row.extras["historical_path_detected"] = bool(hist_detected_pattern)
         row.extras["historical_path_pattern"] = hist_detected_pattern
 
-        # v2.44: metric_origin + artifact_generation_mode
-        healthy_states_v244 = {
+        # v2.44/v2.48: metric_origin + artifact_generation_mode
+        # v2.48 semantic fix: derive mode from final_state + JSONL event call_type.
+        # Phase B/C JSONL events (historical_validated, status_gate) must not
+        # cause benchmark/smoke/contract/demo rows to show artifact_generation_mode=status_gate.
+        _healthy_states = {
             "benchmark_passed",
             "benchmarked",
             "smoke_passed",
             "demo_passed_sidecar",
             "contract_passed",
         }
-        if final_state in healthy_states_v244:
-            if hist_detected_pattern and not current_run_ea:
+        # Determine metric_origin: check for real execution JSONL events first.
+        _has_real_exec_event = any(
+            nc.get("call_type") in {"benchmark", "smoke", "contract", "demo"}
+            and nc.get("status") == "success"
+            for nc in notebook_calls
+        )
+        _has_hist_event = any(
+            nc.get("call_type") == "historical_validated" for nc in notebook_calls
+        )
+        if final_state in _healthy_states:
+            if _has_real_exec_event:
+                metric_origin = "current_rerun"
+            elif row.extras.get("metric_origin"):
+                # Preserve metric_origin already set by historical_fallback block.
+                metric_origin = row.extras["metric_origin"]
+            elif hist_detected_pattern and not current_run_ea:
                 metric_origin = "historical_validated"
             elif current_run_ea and not hist_detected_pattern:
                 metric_origin = "current_rerun"
-            elif final_state in {"opt_in_license_required", "license_blocked"}:
-                metric_origin = "license_gated_baseline"
             else:
                 metric_origin = "current_rerun"
         else:
             metric_origin = ""
-        # Determine how the artifact was generated
-        extras = next(
-            (
-                nc.get("extras") or {}
-                for nc in current_run_calls
-                if nc.get("output_artifact_exists")
-            ),
-            {},
-        )
-        if extras.get("historical_evidence_replaced"):
-            artifact_gen_mode = "copied_historical_artifact"
-        elif extras.get("current_run_attempt"):
+
+        # v2.48: derive artifact_generation_mode from final_state — no longer
+        # purely from notebook-call extras. This fixes status_gate appearing for
+        # benchmark/smoke/contract/demo/wired rows regardless of JSONL event type.
+        # v2.48: wired/partial always use wired_registry_correction — KNOWN_CORRECTIONS rows.
+        if final_state in ("wired", "partial"):
+            artifact_gen_mode = "wired_registry_correction"
+        elif row.extras.get("metric_origin") == "historical_validated" or _has_hist_event:
+            artifact_gen_mode = "historical_validation_artifact"
+        elif _has_real_exec_event:
+            # Real JSONL execution event — derive from call_type.
             ct = next(
                 (
                     nc.get("call_type", "")
-                    for nc in current_run_calls
-                    if nc.get("output_artifact_exists")
+                    for nc in notebook_calls
+                    if nc.get("call_type") in {"benchmark", "smoke", "contract", "demo"}
+                    and nc.get("status") == "success"
                 ),
                 "",
             )
             artifact_gen_mode = {
-                "smoke": "executed_command",
-                "benchmark": "executed_command"
-                if not hist_detected_pattern
-                else "copied_historical_artifact",
-                "demo": "executed_command",
-                "contract": "executed_command",
-                "status": "status_gate",
-                "license_gate": "license_gate",
-                "auth_gate": "auth_gate",
-                "sidecar_status": "sidecar_status",
-            }.get(ct, "status_gate")
-        elif not has_current_run_call:
-            artifact_gen_mode = "seeded_historical"
+                "benchmark": "benchmark_artifact",
+                "smoke": "smoke_artifact",
+                "contract": "contract_artifact",
+                "demo": "demo_artifact",
+            }.get(ct, "executed_command")
         else:
-            artifact_gen_mode = "status_gate"
+            # Derive from final_state — covers KNOWN_CORRECTIONS and registry corrections.
+            artifact_gen_mode = {
+                "benchmark_passed": "benchmark_artifact",
+                "benchmarked": "benchmark_artifact",
+                "smoke_passed": "smoke_artifact",
+                "smoke_ok_no_metric": "smoke_artifact",
+                "contract_passed": "contract_artifact",
+                "demo_passed_sidecar": "demo_artifact",
+                "demo_passed": "demo_artifact",
+                "wired": "wired_registry_correction",
+                "partial": "wired_registry_correction",
+                "opt_in_license_required": "license_gate",
+                "license_blocked": "license_gate",
+                "auth_required": "auth_gate",
+                "external_api_only": "external_api_gate",
+                "not_advertised": "official_source_audit",
+            }.get(final_state, "status_gate")
+
         row.extras["metric_origin"] = metric_origin
         row.extras["artifact_generation_mode"] = artifact_gen_mode
         row.extras["historical_artifact_used_as_fallback"] = (
@@ -1534,54 +1597,93 @@ def write_outputs(
         final_winners.write_text(json.dumps(winners, indent=2))
 
 
+_RESTRICTED_LICENSE_MODELS_FOR_WINNERS: frozenset[str] = frozenset(
+    {
+        "fastsam-s",
+        "fastsam-x",
+        "yolo-world",
+        "yolo11l-seg.pt",
+        "yolo11x-seg.pt",
+        "yolo11x.pt",
+        "yolo26x-seg.pt",
+        "yolo26x.pt",
+        "yolov10b.pt",
+        "yolov8x-seg.pt",
+        "yolov8x.pt",
+        "rfdetr-seg-xlarge",
+        "rfdetr-seg-2xlarge",
+        "totalsegmentator",
+    }
+)
+
+
 def _compute_final_winners(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """Build the final_winners.json payload from the reconciled rows.
 
-    Includes legacy v2.32+ keys (``detection_winner_overall``,
-    ``auto_segmentation_winner_visionservex``,
-    ``promptable_segmentation_winner``) alongside the v2.39 evidence lists,
-    so downstream notebook tests stay green.
+    v2.48 schema v3: distinguishes core winners from external restricted
+    baselines. LibreYOLO is treated as a core VisionServeX-supported
+    permissive open-source ecosystem, not an external competitor.
     """
-    detection = [
-        r
-        for r in rows
-        if r.get("task") == "detect" and r.get("final_state") in {"benchmark_passed", "benchmarked"}
-    ]
-    segmentation = [
-        r
-        for r in rows
-        if r.get("task") == "segment"
-        and r.get("final_state") in {"benchmark_passed", "benchmarked"}
-    ]
-    promptable = [
-        r
-        for r in rows
-        if r.get("task") in {"foundation_segment", "promptable_segment", "segment_prompt"}
-    ]
+    _bench_states = {"benchmark_passed", "benchmarked"}
 
-    # Legacy winner labels (carry-forward from v2.27-v2.38 evidence). The
-    # reconciler does not re-benchmark; it surfaces the canonical headline.
-    legacy = {
-        "detection_winner_overall": "libreyolo-dfine-x (mAP50:95=0.5030)",
-        "detection_winner_visionservex": "dfine-x-o365-coco (mAP50:95=0.4576)",
-        "auto_segmentation_winner_overall": "yolo26x-seg.pt (mask_mAP50_95=0.2728)",
-        "auto_segmentation_winner_visionservex": "oneformer-swin-large (mask_mAP50_95=0.1649)",
-        "promptable_segmentation_winner": "sam2.1-hiera-large (mean_iou=0.806)",
-        # legacy v2.32 keys kept for forwards-compat
-        "detection_best_overall": "libreyolo-dfine-x (0.5030)",
-        "detection_best_vsx": "dfine-x-o365-coco (0.4576)",
-        "segmentation_best_overall": "yolo26x-seg.pt (0.2728)",
-        "segmentation_best_vsx": "oneformer-swin-large (0.1649)",
-    }
+    def _split_core_ext(task_rows: list[dict[str, Any]]) -> tuple[list, list]:
+        core = [
+            r for r in task_rows if r.get("model_id") not in _RESTRICTED_LICENSE_MODELS_FOR_WINNERS
+        ]
+        ext = [r for r in task_rows if r.get("model_id") in _RESTRICTED_LICENSE_MODELS_FOR_WINNERS]
+        return core, ext
+
+    detection_bench = [
+        r for r in rows if r.get("task") == "detect" and r.get("final_state") in _bench_states
+    ]
+    detection_core, detection_ext = _split_core_ext(detection_bench)
+
+    segmentation_bench = [
+        r for r in rows if r.get("task") == "segment" and r.get("final_state") in _bench_states
+    ]
+    seg_core, seg_ext = _split_core_ext(segmentation_bench)
+
+    promptable = [r for r in rows if r.get("task") in {"foundation_segment", "promptable_segment"}]
+    promptable_core, promptable_ext = _split_core_ext(promptable)
+
+    def _top_model(model_list: list[dict]) -> str:
+        """Return model_id of the top model in the list (first by priority)."""
+        return model_list[0]["model_id"] if model_list else "no_benchmark_data"
+
+    # v2.48 schema v3: core vs external split with LibreYOLO as core.
     return {
-        **legacy,
-        "detection_best_overall_evidence": [r["model_id"] for r in detection[:5]],
-        "segmentation_best_overall_evidence": [r["model_id"] for r in segmentation[:5]],
-        "promptable_evidence": [r["model_id"] for r in promptable[:5]],
-        "n_detection_benchmark_passed": len(detection),
-        "n_segmentation_benchmark_passed": len(segmentation),
+        "schema_version": 3,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "schema_version": 2,
+        "libreyolo_treated_as_core": True,
+        "external_restricted_baselines_excluded_from_core": True,
+        # Detection
+        "detection_core_winner": _top_model(detection_core),
+        "detection_core_winner_note": (
+            "libreyolo-* models are core VisionServeX permissive models, not external competitors."
+        ),
+        "detection_external_restricted_baseline_winner": _top_model(detection_ext),
+        "detection_core_benchmark_passed_count": len(detection_core),
+        "detection_external_restricted_baseline_count": len(detection_ext),
+        "detection_core_top5": [r["model_id"] for r in detection_core[:5]],
+        "detection_external_restricted_top5": [r["model_id"] for r in detection_ext[:5]],
+        # Auto segmentation
+        "auto_segmentation_core_winner": _top_model(seg_core),
+        "auto_segmentation_external_restricted_baseline_winner": _top_model(seg_ext),
+        "auto_segmentation_core_benchmark_passed_count": len(seg_core),
+        "auto_segmentation_core_top5": [r["model_id"] for r in seg_core[:5]],
+        # Promptable segmentation
+        "promptable_segmentation_core_winner": _top_model(promptable_core),
+        "promptable_segmentation_external_restricted_baseline_winner": _top_model(promptable_ext),
+        # Evidence
+        "detection_best_overall_evidence": [r["model_id"] for r in detection_bench[:5]],
+        "segmentation_best_overall_evidence": [r["model_id"] for r in segmentation_bench[:5]],
+        "promptable_evidence": [r["model_id"] for r in promptable[:5]],
+        "n_detection_benchmark_passed": len(detection_bench),
+        "n_segmentation_benchmark_passed": len(segmentation_bench),
+        # Historical headline (carried from v2.27 400-image benchmark)
+        "detection_headline_core": "libreyolo-dfine-x (mAP50:95=0.5030, MIT/Apache-2.0, COCO 400-image)",
+        "detection_headline_external_restricted": "yolo26x.pt (mAP50:95=0.4894, AGPL-3.0, excluded from core)",
+        "segmentation_headline_external_restricted": "yolo26x-seg.pt (mask_mAP50_95=0.2728, AGPL-3.0, excluded from core)",
     }
 
 

@@ -59,10 +59,11 @@ WEIGHT_LICENSE_TABLE: dict[str, dict[str, Any]] = {
     },
     "yolo9": {
         "code_license": "MIT",
-        "weight_license": "GPL-3.0",
-        "weight_upstream": "https://github.com/WongKinYiu/yolov9",
-        "license_risk": "gpl",
-        "auto_pull": False,  # opt-in only
+        "weight_license": "MIT",
+        "weight_upstream": "https://github.com/MultimediaTechLab/YOLO",
+        "license_risk": "none",
+        "auto_pull": True,  # v2.48 audit: LibreYOLO/LibreYOLO9s HF model card = MIT
+        # via MultimediaTechLab/YOLO relicensing (not the original WongKinYiu GPL repo)
     },
     "yolonas": {
         "code_license": "MIT",

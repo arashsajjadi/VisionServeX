@@ -49,20 +49,46 @@ DEIMV2_REQUIRED_TORCH = "2.5.1"
 
 # Known DEIMv2 HuggingFace checkpoint card → upstream-class hint.
 DEIMV2_HF_CHECKPOINTS: dict[str, dict[str, str]] = {
+    # v2.48 audit: Intellindust HF org has these models published.
+    "deimv2-atto": {
+        "hf_repo": "Intellindust/DEIMv2_HGNetv2_ATTO_COCO",
+        "upstream_class": "deimv2.DEIMv2",
+        "notes": "ATTO variant (HGNetv2 backbone, ~25 AP, COCO).",
+    },
+    "deimv2-femto": {
+        "hf_repo": "Intellindust/DEIMv2_HGNetv2_FEMTO_COCO",
+        "upstream_class": "deimv2.DEIMv2",
+        "notes": "FEMTO variant (HGNetv2 backbone, COCO).",
+    },
+    "deimv2-pico": {
+        "hf_repo": "Intellindust/DEIMv2_HGNetv2_PICO_COCO",
+        "upstream_class": "deimv2.DEIMv2",
+        "notes": "PICO variant (HGNetv2 backbone, COCO).",
+    },
+    "deimv2-n": {
+        "hf_repo": "Intellindust/DEIMv2_HGNetv2_N_COCO",
+        "upstream_class": "deimv2.DEIMv2",
+        "notes": "v2.48 audit confirmed: Nano variant on HF using HGNetv2 backbone. Previously wrongly marked CHECKPOINT_NOT_FOUND.",
+    },
     "deimv2-s": {
         "hf_repo": "Intellindust/DEIMv2_DINOv3_S_COCO",
         "upstream_class": "deimv2.DEIMv2",
-        "notes": "Small variant (research target ~50.9 AP, ~5.78 ms latency).",
+        "notes": "Small variant (DINOv3 backbone, ~50.9 AP, ~5.78 ms latency).",
     },
-    "deimv2-m": {"hf_repo": "", "upstream_class": "", "notes": "HF card not yet published."},
-    "deimv2-l": {"hf_repo": "", "upstream_class": "", "notes": "HF card not yet published."},
+    "deimv2-m": {
+        "hf_repo": "Intellindust/DEIMv2_DINOv3_M_COCO",
+        "upstream_class": "deimv2.DEIMv2",
+        "notes": "v2.48 audit confirmed: Medium variant on HF.",
+    },
+    "deimv2-l": {
+        "hf_repo": "Intellindust/DEIMv2_DINOv3_L_COCO",
+        "upstream_class": "deimv2.DEIMv2",
+        "notes": "v2.48 audit confirmed: Large variant on HF.",
+    },
     "deimv2-x": {
-        "hf_repo": "",
-        "upstream_class": "",
-        "notes": (
-            "X variant — highest-priority accuracy candidate "
-            "(~57.8 AP / ~13.75 ms). HF card not yet published."
-        ),
+        "hf_repo": "Intellindust/DEIMv2_DINOv3_X_COCO",
+        "upstream_class": "deimv2.DEIMv2",
+        "notes": "v2.48 audit confirmed: X variant on HF (~57.8 AP).",
     },
 }
 

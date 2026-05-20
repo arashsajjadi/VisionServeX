@@ -1,0 +1,96 @@
+{
+  "schema_version": "v248.libreyolo_audit.v1",
+  "audit_date": "2026-05-20",
+  "official_sources_checked": [
+    "https://github.com/LibreYOLO/libreyolo",
+    "https://pypi.org/project/libreyolo/",
+    "https://www.libreyolo.com/docs",
+    "https://huggingface.co/LibreYOLO",
+    "https://huggingface.co/LibreYOLO/LibreYOLO9s"
+  ],
+  "strategic_classification": "core_visionservex_ecosystem",
+  "strategic_note": "LibreYOLO is a MIT-code open-source library that provides the same API as Ultralytics but with permissive licenses. It is NOT an external competitor — it is a core VisionServeX-supported ecosystem. libreyolo-* models belong in the core ledger, not external_restricted_baselines.",
+  "code_license": "MIT",
+  "code_license_source": "https://github.com/LibreYOLO/libreyolo/blob/main/LICENSE",
+  "install_command": "pip install libreyolo[all]",
+  "model_families": [
+    {
+      "family": "dfine",
+      "variants": ["n", "s", "m", "l", "x"],
+      "task_support": ["detect", "segment"],
+      "weight_license": "Apache-2.0",
+      "weight_upstream": "https://github.com/Peterande/D-FINE",
+      "commercial_safe": true,
+      "included_in_core": true,
+      "hf_org": "LibreYOLO",
+      "notes": "D-FINE transformer-based detector. Apache-2.0 weights."
+    },
+    {
+      "family": "yolox",
+      "variants": ["n", "t", "s", "m", "l", "x"],
+      "task_support": ["detect", "segment"],
+      "weight_license": "Apache-2.0",
+      "weight_upstream": "https://github.com/Megvii-BaseDetection/YOLOX",
+      "commercial_safe": true,
+      "included_in_core": true,
+      "hf_org": "LibreYOLO",
+      "notes": "YOLOX anchor-free detector. Apache-2.0 weights."
+    },
+    {
+      "family": "rtdetr",
+      "variants": ["r18", "r34", "r50", "r50m", "r101", "l", "x"],
+      "task_support": ["detect", "segment"],
+      "weight_license": "Apache-2.0",
+      "weight_upstream": "https://github.com/lyuwenyu/RT-DETR",
+      "commercial_safe": true,
+      "included_in_core": true,
+      "hf_org": "LibreYOLO",
+      "notes": "RT-DETR transformer detector. Apache-2.0 weights."
+    },
+    {
+      "family": "rfdetr",
+      "variants": ["n", "s", "m", "l"],
+      "task_support": ["detect", "segment"],
+      "weight_license": "Apache-2.0",
+      "weight_upstream": "https://github.com/roboflow/rf-detr",
+      "commercial_safe": true,
+      "included_in_core": true,
+      "hf_org": "LibreYOLO",
+      "notes": "RF-DETR Roboflow core detector (NOT the XL/2XL PML variants). Apache-2.0."
+    },
+    {
+      "family": "yolov9",
+      "variants": ["t", "s", "m", "c"],
+      "task_support": ["detect", "segment"],
+      "weight_license": "MIT",
+      "weight_upstream": "https://github.com/MultimediaTechLab/YOLO",
+      "commercial_safe": true,
+      "included_in_core": true,
+      "hf_org": "LibreYOLO",
+      "notes": "v2.48 audit: LibreYOLO distributes YOLOv9 via MultimediaTechLab/YOLO which relicensed under MIT (not the original WongKinYiu GPL-3.0 repo). HF model card LibreYOLO/LibreYOLO9s shows MIT. Updated from GPL-3.0 to MIT in VisionServeX license table."
+    },
+    {
+      "family": "yolonas",
+      "variants": ["s", "m", "l"],
+      "task_support": ["detect"],
+      "weight_license": "Deci-AI-non-commercial",
+      "weight_upstream": "https://github.com/Deci-AI/super-gradients",
+      "commercial_safe": false,
+      "included_in_core": false,
+      "exclusion_reason": "Deci.AI proprietary non-commercial license. Blocked by default.",
+      "notes": "YOLO-NAS uses Deci.AI license; not commercial-safe without agreement."
+    }
+  ],
+  "task_support_confirmed": {
+    "detection": "All families",
+    "segmentation": "YOLOX, D-FINE, RT-DETR, RF-DETR (confirmed from HF model names ending -seg)",
+    "pose": "Not confirmed for LibreYOLO distribution (GitHub says YOLOX/YOLOv9/YOLO-NAS but no HF model found)",
+    "tracking": "ByteTrack integration via libreyolo[tracking] — not a separate model family",
+    "open_vocabulary": "Not confirmed in official docs",
+    "export": "ONNX, TorchScript, TensorRT, OpenVINO, NCNN via libreyolo[onnx/tensorrt/openvino/ncnn]"
+  },
+  "hf_model_count": 70,
+  "permissive_models_added_to_core": 26,
+  "non_commercial_models_excluded": 3,
+  "yolov9_license_correction": "Changed GPL-3.0 → MIT based on HF model card evidence from MultimediaTechLab/YOLO relicensing."
+}

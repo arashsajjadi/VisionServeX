@@ -657,6 +657,60 @@ runtimes:
       - seem-davit-d3
       - seem-focal-t
 
+  - id: libreyolo_core_py310
+    description: "LibreYOLO core runtime — MIT code + permissive weights (Apache-2.0/MIT). Unified API for YOLOX/D-FINE/RT-DETR/RF-DETR/YOLOv9. pip install libreyolo[all]."
+    env_type: subprocess
+    python_version: "3.11"
+    torch_version: ">=2.6"
+    cuda_version: any
+    pip_packages:
+      - "libreyolo[all]"
+    conda_packages: []
+    git_repos: []
+    custom_ops: []
+    checkpoint_sources: []
+    license_gate: null
+    auth_gate: null
+    output_adapter: "visionservex.runtime_broker.adapters.libreyolo:to_canonical"
+    smoke_command: ["visionservex", "libreyolo", "smoke-test", "{model_id}", "{input}"]
+    contract_command: ["visionservex", "libreyolo", "smoke-test", "{model_id}", "{input}"]
+    benchmark_command: ["visionservex", "benchmark-detection", "--models", "{model_id}", "--device", "{device}"]
+    known_failure_modes:
+      - code: LIBREYOLO_WEIGHT_NOT_FOUND
+        description: "Weight not found in HF registry."
+        next_action: "visionservex libreyolo pull {model_id}"
+      - code: LIBREYOLO_IMPORT_FAILED
+        description: "libreyolo not installed or import failed."
+        next_action: "pip install libreyolo[all]"
+    fallback_runtime: core_py311
+    supported_models:
+      - libreyolo-dfine-n
+      - libreyolo-dfine-s
+      - libreyolo-dfine-m
+      - libreyolo-dfine-l
+      - libreyolo-dfine-x
+      - libreyolo-yolox-n
+      - libreyolo-yolox-t
+      - libreyolo-yolox-s
+      - libreyolo-yolox-m
+      - libreyolo-yolox-l
+      - libreyolo-yolox-x
+      - libreyolo-rtdetr-r18
+      - libreyolo-rtdetr-r34
+      - libreyolo-rtdetr-r50
+      - libreyolo-rtdetr-r50m
+      - libreyolo-rtdetr-r101
+      - libreyolo-rtdetr-l
+      - libreyolo-rtdetr-x
+      - libreyolo-rfdetr-n
+      - libreyolo-rfdetr-s
+      - libreyolo-rfdetr-m
+      - libreyolo-rfdetr-l
+      - libreyolo-yolov9-t
+      - libreyolo-yolov9-s
+      - libreyolo-yolov9-m
+      - libreyolo-yolov9-c
+
   - id: reid_torchreid_py310
     description: "OSNet / Person-ReID sidecar (Python 3.10, torchreid from KaiyangZhou/deep-person-reid)."
     env_type: conda

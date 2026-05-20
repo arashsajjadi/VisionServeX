@@ -116,25 +116,134 @@ _EXTENDED_ROWS: list[ModelSource] = [
         )
         for mid in ("rfdetr-base", "rfdetr-medium", "rfdetr-nano")
     ],
-    # ---------------- LibreYOLO permissive bundles ---------------------------
+    # ---------------- LibreYOLO permissive core bundles ----------------------
+    # v2.48: LibreYOLO is a core VisionServeX-supported permissive open-source
+    # ecosystem (MIT code license; Apache-2.0 weights verified per HF model card).
+    # NOT an external competitor — should appear as core winner in leaderboards.
     *[
         ModelSource(
             model_id=mid,
             family="libreyolo",
             task="detect",
-            official_repo="https://github.com/lzhcv/LibreYOLO",
+            official_repo="https://github.com/LibreYOLO/libreyolo",
             license="Apache-2.0",
             license_risk="none",
             runnable_in_visionservex=True,
             access_status="open",
             recommended_action="add_now",
-            notes="LibreYOLO permissive bundle (default-safe weights)",
+            notes="LibreYOLO detection model (Apache-2.0 weights, MIT code)",
         )
         for mid in (
+            # D-FINE family (Apache-2.0)
             "libreyolo-dfine-n",
             "libreyolo-dfine-s",
+            "libreyolo-dfine-m",
+            "libreyolo-dfine-l",
+            "libreyolo-dfine-x",
+            # YOLOX family (Apache-2.0)
             "libreyolo-yolox-n",
+            "libreyolo-yolox-t",
             "libreyolo-yolox-s",
+            "libreyolo-yolox-m",
+            "libreyolo-yolox-l",
+            "libreyolo-yolox-x",
+            # RT-DETR family (Apache-2.0)
+            "libreyolo-rtdetr-r18",
+            "libreyolo-rtdetr-r34",
+            "libreyolo-rtdetr-r50",
+            "libreyolo-rtdetr-r50m",
+            "libreyolo-rtdetr-r101",
+            "libreyolo-rtdetr-l",
+            "libreyolo-rtdetr-x",
+            # RF-DETR family (Apache-2.0)
+            "libreyolo-rfdetr-n",
+            "libreyolo-rfdetr-s",
+            "libreyolo-rfdetr-m",
+            "libreyolo-rfdetr-l",
+        )
+    ],
+    *[
+        ModelSource(
+            model_id=mid,
+            family="libreyolo",
+            task="segment",
+            official_repo="https://github.com/LibreYOLO/libreyolo",
+            license="Apache-2.0",
+            license_risk="none",
+            runnable_in_visionservex=True,
+            access_status="open",
+            recommended_action="add_now",
+            notes="LibreYOLO segmentation model (Apache-2.0 weights, MIT code)",
+        )
+        for mid in (
+            # D-FINE seg
+            "libreyolo-dfine-n-seg",
+            "libreyolo-dfine-s-seg",
+            "libreyolo-dfine-m-seg",
+            "libreyolo-dfine-l-seg",
+            "libreyolo-dfine-x-seg",
+            # YOLOX seg
+            "libreyolo-yolox-n-seg",
+            "libreyolo-yolox-t-seg",
+            "libreyolo-yolox-s-seg",
+            "libreyolo-yolox-m-seg",
+            "libreyolo-yolox-l-seg",
+            "libreyolo-yolox-x-seg",
+            # RT-DETR seg
+            "libreyolo-rtdetr-r18-seg",
+            "libreyolo-rtdetr-r34-seg",
+            "libreyolo-rtdetr-r50-seg",
+            "libreyolo-rtdetr-r50m-seg",
+            "libreyolo-rtdetr-r101-seg",
+            "libreyolo-rtdetr-l-seg",
+            "libreyolo-rtdetr-x-seg",
+            # RF-DETR seg
+            "libreyolo-rfdetr-n-seg",
+            "libreyolo-rfdetr-s-seg",
+            "libreyolo-rfdetr-m-seg",
+            "libreyolo-rfdetr-l-seg",
+        )
+    ],
+    # YOLOv9 family — v2.48 audit: LibreYOLO/LibreYOLO9s HF model card shows MIT
+    # (weights from MultimediaTechLab/YOLO which relicensed under MIT). Auto-pull.
+    *[
+        ModelSource(
+            model_id=mid,
+            family="libreyolo",
+            task="detect",
+            official_repo="https://github.com/LibreYOLO/libreyolo",
+            license="MIT",
+            license_risk="none",
+            runnable_in_visionservex=True,
+            access_status="open",
+            recommended_action="add_now",
+            notes="LibreYOLO YOLOv9 (MIT per HF model card via MultimediaTechLab/YOLO)",
+        )
+        for mid in (
+            "libreyolo-yolov9-t",
+            "libreyolo-yolov9-s",
+            "libreyolo-yolov9-m",
+            "libreyolo-yolov9-c",
+        )
+    ],
+    # YOLO-NAS — still non-commercial (Deci.AI). Excluded from default-safe core.
+    *[
+        ModelSource(
+            model_id=mid,
+            family="libreyolo",
+            task="detect",
+            official_repo="https://github.com/LibreYOLO/libreyolo",
+            license="Deci-AI-non-commercial",
+            license_risk="non_commercial",
+            runnable_in_visionservex=False,
+            access_status="open",
+            recommended_action="do_not_add",
+            notes="LibreYOLO YOLO-NAS — Deci.AI non-commercial license. Blocked by default.",
+        )
+        for mid in (
+            "libreyolo-yolonas-s",
+            "libreyolo-yolonas-m",
+            "libreyolo-yolonas-l",
         )
     ],
     # ---------------- Ultralytics baselines (AGPL-3.0) -----------------------
