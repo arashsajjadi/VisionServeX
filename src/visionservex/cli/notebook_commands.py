@@ -292,7 +292,31 @@ _PRESERVE_ABS_PREFIXES = (
 )
 
 
-def _is_preserved(path: Path, preserve_dirs: tuple[str, ...]) -> bool:
+# v2.46 historical evidence patterns — never delete these even under broad cleanup.
+_HISTORICAL_EVIDENCE_REGEX = re.compile(
+    "|".join(
+        [
+            r"_current_run\.json$",
+            r"^v\d{3}[a-z_]*\.(?:json|csv|md)$",
+            r"_v\d{3}[a-z_]*.*\.(?:json|csv|md)$",
+            r"(?:detection|segmentation|promptable|libreyolo)_leaderboard\.(?:json|csv)$",
+            r"final_winners\.json$",
+            r"model_coverage_ledger\.(?:json|csv)$",
+            r"notebook_model_call_ledger\.(?:json|jsonl)$",
+            r"benchmark_notebook_coverage_audit\.json$",
+            r"generated_artifact_integrity\.json$",
+            r"environment_v\d+\.json$",
+        ]
+    )
+)
+
+
+def _is_preserved(
+    path: Path,
+    preserve_dirs: tuple[str, ...],
+    *,
+    preserve_historical_evidence: bool = True,
+) -> bool:
     parts = set(path.parts)
     for p in preserve_dirs:
         if p in parts:
@@ -300,18 +324,30 @@ def _is_preserved(path: Path, preserve_dirs: tuple[str, ...]) -> bool:
         if p in str(path):
             return True
     s = str(path.resolve())
-    return any(s.startswith(prefix) for prefix in _PRESERVE_ABS_PREFIXES)
+    if any(s.startswith(prefix) for prefix in _PRESERVE_ABS_PREFIXES):
+        return True
+    return (
+        preserve_historical_evidence
+        and path.is_file()
+        and _HISTORICAL_EVIDENCE_REGEX.search(path.name) is not None
+    )
 
 
 def _iter_to_delete(
     root: Path,
     patterns: tuple[str, ...],
     preserve_dirs: tuple[str, ...],
+    *,
+    preserve_historical_evidence: bool = True,
 ) -> list[Path]:
     out: list[Path] = []
     for pattern in patterns:
         for candidate in root.glob(pattern):
-            if _is_preserved(candidate, preserve_dirs):
+            if _is_preserved(
+                candidate,
+                preserve_dirs,
+                preserve_historical_evidence=preserve_historical_evidence,
+            ):
                 continue
             out.append(candidate)
     # de-dup preserving order
@@ -353,8 +389,22 @@ def clean_outputs_cmd(
     extra_pattern: list[str] = typer.Option(
         [], "--extra-pattern", help="Additional glob patterns to delete."
     ),
+    preserve_historical_evidence: bool = typer.Option(
+        True,
+        "--preserve-historical-evidence/--no-preserve-historical-evidence",
+        help=(
+            "v2.46: keep per-model `*_current_run.json`, leaderboard csv/json, "
+            "and ledger artifacts so the reconciler can still see benchmark "
+            "evidence after cleanup. Default True. Pass --no-... to match "
+            "v2.45 behavior (full wipe)."
+        ),
+    ),
 ) -> None:
-    """v2.39.0: clean generated outputs while preserving models, datasets, env."""
+    """v2.39.0+: clean generated outputs while preserving models, datasets, env.
+
+    v2.46 update: preserves historical per-model evidence by default so the
+    reconciler can still see benchmark_passed rows after cleanup.
+    """
     preserve_dirs = list(_PRESERVE_DEFAULT_DIRS)
     if not preserve_env:
         preserve_dirs.remove(".venv")
@@ -364,7 +414,12 @@ def clean_outputs_cmd(
         preserve_dirs = [d for d in preserve_dirs if d != "datasets"]
 
     patterns = tuple(_CLEAN_PATTERNS_DEFAULT) + tuple(extra_pattern)
-    targets = _iter_to_delete(root, patterns, tuple(preserve_dirs))
+    targets = _iter_to_delete(
+        root,
+        patterns,
+        tuple(preserve_dirs),
+        preserve_historical_evidence=preserve_historical_evidence,
+    )
     bytes_freed = 0
     deleted_files = 0
     deleted_dirs = 0
