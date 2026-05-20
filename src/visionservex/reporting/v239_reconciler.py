@@ -464,31 +464,42 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "",
         "v246_correction_reason": "v252_coco_instance_seg_mask_mAP50_95=0.1646",
     },
-    # Pose — dataset_required (no COCO keypoint GT subset).
+    # v2.53: RTMPose COCO keypoints benchmark on 271-image mini dataset.
+    # GT-box top-down mode (gt-person-boxes). CPU inference (RTX5080 sm_120
+    # incompatible with mmpose env torch cu121).
+    # Artifact: notebook/_runs/20260520T110000Z_v253/reports/v253_rtmpose_coco_keypoints_benchmark.json
+    "rtmpose-s": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v253_coco_kp_oks_ap=0.6718_gt_box_topdown",
+    },
+    "rtmpose-m": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v253_coco_kp_oks_ap=0.7100_gt_box_topdown",
+    },
     "rtmpose-l": {
-        "final_state": "dataset_required",
-        "blocker_code": "COCO_KEYPOINTS_MISSING",
-        "v246_correction_reason": "coco_keypoints_val_mini_not_present",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v253_coco_kp_oks_ap=0.7248_gt_box_topdown",
+    },
+    # rtmpose-t config downloaded by mim is CrowdPose (14-kp), not COCO.
+    # Correct COCO config name not found in mim registry for mmpose 1.3.x.
+    "rtmpose-t": {
+        "final_state": "benchmark_failed",
+        "blocker_code": "RTMPOSE_T_CONFIG_CROWDPOSE_MISLABELED",
+        "v246_correction_reason": "v253_mim_downloaded_crowdpose_config_instead_of_coco",
+    },
+    # 384x288 configs not in mim registry for mmpose 1.3.x.
+    "rtmpose-m-384x288": {
+        "final_state": "benchmark_failed",
+        "blocker_code": "RTMPOSE_CONFIG_NOT_IN_MIM_REGISTRY",
+        "v246_correction_reason": "v253_384x288_config_missing_mim_registry_mmpose_1.3.x",
     },
     "rtmpose-l-384x288": {
-        "final_state": "dataset_required",
-        "blocker_code": "COCO_KEYPOINTS_MISSING",
-        "v246_correction_reason": "coco_keypoints_val_mini_not_present",
-    },
-    "rtmpose-m-384x288": {
-        "final_state": "dataset_required",
-        "blocker_code": "COCO_KEYPOINTS_MISSING",
-        "v246_correction_reason": "coco_keypoints_val_mini_not_present",
-    },
-    "rtmpose-s": {
-        "final_state": "dataset_required",
-        "blocker_code": "COCO_KEYPOINTS_MISSING",
-        "v246_correction_reason": "coco_keypoints_val_mini_not_present",
-    },
-    "rtmpose-t": {
-        "final_state": "dataset_required",
-        "blocker_code": "COCO_KEYPOINTS_MISSING",
-        "v246_correction_reason": "coco_keypoints_val_mini_not_present",
+        "final_state": "benchmark_failed",
+        "blocker_code": "RTMPOSE_CONFIG_NOT_IN_MIM_REGISTRY",
+        "v246_correction_reason": "v253_384x288_config_missing_mim_registry_mmpose_1.3.x",
     },
     # v2.50 LibreYOLO segmentation — adapter implemented in scripts/libreyolo_coco_seg_benchmark.py.
     # Capability probe revealed three distinct classes of -seg weights:
@@ -579,13 +590,7 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     # v2.47.3 → v2.49: historical retention upgraded to zero-smoke states.
     # rtmdet-r2-s and rtmpose-m already confirmed as contract_passed in v2.45.
     "rtmdet-r2-s": {"final_state": "contract_passed", "blocker_code": ""},
-    # v2.52: rtmpose-m → dataset_required (COCO keypoints download failed in v2.52 sprint).
-    # Consistent with other rtmpose models. Benchmark attempted but source missing.
-    "rtmpose-m": {
-        "final_state": "dataset_required",
-        "blocker_code": "COCO_KEYPOINTS_MISSING",
-        "v246_correction_reason": "v252_coco_keypoints_download_failed_imcocodataset_org",
-    },
+    # v2.53: rtmpose-m promoted to benchmark_passed (see v2.53 block above).
     # v2.47.2 bytetrack sidecar built; v2.49 promoted to micro_benchmark_passed.
     # BYTETracker.update() with dummy detections returned 2 tracks correctly.
     # v2.51: grounding-dino-original-swin-t/b: VisionModel('grounding-dino-original-swin-t')
