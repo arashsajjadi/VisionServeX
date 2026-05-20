@@ -204,13 +204,8 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "",
         "v246_correction_reason": "license_truth_corrected_Meta-commercial-friendly",
     },
-    # v2.46 download retry: HF migration verified. Mark wired; real smoke
-    # happens in 05_classification.
-    "swinv2-large": {
-        "final_state": "wired",
-        "blocker_code": "",
-        "v246_correction_reason": "hf_id_correction_microsoft_swinv2-large-patch4-window12to16-192to256-22kto1k-ft",
-    },
+    # v2.46 download retry: HF migration verified.
+    # v2.51: benchmark_failed (LABEL_N format — see lower entry for details).
     # v2.48.0 benchmark promotions: 15 detection models benchmarked on 400-image COCO.
     # Results artifact: notebook/_runs/20260520T240000Z_v248/reports/v248_dfine_rfdetr_detection_benchmark_400.json
     "dfine-l": {"final_state": "benchmark_passed", "blocker_code": ""},
@@ -269,18 +264,47 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "CHECKPOINT_REQUIRED",
         "v246_correction_reason": "yolov9_weights_not_cached_run_libreyolo_pull",
     },
-    # v2.49 zero-smoke: OWL open-vocab models — ran 50-image schema validation.
-    # No COCO GT categories per image available; mAP cannot be computed without GT.
-    # Contract-passed: models load, run, output schema validated.
-    "owlvit-base-patch32": {"final_state": "contract_passed", "blocker_code": ""},
-    "owlvit-large-patch14": {"final_state": "contract_passed", "blocker_code": ""},
-    "owlv2-base-patch16": {"final_state": "contract_passed", "blocker_code": ""},
-    "owlv2-large-patch14": {"final_state": "contract_passed", "blocker_code": ""},
-    # Grounding-DINO original SwinT/B: validated via VisionServeX open-vocab
-    # smoke — output schema valid. No COCO instance GT matching yet.
-    "grounding-dino-swin-t": {"final_state": "contract_passed", "blocker_code": ""},
-    "grounding-dino-swin-b": {"final_state": "contract_passed", "blocker_code": ""},
-    "grounding-dino-tiny": {"final_state": "contract_passed", "blocker_code": ""},
+    # v2.51 open-vocab COCO mAP benchmark — coco_all_80_categories prompts, pycocotools.
+    # Artifact: notebook/_runs/20260521T080000Z_v251/reports/v251_open_vocab_detection_benchmark.json
+    # 3 GD models (400 imgs, period-joined string), 4 OWL models (100 imgs, list format).
+    # grounding-dino-original-swin-t/b: VisionModel returns 'unknown model' → CHECKPOINT_REQUIRED.
+    "grounding-dino-swin-t": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_coco_ovd_mAP50:95=0.3809",
+    },
+    "grounding-dino-swin-b": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_coco_ovd_mAP50:95=0.4303",
+    },
+    "grounding-dino-tiny": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_coco_ovd_mAP50:95=0.3809",
+    },
+    # OWL open-vocab models — v2.51 COCO benchmark (100 imgs, all-80-categories list prompts).
+    # Artifact: notebook/_runs/20260521T080000Z_v251/reports/v251_open_vocab_detection_benchmark.json
+    "owlvit-base-patch32": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_coco_ovd_mAP50:95=0.0510_all80cat_100imgs",
+    },
+    "owlvit-large-patch14": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_coco_ovd_mAP50:95=0.0881_all80cat_100imgs",
+    },
+    "owlv2-base-patch16": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_coco_ovd_mAP50:95=0.0973_all80cat_100imgs",
+    },
+    "owlv2-large-patch14": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_coco_ovd_mAP50:95=0.0967_all80cat_100imgs",
+    },
     # v2.50 SAM family — promotable to benchmark_passed via COCO bbox-prompt benchmark.
     # 12 SAM variants benchmarked on COCO val2017 instance masks with mean_iou:
     #   sam-vit-base (0.7612), sam-vit-large (0.7707), sam-vit-huge (0.7705),
@@ -305,52 +329,104 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     "efficientsam": {"final_state": "contract_passed", "blocker_code": ""},
     "hq-sam": {"final_state": "contract_passed", "blocker_code": ""},
     "mobilesam": {"final_state": "contract_passed", "blocker_code": ""},
-    # Embedding models — contract_passed (embed runs, output shape validated).
-    "clip-vit-base-patch32": {"final_state": "contract_passed", "blocker_code": ""},
-    "clip-vit-large-patch14": {"final_state": "contract_passed", "blocker_code": ""},
-    "dinov2-base": {"final_state": "contract_passed", "blocker_code": ""},
-    "dinov2-giant": {"final_state": "contract_passed", "blocker_code": ""},
-    "dinov2-large": {"final_state": "contract_passed", "blocker_code": ""},
-    "dinov2-small": {"final_state": "contract_passed", "blocker_code": ""},
-    "siglip-base-patch16-224": {"final_state": "contract_passed", "blocker_code": ""},
-    "siglip2-base-patch16-224": {"final_state": "contract_passed", "blocker_code": ""},
-    "siglip2-large-patch16-256": {"final_state": "contract_passed", "blocker_code": ""},
-    "siglip2-so400m-patch14-384": {"final_state": "contract_passed", "blocker_code": ""},
-    # Classification — dataset_required (no ImageNet subset on host).
+    # v2.51 embedding kNN benchmark on Imagenette (500 images, 10 classes).
+    # Artifact: notebook/_runs/20260521T080000Z_v251/reports/v251_embedding_knn_benchmark.json
+    "clip-vit-base-patch32": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_knn=0.9800",
+    },
+    "clip-vit-large-patch14": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_knn=0.9940",
+    },
+    "dinov2-small": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_knn=0.9880",
+    },
+    "dinov2-base": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_knn=0.9920",
+    },
+    "dinov2-large": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_knn=0.9960",
+    },
+    "dinov2-giant": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_knn=0.9980",
+    },
+    "siglip2-base-patch16-224": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_knn=0.9960",
+    },
+    "siglip2-large-patch16-256": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_knn=0.9920",
+    },
+    "siglip2-so400m-patch14-384": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_knn=0.9940",
+    },
+    # siglip-base-patch16-224: HF download failed (brotli decompression error).
+    "siglip-base-patch16-224": {
+        "final_state": "benchmark_failed",
+        "blocker_code": "HF_DOWNLOAD_FAILED",
+        "v246_correction_reason": "v251_siglip_base_brotli_decompression_error",
+    },
+    # v2.51.0 Classification: Imagenette2-320 benchmark (100 images/class x 10 classes = 1000 images).
+    # Dataset downloaded from https://s3.amazonaws.com/fast-ai-imageclas/imagenette2-320.tgz
+    # Artifact: notebook/_runs/20260521T080000Z_v251/reports/v251_imagenette_classification_benchmark.json
+    # 6 models benchmark_passed, 2 benchmark_failed (label mapping issues).
+    "convnextv2-tiny": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_top1=0.8670_imagenette2-320",
+    },
     "convnextv2-base": {
-        "final_state": "dataset_required",
-        "blocker_code": "IMAGENET_DATASET_MISSING",
-        "v246_correction_reason": "imagenet_subset_not_present_prepare_command_visionservex_dataset_prepare-imagenet-mini",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_top1=0.8680_imagenette2-320",
     },
     "convnextv2-large": {
-        "final_state": "dataset_required",
-        "blocker_code": "IMAGENET_DATASET_MISSING",
-        "v246_correction_reason": "imagenet_subset_not_present",
-    },
-    "convnextv2-tiny": {
-        "final_state": "dataset_required",
-        "blocker_code": "IMAGENET_DATASET_MISSING",
-        "v246_correction_reason": "imagenet_subset_not_present",
-    },
-    "maxvit-tiny-tf-224": {
-        "final_state": "dataset_required",
-        "blocker_code": "IMAGENET_DATASET_MISSING",
-        "v246_correction_reason": "imagenet_subset_not_present",
-    },
-    "swinv2-base": {
-        "final_state": "dataset_required",
-        "blocker_code": "IMAGENET_DATASET_MISSING",
-        "v246_correction_reason": "imagenet_subset_not_present",
-    },
-    "swinv2-small": {
-        "final_state": "dataset_required",
-        "blocker_code": "IMAGENET_DATASET_MISSING",
-        "v246_correction_reason": "imagenet_subset_not_present",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_top1=0.8820_imagenette2-320",
     },
     "swinv2-tiny": {
-        "final_state": "dataset_required",
-        "blocker_code": "IMAGENET_DATASET_MISSING",
-        "v246_correction_reason": "imagenet_subset_not_present",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_top1=0.8570_imagenette2-320",
+    },
+    "swinv2-small": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_top1=0.8780_imagenette2-320",
+    },
+    "swinv2-base": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v251_imagenette_top1=0.8770_imagenette2-320",
+    },
+    # maxvit-tiny-tf-224: ran benchmark but label mapping failed (NaN scores, off-by-one rank)
+    "maxvit-tiny-tf-224": {
+        "final_state": "benchmark_failed",
+        "blocker_code": "IMAGENETTE_LABEL_MAPPING_FAILED",
+        "v246_correction_reason": "v251_maxvit_nan_scores_rank_ordering_inconsistent",
+    },
+    # swinv2-large: wired → benchmark_failed (LABEL_N format, likely ImageNet-21K non-standard indexing)
+    "swinv2-large": {
+        "final_state": "benchmark_failed",
+        "blocker_code": "IMAGENETTE_LABEL_MAPPING_FAILED",
+        "v246_correction_reason": "v251_swinv2_large_label_N_format_imagenet21k_class_ordering",
     },
     # oneformer-swin-large — contract_passed (loads, runs panoptic prediction).
     "oneformer-swin-large": {"final_state": "contract_passed", "blocker_code": ""},
@@ -472,16 +548,18 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     "rtmpose-m": {"final_state": "contract_passed", "blocker_code": ""},
     # v2.47.2 bytetrack sidecar built; v2.49 promoted to micro_benchmark_passed.
     # BYTETracker.update() with dummy detections returned 2 tracks correctly.
-    # v2.47 Grounding-DINO original SwinT/SwinB — Apache-2.0, local weights available.
+    # v2.51: grounding-dino-original-swin-t/b: VisionModel('grounding-dino-original-swin-t')
+    # returns 'unknown model' — not registered in VisionModel engine. Benchmark_failed.
+    # The model registry entry exists (wired) but the execution path is not wired.
     "grounding-dino-original-swin-t": {
-        "final_state": "wired",
-        "blocker_code": "",
-        "v246_correction_reason": "gdino_original_swint_local_weights_apache2",
+        "final_state": "benchmark_failed",
+        "blocker_code": "VISIONMODEL_ENGINE_NOT_REGISTERED",
+        "v246_correction_reason": "v251_gdino_original_swint_unknown_to_visionmodel_api",
     },
     "grounding-dino-original-swin-b": {
-        "final_state": "wired",
-        "blocker_code": "",
-        "v246_correction_reason": "gdino_original_swinb_local_weights_apache2",
+        "final_state": "benchmark_failed",
+        "blocker_code": "VISIONMODEL_ENGINE_NOT_REGISTERED",
+        "v246_correction_reason": "v251_gdino_original_swinb_unknown_to_visionmodel_api",
     },
     # v2.47 Grounding-DINO 2 audit — no official source found as of 2026-05-20.
     # Searched: GitHub IDEA-Research, Hugging Face, arXiv, DeepDataSpace. Not found.

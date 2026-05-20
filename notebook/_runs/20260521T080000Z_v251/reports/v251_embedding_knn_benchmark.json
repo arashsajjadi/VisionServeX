@@ -1,0 +1,93 @@
+{
+  "benchmark_type": "imagenette_embedding_knn",
+  "dataset": "folder:/tmp/imagenette_flat_bench",
+  "dataset_source": "imagenette2-320 val split, 500 images (50 per class x 10 classes)",
+  "n_images": 500,
+  "n_classes": 10,
+  "wnid_mapping": {
+    "n01440764": "tench",
+    "n02102040": "english_springer",
+    "n02979186": "cassette_player",
+    "n03000684": "chain_saw",
+    "n03028079": "church",
+    "n03394916": "french_horn",
+    "n03417042": "garbage_truck",
+    "n03425413": "gas_pump",
+    "n03445777": "golf_ball",
+    "n03888257": "parachute"
+  },
+  "models": [
+    {
+      "model_id": "clip-vit-base-patch32",
+      "status": "ok",
+      "knn_accuracy": 0.98,
+      "mean_latency_ms": 11.85,
+      "n_images": 500,
+      "embedding_dim": 768
+    },
+    {
+      "model_id": "clip-vit-large-patch14",
+      "status": "ok",
+      "knn_accuracy": 0.994,
+      "mean_latency_ms": 22.82,
+      "n_images": 500,
+      "embedding_dim": 1024
+    },
+    {
+      "model_id": "dinov2-small",
+      "status": "ok",
+      "knn_accuracy": 0.988,
+      "mean_latency_ms": 11.68,
+      "n_images": 500,
+      "embedding_dim": 384
+    },
+    {
+      "model_id": "dinov2-base",
+      "status": "ok",
+      "knn_accuracy": 0.992,
+      "mean_latency_ms": 17.32,
+      "n_images": 500,
+      "embedding_dim": 768
+    },
+    {
+      "model_id": "dinov2-large",
+      "status": "ok",
+      "knn_accuracy": 0.996,
+      "mean_latency_ms": 22.83,
+      "n_images": 500,
+      "embedding_dim": 1024
+    },
+    {
+      "model_id": "dinov2-giant",
+      "status": "ok",
+      "knn_accuracy": 0.998,
+      "mean_latency_ms": 56.91,
+      "n_images": 500,
+      "embedding_dim": 1536
+    },
+    {
+      "model_id": "siglip2-base-patch16-224",
+      "status": "ok",
+      "knn_accuracy": 0.996,
+      "mean_latency_ms": 17.95,
+      "n_images": 500,
+      "embedding_dim": 768
+    },
+    {
+      "model_id": "siglip2-large-patch16-256",
+      "status": "ok",
+      "knn_accuracy": 0.992,
+      "mean_latency_ms": 30.63,
+      "n_images": 500,
+      "embedding_dim": 1024
+    },
+    {
+      "model_id": "siglip2-so400m-patch14-384",
+      "status": "ok",
+      "knn_accuracy": 0.994,
+      "mean_latency_ms": 55.86,
+      "n_images": 500,
+      "embedding_dim": 1152
+    }
+  ]
+}
