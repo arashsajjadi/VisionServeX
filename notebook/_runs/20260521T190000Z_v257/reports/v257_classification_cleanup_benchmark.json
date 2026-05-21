@@ -1,0 +1,25 @@
+{
+  "benchmark_type": "timm_imagenette_v257",
+  "models": [
+    {
+      "model_id": "maxvit-tiny-tf-224",
+      "timm_model": "maxvit_tiny_tf_224.in1k",
+      "status": "ok",
+      "top1": 0.8533,
+      "top5": 0.99,
+      "latency_ms_p50": 55.6,
+      "n_images": 300,
+      "timm_backend": true
+    },
+    {
+      "model_id": "swinv2-large",
+      "timm_model": "swinv2_large_window12to16_192to256",
+      "status": "ok",
+      "top1": 0.8667,
+      "top5": 0.9967,
+      "latency_ms_p50": 212.2,
+      "n_images": 300,
+      "timm_backend": true
+    }
+  ]
+}

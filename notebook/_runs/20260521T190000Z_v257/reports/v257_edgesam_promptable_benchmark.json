@@ -1,0 +1,19 @@
+{
+  "benchmark_type": "edgesam_promptable_gt_box",
+  "models": [
+    {
+      "model_id": "edgesam",
+      "status": "ok",
+      "device": "cpu",
+      "mask_mAP50_95": 0.1494,
+      "mask_AP50": 0.2021,
+      "mask_AP75": 0.1793,
+      "latency_ms_p50": 801.3,
+      "n_images": 50,
+      "n_instances": 150,
+      "benchmark_protocol": "gt-box-prompts-coco-instance-seg",
+      "cuda_fallback": true,
+      "cuda_fallback_reason": "cu121 incompatible with sm_120"
+    }
+  ]
+}

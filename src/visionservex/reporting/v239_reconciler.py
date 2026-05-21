@@ -344,6 +344,15 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     # COCO gt-box prompts, 100 instances, benchmark-promptable-segmentation.
     # Packages: efficientsam (EfficientViT-SAM), mobile-sam, segment-anything-hq.
     # Artifact: notebook/_runs/20260520T150000Z_v255/reports/v255_promptable_optional_benchmark.json
+    # v2.57: EdgeSAM benchmarked (gt-box COCO instance seg, CPU, 50 images, 150 instances).
+    # Runtime: vsx-openmmlab-py310 + EdgeSAM from GitHub + mmdetection/projects (EfficientDet)
+    # CPU fallback: openmmlab py310 torch cu121 incompatible with RTX5080 sm_120.
+    # Artifact: notebook/_runs/20260521T190000Z_v257/reports/v257_edgesam_promptable_benchmark.json
+    "edgesam": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v257_coco_gtbox_mask_mAP50_95=0.1494_cpu_cu121_fallback",
+    },
     "efficientsam": {
         "final_state": "benchmark_passed",
         "blocker_code": "",
@@ -447,16 +456,20 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "v246_correction_reason": "v251_imagenette_top1=0.8770_imagenette2-320",
     },
     # maxvit-tiny-tf-224: ran benchmark but label mapping failed (NaN scores, off-by-one rank)
+    # v2.57: maxvit-tiny-tf-224 benchmarked via TIMM backend (HF backend produces all-NaN logits).
+    # TIMM: maxvit_tiny_tf_224.in1k → top1=0.853, top5=0.990 on Imagenette2-320 val.
     "maxvit-tiny-tf-224": {
-        "final_state": "benchmark_failed",
-        "blocker_code": "IMAGENETTE_LABEL_MAPPING_FAILED",
-        "v246_correction_reason": "v251_maxvit_nan_scores_rank_ordering_inconsistent",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v257_imagenette_timm_top1=0.8533_swinv2_large_window12to16",
     },
     # swinv2-large: wired → benchmark_failed (LABEL_N format, likely ImageNet-21K non-standard indexing)
+    # v2.57: swinv2-large benchmarked via TIMM backend (22K→1K fine-tuned).
+    # swinv2_large_window12to16_192to256: top1=0.867, top5=0.997 on Imagenette2-320 val.
     "swinv2-large": {
-        "final_state": "benchmark_failed",
-        "blocker_code": "IMAGENETTE_LABEL_MAPPING_FAILED",
-        "v246_correction_reason": "v251_swinv2_large_label_N_format_imagenet21k_class_ordering",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v257_imagenette_timm_top1=0.8667",
     },
     # oneformer-swin-large — contract_passed (loads, runs panoptic prediction).
     # v2.52: oneformer-swin-large benchmarked on 400-image COCO instance seg.

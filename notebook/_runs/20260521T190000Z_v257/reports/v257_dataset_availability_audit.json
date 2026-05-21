@@ -1,0 +1,43 @@
+{
+  "dota": {
+    "paths_checked": [
+      "/home/arash/datasets/DOTA",
+      "/home/arash/datasets/DOTA-v1.0",
+      "/home/arash/datasets/dota",
+      "/home/arash/datasets/dota_mini_vsx"
+    ],
+    "found": [],
+    "available": false,
+    "status": "MISSING"
+  },
+  "market1501": {
+    "paths_checked": [
+      "/home/arash/datasets/Market-1501-v15.09.15",
+      "/home/arash/datasets/market1501",
+      "/home/arash/datasets/market1501_mini_vsx"
+    ],
+    "found": [],
+    "available": false,
+    "status": "MISSING"
+  },
+  "mvtec": {
+    "paths_checked": [
+      "/home/arash/datasets/mvtec_anomaly_detection",
+      "/home/arash/datasets/mvtec_ad",
+      "/home/arash/datasets/mvtec_ad_mini_vsx"
+    ],
+    "found": [],
+    "available": false,
+    "status": "MISSING"
+  },
+  "medical": {
+    "paths_checked": [
+      "/home/arash/datasets/medical_segmentation",
+      "/home/arash/datasets/medical_seg_mini_vsx",
+      "/home/arash/datasets/nnUNet_raw"
+    ],
+    "found": [],
+    "available": false,
+    "status": "MISSING"
+  }
+}
