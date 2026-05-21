@@ -1,12 +1,12 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-05-21T01:18:42Z",
+  "generated_at": "2026-05-21T02:19:39Z",
   "libreyolo_treated_as_core": true,
   "external_restricted_baselines_excluded_from_core": true,
   "detection_core_winner": "deimv2-atto",
   "detection_core_winner_note": "libreyolo-* models are core VisionServeX permissive models, not external competitors.",
   "detection_external_restricted_baseline_winner": "no_benchmark_data",
-  "detection_core_benchmark_passed_count": 52,
+  "detection_core_benchmark_passed_count": 56,
   "detection_external_restricted_baseline_count": 0,
   "detection_core_top5": [
     "deimv2-atto",
@@ -49,7 +49,7 @@
     "fastsam-x",
     "hq-sam"
   ],
-  "n_detection_benchmark_passed": 52,
+  "n_detection_benchmark_passed": 56,
   "n_segmentation_benchmark_passed": 9,
   "detection_headline_core": "libreyolo-dfine-x (mAP50:95=0.5030, MIT/Apache-2.0, COCO 400-image)",
   "detection_headline_external_restricted": "yolo26x.pt (mAP50:95=0.4894, AGPL-3.0, excluded from core)",
