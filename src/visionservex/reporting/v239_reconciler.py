@@ -542,45 +542,12 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "",
         "v246_correction_reason": "v250_libreyolo_seg_adapter_rfdetr_mask_benchmark",
     },
-    # 2. RTDETR-seg (r18/r34/r50/r50m/r101): weight file ends with -seg but
-    # model.predict().masks is None — only emits detection boxes. capability_mismatch.
-    **{
-        mid: {
-            "final_state": "model_capability_mismatch",
-            "blocker_code": "LIBREYOLO_SEG_MASK_OUTPUT_NOT_AVAILABLE",
-            "v246_correction_reason": "v250_libreyolo_rtdetr_seg_no_mask_output",
-        }
-        for mid in (
-            "libreyolo-rtdetr-r18-seg",
-            "libreyolo-rtdetr-r34-seg",
-            "libreyolo-rtdetr-r50-seg",
-            "libreyolo-rtdetr-r50m-seg",
-            "libreyolo-rtdetr-r101-seg",
-        )
-    },
-    # 3. YOLOX-seg + DFINE-seg + RTDETR-{l,x}-seg + RFDETR-x-seg: not published on HF (401/404).
-    **{
-        mid: {
-            "final_state": "checkpoint_not_published",
-            "blocker_code": "HF_404_OR_401",
-            "v246_correction_reason": "v250_libreyolo_seg_weight_not_published_on_hf",
-        }
-        for mid in (
-            "libreyolo-dfine-l-seg",
-            "libreyolo-dfine-m-seg",
-            "libreyolo-dfine-n-seg",
-            "libreyolo-dfine-s-seg",
-            "libreyolo-dfine-x-seg",
-            "libreyolo-rtdetr-l-seg",
-            "libreyolo-rtdetr-x-seg",
-            "libreyolo-yolox-l-seg",
-            "libreyolo-yolox-m-seg",
-            "libreyolo-yolox-n-seg",
-            "libreyolo-yolox-s-seg",
-            "libreyolo-yolox-t-seg",
-            "libreyolo-yolox-x-seg",
-        )
-    },
+    # v2.58 source-truth cleanup: Removed 18 hallucinated/impossible LibreYOLO seg rows.
+    # Research report: D-FINE, YOLOX, RT-DETR have NO seg heads in LibreYOLO framework.
+    # Weights were never published. Detection counterparts (without -seg) remain and are
+    # benchmark_passed. RT-DETR r18-r101 produce no masks despite -seg filename.
+    # These 18 rows are REMOVED from extended_manifest_v240.py (v2.58 cleanup).
+    # Archived in: notebook/99_final_report/reports/v258_archived_libreyolo_seg_rows.json
     # Tracking — micro_benchmark_passed (bytetrack env built and functional).
     "bytetrack": {
         "final_state": "micro_benchmark_passed",
@@ -630,12 +597,34 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "",
         "v246_correction_reason": "v256_coco_ovd_mAP50:95=0.4303_alias_grounding_dino_swin_b",
     },
-    # v2.47 Grounding-DINO 2 audit — no official source found as of 2026-05-20.
-    # Searched: GitHub IDEA-Research, Hugging Face, arXiv, DeepDataSpace. Not found.
+    # v2.58: auth-gated model documentation. No credentials present in this environment.
+    # grounding-dino-1.5 and 1.6 are API-only (DeepDataSpace). Local weights NOT released.
+    # Next: export DDS_API_TOKEN=<token_from_deepdataspace.com>
+    "grounding-dino-1.5": {
+        "final_state": "auth_required",
+        "blocker_code": "DEEPDATASPACE_API_KEY_MISSING",
+        "v246_correction_reason": "v258_confirmed_api_only_no_local_weights_deepdataspace_com",
+    },
+    "grounding-dino-1.6": {
+        "final_state": "auth_required",
+        "blocker_code": "DEEPDATASPACE_API_KEY_MISSING",
+        "v246_correction_reason": "v258_confirmed_api_only_deepdataspace_com",
+    },
+    # sam3-base: facebook/sam3 is HF-gated. Request access then set HF_TOKEN.
+    # Next: huggingface-cli login && python -c "from huggingface_hub import model_info; model_info('facebook/sam3', token=True)"
+    "sam3-base": {
+        "final_state": "auth_required",
+        "blocker_code": "HF_SAM3_ACCESS_NOT_APPROVED",
+        "v246_correction_reason": "v258_hf_gated_sam3_requires_approved_access_request",
+    },
+    # v2.58 confirmed: "grounding-dino-2" does not exist. This name is a hallucination
+    # from academic papers using numeric citation references (e.g., "[2]" in bibliography).
+    # Source: v2.58 research audit. The IDEA-Research lineage goes 1.0→1.5→1.6→DINO-X.
+    # Row archived in v258_archived_hallucination_rows.json; remains not_advertised.
     "grounding-dino-2-audit": {
         "final_state": "not_advertised",
-        "blocker_code": "OFFICIAL_SOURCE_NOT_FOUND",
-        "v246_correction_reason": "gdino2_official_source_not_found_2026-05-20",
+        "blocker_code": "CITATION_NUMBER_HALLUCINATION",
+        "v246_correction_reason": "v258_confirmed_hallucination_citation_bracket_2_not_model_version",
     },
     # v2.46 license-gate retention: AGPL-3.0 Ultralytics / THU-MIG / FastSAM
     # weights MUST stay opt_in_license_required. They have historical benchmark
@@ -1642,6 +1631,10 @@ def reconcile(
                 "model_capability_mismatch": "model_capability",
                 "checkpoint_not_published": "checkpoint_source",
                 "benchmark_implementation_required": "adapter_implementation",
+                # v2.58: absent_from_manifest rows get "registry_cleanup" category
+                "expected_blocker": "registry_cleanup",
+                "stub": "registry_cleanup",
+                "blocked": "registry_cleanup",
             }
             cat = _STATE_TO_CATEGORY.get(final_state, "unclassified")
         row.blocker_category = cat

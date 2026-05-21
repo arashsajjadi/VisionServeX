@@ -1,0 +1,17 @@
+{
+  "run_id": "20260521T210000Z_v258",
+  "HF_TOKEN": "MISSING",
+  "HUGGINGFACE_HUB_TOKEN": "MISSING",
+  "DEEPDATASPACE_API_KEY": "MISSING",
+  "DDS_API_TOKEN": "MISSING",
+  "DINOX_API_KEY": "MISSING",
+  "GROUNDING_DINO_API_KEY": "MISSING",
+  "sam3_hf_access": "NOT_CHECKED_NO_TOKEN",
+  "grounding_dino_api_access": "NOT_CHECKED_NO_TOKEN",
+  "conclusion": "All auth-gated models remain auth_required. LibreYOLO cleanup proceeds independently.",
+  "next_commands": {
+    "sam3_base": "huggingface-cli login && python -c \"from huggingface_hub import model_info; model_info(\"facebook/sam3\", token=True)\"",
+    "grounding_dino_1_5": "export DDS_API_TOKEN=<token_from_deepdataspace.com>",
+    "grounding_dino_1_6": "export DDS_API_TOKEN=<token_from_deepdataspace.com>"
+  }
+}

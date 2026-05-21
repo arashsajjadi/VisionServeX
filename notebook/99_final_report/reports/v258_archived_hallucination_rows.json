@@ -1,0 +1,12 @@
+{
+  "schema_version": "v258.hallucination_archive.v1",
+  "archived_rows": [
+    {
+      "model_id": "grounding-dino-2-audit",
+      "old_state": "not_advertised",
+      "reason": "Citation hallucination: academic papers use bracketed reference [2] for Grounding DINO paper. NLP parsers misread as model version 2. IDEA-Research lineage: 1.0 \u2192 1.5 \u2192 1.6 \u2192 DINO-X. No Grounding DINO 2 exists.",
+      "removed_from_core_denominator": false,
+      "action": "reclassified_blocker_to_CITATION_NUMBER_HALLUCINATION"
+    }
+  ]
+}

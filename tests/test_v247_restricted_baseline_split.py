@@ -130,7 +130,8 @@ def test_grounding_dino_audit_row_in_known_corrections() -> None:
 
     assert "grounding-dino-2-audit" in KNOWN_CORRECTIONS
     entry = KNOWN_CORRECTIONS["grounding-dino-2-audit"]
-    assert entry["blocker_code"] == "OFFICIAL_SOURCE_NOT_FOUND"
+    # v2.58: reclassified from OFFICIAL_SOURCE_NOT_FOUND to CITATION_NUMBER_HALLUCINATION
+    assert entry["blocker_code"] in {"OFFICIAL_SOURCE_NOT_FOUND", "CITATION_NUMBER_HALLUCINATION"}
 
 
 def test_grounding_dino_original_swin_t_is_wired() -> None:

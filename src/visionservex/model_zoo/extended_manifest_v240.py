@@ -162,6 +162,10 @@ _EXTENDED_ROWS: list[ModelSource] = [
             "libreyolo-rfdetr-l",
         )
     ],
+    # v2.58 source-truth cleanup: Only RF-DETR segmentation is officially published
+    # by LibreYOLO. D-FINE/YOLOX/RT-DETR seg weights were never published (HF 404).
+    # RT-DETR r18-r101-seg weights exist but produce no masks (capability_mismatch).
+    # Their detection counterparts (without -seg) already exist and are benchmark_passed.
     *[
         ModelSource(
             model_id=mid,
@@ -173,31 +177,9 @@ _EXTENDED_ROWS: list[ModelSource] = [
             runnable_in_visionservex=True,
             access_status="open",
             recommended_action="add_now",
-            notes="LibreYOLO segmentation model (Apache-2.0 weights, MIT code)",
+            notes="LibreYOLO RF-DETR seg — only officially published LibreYOLO seg model (Apache-2.0)",
         )
         for mid in (
-            # D-FINE seg
-            "libreyolo-dfine-n-seg",
-            "libreyolo-dfine-s-seg",
-            "libreyolo-dfine-m-seg",
-            "libreyolo-dfine-l-seg",
-            "libreyolo-dfine-x-seg",
-            # YOLOX seg
-            "libreyolo-yolox-n-seg",
-            "libreyolo-yolox-t-seg",
-            "libreyolo-yolox-s-seg",
-            "libreyolo-yolox-m-seg",
-            "libreyolo-yolox-l-seg",
-            "libreyolo-yolox-x-seg",
-            # RT-DETR seg
-            "libreyolo-rtdetr-r18-seg",
-            "libreyolo-rtdetr-r34-seg",
-            "libreyolo-rtdetr-r50-seg",
-            "libreyolo-rtdetr-r50m-seg",
-            "libreyolo-rtdetr-r101-seg",
-            "libreyolo-rtdetr-l-seg",
-            "libreyolo-rtdetr-x-seg",
-            # RF-DETR seg
             "libreyolo-rfdetr-n-seg",
             "libreyolo-rfdetr-s-seg",
             "libreyolo-rfdetr-m-seg",

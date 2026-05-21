@@ -1,0 +1,168 @@
+{
+  "schema_version": "v258.libreyolo_archive.v1",
+  "archived_rows": [
+    {
+      "model_id": "libreyolo-rtdetr-rr18-seg",
+      "old_state": "model_capability_mismatch",
+      "reason": "RT-DETR architecture has no instance segmentation head in LibreYOLO. Weights produce detection boxes only.",
+      "source_status": "official_detection_only",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreRTDETRr18",
+      "detection_counterpart": "libreyolo-rtdetr-rr18",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-rtdetr-rr34-seg",
+      "old_state": "model_capability_mismatch",
+      "reason": "RT-DETR architecture has no instance segmentation head in LibreYOLO. Weights produce detection boxes only.",
+      "source_status": "official_detection_only",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreRTDETRr34",
+      "detection_counterpart": "libreyolo-rtdetr-rr34",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-rtdetr-rr50-seg",
+      "old_state": "model_capability_mismatch",
+      "reason": "RT-DETR architecture has no instance segmentation head in LibreYOLO. Weights produce detection boxes only.",
+      "source_status": "official_detection_only",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreRTDETRr50",
+      "detection_counterpart": "libreyolo-rtdetr-rr50",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-rtdetr-rr50m-seg",
+      "old_state": "model_capability_mismatch",
+      "reason": "RT-DETR architecture has no instance segmentation head in LibreYOLO. Weights produce detection boxes only.",
+      "source_status": "official_detection_only",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreRTDETRr50m",
+      "detection_counterpart": "libreyolo-rtdetr-rr50m",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-rtdetr-rr101-seg",
+      "old_state": "model_capability_mismatch",
+      "reason": "RT-DETR architecture has no instance segmentation head in LibreYOLO. Weights produce detection boxes only.",
+      "source_status": "official_detection_only",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreRTDETRr101",
+      "detection_counterpart": "libreyolo-rtdetr-rr101",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-dfine-n-seg",
+      "old_state": "checkpoint_not_published",
+      "reason": "D-FINE has no seg head in LibreYOLO. HF repo LibreYOLO/LibreDFINEn-seg returns 404.",
+      "source_status": "official_not_published",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreDFINEn-seg",
+      "detection_counterpart": "libreyolo-dfine-n",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-dfine-s-seg",
+      "old_state": "checkpoint_not_published",
+      "reason": "D-FINE has no seg head in LibreYOLO. HF 404.",
+      "source_status": "official_not_published",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreDFINEs-seg",
+      "detection_counterpart": "libreyolo-dfine-s",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-dfine-m-seg",
+      "old_state": "checkpoint_not_published",
+      "reason": "D-FINE has no seg head in LibreYOLO. HF 404.",
+      "source_status": "official_not_published",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreDFINEm-seg",
+      "detection_counterpart": "libreyolo-dfine-m",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-dfine-l-seg",
+      "old_state": "checkpoint_not_published",
+      "reason": "D-FINE has no seg head in LibreYOLO. HF 404.",
+      "source_status": "official_not_published",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreDFINEl-seg",
+      "detection_counterpart": "libreyolo-dfine-l",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-dfine-x-seg",
+      "old_state": "checkpoint_not_published",
+      "reason": "D-FINE has no seg head in LibreYOLO. HF 404.",
+      "source_status": "official_not_published",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreDFINEx-seg",
+      "detection_counterpart": "libreyolo-dfine-x",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-rtdetr-l-seg",
+      "old_state": "checkpoint_not_published",
+      "reason": "RT-DETR-L no seg head; HF 404.",
+      "source_status": "official_not_published",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreRTDETRl-seg",
+      "detection_counterpart": "libreyolo-rtdetr-l",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-rtdetr-x-seg",
+      "old_state": "checkpoint_not_published",
+      "reason": "RT-DETR-X no seg head; HF 404.",
+      "source_status": "official_not_published",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreRTDETRx-seg",
+      "detection_counterpart": "libreyolo-rtdetr-x",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-yolox-n-seg",
+      "old_state": "checkpoint_not_published",
+      "reason": "YOLOX has no seg head in LibreYOLO. HF 404.",
+      "source_status": "official_not_published",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreYOLOXn-seg",
+      "detection_counterpart": "libreyolo-yolox-n",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-yolox-t-seg",
+      "old_state": "checkpoint_not_published",
+      "reason": "YOLOX has no seg head. HF 404.",
+      "source_status": "official_not_published",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreYOLOXt-seg",
+      "detection_counterpart": "libreyolo-yolox-t",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-yolox-s-seg",
+      "old_state": "checkpoint_not_published",
+      "reason": "YOLOX has no seg head. HF 404.",
+      "source_status": "official_not_published",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreYOLOXs-seg",
+      "detection_counterpart": "libreyolo-yolox-s",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-yolox-m-seg",
+      "old_state": "checkpoint_not_published",
+      "reason": "YOLOX has no seg head. HF 404.",
+      "source_status": "official_not_published",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreYOLOXm-seg",
+      "detection_counterpart": "libreyolo-yolox-m",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-yolox-l-seg",
+      "old_state": "checkpoint_not_published",
+      "reason": "YOLOX has no seg head. HF 404.",
+      "source_status": "official_not_published",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreYOLOXl-seg",
+      "detection_counterpart": "libreyolo-yolox-l",
+      "removed_from_core_denominator": true
+    },
+    {
+      "model_id": "libreyolo-yolox-x-seg",
+      "old_state": "checkpoint_not_published",
+      "reason": "YOLOX has no seg head. HF 404.",
+      "source_status": "official_not_published",
+      "source_url_checked": "https://huggingface.co/LibreYOLO/LibreYOLOXx-seg",
+      "detection_counterpart": "libreyolo-yolox-x",
+      "removed_from_core_denominator": true
+    }
+  ],
+  "reason": "LibreYOLO source-truth cleanup v2.58: removed hallucinated and capability-mismatch rows from core manifest."
+}
