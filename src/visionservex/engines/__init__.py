@@ -26,6 +26,7 @@ from visionservex.engines import rfdetr as _rfdetr
 from visionservex.engines import sam2 as _sam
 from visionservex.engines import sam2_hf as _sam2_hf
 from visionservex.engines import sam_hf as _sam_hf
+from visionservex.engines import sam_optional as _sam_optional  # v2.55: efficientsam, hq-sam, mobilesam
 from visionservex.engines import swinv2 as _swinv2
 from visionservex.engines.base import BaseEngine, EngineError, MissingDependencyError
 from visionservex.engines.mock import MockEngine

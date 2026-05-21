@@ -339,24 +339,24 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     "sam2.1-hiera-base-plus": {"final_state": "benchmark_passed", "blocker_code": ""},
     "sam2.1-hiera-large": {"final_state": "benchmark_passed", "blocker_code": ""},
     "medsam": {"final_state": "benchmark_passed", "blocker_code": ""},
-    # v2.52: efficientsam/hq-sam/mobilesam — benchmark attempted with COCO bbox prompts.
-    # VisionModel and benchmark-promptable-segmentation both return 'unknown model'
-    # for these IDs — they are optional_extra installs not in base VisionModel registry.
-    # Code: PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED (model not wired in CLI registry).
+    # v2.55: optional promptable SAM models — engines wired, checkpoints downloaded, benchmarked.
+    # COCO gt-box prompts, 100 instances, benchmark-promptable-segmentation.
+    # Packages: efficientsam (EfficientViT-SAM), mobile-sam, segment-anything-hq.
+    # Artifact: notebook/_runs/20260520T150000Z_v255/reports/v255_promptable_optional_benchmark.json
     "efficientsam": {
-        "final_state": "benchmark_failed",
-        "blocker_code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
-        "v246_correction_reason": "v252_efficientsam_not_in_visionmodel_registry_optional_extra_required",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v255_coco_gtbox_mean_iou=0.7742_efficientsam_l0",
     },
     "hq-sam": {
-        "final_state": "benchmark_failed",
-        "blocker_code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
-        "v246_correction_reason": "v252_hqsam_not_in_visionmodel_registry_optional_extra_required",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v255_coco_gtbox_mean_iou=0.7550_hq_sam_vit_b",
     },
     "mobilesam": {
-        "final_state": "benchmark_failed",
-        "blocker_code": "PROMPTABLE_SEGMENTATION_NOT_IMPLEMENTED",
-        "v246_correction_reason": "v252_mobilesam_not_in_visionmodel_registry_optional_extra_required",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v255_coco_gtbox_mean_iou=0.7409_mobilesam",
     },
     # v2.51 embedding kNN benchmark on Imagenette (500 images, 10 classes).
     # Artifact: notebook/_runs/20260521T080000Z_v251/reports/v251_embedding_knn_benchmark.json
@@ -405,11 +405,11 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "",
         "v246_correction_reason": "v251_imagenette_knn=0.9940",
     },
-    # siglip-base-patch16-224: HF download failed (brotli decompression error).
+    # v2.55: siglip-base-patch16-224 — cleared HF cache, re-downloaded, kNN=0.984.
     "siglip-base-patch16-224": {
-        "final_state": "benchmark_failed",
-        "blocker_code": "HF_DOWNLOAD_FAILED",
-        "v246_correction_reason": "v251_siglip_base_brotli_decompression_error",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v255_imagenette_knn=0.9840_cache_cleared_successful_download",
     },
     # v2.51.0 Classification: Imagenette2-320 benchmark (100 images/class x 10 classes = 1000 images).
     # Dataset downloaded from https://s3.amazonaws.com/fast-ai-imageclas/imagenette2-320.tgz

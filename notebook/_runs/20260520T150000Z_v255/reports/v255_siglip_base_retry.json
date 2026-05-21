@@ -1,0 +1,15 @@
+{
+  "model_id": "siglip-base-patch16-224",
+  "dataset": "folder:/tmp/imagenette_flat_bench",
+  "n_images": 500,
+  "embedding_dim": 768,
+  "total_time_ms": 18184.4,
+  "mean_latency_ms": 36.37,
+  "metrics_requested": [
+    "knn_accuracy",
+    "recall_at_5",
+    "latency"
+  ],
+  "knn_accuracy": 0.984,
+  "n_classes": 10
+}

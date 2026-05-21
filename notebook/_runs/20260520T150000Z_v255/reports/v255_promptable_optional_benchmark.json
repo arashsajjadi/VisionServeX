@@ -1,0 +1,3045 @@
+{
+  "status": "ok",
+  "code": "OK",
+  "dataset": "/home/arash/datasets/coco_val2017_400_vsx/annotations.json",
+  "images_dir": "/home/arash/datasets/coco_val2017_400_vsx/images",
+  "prompt_source": "gt-box",
+  "max_instances": 100,
+  "device": "cuda",
+  "draw_dir": "",
+  "n_models": 3,
+  "rows": [
+    {
+      "model_id": "mobilesam",
+      "status": "ok",
+      "code": "OK",
+      "total_instances": 100,
+      "mean_iou": 0.7409,
+      "metric_status": "computed",
+      "rows": [
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 7915,
+          "image_id": 419974,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8853,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 8032,
+          "image_id": 329219,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9234,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 12414,
+          "image_id": 424162,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8941,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 14189,
+          "image_id": 279278,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7771,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 18979,
+          "image_id": 540502,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5813,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 19679,
+          "image_id": 127182,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8043,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 19751,
+          "image_id": 565776,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.547,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 20026,
+          "image_id": 575970,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6986,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 20865,
+          "image_id": 407614,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8145,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 20979,
+          "image_id": 522007,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6353,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 21865,
+          "image_id": 226984,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7683,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 22328,
+          "image_id": 37777,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7297,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 22674,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8314,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 22806,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6121,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 23607,
+          "image_id": 529568,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8105,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 26036,
+          "image_id": 226984,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.892,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 26288,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.627,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 26324,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.4965,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 26341,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7873,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 26700,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.0,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 27423,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7024,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 27879,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.221,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 29249,
+          "image_id": 68833,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9253,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 33192,
+          "image_id": 440475,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7763,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 34096,
+          "image_id": 525083,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9051,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 36197,
+          "image_id": 17899,
+          "category": "bird",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6148,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 49229,
+          "image_id": 554291,
+          "category": "cat",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.79,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 52654,
+          "image_id": 491216,
+          "category": "cat",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8978,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 70383,
+          "image_id": 555050,
+          "category": "cow",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8801,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 78863,
+          "image_id": 465129,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8747,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 80188,
+          "image_id": 182611,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8106,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 80610,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8901,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 80856,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9092,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 80979,
+          "image_id": 480122,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8239,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 80989,
+          "image_id": 419974,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9042,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 81272,
+          "image_id": 226984,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8068,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 81729,
+          "image_id": 226984,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7229,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 82378,
+          "image_id": 481386,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7863,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 82445,
+          "image_id": 397133,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8228,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 82527,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7151,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 82960,
+          "image_id": 173302,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7112,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 83100,
+          "image_id": 491216,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8327,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 83117,
+          "image_id": 419974,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8394,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 84025,
+          "image_id": 84241,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5262,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 84751,
+          "image_id": 74209,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8391,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 85117,
+          "image_id": 74209,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8719,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 86180,
+          "image_id": 175364,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6683,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 86367,
+          "image_id": 173302,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7551,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 86642,
+          "image_id": 173302,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8559,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 86953,
+          "image_id": 438774,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8187,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 87679,
+          "image_id": 175364,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8497,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 87864,
+          "image_id": 530836,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8832,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 88676,
+          "image_id": 40471,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.78,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 88785,
+          "image_id": 7574,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8992,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 89267,
+          "image_id": 40471,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9504,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 89742,
+          "image_id": 455597,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5795,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 90223,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7377,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 90913,
+          "image_id": 7574,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8161,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 91192,
+          "image_id": 229358,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8691,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 92109,
+          "image_id": 455597,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.887,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 92265,
+          "image_id": 40471,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8125,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 92397,
+          "image_id": 491216,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.4913,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 93835,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.4549,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 95194,
+          "image_id": 40471,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8679,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 98245,
+          "image_id": 555050,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8803,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 100906,
+          "image_id": 186980,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5063,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 100948,
+          "image_id": 37777,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9201,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 100995,
+          "image_id": 419974,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8199,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 101212,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5693,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 101248,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6981,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 101280,
+          "image_id": 575970,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6834,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 101424,
+          "image_id": 186980,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.0096,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 101686,
+          "image_id": 441247,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7419,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 101996,
+          "image_id": 136355,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6967,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 102047,
+          "image_id": 93437,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5232,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 102453,
+          "image_id": 37777,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7235,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 102658,
+          "image_id": 440475,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.938,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 103159,
+          "image_id": 136355,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6437,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 103990,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.4795,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 104284,
+          "image_id": 136355,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7537,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 104406,
+          "image_id": 441247,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5273,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 104434,
+          "image_id": 525083,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9274,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 105325,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9522,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 105773,
+          "image_id": 525083,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8815,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 105777,
+          "image_id": 68833,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.621,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 105814,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7324,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 106130,
+          "image_id": 17899,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.699,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 106396,
+          "image_id": 93437,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5638,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 106490,
+          "image_id": 441247,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9432,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 108130,
+          "image_id": 93437,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7948,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 108544,
+          "image_id": 17899,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6789,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 109744,
+          "image_id": 575970,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5947,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 109926,
+          "image_id": 575970,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6142,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 111488,
+          "image_id": 555050,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6914,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 111942,
+          "image_id": 554291,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9536,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 113570,
+          "image_id": 543047,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6442,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 113621,
+          "image_id": 543047,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7642,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 115035,
+          "image_id": 441247,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9295,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 115207,
+          "image_id": 472046,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9071,
+          "draw_path": ""
+        },
+        {
+          "model_id": "mobilesam",
+          "annotation_id": 115472,
+          "image_id": 440475,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5903,
+          "draw_path": ""
+        }
+      ]
+    },
+    {
+      "model_id": "hq-sam",
+      "status": "ok",
+      "code": "OK",
+      "total_instances": 100,
+      "mean_iou": 0.755,
+      "metric_status": "computed",
+      "rows": [
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 7915,
+          "image_id": 419974,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9091,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 8032,
+          "image_id": 329219,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9509,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 12414,
+          "image_id": 424162,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9004,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 14189,
+          "image_id": 279278,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7838,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 18979,
+          "image_id": 540502,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6142,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 19679,
+          "image_id": 127182,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8156,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 19751,
+          "image_id": 565776,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.684,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 20026,
+          "image_id": 575970,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6229,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 20865,
+          "image_id": 407614,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7802,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 20979,
+          "image_id": 522007,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6609,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 21865,
+          "image_id": 226984,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7564,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 22328,
+          "image_id": 37777,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7117,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 22674,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7963,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 22806,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7856,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 23607,
+          "image_id": 529568,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7923,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 26036,
+          "image_id": 226984,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8908,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 26288,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.776,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 26324,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.1133,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 26341,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7134,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 26700,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.0,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 27423,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6761,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 27879,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.3263,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 29249,
+          "image_id": 68833,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9511,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 33192,
+          "image_id": 440475,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9137,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 34096,
+          "image_id": 525083,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9112,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 36197,
+          "image_id": 17899,
+          "category": "bird",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6385,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 49229,
+          "image_id": 554291,
+          "category": "cat",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5752,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 52654,
+          "image_id": 491216,
+          "category": "cat",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9056,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 70383,
+          "image_id": 555050,
+          "category": "cow",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9015,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 78863,
+          "image_id": 465129,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9023,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 80188,
+          "image_id": 182611,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.894,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 80610,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9068,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 80856,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9041,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 80979,
+          "image_id": 480122,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8322,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 80989,
+          "image_id": 419974,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7592,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 81272,
+          "image_id": 226984,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8012,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 81729,
+          "image_id": 226984,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7151,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 82378,
+          "image_id": 481386,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7963,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 82445,
+          "image_id": 397133,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8984,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 82527,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6158,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 82960,
+          "image_id": 173302,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7553,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 83100,
+          "image_id": 491216,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8614,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 83117,
+          "image_id": 419974,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8344,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 84025,
+          "image_id": 84241,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6478,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 84751,
+          "image_id": 74209,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7743,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 85117,
+          "image_id": 74209,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8491,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 86180,
+          "image_id": 175364,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7811,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 86367,
+          "image_id": 173302,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7526,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 86642,
+          "image_id": 173302,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9364,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 86953,
+          "image_id": 438774,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7969,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 87679,
+          "image_id": 175364,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8357,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 87864,
+          "image_id": 530836,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9275,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 88676,
+          "image_id": 40471,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7604,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 88785,
+          "image_id": 7574,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9244,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 89267,
+          "image_id": 40471,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8986,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 89742,
+          "image_id": 455597,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.485,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 90223,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6912,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 90913,
+          "image_id": 7574,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8685,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 91192,
+          "image_id": 229358,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9208,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 92109,
+          "image_id": 455597,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8952,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 92265,
+          "image_id": 40471,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7876,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 92397,
+          "image_id": 491216,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.4912,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 93835,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5452,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 95194,
+          "image_id": 40471,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.875,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 98245,
+          "image_id": 555050,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8709,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 100906,
+          "image_id": 186980,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7551,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 100948,
+          "image_id": 37777,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9264,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 100995,
+          "image_id": 419974,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.833,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 101212,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8418,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 101248,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8162,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 101280,
+          "image_id": 575970,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6789,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 101424,
+          "image_id": 186980,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.4837,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 101686,
+          "image_id": 441247,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6882,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 101996,
+          "image_id": 136355,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.644,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 102047,
+          "image_id": 93437,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7389,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 102453,
+          "image_id": 37777,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7052,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 102658,
+          "image_id": 440475,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9417,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 103159,
+          "image_id": 136355,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5407,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 103990,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.51,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 104284,
+          "image_id": 136355,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6931,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 104406,
+          "image_id": 441247,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5626,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 104434,
+          "image_id": 525083,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9333,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 105325,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9545,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 105773,
+          "image_id": 525083,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8283,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 105777,
+          "image_id": 68833,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5669,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 105814,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7571,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 106130,
+          "image_id": 17899,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.302,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 106396,
+          "image_id": 93437,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7426,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 106490,
+          "image_id": 441247,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9549,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 108130,
+          "image_id": 93437,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8132,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 108544,
+          "image_id": 17899,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5863,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 109744,
+          "image_id": 575970,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5672,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 109926,
+          "image_id": 575970,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6327,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 111488,
+          "image_id": 555050,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6776,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 111942,
+          "image_id": 554291,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9539,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 113570,
+          "image_id": 543047,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8564,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 113621,
+          "image_id": 543047,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7864,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 115035,
+          "image_id": 441247,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9252,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 115207,
+          "image_id": 472046,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8599,
+          "draw_path": ""
+        },
+        {
+          "model_id": "hq-sam",
+          "annotation_id": 115472,
+          "image_id": 440475,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7935,
+          "draw_path": ""
+        }
+      ]
+    },
+    {
+      "model_id": "efficientsam",
+      "status": "ok",
+      "code": "OK",
+      "total_instances": 100,
+      "mean_iou": 0.7742,
+      "metric_status": "computed",
+      "rows": [
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 7915,
+          "image_id": 419974,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9272,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 8032,
+          "image_id": 329219,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9472,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 12414,
+          "image_id": 424162,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9002,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 14189,
+          "image_id": 279278,
+          "category": "dog",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8082,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 18979,
+          "image_id": 540502,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5882,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 19679,
+          "image_id": 127182,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8058,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 19751,
+          "image_id": 565776,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6944,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 20026,
+          "image_id": 575970,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7011,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 20865,
+          "image_id": 407614,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8336,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 20979,
+          "image_id": 522007,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6562,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 21865,
+          "image_id": 226984,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7803,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 22328,
+          "image_id": 37777,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7545,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 22674,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8198,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 22806,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8657,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 23607,
+          "image_id": 529568,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8134,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 26036,
+          "image_id": 226984,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.881,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 26288,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7521,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 26324,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5497,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 26341,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7525,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 26700,
+          "image_id": 136355,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.0,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 27423,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7579,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 27879,
+          "image_id": 491216,
+          "category": "potted plant",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.3422,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 29249,
+          "image_id": 68833,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9515,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 33192,
+          "image_id": 440475,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9154,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 34096,
+          "image_id": 525083,
+          "category": "tv",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8715,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 36197,
+          "image_id": 17899,
+          "category": "bird",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6181,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 49229,
+          "image_id": 554291,
+          "category": "cat",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9246,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 52654,
+          "image_id": 491216,
+          "category": "cat",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9059,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 70383,
+          "image_id": 555050,
+          "category": "cow",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9142,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 78863,
+          "image_id": 465129,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8945,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 80188,
+          "image_id": 182611,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8976,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 80610,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8989,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 80856,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9224,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 80979,
+          "image_id": 480122,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8258,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 80989,
+          "image_id": 419974,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9123,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 81272,
+          "image_id": 226984,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8173,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 81729,
+          "image_id": 226984,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7625,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 82378,
+          "image_id": 481386,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8605,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 82445,
+          "image_id": 397133,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9059,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 82527,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7837,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 82960,
+          "image_id": 173302,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7814,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 83100,
+          "image_id": 491216,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8891,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 83117,
+          "image_id": 419974,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.809,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 84025,
+          "image_id": 84241,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5793,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 84751,
+          "image_id": 74209,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8268,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 85117,
+          "image_id": 74209,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8883,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 86180,
+          "image_id": 175364,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7901,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 86367,
+          "image_id": 173302,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7579,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 86642,
+          "image_id": 173302,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9439,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 86953,
+          "image_id": 438774,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8346,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 87679,
+          "image_id": 175364,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8494,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 87864,
+          "image_id": 530836,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9477,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 88676,
+          "image_id": 40471,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7732,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 88785,
+          "image_id": 7574,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9298,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 89267,
+          "image_id": 40471,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.931,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 89742,
+          "image_id": 455597,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7007,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 90223,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7289,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 90913,
+          "image_id": 7574,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8799,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 91192,
+          "image_id": 229358,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9092,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 92109,
+          "image_id": 455597,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9199,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 92265,
+          "image_id": 40471,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8402,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 92397,
+          "image_id": 491216,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.4862,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 93835,
+          "image_id": 425226,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7339,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 95194,
+          "image_id": 40471,
+          "category": "bottle",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9071,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 98245,
+          "image_id": 555050,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8967,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 100906,
+          "image_id": 186980,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7197,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 100948,
+          "image_id": 37777,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9227,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 100995,
+          "image_id": 419974,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7399,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 101212,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8269,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 101248,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7451,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 101280,
+          "image_id": 575970,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6993,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 101424,
+          "image_id": 186980,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.4505,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 101686,
+          "image_id": 441247,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6972,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 101996,
+          "image_id": 136355,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6208,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 102047,
+          "image_id": 93437,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7204,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 102453,
+          "image_id": 37777,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7495,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 102658,
+          "image_id": 440475,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9596,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 103159,
+          "image_id": 136355,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.4283,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 103990,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.482,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 104284,
+          "image_id": 136355,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.654,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 104406,
+          "image_id": 441247,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5456,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 104434,
+          "image_id": 525083,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9316,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 105325,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.974,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 105773,
+          "image_id": 525083,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6712,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 105777,
+          "image_id": 68833,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5819,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 105814,
+          "image_id": 555050,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7356,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 106130,
+          "image_id": 17899,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6383,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 106396,
+          "image_id": 93437,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.705,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 106490,
+          "image_id": 441247,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.928,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 108130,
+          "image_id": 93437,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8336,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 108544,
+          "image_id": 17899,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.7535,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 109744,
+          "image_id": 575970,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.5729,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 109926,
+          "image_id": 575970,
+          "category": "chair",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.633,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 111488,
+          "image_id": 555050,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6613,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 111942,
+          "image_id": 554291,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9566,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 113570,
+          "image_id": 543047,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.504,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 113621,
+          "image_id": 543047,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9067,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 115035,
+          "image_id": 441247,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.9057,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 115207,
+          "image_id": 472046,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.8916,
+          "draw_path": ""
+        },
+        {
+          "model_id": "efficientsam",
+          "annotation_id": 115472,
+          "image_id": 440475,
+          "category": "couch",
+          "n_masks": 1,
+          "metric_status": "computed",
+          "iou": 0.6267,
+          "draw_path": ""
+        }
+      ]
+    }
+  ],
+  "task": "promptable_segmentation",
+  "version": "v2.29.0"
+}

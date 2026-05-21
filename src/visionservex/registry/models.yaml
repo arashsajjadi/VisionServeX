@@ -3297,3 +3297,72 @@ models:
   difficulty: medium
   status: beta
   model_category: feature_backbone
+
+- id: mobilesam
+  display_name: MobileSAM (TinyViT backbone, Apache-2.0)
+  task: foundation_segment
+  family: mobilesam
+  backend: mobilesam
+  engine: mobilesam
+  license: Apache-2.0
+  upstream_url: https://github.com/ChaoningZhang/MobileSAM
+  download_type: package_managed
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: promptable-extra
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  minimum_vram_gb: 1.0
+  difficulty: easy
+  status: beta
+  model_category: production_recommended
+
+- id: hq-sam
+  display_name: HQ-SAM (ViT-Base, high-quality masks, Apache-2.0)
+  task: foundation_segment
+  family: hq-sam
+  backend: hq-sam
+  engine: hq-sam
+  license: Apache-2.0
+  upstream_url: https://github.com/SysCV/sam-hq
+  download_type: package_managed
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: promptable-extra
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  minimum_vram_gb: 2.0
+  difficulty: easy
+  status: beta
+  model_category: production_recommended
+
+- id: efficientsam
+  display_name: EfficientViT-SAM L0 (Apache-2.0)
+  task: foundation_segment
+  family: efficientsam
+  backend: efficientsam
+  engine: efficientsam
+  license: Apache-2.0
+  upstream_url: https://github.com/yformer/EfficientSAM
+  download_type: package_managed
+  auto_download: false
+  requires_optional_extra: true
+  install_extra: promptable-extra
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  supported_precisions:
+  - fp32
+  minimum_vram_gb: 1.5
+  difficulty: easy
+  status: beta
+  model_category: production_recommended

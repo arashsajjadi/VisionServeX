@@ -1,0 +1,53 @@
+{
+  "schema_version": "v255.openmmlab_gpu_compat.v1",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 5080",
+    "capability": [
+      12,
+      0
+    ],
+    "driver": "580.142"
+  },
+  "runtimes": [
+    {
+      "runtime_id": "openmmlab_pose_py310_cu121_existing",
+      "python": "3.10",
+      "torch": "2.1.0+cu121",
+      "cuda_available": true,
+      "cuda_matmul": false,
+      "cuda_fail_reason": "no kernel image for sm_120 (cu121 max = sm_90)",
+      "mmcv_import": true,
+      "mmcv_ext_import": true,
+      "mmpose_import": true,
+      "mmpose_gpu_inference": false,
+      "result": "GPU_INCOMPATIBLE_CU121_SM120"
+    },
+    {
+      "runtime_id": "openmmlab_pose_py310_cu130_upgrade",
+      "python": "3.10",
+      "torch": "2.11.0+cu130",
+      "cuda_available": true,
+      "cuda_matmul": true,
+      "cuda_fail_reason": null,
+      "mmcv_import": true,
+      "mmcv_ext_import": false,
+      "mmcv_ext_fail_reason": "ABI mismatch: mmcv._ext compiled for torch 2.1.0+cu121, linking against torch 2.11.0+cu130",
+      "mmpose_import": false,
+      "result": "MMCV_ABI_INCOMPATIBLE_WITH_CU130"
+    },
+    {
+      "runtime_id": "openmmlab_pose_py311_cu130_new",
+      "python": "3.11",
+      "torch": "2.11.0+cu130",
+      "cuda_available": true,
+      "cuda_matmul": true,
+      "mmcv_build_attempted": true,
+      "mmcv_build_fail_reason": "pkg_resources not found in pip subprocess (Python 3.11 setuptools compatibility)",
+      "mmcv_ext_import": false,
+      "result": "MMCV_SOURCE_BUILD_FAILED_PKG_RESOURCES"
+    }
+  ],
+  "conclusion": "No OpenMMLab GPU runtime available for RTX 5080 (sm_120) with current mmcv. RTMPose OKS accuracy remains valid from CPU benchmark.",
+  "gpu_cuda_matmul_works": true,
+  "gpu_mmpose_inference_works": false
+}
