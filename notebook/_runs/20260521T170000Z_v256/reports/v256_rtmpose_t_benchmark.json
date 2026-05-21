@@ -1,0 +1,25 @@
+{
+  "benchmark_type": "rtmpose_coco_keypoints_gt_box_topdown",
+  "box_source": "gt-person-boxes",
+  "evaluation_note": "GT person boxes used as pose input. This evaluates the pose estimator only, not end-to-end detection+pose.",
+  "dataset": "coco-keypoints:/home/arash/datasets/coco_keypoints_val_mini_vsx",
+  "n_images": 271,
+  "models": [
+    {
+      "model_id": "rtmpose-t",
+      "status": "ok",
+      "code": "OK",
+      "box_source": "gt-person-boxes",
+      "oks_ap": 0.6331,
+      "oks_ap50": 0.8801,
+      "oks_ap75": 0.6908,
+      "oks_ar": 0.6748,
+      "latency_ms_p50": 26.0,
+      "fps": 17.9,
+      "n_images": 271,
+      "n_person_instances": 1017,
+      "error": null,
+      "device": "cpu"
+    }
+  ]
+}

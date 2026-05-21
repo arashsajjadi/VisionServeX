@@ -140,4 +140,5 @@ def test_grounding_dino_original_swin_t_is_wired() -> None:
         assert mid in KNOWN_CORRECTIONS
         # v2.51: VisionModel('grounding-dino-original-*') → 'unknown model'.
         # Benchmark attempted; failed with VISIONMODEL_ENGINE_NOT_REGISTERED.
-        assert KNOWN_CORRECTIONS[mid]["final_state"] in {"wired", "benchmark_failed"}
+        # v2.56: models registered in registry and benchmarked as aliases of swin-t/b.
+        assert KNOWN_CORRECTIONS[mid]["final_state"] in {"wired", "benchmark_failed", "benchmark_passed"}

@@ -65,6 +65,15 @@ WEIGHT_LICENSE_TABLE: dict[str, dict[str, Any]] = {
         "auto_pull": True,  # v2.48 audit: LibreYOLO/LibreYOLO9s HF model card = MIT
         # via MultimediaTechLab/YOLO relicensing (not the original WongKinYiu GPL repo)
     },
+    # v2.56: yolov9 is the family name parsed from libreyolo-yolov9-* model IDs.
+    # Same weights as yolo9; alias needed because _libreyolo_id_to_libre_class produces "yolov9".
+    "yolov9": {
+        "code_license": "MIT",
+        "weight_license": "MIT",
+        "weight_upstream": "https://github.com/MultimediaTechLab/YOLO",
+        "license_risk": "none",
+        "auto_pull": True,
+    },
     "yolonas": {
         "code_license": "MIT",
         "weight_license": "Deci-AI YOLO-NAS proprietary, non-commercial",
@@ -410,10 +419,14 @@ def pull_cmd(
         )
         return
 
+    # v2.56: family name aliases (yolov9 → yolo9 in LibreYOLO registry)
+    _FAMILY_ALIASES = {"yolov9": "yolo9"}
+    family_lookup = _FAMILY_ALIASES.get(family, family)
+
     # Resolve the URL via the LibreYOLO base registry.
     cls_for_family = None
     for c in _registry_classes():
-        if family == c.FAMILY:
+        if family_lookup == c.FAMILY:
             cls_for_family = c
             break
     if cls_for_family is None:

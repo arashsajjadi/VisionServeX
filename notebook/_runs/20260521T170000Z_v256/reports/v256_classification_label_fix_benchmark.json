@@ -1,0 +1,98 @@
+{
+  "benchmark_type": "imagenette_classification",
+  "dataset": "imagenette2-320 val",
+  "wnid_mapping": {
+    "n01440764": "tench",
+    "n02102040": "English springer",
+    "n02979186": "cassette player",
+    "n03000684": "chain saw",
+    "n03028079": "church",
+    "n03394916": "French horn",
+    "n03417042": "garbage truck",
+    "n03425413": "gas pump",
+    "n03445777": "golf ball",
+    "n03888257": "parachute"
+  },
+  "images_per_class": 100,
+  "n_images": 1000,
+  "models": [
+    {
+      "model_id": "maxvit-tiny-tf-224",
+      "status": "benchmark_failed",
+      "code": "CLASSIFICATION_LOGITS_NAN",
+      "dataset": "imagenette2-320 val",
+      "dataset_source": "https://s3.amazonaws.com/fast-ai-imageclas/imagenette2-320.tgz",
+      "wnid_mapping": {
+        "n01440764": "tench",
+        "n02102040": "English springer",
+        "n02979186": "cassette player",
+        "n03000684": "chain saw",
+        "n03028079": "church",
+        "n03394916": "French horn",
+        "n03417042": "garbage truck",
+        "n03425413": "gas pump",
+        "n03445777": "golf ball",
+        "n03888257": "parachute"
+      },
+      "top1": 0.0,
+      "top5": 0.1,
+      "macro_accuracy": 0.0,
+      "per_class_accuracy": {
+        "tench": 0.0,
+        "English springer": 0.0,
+        "cassette player": 0.0,
+        "chain saw": 0.0,
+        "church": 0.0,
+        "French horn": 0.0,
+        "garbage truck": 0.0,
+        "gas pump": 0.0,
+        "golf ball": 0.0,
+        "parachute": 0.0
+      },
+      "latency_ms_p50": 8.9,
+      "fps": 78.8,
+      "n_evaluated": 1000,
+      "error": "MaxViT model produces all-NaN logits regardless of precision. Model architecture/weights issue. All-NaN detected \u2192 uniform distribution fallback; top1=0. Not a valid accuracy benchmark.",
+      "logit_issue": "all_nan"
+    },
+    {
+      "model_id": "swinv2-large",
+      "status": "benchmark_failed",
+      "code": "IMAGENET21K_MAPPING_UNAVAILABLE",
+      "dataset": "imagenette2-320 val",
+      "dataset_source": "https://s3.amazonaws.com/fast-ai-imageclas/imagenette2-320.tgz",
+      "wnid_mapping": {
+        "n01440764": "tench",
+        "n02102040": "English springer",
+        "n02979186": "cassette player",
+        "n03000684": "chain saw",
+        "n03028079": "church",
+        "n03394916": "French horn",
+        "n03417042": "garbage truck",
+        "n03425413": "gas pump",
+        "n03445777": "golf ball",
+        "n03888257": "parachute"
+      },
+      "top1": 0.0,
+      "top5": 0.0,
+      "macro_accuracy": 0.0,
+      "per_class_accuracy": {
+        "tench": 0.0,
+        "English springer": 0.0,
+        "cassette player": 0.0,
+        "chain saw": 0.0,
+        "church": 0.0,
+        "French horn": 0.0,
+        "garbage truck": 0.0,
+        "gas pump": 0.0,
+        "golf ball": 0.0,
+        "parachute": 0.0
+      },
+      "latency_ms_p50": 11.4,
+      "fps": 69.4,
+      "n_evaluated": 1000,
+      "error": "SwinV2-Large uses ImageNet-21K checkpoint (>1000 classes, LABEL_N format). Cannot map LABEL_N to Imagenette WNIDs without 21K\u2192WNID index lookup table. 21K index ordering does not correspond to standard 1K ordering.",
+      "logit_issue": "imagenet_21k_label_format"
+    }
+  ]
+}

@@ -3366,3 +3366,58 @@ models:
   difficulty: easy
   status: beta
   model_category: production_recommended
+
+- id: grounding-dino-original-swin-t
+  display_name: Grounding DINO Original (SwinT backbone) — alias for grounding-dino-swin-t
+  task: open_vocab_detect
+  family: grounding-dino
+  backend: huggingface
+  engine: grounding_dino
+  license: Apache-2.0
+  upstream_url: https://github.com/IDEA-Research/GroundingDINO
+  download_type: huggingface
+  hf_repo_id: IDEA-Research/grounding-dino-tiny
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: grounding
+  supported_devices:
+  - cpu
+  - cuda
+  recommended_device: cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  minimum_vram_gb: 3.0
+  recommended_vram_gb: 6.0
+  difficulty: easy
+  implementation_status: wired
+  status: beta
+  model_category: demo_fast
+  notes: "Alias for grounding-dino-swin-t. Uses IDEA-Research/grounding-dino-tiny (SwinT backbone). Same weights."
+
+- id: grounding-dino-original-swin-b
+  display_name: Grounding DINO Original (SwinB backbone) — alias for grounding-dino-swin-b
+  task: open_vocab_detect
+  family: grounding-dino
+  backend: huggingface
+  engine: grounding_dino
+  license: Apache-2.0
+  upstream_url: https://github.com/IDEA-Research/GroundingDINO
+  download_type: huggingface
+  hf_repo_id: IDEA-Research/grounding-dino-base
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: grounding
+  supported_devices:
+  - cuda
+  recommended_device: cuda
+  supported_precisions:
+  - fp16
+  - bf16
+  minimum_vram_gb: 8.0
+  recommended_vram_gb: 12.0
+  difficulty: medium
+  implementation_status: wired
+  status: beta
+  model_category: accuracy_grade
+  notes: "Alias for grounding-dino-swin-b. Uses IDEA-Research/grounding-dino-base (SwinB backbone). Same weights."

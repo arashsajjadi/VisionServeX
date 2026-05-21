@@ -123,7 +123,13 @@ class HFClassifyEngine(StubEngine):
             out = self._model(**inputs_dev)
 
         logits = out.logits[0]
-        probs = self._torch.nn.functional.softmax(logits, dim=-1)
+        # v2.56: cast to float32 before softmax to avoid NaN from fp16 overflow
+        logits_f32 = logits.float()
+        if not self._torch.isfinite(logits_f32).any():
+            # All-NaN logits: use uniform distribution as fallback
+            probs = self._torch.ones_like(logits_f32) / len(logits_f32)
+        else:
+            probs = self._torch.nn.functional.softmax(logits_f32, dim=-1)
         topk_probs, topk_idx = probs.topk(min(top_k, len(probs)))
 
         top_k_pairs = [

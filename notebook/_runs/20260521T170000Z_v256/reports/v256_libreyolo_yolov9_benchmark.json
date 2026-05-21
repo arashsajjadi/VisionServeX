@@ -1,0 +1,55 @@
+{
+  "benchmark_type": "libreyolo_coco_detection",
+  "dataset": "yolo:/home/arash/datasets/coco_val2017_400_vsx/images",
+  "n_images": 400,
+  "models": [
+    {
+      "model_id": "libreyolo-yolov9-t",
+      "status": "ok",
+      "code": "OK",
+      "mAP50_95": 0.2222,
+      "AP50": 0.3035,
+      "AP75": 0.2466,
+      "latency_ms_p50": 15.4,
+      "fps": 61.2,
+      "n_images": 400,
+      "error": null
+    },
+    {
+      "model_id": "libreyolo-yolov9-s",
+      "status": "ok",
+      "code": "OK",
+      "mAP50_95": 0.2926,
+      "AP50": 0.3955,
+      "AP75": 0.3198,
+      "latency_ms_p50": 13.1,
+      "fps": 74.5,
+      "n_images": 400,
+      "error": null
+    },
+    {
+      "model_id": "libreyolo-yolov9-m",
+      "status": "ok",
+      "code": "OK",
+      "mAP50_95": 0.3441,
+      "AP50": 0.4548,
+      "AP75": 0.3764,
+      "latency_ms_p50": 11.3,
+      "fps": 86.9,
+      "n_images": 400,
+      "error": null
+    },
+    {
+      "model_id": "libreyolo-yolov9-c",
+      "status": "ok",
+      "code": "OK",
+      "mAP50_95": 0.3519,
+      "AP50": 0.4664,
+      "AP75": 0.3869,
+      "latency_ms_p50": 12.3,
+      "fps": 80.5,
+      "n_images": 400,
+      "error": null
+    }
+  ]
+}

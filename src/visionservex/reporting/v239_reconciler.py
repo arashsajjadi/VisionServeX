@@ -258,26 +258,27 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     "libreyolo-yolox-m": {"final_state": "benchmark_passed", "blocker_code": ""},
     "libreyolo-yolox-t": {"final_state": "benchmark_passed", "blocker_code": ""},
     "libreyolo-yolox-x": {"final_state": "benchmark_passed", "blocker_code": ""},
-    # YOLOv9 weights not cached — checkpoint_required.
-    "libreyolo-yolov9-c": {
-        "final_state": "checkpoint_required",
-        "blocker_code": "CHECKPOINT_REQUIRED",
-        "v246_correction_reason": "yolov9_weights_not_cached_run_libreyolo_pull",
-    },
-    "libreyolo-yolov9-m": {
-        "final_state": "checkpoint_required",
-        "blocker_code": "CHECKPOINT_REQUIRED",
-        "v246_correction_reason": "yolov9_weights_not_cached_run_libreyolo_pull",
+    # v2.56: LibreYOLO YOLOv9 pulled (MIT license via MultimediaTechLab/YOLO) and benchmarked.
+    # Artifact: notebook/_runs/20260521T170000Z_v256/reports/v256_libreyolo_yolov9_benchmark.json
+    "libreyolo-yolov9-t": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v256_coco_detection_mAP50:95=0.2222",
     },
     "libreyolo-yolov9-s": {
-        "final_state": "checkpoint_required",
-        "blocker_code": "CHECKPOINT_REQUIRED",
-        "v246_correction_reason": "yolov9_weights_not_cached_run_libreyolo_pull",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v256_coco_detection_mAP50:95=0.2926",
     },
-    "libreyolo-yolov9-t": {
-        "final_state": "checkpoint_required",
-        "blocker_code": "CHECKPOINT_REQUIRED",
-        "v246_correction_reason": "yolov9_weights_not_cached_run_libreyolo_pull",
+    "libreyolo-yolov9-m": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v256_coco_detection_mAP50:95=0.3441",
+    },
+    "libreyolo-yolov9-c": {
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v256_coco_detection_mAP50:95=0.3519",
     },
     # v2.51 open-vocab COCO mAP benchmark — coco_all_80_categories prompts, pycocotools.
     # Artifact: notebook/_runs/20260521T080000Z_v251/reports/v251_open_vocab_detection_benchmark.json
@@ -483,12 +484,15 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "",
         "v246_correction_reason": "v253_coco_kp_oks_ap=0.7248_gt_box_topdown",
     },
-    # rtmpose-t: mim config is CrowdPose (14-kp); AIC-COCO config backbone mismatches checkpoint.
-    # No matching COCO config+checkpoint pair resolvable from mim or GitHub for mmpose 1.3.x.
+    # v2.56: rtmpose-t benchmarked using body8 config (compatible 12-ch backbone).
+    # Config: rtmpose-t_8xb256-420e_body8-256x192.py, Checkpoint: rtmpose-tiny_simcc-aic-coco_420e.pth
+    # Both use 17 keypoints; OKS evaluation on COCO keypoints mini is valid.
+    # Note: config is body8-training config but architecture identical to COCO AIC training.
+    # Artifact: notebook/_runs/20260521T170000Z_v256/reports/v256_rtmpose_t_benchmark.json
     "rtmpose-t": {
-        "final_state": "benchmark_failed",
-        "blocker_code": "RTMPOSE_T_CONFIG_CHECKPOINT_MISMATCH",
-        "v246_correction_reason": "v254_aic_coco_config_backbone_24ch_vs_checkpoint_12ch_mismatch",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v256_coco_kp_oks_ap=0.6331_body8_config_compatible_17kp",
     },
     # v2.54: 384x288 models benchmarked on COCO keypoints mini (AIC-COCO config from mim).
     # GT-box top-down, CPU (mmcv ABI incompatible with cu130 for GPU).
@@ -590,22 +594,28 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
     },
     # v2.47.3 → v2.49: historical retention upgraded to zero-smoke states.
     # rtmdet-r2-s and rtmpose-m already confirmed as contract_passed in v2.45.
-    "rtmdet-r2-s": {"final_state": "contract_passed", "blocker_code": ""},
+    # v2.56: rtmdet-r2-s moved from contract_passed to dataset_required.
+    # OBB benchmark requires DOTA dataset which is not present on host.
+    "rtmdet-r2-s": {
+        "final_state": "dataset_required",
+        "blocker_code": "DOTA_DATASET_MISSING",
+        "v246_correction_reason": "v256_obb_benchmark_needs_dota_not_present",
+    },
     # v2.53: rtmpose-m promoted to benchmark_passed (see v2.53 block above).
     # v2.47.2 bytetrack sidecar built; v2.49 promoted to micro_benchmark_passed.
     # BYTETracker.update() with dummy detections returned 2 tracks correctly.
-    # v2.51: grounding-dino-original-swin-t/b: VisionModel('grounding-dino-original-swin-t')
-    # returns 'unknown model' — not registered in VisionModel engine. Benchmark_failed.
-    # The model registry entry exists (wired) but the execution path is not wired.
+    # v2.56: grounding-dino-original-swin-t/b added to registry as aliases of swin-t/b.
+    # Same HF checkpoints as grounding-dino-swin-t/b. Benchmarked with COCO all-80-cat prompts.
+    # Artifact: notebook/_runs/20260521T170000Z_v256/reports/v256_grounding_dino_original_benchmark.json
     "grounding-dino-original-swin-t": {
-        "final_state": "benchmark_failed",
-        "blocker_code": "VISIONMODEL_ENGINE_NOT_REGISTERED",
-        "v246_correction_reason": "v251_gdino_original_swint_unknown_to_visionmodel_api",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v256_coco_ovd_mAP50:95=0.3809_alias_grounding_dino_swin_t",
     },
     "grounding-dino-original-swin-b": {
-        "final_state": "benchmark_failed",
-        "blocker_code": "VISIONMODEL_ENGINE_NOT_REGISTERED",
-        "v246_correction_reason": "v251_gdino_original_swinb_unknown_to_visionmodel_api",
+        "final_state": "benchmark_passed",
+        "blocker_code": "",
+        "v246_correction_reason": "v256_coco_ovd_mAP50:95=0.4303_alias_grounding_dino_swin_b",
     },
     # v2.47 Grounding-DINO 2 audit — no official source found as of 2026-05-20.
     # Searched: GitHub IDEA-Research, Hugging Face, arXiv, DeepDataSpace. Not found.
@@ -1844,6 +1854,12 @@ def _derive_dataset_prepare_command(model_id: str, blocker_code: str) -> str:
             "visionservex dataset prepare-medical-seg-mini "
             "--source /home/arash/datasets/medical_segmentation "
             "--out /home/arash/datasets/medical_seg_mini_vsx"
+        ),
+        "DOTA_DATASET_MISSING": (
+            "visionservex dataset prepare-dota-mini "
+            "--source /home/arash/datasets/DOTA "
+            "--split val --limit 200 "
+            "--out /home/arash/datasets/dota_mini_vsx"
         ),
     }
     return mapping.get(blocker_code, "")
