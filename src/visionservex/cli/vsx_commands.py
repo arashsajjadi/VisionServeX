@@ -70,12 +70,46 @@ def sam_run(
 
 @sam_app.command("video")
 def sam_video(
-    model_id: str, video: str, box: str = typer.Option(None), out: str = typer.Option("runs/video")
+    model_id: str,
+    video: str,
+    box: str = typer.Option(None, help="x1,y1,x2,y2 on frame 0"),
+    out: str = typer.Option("runs/video"),
+    max_frames: int = typer.Option(8),
 ):
+    """SAM2 video object tracking — prompt frame 0 with a box, propagate."""
     try:
-        VSX.sam(model_id).track(video, box=box)
+        import cv2
+        from PIL import Image
+
+        cap = cv2.VideoCapture(video)
+        frames = []
+        while len(frames) < max_frames:
+            ok, fr = cap.read()
+            if not ok:
+                break
+            frames.append(Image.fromarray(cv2.cvtColor(fr, cv2.COLOR_BGR2RGB)))
+        cap.release()
+        if not frames:
+            _echo({"status": "error", "message": f"no frames read from {video}"})
+            return
+        bc = [float(v) for v in box.split(",")] if box else None
+        res = VSX.sam(model_id).track(frames, box=bc)
+        _echo({"status": "ok", "model_id": model_id, "out": out, **res})
     except VSXError as e:
         _echo({"status": e.state, "message": str(e), "next_command": e.next_command})
+
+
+@sam_app.command("export-onnx")
+def sam_export_onnx(model_id: str, out: str = typer.Option("models/{model}.onnx")):
+    """Export a commercial-safe SAM mask decoder to ONNX (local, license-clean)."""
+    out = out.replace("{model}", model_id)
+    try:
+        res = VSX.sam(model_id).to_onnx(out)
+        _echo({"status": "ok", **res})
+    except VSXError as e:
+        _echo({"status": e.state, "message": str(e), "next_command": e.next_command})
+    except Exception as e:
+        _echo({"status": "error", "model_id": model_id, "message": str(e)})
 
 
 # ---------------- DINO ----------------

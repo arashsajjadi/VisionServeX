@@ -1,0 +1,9 @@
+{
+  "model_id": "medsam2",
+  "escalation": [
+    "transformers(wanglab/MedSAM2): OSError: Can't load image processor for 'wanglab/MedSAM2'. If you were trying to load it from 'https://huggin",
+    "transformers(wanglab/medsam2): OSError: Can't load image processor for 'wanglab/medsam2'. If you were trying to load it from 'https://huggin"
+  ],
+  "final_state": "sidecar_required",
+  "next_command": "visionservex sidecar create medsam2 --execute  # needs MedSAM2 repo + sam2 base; HF format mismatch"
+}

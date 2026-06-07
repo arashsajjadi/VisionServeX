@@ -1,0 +1,8 @@
+model_id,family,auth_env,token_present,terms,weights_mirrored,token_logged,final_state,next_command
+sam3-base,sam,HF_TOKEN,False,"Meta SAM License (custom, HF-gated)",False,False,auth_required,export HF_TOKEN=... && visionservex sam status sam3-base
+grounding-dino-1.5,dino,DEEPDATASPACE_API_KEY,False,DeepDataSpace API,False,False,auth_required,export DEEPDATASPACE_API_KEY=... && visionservex dino status grounding-dino-1.5
+grounding-dino-1.6,dino,DEEPDATASPACE_API_KEY,False,DeepDataSpace API,False,False,auth_required,export DEEPDATASPACE_API_KEY=... && visionservex dino status grounding-dino-1.6
+grounding-dino-1.5-pro,dino,DEEPDATASPACE_API_KEY,False,"DeepDataSpace API (pro, proprietary)",False,False,auth_required,export DEEPDATASPACE_API_KEY=... && visionservex dino status grounding-dino-1.5-pro
+grounding-dino-1.6-pro,dino,DEEPDATASPACE_API_KEY,False,"DeepDataSpace API (pro, proprietary)",False,False,auth_required,export DEEPDATASPACE_API_KEY=... && visionservex dino status grounding-dino-1.6-pro
+dino-x-api,dino,DEEPDATASPACE_API_KEY,False,DINO-X API,False,False,auth_required,export DEEPDATASPACE_API_KEY=... && visionservex dino status dino-x-api
+dinov3-vitb16,dino,HF_TOKEN,False,"DINOv3 License (Meta custom, HF-gated)",False,False,auth_required,export HF_TOKEN=... && visionservex dino status dinov3-vitb16

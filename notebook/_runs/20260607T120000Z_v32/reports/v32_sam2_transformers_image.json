@@ -1,0 +1,8 @@
+{
+  "model_id": "sam2.1-hiera-tiny",
+  "mode": "transformers_image_seg",
+  "device": "cuda",
+  "mask_area": 21399,
+  "latency_ms": 313.7,
+  "final_state": "benchmark_passed"
+}

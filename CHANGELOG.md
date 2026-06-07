@@ -3,6 +3,36 @@
 ## [Unreleased]
 
 
+## [3.2.0] - 2026-06-06
+
+### Real model activation continuation — new SAM runtime/video/ONNX modes + proven blocker table
+
+- **5 REAL new-mode model activations** (each adds a genuinely new runtime mode to an
+  already-benchmarked SAM model, with executed evidence):
+  - `mobilesam-onnx`, `sam-vit-b-onnx` — local ONNX mask-decoder export (Apache-2.0) +
+    CPU run via onnxruntime (~17ms decoder). EdgeSAM (non-commercial) is refused.
+  - `sam2.1-video-tiny`, `sam2.1-video-small` — SAM2 video object tracking via the HF
+    Transformers `Sam2VideoModel` backend (real propagation across frames).
+  - `sam2.1-hiera-tiny` transformers image backend.
+- New modules `visionservex.onnx_export` + `visionservex.sam2_runtime`; new CLI
+  `visionservex sam export-onnx` + real `visionservex sam video`; `VSX.sam(...).to_onnx()`
+  / `.track(frames, box=...)`.
+- **Honest outcome on the 12-real-model target: NOT met** — the remaining model families
+  are blocked. A fully-proven blocker table ships with the exact error + replacement +
+  next command for each: 21 OpenMMLab sidecars (mmcv build fails on torch 2.11+cu130 —
+  `pkg_resources` / no wheel; replacement = conda py3.10+torch2.1+mmcv2.1 wheel), MedSAM2
+  (raw SAM2 checkpoint, transformers format mismatch), RITM/ClickSEG (legacy torch envs),
+  SAM3/SAM3.1 (gated/not-released), GroundingDINO 1.5/1.6/-pro + DINO-X (API/BYOT, no token
+  present), DINOv3 (custom Meta license, HF-gated), RT-DETRv4 (Google-Drive gated).
+- v32 ledgers: real_model_activation_plan, sidecar_execution, byot_execution,
+  checkpoint_required, failed_model_blockers. BYOT: weights never mirrored, tokens never
+  logged, no token present -> auth_required (never faked benchmark_passed).
+- 7 v32 tests; commercial-safety from V3 preserved (no bad-license core).
+
+
+## [Unreleased]
+
+
 ## [3.1.0] - 2026-06-06
 
 ### SAM/DINO model expansion + CV2-Pro + unified VSX API

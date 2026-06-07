@@ -1,0 +1,16 @@
+{
+  "model_id": "sam2.1-video-tiny",
+  "mode": "video_tracking",
+  "device": "cuda",
+  "frames_propagated": 6,
+  "mask_areas": [
+    5596,
+    5597,
+    5596,
+    5587,
+    5594,
+    5591
+  ],
+  "latency_ms": 644.8,
+  "final_state": "benchmark_passed"
+}

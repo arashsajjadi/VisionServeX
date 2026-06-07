@@ -145,12 +145,29 @@ class _SAMHandle(_Base):
         with VisionModel(self.model_id) as model:
             return model.predict(_load_image(image), box=box, points=points, **kw)
 
-    def track(self, video, frame=0, box=None, **kw):
-        raise VSXError(
-            f"{self.model_id}: video tracking requires the SAM2-video runtime",
-            state="sidecar_required",
-            next_command=f"visionservex sam video {self.model_id} {video} --box ... --out runs/video",
-        )
+    def track(self, frames, box=None, **kw):
+        """SAM2 video object tracking (transformers backend). ``frames`` = list of PIL frames."""
+        if not (self.model_id.startswith("sam2") or "video" in self.model_id):
+            raise VSXError(
+                f"{self.model_id}: video tracking is a SAM2 capability",
+                state="not_applicable",
+                next_command="use a sam2/sam2.1 model: VSX.sam('sam2.1-hiera-small').track(frames, box=...)",
+            )
+        from visionservex.sam2_runtime import track_video
+
+        return track_video(self.model_id, frames, box=box, **kw)
+
+    def to_onnx(self, out_path: str):
+        """Export the SAM mask decoder to ONNX (commercial-safe SAM variants only)."""
+        from visionservex.onnx_export import export_sam_decoder_onnx, onnx_eligible
+
+        if self.model_id not in onnx_eligible():
+            raise VSXError(
+                f"{self.model_id}: not ONNX-export-eligible (commercial-safe SAM only)",
+                state="not_applicable",
+                next_command="eligible: mobilesam, sam-vit-b (Apache-2.0 local export)",
+            )
+        return export_sam_decoder_onnx(self.model_id, out_path)
 
 
 class _DINOHandle(_Base):

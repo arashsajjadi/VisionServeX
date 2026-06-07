@@ -1,0 +1,3 @@
+model_id,family,attempt,result,final_state,ram_gb_at_attempt,next_command
+medsam2,medsam,transformers Sam2Model load,"FAILED — no image_processor config (raw SAM2 .pt, not transformers format)",sidecar_required,27,conda create -n vsx-medsam2 python=3.10 && pip install SAM-2 + MedSAM2 repo + ckpt
+rtmdet-r2-s (+20 OpenMMLab),openmmlab,pip install mmengine (OK) + mmcv (FAILED),mmcv build fails on torch 2.11+cu130: ModuleNotFoundError: No module named 'pkg_resources' (setuptools incompatibility; no prebuilt wheel for this torch/cuda),sidecar_required,27,conda create -n vsx-mmlab python=3.10 && pip install torch==2.1.0 && pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && pip install mmdet mmrotate

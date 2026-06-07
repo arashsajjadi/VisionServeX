@@ -1,0 +1,6 @@
+model_id,base_model,new_mode,device,metric,final_state,evidence,license,counts_real_model
+mobilesam-onnx,mobilesam,onnx_cpu_runtime,cpu,"decoder 17.58ms, iou 0.455",benchmark_passed,reports(_runs)/v32_sam_onnx_benchmark.json,Apache-2.0 (local export),True
+sam-vit-b-onnx,sam-vit-b,onnx_cpu_runtime,cpu,"decoder 17.86ms, iou 0.867",benchmark_passed,reports(_runs)/v32_sam_onnx_benchmark.json,Apache-2.0 (local export),True
+sam2.1-hiera-tiny (transformers-image),sam2.1-hiera-tiny,transformers_image_backend,cuda,"mask_area 21399, 313.7ms",benchmark_passed,v32_sam2_transformers_image.json,Apache-2.0,True
+sam2.1-video-tiny,sam2.1-hiera-tiny,video_object_tracking,cuda,"6 frames, areas [5596, 5597, 5596, 5587, 5594, 5591]",benchmark_passed,v32_sam2_video*.json,Apache-2.0,True
+sam2.1-video-small,sam2.1-hiera-small,video_object_tracking,cuda,"6 frames, areas [5600, 5599, 5598, 5599, 5599, 5599]",benchmark_passed,v32_sam2_video*.json,Apache-2.0,True

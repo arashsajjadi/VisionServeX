@@ -1,0 +1,5 @@
+model_id,code_license,weights,final_state,blocker,next_command
+ritm,MIT,"user-download (Google Drive); HRNet/ImageNet backbone, SBD/COCO+LVIS data",checkpoint_required,legacy torch 1.4-1.8 env (current torch 2.11 incompatible),conda create -n vsx-ritm python=3.8 && pip install torch==1.8.1 + ritm repo + download hrnet32 ckpt
+clickseg,Apache-2.0,"user-download (CDNet/MobileNet permissive variants), COCO+LVIS data",checkpoint_required,legacy RITM-derived env (torch ~1.7-1.9),conda create -n vsx-clickseg python=3.8 && pip install torch==1.9 + ClickSEG repo + ckpt
+sam-vit-l-onnx,Apache-2.0,Apache-2.0 (1.2GB download then local export),checkpoint_required,weights not pre-downloaded (export path proven for sam-vit-b),visionservex pull sam-vit-large && visionservex sam export-onnx sam-vit-l --out models/sam-vit-l.onnx
+sam-vit-h-onnx,Apache-2.0,Apache-2.0 (2.5GB download then local export),checkpoint_required,weights not pre-downloaded,visionservex pull sam-vit-huge && visionservex sam export-onnx sam-vit-h --out models/sam-vit-h.onnx

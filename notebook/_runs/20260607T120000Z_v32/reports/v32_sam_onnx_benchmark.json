@@ -1,0 +1,54 @@
+[
+  {
+    "model_id": "mobilesam-onnx",
+    "export": {
+      "model_id": "mobilesam",
+      "onnx_path": "models/mobilesam_decoder.onnx",
+      "size_mb": 16.5,
+      "checkpoint": "/home/arash/.cache/visionservex/mobilesam/mobile_sam.pt",
+      "license": "Apache-2.0 (local export)",
+      "opset": 17
+    },
+    "run": {
+      "onnx_path": "models/mobilesam_decoder.onnx",
+      "ran_on": "cpu (onnxruntime)",
+      "mask_shape": [
+        1,
+        1,
+        1500,
+        2250
+      ],
+      "iou_pred": 0.45522329211235046,
+      "decoder_latency_ms": 17.58,
+      "status": "ok"
+    },
+    "final_state": "benchmark_passed",
+    "mode": "onnx_cpu_runtime"
+  },
+  {
+    "model_id": "sam-vit-b-onnx",
+    "export": {
+      "model_id": "sam-vit-b",
+      "onnx_path": "models/sam-vit-b_decoder.onnx",
+      "size_mb": 16.5,
+      "checkpoint": "/home/arash/.cache/visionservex/sam/sam_vit_b_01ec64.pth",
+      "license": "Apache-2.0 (local export)",
+      "opset": 17
+    },
+    "run": {
+      "onnx_path": "models/sam-vit-b_decoder.onnx",
+      "ran_on": "cpu (onnxruntime)",
+      "mask_shape": [
+        1,
+        1,
+        1500,
+        2250
+      ],
+      "iou_pred": 0.8669865131378174,
+      "decoder_latency_ms": 17.86,
+      "status": "ok"
+    },
+    "final_state": "benchmark_passed",
+    "mode": "onnx_cpu_runtime"
+  }
+]
