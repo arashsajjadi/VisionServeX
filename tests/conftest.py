@@ -113,6 +113,10 @@ def pytest_configure(config: pytest.Config) -> None:
             "smoke",
             "smallest/lightest variant of a real_model or gpu test; always paired with real_model or gpu",
         ),
+        (
+            "sam_onnx",
+            "SAM ONNX export and CPU runtime tests; opt in: VISIONSERVEX_RUN_REAL_MODEL_TESTS=1",
+        ),
     ]
     for name, desc in _markers:
         config.addinivalue_line("markers", f"{name}: {desc}")

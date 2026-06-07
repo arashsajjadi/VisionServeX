@@ -1,0 +1,39 @@
+{
+  "executions_total": 40,
+  "executions_ok": 38,
+  "executions_blocked": 2,
+  "executions_failed": 0,
+  "distinct_ok_ids": 36,
+  "pipelines_ok": 7,
+  "rfdetr_seg_ok": 4,
+  "sam_variants": 51,
+  "sam_state_dist": {
+    "benchmark_passed": 21,
+    "checkpoint_required": 6,
+    "blocked_documented": 4,
+    "sidecar_required": 1,
+    "legal_review_required": 3,
+    "excluded_restricted": 1,
+    "auth_required": 15
+  },
+  "dino_variants": 33,
+  "dino_state_dist": {
+    "benchmark_passed": 15,
+    "auth_required": 8,
+    "external_api_only": 10
+  },
+  "inventory_rows": 105,
+  "inventory_state_dist": {
+    "benchmark_passed": 44,
+    "checkpoint_required": 9,
+    "blocked_documented": 4,
+    "sidecar_required": 1,
+    "legal_review_required": 8,
+    "excluded_restricted": 5,
+    "auth_required": 23,
+    "external_api_only": 10,
+    "tool_available": 1
+  },
+  "inventory_commercial_safe": 57,
+  "inventory_product_grade": 45
+}

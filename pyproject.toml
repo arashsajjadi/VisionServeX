@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "visionservex"
-version = "3.3.0"
+version = "3.7.0"
 description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -274,6 +274,17 @@ vlm = [
     "accelerate>=0.28",
     "pillow>=10.0",
 ]
+locateanything = [
+    # LocateAnything-3B sidecar — NVIDIA License (non-commercial only).
+    # VisionServeX does NOT ship or mirror the weights. BYOT/user-local-cache only.
+    # Install sidecar manually: git clone https://github.com/NVlabs/Eagle.git eagle && cd eagle/Embodied && pip install -e .
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "transformers>=4.40",
+    "huggingface_hub>=0.24",
+    "pillow>=10.0",
+    "numpy>=1.24",
+]
 "all-benchmark" = [
     "visionservex[server,hf,rfdetr,libreyolo,sam2,grounding,anomaly,video,notebook,benchmark,segmentation,promptable,detection,foundation,open-vocab]",
 ]
@@ -361,4 +372,5 @@ markers = [
     "download: downloads large assets; opt in: VISIONSERVEX_RUN_DOWNLOAD_TESTS=1",
     "smoke: small smoke-only variant of real_model or gpu test; always paired with real_model or gpu marker",
     "notebook: notebook execution test; opt in: manually",
+    "sam_onnx: SAM ONNX export and CPU runtime tests; opt in: VISIONSERVEX_RUN_REAL_MODEL_TESTS=1",
 ]

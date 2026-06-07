@@ -1,0 +1,5 @@
+model_id,auth_type,token_env_var,has_token_in_env,attempt_result,blocker,fix_command
+sam3-base,hf_token,HF_TOKEN,NO,auth_required,HF token required to download gated model facebook/sam3,export HF_TOKEN=hf_xxx && visionservex sam3 status --model sam3-base
+grounding-dino-1.5,api_key,DEEPDATASPACE_API_KEY,NO,auth_required,DEEPDATASPACE_API_KEY required for DDSAM API,export DEEPDATASPACE_API_KEY=xxx && visionservex dino api grounding-dino-1.5
+grounding-dino-1.5-pro,api_key,DEEPDATASPACE_API_KEY,NO,external_api_only,Pro tier requires subscription,contact api.deepdataspace.com
+dino-x-api,api_key,DEEPDATASPACE_API_KEY,NO,external_api_only,DINO-X external API only no local weights,export DEEPDATASPACE_API_KEY=xxx

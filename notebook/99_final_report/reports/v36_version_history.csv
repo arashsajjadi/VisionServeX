@@ -1,0 +1,8 @@
+version,date,new_executions,new_model_ids,sam_onnx_count,dino_gdino_count,sidecar_checkpoint_count,total_benchmark_passed,key_changes
+3.0.0,2026-01,8,8,2,3,1,40,Initial SAM/DINOv2/GD foundation
+3.1.0,2026-02,6,6,2,2,1,52,SAM2 family + pipeline handle + VSX facade
+3.2.0,2026-03,5,5,3,2,2,68,SAM ONNX export + video tracking + real SAM ONNX runtime
+3.3.0,2026-04,4,4,3,3,1,80,MobileSAM + EfficientSAM + grounding-dino-original variants
+3.4.0,2026-05,8,8,4,5,2,96,SAM-ViT-L/H ONNX eligible + dinov2-large/giant + GD-tiny/swin-b
+3.5.0,2026-05,16,13,5,5,3,110,EfficientSAM ONNX + SAM2.1 all variants + MedSAM + SAM-ViT-H/L HF
+3.6.0,2026-06,12,8,6,7,4,122,Phase 1 CLI fixes + LocateAnything + CLIP + OWLv2 + DepthAnything + Florence-2

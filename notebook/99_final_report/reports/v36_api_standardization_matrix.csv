@@ -1,0 +1,6 @@
+family,vsx_factory_method,handle_class,methods,has_explain,has_status,cli_subcommand,cli_run,cli_explain,standardized_v36
+sam,VSX.sam(model_id),_SAMHandle,segment/track/to_onnx,true,true,visionservex sam,sam run,sam status,YES
+dino,VSX.dino(model_id),_DINOHandle,embed/detect,true,true,visionservex dino,dino detect,dino status,YES
+pipeline,VSX.pipeline(pipeline_id),_PipelineHandle,run,true,true,visionservex pipeline,pipeline run,pipeline explain,YES
+cv2,VSX.cv2(tool_id),_Cv2Handle,run,true,true,visionservex cv2-pro,cv2-pro run,cv2-pro explain,YES
+locate_anything,VSX.locateanything(model_id),_LocateAnythingHandle,locate,true,true,visionservex locate-anything,locate-anything run,locate-anything explain,YES

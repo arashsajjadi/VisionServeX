@@ -16,6 +16,9 @@ from typing import Any
 _SAM_ONNX_ELIGIBLE = {
     "mobilesam": ("vit_t", "~/.cache/visionservex/mobilesam/mobile_sam.pt", True),
     "sam-vit-b": ("vit_b", "~/.cache/visionservex/sam/sam_vit_b_01ec64.pth", True),
+    # v3.4: added larger SAM1 variants (Apache-2.0); checkpoints must be pulled first
+    "sam-vit-l": ("vit_l", "~/.cache/visionservex/sam/sam_vit_l_0b3195.pth", True),
+    "sam-vit-h": ("vit_h", "~/.cache/visionservex/sam/sam_vit_h_4b8939.pth", True),
 }
 
 
@@ -133,3 +136,27 @@ def run_sam_onnx_cpu(onnx_path: str | Path) -> dict[str, Any]:
         "decoder_latency_ms": round(dt, 2),
         "status": "ok",
     }
+
+
+def list_onnx_eligible_models() -> list[dict[str, Any]]:
+    """Return status for every SAM ONNX export target (v3.4)."""
+    results = []
+    for model_id, (reg_key, ckpt, safe) in _SAM_ONNX_ELIGIBLE.items():
+        ckpt_path = Path(ckpt).expanduser()
+        exists = ckpt_path.exists()
+        results.append(
+            {
+                "model_id": model_id,
+                "onnx_eligible": safe,
+                "checkpoint_exists": exists,
+                "checkpoint_path": str(ckpt_path),
+                "size_mb": round(ckpt_path.stat().st_size / 1e6, 2) if exists else 0,
+                "status": "ready" if exists else "checkpoint_required",
+                "pull_command": f"visionservex pull {model_id}" if not exists else None,
+                "export_command": (
+                    f"visionservex sam export-onnx {model_id} --out models/{model_id}.onnx"
+                ),
+                "license": "Apache-2.0 (local ONNX export from official weights)",
+            }
+        )
+    return results

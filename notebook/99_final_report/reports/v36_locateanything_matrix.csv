@@ -1,0 +1,11 @@
+model_id,license,default_safe,commercial_safe,byot,accept_noncommercial_required,has_warning_text,has_cli,has_python_api,has_test,has_tutorial,state,install_type,sidecar_repo,notes
+locate-anything-3b,NVIDIA-non-commercial,false,false,true,true,true,true,true,true,true,legal_review_required,sidecar,https://github.com/NVlabs/Eagle,Base LocateAnything-3B
+locate-anything-3b-v2,NVIDIA-non-commercial,false,false,true,true,true,true,true,true,true,legal_review_required,sidecar,https://github.com/NVlabs/Eagle,LocateAnything-3B v2
+locate-anything-3b-grounded,NVIDIA-non-commercial,false,false,true,true,true,true,true,true,true,legal_review_required,sidecar,https://github.com/NVlabs/Eagle,Grounded variant
+locate-anything-3b-coco,NVIDIA-non-commercial,false,false,true,true,true,true,true,true,true,legal_review_required,sidecar,https://github.com/NVlabs/Eagle,COCO fine-tune
+locate-anything-3b-lvis,NVIDIA-non-commercial,false,false,true,true,true,true,true,true,true,legal_review_required,sidecar,https://github.com/NVlabs/Eagle,LVIS fine-tune
+locate-anything-3b-objects365,NVIDIA-non-commercial,false,false,true,true,true,true,true,true,true,legal_review_required,sidecar,https://github.com/NVlabs/Eagle,Objects365 fine-tune
+locate-anything-3b-open-vocab,NVIDIA-non-commercial,false,false,true,true,true,true,true,true,true,legal_review_required,sidecar,https://github.com/NVlabs/Eagle,Open-vocabulary variant
+locate-anything-3b-caption,NVIDIA-non-commercial,false,false,true,true,true,true,true,true,true,legal_review_required,sidecar,https://github.com/NVlabs/Eagle,Caption/grounding variant
+locate-anything-3b-video,NVIDIA-non-commercial,false,false,true,true,true,true,true,true,true,legal_review_required,sidecar,https://github.com/NVlabs/Eagle,Video grounding variant
+locate-anything-3b-ft,NVIDIA-non-commercial,false,false,true,true,true,true,true,true,true,legal_review_required,sidecar,https://github.com/NVlabs/Eagle,Fine-tuned general variant

@@ -1,0 +1,45 @@
+model_id,license,default_safe,commercial_safe,exclude_reason,action
+sam-vit-base,Apache-2.0,true,true,,none — fully commercial-safe
+sam-vit-large,Apache-2.0,true,true,,none — fully commercial-safe
+sam-vit-huge,Apache-2.0,true,true,,none — fully commercial-safe
+sam2-hiera-tiny,Apache-2.0,true,true,,none — fully commercial-safe
+sam2-hiera-small,Apache-2.0,true,true,,none — fully commercial-safe
+sam2-hiera-base-plus,Apache-2.0,true,true,,none — fully commercial-safe
+sam2-hiera-large,Apache-2.0,true,true,,none — fully commercial-safe
+sam2.1-hiera-tiny,Apache-2.0,true,true,,none — fully commercial-safe
+sam2.1-hiera-small,Apache-2.0,true,true,,none — fully commercial-safe
+sam2.1-hiera-base-plus,Apache-2.0,true,true,,none — fully commercial-safe
+sam2.1-hiera-large,Apache-2.0,true,true,,none — fully commercial-safe
+mobilesam,Apache-2.0,true,true,,none — fully commercial-safe
+efficientsam,Apache-2.0,true,true,,none — fully commercial-safe
+medsam,Apache-2.0,true,true,,none — fully commercial-safe
+hq-sam,Apache-2.0-code+HQSeg-44K-data,false,false,HQSeg-44K training data requires legal review,legal_review_required state
+sam3-base,SAM-License-Meta-gated,false,false,Meta gated model — requires HF access token,auth_required state
+edge-sam,S-Lab-License-1.0-NON-COMMERCIAL,false,false,Non-commercial only,excluded_restricted state
+medsam2,Apache-2.0,true,true,,sidecar_required — weights not shipped
+dinov2-small,Apache-2.0,true,true,,none — fully commercial-safe
+dinov2-base,Apache-2.0,true,true,,none — fully commercial-safe
+dinov2-large,Apache-2.0,true,true,,none — fully commercial-safe
+dinov2-giant,Apache-2.0,true,true,,none — fully commercial-safe
+grounding-dino-swin-t,Apache-2.0,true,true,,none — fully commercial-safe
+grounding-dino-swin-b,Apache-2.0,true,true,,none — fully commercial-safe
+grounding-dino-tiny,Apache-2.0,true,true,,none — fully commercial-safe
+grounding-dino-1.5,API/gated,false,false,Token-gated Idea Research API,auth_required state
+grounding-dino-1.5-pro,proprietary/closed,false,false,External API only,external_api_only state
+dino-x-api,proprietary/closed,false,false,External API only,external_api_only state
+clip-vit-base-patch32,Apache-2.0,true,true,,none — fully commercial-safe (OpenAI CLIP Apache-2.0)
+owlvit-base-patch32,Apache-2.0,true,true,,none — Apache-2.0 (Google)
+owlv2-base-patch16,Apache-2.0,true,true,,none — Apache-2.0 (Google)
+depth-anything-small-hf,Apache-2.0,true,true,,none — Apache-2.0
+florence-2-large,MIT,true,true,,none — MIT license (Microsoft Florence-2)
+dino-vits8,Apache-2.0,true,true,,none — Apache-2.0 (Meta DINO original)
+locate-anything-3b,NVIDIA-non-commercial,false,false,Non-commercial NVIDIA License,legal_review_required + --accept-noncommercial required
+locate-anything-3b-v2,NVIDIA-non-commercial,false,false,Non-commercial NVIDIA License,legal_review_required + --accept-noncommercial required
+locate-anything-3b-grounded,NVIDIA-non-commercial,false,false,Non-commercial NVIDIA License,legal_review_required + --accept-noncommercial required
+locate-anything-3b-coco,NVIDIA-non-commercial,false,false,Non-commercial NVIDIA License,legal_review_required + --accept-noncommercial required
+locate-anything-3b-lvis,NVIDIA-non-commercial,false,false,Non-commercial NVIDIA License,legal_review_required + --accept-noncommercial required
+locate-anything-3b-objects365,NVIDIA-non-commercial,false,false,Non-commercial NVIDIA License,legal_review_required + --accept-noncommercial required
+locate-anything-3b-open-vocab,NVIDIA-non-commercial,false,false,Non-commercial NVIDIA License,legal_review_required + --accept-noncommercial required
+locate-anything-3b-caption,NVIDIA-non-commercial,false,false,Non-commercial NVIDIA License,legal_review_required + --accept-noncommercial required
+locate-anything-3b-video,NVIDIA-non-commercial,false,false,Non-commercial NVIDIA License,legal_review_required + --accept-noncommercial required
+locate-anything-3b-ft,NVIDIA-non-commercial,false,false,Non-commercial NVIDIA License,legal_review_required + --accept-noncommercial required

@@ -1,0 +1,21 @@
+model_id,family,execution_type,attempted,result,artifact_path,latency_ms,embed_dim,n_detections,blocker,exact_command
+dinov2-small,dinov2,embedding_knn,yes,embedding_ok,artifacts/v34/dinov2_dinov2_small_embed.npy,3798.37,384,na,none,visionservex dino embed dinov2-small tests/assets/smoke/coco_person_car.jpg --out embed.npy
+dinov2-base,dinov2,embedding_knn,yes,embedding_ok,artifacts/v34/dinov2_dinov2_base_embed.npy,749.17,768,na,none,visionservex dino embed dinov2-base tests/assets/smoke/coco_person_car.jpg --out embed.npy
+grounding-dino-swin-t,grounding_dino,text_detection,yes,detection_ok,artifacts/v34/grounding_dino_text_detect.json,5388.02,na,2,none,"visionservex dino detect grounding-dino-swin-t image.jpg --text 'person . car . vehicle'"
+grounding-dino-original-swin-t,grounding_dino,text_detection,yes,detection_ok,artifacts/v34/grounding_dino_text_detect.json,2238.16,na,2,none,"visionservex dino detect grounding-dino-original-swin-t image.jpg --text 'person . car . vehicle'"
+grounding-dino-1.5,grounding_dino,api_check,yes,auth_required,na,na,na,na,api_key_missing,export DEEPDATASPACE_API_KEY=... && visionservex dino api grounding-dino-1.5 image.jpg --text cat
+grounding-dino-1.6,grounding_dino,api_check,yes,auth_required,na,na,na,na,api_key_missing,export DEEPDATASPACE_API_KEY=... && visionservex dino api grounding-dino-1.6 image.jpg --text cat
+dino-x-api,dino-x,api_check,yes,external_api_only,na,na,na,na,api_key_missing,export DEEPDATASPACE_API_KEY=... && visionservex dino api dino-x-api image.jpg --text cat
+dinov3-vitb16,dinov3,auth_check,yes,auth_required,na,na,na,na,hf_gated_custom_license,export HF_TOKEN=... && visionservex dino status dinov3-vitb16
+dinov3-vits16,dinov3,status_check,yes,legal_review_required,na,na,na,na,legal_review_required,visionservex legal review dinov3-vits16
+dinov3-vitl16,dinov3,status_check,yes,legal_review_required,na,na,na,na,legal_review_required,visionservex legal review dinov3-vitl16
+dinov3-vit7b16,dinov3,status_check,yes,legal_review_required,na,na,na,na,legal_review_required,visionservex legal review dinov3-vit7b16
+dinov3-convnext-tiny,dinov3,status_check,yes,legal_review_required,na,na,na,na,legal_review_required,visionservex legal review dinov3-convnext-tiny
+dinov3-convnext-small,dinov3,status_check,yes,legal_review_required,na,na,na,na,legal_review_required,visionservex legal review dinov3-convnext-small
+dinov3-convnext-base,dinov3,status_check,yes,legal_review_required,na,na,na,na,legal_review_required,visionservex legal review dinov3-convnext-base
+dinov3-convnext-large,dinov3,status_check,yes,legal_review_required,na,na,na,na,legal_review_required,visionservex legal review dinov3-convnext-large
+dino-x-detection,dino-x,status_check,yes,not_released,na,na,na,na,not_released,watch IDEACVR/DINO-X releases
+dino-x-segmentation,dino-x,status_check,yes,not_released,na,na,na,na,not_released,watch IDEACVR/DINO-X releases
+dino-x-phrase-grounding,dino-x,status_check,yes,not_released,na,na,na,na,not_released,watch IDEACVR/DINO-X releases
+dino-x-counting,dino-x,status_check,yes,not_released,na,na,na,na,not_released,watch IDEACVR/DINO-X releases
+dino-x-region-captioning,dino-x,status_check,yes,not_released,na,na,na,na,not_released,watch IDEACVR/DINO-X releases

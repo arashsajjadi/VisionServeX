@@ -1,0 +1,25 @@
+model_id,has_registry_row,has_final_state,has_install_extra,has_license_status,has_default_safe,has_evidence_artifact,has_vsx_api,has_cli,has_explain,has_tutorial,has_test,has_model_card,pass_fail_matrix,canonicalized_v36,blocker
+sam-vit-base,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+sam-vit-large,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+sam-vit-huge,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+sam2-hiera-tiny,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+sam2-hiera-small,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+sam2-hiera-base-plus,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+sam2-hiera-large,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+sam2.1-hiera-tiny,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+sam2.1-hiera-small,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+sam2.1-hiera-base-plus,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+sam2.1-hiera-large,true,true,true,true,true,true,true,true,true,true,true,false,true,PARTIAL,tutorial pending
+mobilesam,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+efficientsam,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+medsam,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+dinov2-small,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+dinov2-base,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+dinov2-large,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+dinov2-giant,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+grounding-dino-swin-t,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+grounding-dino-swin-b,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+grounding-dino-tiny,true,true,true,true,true,true,true,true,true,true,true,true,true,YES,none
+grounding-dino-original-swin-t,true,true,true,true,true,true,true,true,true,true,true,false,true,PARTIAL,test pending
+grounding-dino-original-swin-b,true,true,true,true,true,true,true,true,true,true,true,false,true,PARTIAL,test pending
+medsam2,true,true,true,true,true,false,false,false,true,false,true,false,true,PARTIAL,sidecar not installed — sidecar_required state documented

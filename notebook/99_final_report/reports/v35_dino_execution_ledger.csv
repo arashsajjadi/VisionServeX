@@ -1,0 +1,8 @@
+model_id,execution_type,embed_dim,latency_ms,artifact_path,blocker,exact_command
+dinov2-small,embedding,384,3798.37,artifacts/v34/dinov2_knn_results.json,none,VisionModel('dinov2-small').predict
+dinov2-base,embedding,768,749.17,artifacts/v34/dinov2_knn_results.json,none,VisionModel('dinov2-base').predict
+dinov2-large,embedding,1024,5236.2,artifacts/v35/dinov2_lg_embed_results.json,none,VisionModel('dinov2-large').predict
+dinov2-giant,embedding,1536,7093.2,artifacts/v35/dinov2_lg_embed_results.json,none,VisionModel('dinov2-giant').predict
+dinov3-vitb16,excluded,n/a,n/a,n/a,legal_review_required,n/a
+dinov3-vits16,legal_review,n/a,n/a,n/a,legal_review_required,n/a
+dinov3-vitl16,legal_review,n/a,n/a,n/a,legal_review_required,n/a

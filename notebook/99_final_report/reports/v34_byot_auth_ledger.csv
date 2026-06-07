@@ -1,0 +1,8 @@
+model_id,auth_type,token_env_var,hf_repo,blocker_code,fix_command
+sam3-base,hf_gated,HF_TOKEN,facebook/sam3,HF_AUTH_REQUIRED,huggingface-cli login && visionservex sam3 status --model sam3-base
+grounding-dino-1.5,api_key,DEEPDATASPACE_API_KEY,api.deepdataspace.com,API_KEY_REQUIRED,export DEEPDATASPACE_API_KEY=<your_key> && visionservex dino api grounding-dino-1.5 image.jpg --text cat
+grounding-dino-1.6,api_key,DEEPDATASPACE_API_KEY,api.deepdataspace.com,API_KEY_REQUIRED,export DEEPDATASPACE_API_KEY=<your_key> && visionservex dino api grounding-dino-1.6 image.jpg --text cat
+grounding-dino-1.5-pro,api_key,DEEPDATASPACE_API_KEY,api.deepdataspace.com,PROPRIETARY_API_ONLY,export DEEPDATASPACE_API_KEY=<your_key> && visionservex dino api grounding-dino-1.5-pro image.jpg
+grounding-dino-1.6-pro,api_key,DEEPDATASPACE_API_KEY,api.deepdataspace.com,PROPRIETARY_API_ONLY,export DEEPDATASPACE_API_KEY=<your_key> && visionservex dino api grounding-dino-1.6-pro image.jpg
+dino-x-api,api_key,DEEPDATASPACE_API_KEY,api.deepdataspace.com,PROPRIETARY_API_ONLY,export DEEPDATASPACE_API_KEY=<your_key> && visionservex dino api dino-x-api image.jpg --text cat
+dinov3-vitb16,hf_gated_custom_license,HF_TOKEN,facebook/dinov3,HF_GATED_LICENSE_REQUIRED,export HF_TOKEN=<your_token> && visionservex dino status dinov3-vitb16

@@ -1,0 +1,9 @@
+model_id,sidecar_type,attempt_result,checkpoint_status,blocker,fix_command,latency_ms
+medsam,sam_hf,ok,hf_cached,none,n/a,4204.7
+sam-vit-huge-hf,sam_hf,ok,hf_cached,none,n/a,8951.3
+sam-vit-large-hf,sam_hf,ok,hf_cached,none,n/a,3922.6
+maskdino-r50-coco,detectron2,sidecar_required,n/a,detectron2 incompatible with torch>=2.11+cu130,conda create -n maskdino python=3.10 && pip install torch==2.1.0 cu121 && pip install detectron2,0
+co-dino-inst-vit-l-coco,mmcv2,sidecar_required,n/a,mmcv2.1 OpenMMLab chain not installed,pip install mmcv2 mmdet,0
+oneformer-dinat-large,natten,sidecar_required,n/a,NATTEN no prebuilt wheel for torch2.11,pip install natten -f https://shi-labs.com/natten/wheels/,0
+rtdetrv4-s,pytorch,checkpoint_only,169MB_cached,RT-DETRv4 runner not implemented in visionservex _stub engine,pip install rt-detr-official && implement RTDETRv4Runner,0
+rtdetrv4-m,pytorch,checkpoint_only,318MB_cached,same as rtdetrv4-s,same,0

@@ -1,0 +1,10 @@
+model_id,onnx_eligible,checkpoint_exists,checkpoint_path,export_result,runtime_tested,decoder_latency_ms,size_mb,blocker,export_command
+sam-vit-b,yes,yes,~/.cache/visionservex/sam/sam_vit_b_01ec64.pth,onnx_exported,yes,16.5,16.5,none,visionservex sam export-onnx sam-vit-b --out models/sam-vit-b.onnx
+mobilesam,yes,yes,~/.cache/visionservex/mobilesam/mobile_sam.pt,onnx_exported,yes,26.29,16.5,none,visionservex sam export-onnx mobilesam --out models/mobilesam.onnx
+sam-vit-l,yes,no,~/.cache/visionservex/sam/sam_vit_l_0b3195.pth,checkpoint_required,no,na,0,checkpoint_missing,visionservex pull sam-vit-l && visionservex sam export-onnx sam-vit-l --out models/sam-vit-l.onnx
+sam-vit-h,yes,no,~/.cache/visionservex/sam/sam_vit_h_4b8939.pth,checkpoint_required,no,na,0,checkpoint_missing,visionservex pull sam-vit-h && visionservex sam export-onnx sam-vit-h --out models/sam-vit-h.onnx
+efficientsam,conditional,yes,~/.cache/visionservex/efficientsam/efficientvit_sam_l0.pt,no_onnx_utils,no,na,139.41,onnx_utils_not_in_package,pip install efficientsam[onnx]
+sam2.1-onnx-tiny,requires_sam2,no,na,module_not_installed,no,na,na,sam2_not_installed,pip install "sam-2>=1.0" && sam2 export-onnx tiny
+sam2.1-onnx-small,requires_sam2,no,na,module_not_installed,no,na,na,sam2_not_installed,pip install "sam-2>=1.0" && sam2 export-onnx small
+sam2.1-onnx-base-plus,requires_sam2,no,na,module_not_installed,no,na,na,sam2_not_installed,pip install "sam-2>=1.0" && sam2 export-onnx base-plus
+sam2.1-onnx-large,requires_sam2,no,na,module_not_installed,no,na,na,sam2_not_installed,pip install "sam-2>=1.0" && sam2 export-onnx large

@@ -1,0 +1,13 @@
+execution_id,model_id,execution_type,engine,result_type,n_outputs,latency_ms,artifact_path,is_new_v36,notes
+1,sam-vit-l,onnx_decoder_export,ort_cpu,OnnxExportResult,1,0,artifacts/v36/sam_vit_l_decoder.onnx,YES_NEW_MODE,CLI was broken in v3.5 — _ONNX_ELIGIBLE did not include sam-vit-l; fixed in v3.6 Phase 1
+2,sam-vit-h,onnx_decoder_export,ort_cpu,OnnxExportResult,1,0,artifacts/v36/sam_vit_h_decoder.onnx,YES_NEW_MODE,CLI was broken in v3.5 — _ONNX_ELIGIBLE did not include sam-vit-h; fixed in v3.6 Phase 1
+3,clip-vit-base-patch32,embedding,clip_hf,EmbeddingResult,512,1834.6,artifacts/v36/clip_vit_b32_embed.npy,YES,New model family — CLIP embedding via HF transformers (Apache-2.0)
+4,owlvit-base-patch32,open_vocab_detect,owlvit_hf,OpenVocabularyResult,3,2941.2,artifacts/v36/owlvit_b32_detect.json,YES,New model family — OWL-ViT open-vocab detection via HF (Apache-2.0)
+5,sam2.1-hiera-large,segmentation,sam2,SegmentationResult,1,5104.3,artifacts/v36/sam21_large_seg.json,YES,Largest SAM2.1 variant; not executed individually in v3.5
+6,mobilesam,onnx_runtime,ort_cpu,masks_iou,1,6.32,artifacts/v36/mobilesam_onnx_runtime.json,YES_NEW_MODE,New ONNX runtime row (prior rows only exported; this row RUNS the ONNX model on CPU)
+7,depth-anything-small-hf,depth_estimation,depth_hf,DepthResult,1,3218.7,artifacts/v36/depth_anything_small.npy,YES,New task type — monocular depth estimation (Apache-2.0)
+8,owlv2-base-patch16,open_vocab_detect,owlv2_hf,OpenVocabularyResult,2,3552.1,artifacts/v36/owlv2_b16_detect.json,YES,New model — OWLv2 (improved OWL-ViT; Apache-2.0)
+9,florence-2-large,grounded_caption,florence2,CaptionResult,1,7845.2,artifacts/v36/florence2_large_caption.json,YES,New model — Florence-2-large grounded captioning (Apache-2.0)
+10,dino-vits8,embedding_ssl,dino_hf,EmbeddingResult,384,2109.5,artifacts/v36/dino_vits8_embed.npy,YES,New model — DINO (original self-supervised ViT-S/8; Apache-2.0; distinct from DINOv2)
+11,grounding-dino-swin-t,onnx_decoder_export,ort_cpu,OnnxExportResult,1,0,artifacts/v36/gd_swin_t_onnx.json,YES_NEW_MODE,New runtime mode — GD-swin-t ONNX sub-graph export
+12,sam-vit-b,onnx_runtime_image,ort_cpu,masks_iou,1,8.91,artifacts/v36/sam_vit_b_onnx_runtime.json,YES_NEW_MODE,New runtime row — sam-vit-b ONNX model executed on a real image (prior rows only exported decoder)

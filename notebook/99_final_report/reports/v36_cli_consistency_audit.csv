@@ -1,0 +1,6 @@
+command_path,inconsistency,status_v36,fix_applied,notes
+sam_commands._ONNX_ELIGIBLE,Missing sam-vit-l and sam-vit-h vs onnx_export._SAM_ONNX_ELIGIBLE,FIXED,YES,Phase 1 fix — added sam-vit-l/sam-vit-h to _ONNX_ELIGIBLE
+sam_commands._CHECKPOINT_PATHS,Missing sam-vit-l and sam-vit-h paths,FIXED,YES,Phase 1 fix — added correct checkpoint paths for both variants
+locateanything_commands,Not present,ADDED,YES,Phase 1/LocateAnything addendum — new CLI module created
+main.py locateanything import,Not present,ADDED,YES,Registered locateanything_commands.app as locate-anything subcommand
+vsx_commands.pipeline_app,pipeline run command,OK,N/A,pipeline run was already wired via _PipelineHandle.run()

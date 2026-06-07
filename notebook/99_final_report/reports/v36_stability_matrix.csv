@@ -1,0 +1,47 @@
+model_id,family,final_state,license,default_safe,commercial_safe,install_extra,engine,has_evidence_artifact,has_test,has_tutorial,has_cli,has_python_api,has_explain,v35_row,v36_row,notes
+sam-vit-base,sam,benchmark_passed,Apache-2.0,true,true,visionservex[promptable],sam,true,true,true,true,true,true,YES,YES,Canonical SAM1 base — fully wired
+sam-vit-large,sam,benchmark_passed,Apache-2.0,true,true,visionservex[promptable],sam,true,true,true,true,true,true,YES,YES,Canonical SAM1 large — CLI ONNX fixed in v3.6
+sam-vit-huge,sam,benchmark_passed,Apache-2.0,true,true,visionservex[promptable],sam,true,true,true,true,true,true,YES,YES,Canonical SAM1 huge — CLI ONNX fixed in v3.6
+sam2-hiera-tiny,sam2,benchmark_passed,Apache-2.0,true,true,visionservex[sam2],sam2,true,true,true,true,true,true,YES,YES,SAM2 smallest variant
+sam2-hiera-small,sam2,benchmark_passed,Apache-2.0,true,true,visionservex[sam2],sam2,true,true,true,true,true,true,YES,YES,SAM2 small variant
+sam2-hiera-base-plus,sam2,benchmark_passed,Apache-2.0,true,true,visionservex[sam2],sam2,true,true,true,true,true,true,YES,YES,SAM2 base-plus variant
+sam2-hiera-large,sam2,benchmark_passed,Apache-2.0,true,true,visionservex[sam2],sam2,true,true,true,true,true,true,YES,YES,SAM2 large variant
+sam2.1-hiera-tiny,sam2.1,benchmark_passed,Apache-2.0,true,true,visionservex[sam2],sam2,true,true,true,true,true,true,YES,YES,SAM2.1 smallest variant
+sam2.1-hiera-small,sam2.1,benchmark_passed,Apache-2.0,true,true,visionservex[sam2],sam2,true,true,true,true,true,true,YES,YES,SAM2.1 small + video tracking
+sam2.1-hiera-base-plus,sam2.1,benchmark_passed,Apache-2.0,true,true,visionservex[sam2],sam2,true,true,true,true,true,true,YES,YES,SAM2.1 base-plus variant
+sam2.1-hiera-large,sam2.1,benchmark_passed,Apache-2.0,true,true,visionservex[sam2],sam2,true,true,true,true,true,true,NO,YES,Largest SAM2.1 — new v3.6 execution
+mobilesam,sam,benchmark_passed,Apache-2.0,true,true,visionservex[promptable],mobile_sam,true,true,true,true,true,true,YES,YES,MobileSAM — ONNX export + runtime
+efficientsam,sam,benchmark_passed,Apache-2.0,true,true,visionservex[promptable],efficient_sam,true,true,true,true,true,true,YES,YES,EfficientSAM ONNX export (v3.5)
+medsam,sam,benchmark_passed,Apache-2.0,true,true,visionservex[medical],sam_hf,true,true,true,true,true,true,YES,YES,MedSAM via HF (wanglab/medsam)
+hq-sam,sam,legal_review_required,Apache-2.0-code/HQSeg-44K-data,false,false,visionservex[promptable],sam_hq,false,true,true,false,true,true,NO,NO,Legal review — HQSeg-44K training data
+sam3-base,sam,auth_required,SAM-License-Meta-gated,false,false,visionservex[sam2],sam_hf,false,true,true,false,true,true,NO,NO,Gated HF access required
+edge-sam,sam,excluded_restricted,S-Lab-License-NON-COMMERCIAL,false,false,none,none,false,true,false,false,true,true,NO,NO,Excluded — non-commercial license
+medsam2,sam,sidecar_required,Apache-2.0,true,true,visionservex[medical],sidecar,false,true,true,false,true,true,NO,NO,Requires MedSAM2 sidecar install
+dinov2-small,dino,benchmark_passed,Apache-2.0,true,true,visionservex[foundation],dinov2,true,true,true,true,true,true,YES,YES,DINOv2 small embedding (dim=384)
+dinov2-base,dino,benchmark_passed,Apache-2.0,true,true,visionservex[foundation],dinov2,true,true,true,true,true,true,YES,YES,DINOv2 base embedding (dim=768)
+dinov2-large,dino,benchmark_passed,Apache-2.0,true,true,visionservex[foundation],dinov2,true,true,true,true,true,true,YES,YES,DINOv2 large embedding (dim=1024) — new v3.5
+dinov2-giant,dino,benchmark_passed,Apache-2.0,true,true,visionservex[foundation],dinov2,true,true,true,true,true,true,YES,YES,DINOv2 giant embedding (dim=1536) — new v3.5
+grounding-dino-swin-t,dino,benchmark_passed,Apache-2.0,true,true,visionservex[grounding],grounding_dino,true,true,true,true,true,true,YES,YES,GD-swin-t open-vocab detection
+grounding-dino-swin-b,dino,benchmark_passed,Apache-2.0,true,true,visionservex[grounding],grounding_dino,true,true,true,true,true,true,YES,YES,GD-swin-b open-vocab detection
+grounding-dino-tiny,dino,benchmark_passed,Apache-2.0,true,true,visionservex[grounding],grounding_dino,true,true,true,true,true,true,YES,YES,GD-tiny (v3.5 new variant)
+grounding-dino-original-swin-t,dino,benchmark_passed,Apache-2.0,true,true,visionservex[grounding],grounding_dino,true,true,true,true,true,true,YES,YES,GD-original-swin-t alias
+grounding-dino-original-swin-b,dino,benchmark_passed,Apache-2.0,true,true,visionservex[grounding],grounding_dino,true,true,true,true,true,true,YES,YES,GD-original-swin-b alias
+grounding-dino-1.5,dino,auth_required,API/gated,false,false,none,api,false,true,false,false,true,true,NO,NO,Token-gated
+grounding-dino-1.5-pro,dino,external_api_only,proprietary,false,false,none,api,false,true,false,false,true,true,NO,NO,External API only
+dino-x-api,dino,external_api_only,proprietary,false,false,none,api,false,true,false,false,true,true,NO,NO,External API only
+clip-vit-base-patch32,clip,benchmark_passed,Apache-2.0,true,true,visionservex[foundation],clip_hf,true,true,true,true,true,true,NO,YES,New v3.6 — CLIP embedding
+owlvit-base-patch32,owlvit,benchmark_passed,Apache-2.0,true,true,visionservex[open-vocab],owlvit_hf,true,true,true,true,true,true,NO,YES,New v3.6 — OWL-ViT open-vocab
+owlv2-base-patch16,owlv2,benchmark_passed,Apache-2.0,true,true,visionservex[open-vocab],owlv2_hf,true,true,true,true,true,true,NO,YES,New v3.6 — OWLv2 open-vocab
+depth-anything-small-hf,depth,benchmark_passed,Apache-2.0,true,true,visionservex[hf],depth_hf,true,true,true,true,true,true,NO,YES,New v3.6 — DepthAnything depth estimation
+florence-2-large,vlm,benchmark_passed,Apache-2.0,true,true,visionservex[foundation],florence2,true,true,true,true,true,true,NO,YES,New v3.6 — Florence-2-large grounded captioning
+dino-vits8,dino,benchmark_passed,Apache-2.0,true,true,visionservex[foundation],dino_hf,true,true,true,true,true,true,NO,YES,New v3.6 — DINO self-supervised ViT-S/8
+locate-anything-3b,locate_anything,legal_review_required,NVIDIA-non-commercial,false,false,visionservex[locateanything],sidecar,false,true,true,true,true,true,NO,YES,NVIDIA LocateAnything-3B — non-commercial BYOT
+locate-anything-3b-v2,locate_anything,legal_review_required,NVIDIA-non-commercial,false,false,visionservex[locateanything],sidecar,false,true,true,true,true,true,NO,YES,NVIDIA LocateAnything-3B-v2 — non-commercial BYOT
+locate-anything-3b-grounded,locate_anything,legal_review_required,NVIDIA-non-commercial,false,false,visionservex[locateanything],sidecar,false,true,true,true,true,true,NO,YES,NVIDIA LocateAnything-3B-grounded — non-commercial BYOT
+locate-anything-3b-coco,locate_anything,legal_review_required,NVIDIA-non-commercial,false,false,visionservex[locateanything],sidecar,false,true,true,true,true,true,NO,YES,NVIDIA LocateAnything-3B-coco — non-commercial BYOT
+locate-anything-3b-lvis,locate_anything,legal_review_required,NVIDIA-non-commercial,false,false,visionservex[locateanything],sidecar,false,true,true,true,true,true,NO,YES,NVIDIA LocateAnything-3B-lvis — non-commercial BYOT
+locate-anything-3b-objects365,locate_anything,legal_review_required,NVIDIA-non-commercial,false,false,visionservex[locateanything],sidecar,false,true,true,true,true,true,NO,YES,NVIDIA LocateAnything-3B-objects365 — non-commercial BYOT
+locate-anything-3b-open-vocab,locate_anything,legal_review_required,NVIDIA-non-commercial,false,false,visionservex[locateanything],sidecar,false,true,true,true,true,true,NO,YES,NVIDIA LocateAnything-3B-open-vocab — non-commercial BYOT
+locate-anything-3b-caption,locate_anything,legal_review_required,NVIDIA-non-commercial,false,false,visionservex[locateanything],sidecar,false,true,true,true,true,true,NO,YES,NVIDIA LocateAnything-3B-caption — non-commercial BYOT
+locate-anything-3b-video,locate_anything,legal_review_required,NVIDIA-non-commercial,false,false,visionservex[locateanything],sidecar,false,true,true,true,true,true,NO,YES,NVIDIA LocateAnything-3B-video — non-commercial BYOT
+locate-anything-3b-ft,locate_anything,legal_review_required,NVIDIA-non-commercial,false,false,visionservex[locateanything],sidecar,false,true,true,true,true,true,NO,YES,NVIDIA LocateAnything-3B-ft — non-commercial BYOT

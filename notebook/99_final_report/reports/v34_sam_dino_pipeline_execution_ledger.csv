@@ -1,0 +1,12 @@
+pipeline_id,detector_state,segmenter_state,pipeline_state,execution_attempted,result,n_detections,n_segments,latency_ms,artifact_path,blocker
+grounding-dino-swin-t+sam-vit-base,detection_ok,onnx_exported,pipeline_ok,yes,pipeline_ok,2,1,6472.27,/home/arash/PycharmProjects/VisionServeX/notebook/99_final_report/artifacts/v34/sam_dino_pipeline.json,none
+grounding-dino-swin-b+sam-vit-base,benchmark_passed,benchmark_passed,pipeline_demo_ready,yes,pipeline_demo_ready,na,na,na,na,none
+grounding-dino-swin-t+sam2.1-hiera-small,detection_ok,benchmark_passed,pipeline_demo_ready,yes,pipeline_demo_ready,na,na,na,na,none
+grounding-dino-swin-b+sam2.1-hiera-large,benchmark_passed,benchmark_passed,pipeline_demo_ready,yes,pipeline_demo_ready,na,na,na,na,none
+grounding-dino-original-swin-t+sam2-hiera-small,detection_ok,sam2_not_installed,blocked_segmenter,yes,blocked_sam2_not_installed,na,na,na,na,sam2_not_installed
+grounding-dino-original-swin-b+sam2-hiera-large,benchmark_passed,sam2_not_installed,blocked_segmenter,yes,blocked_sam2_not_installed,na,na,na,na,sam2_not_installed
+grounding-dino-1.5+sam3-base,auth_required,auth_required,auth_required,yes,auth_required,na,na,na,na,both_components_gated
+grounding-dino-1.6+sam3-base,auth_required,auth_required,auth_required,yes,auth_required,na,na,na,na,both_components_gated
+dino-x-api+sam3-base,external_api_only,auth_required,auth_required,yes,auth_required,na,na,na,na,both_components_gated
+dinov3-vitb16+sam2.1-hiera-small,legal_review_required,benchmark_passed,blocked_detector,yes,blocked_detector,na,na,na,na,dinov3_license_gated
+dinov3-vitb16+sam3-base,legal_review_required,auth_required,auth_required,yes,auth_required,na,na,na,na,both_components_blocked

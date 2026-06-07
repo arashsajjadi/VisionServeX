@@ -1,0 +1,12 @@
+{
+  "version": "3.7.0",
+  "file": "/home/arash/.cache/vsx_freshvenv/lib/python3.13/site-packages/visionservex/__init__.py",
+  "from_site_packages": true,
+  "interactive_ritm": "checkpoint_required",
+  "rfdetr_seg_small": "benchmark_passed",
+  "locateanything": "excluded_restricted",
+  "dino_giant": "benchmark_passed",
+  "sam_h": "benchmark_passed",
+  "cli_version_rc": 0,
+  "cli_version_out": "VisionServeX 3.7.0"
+}

@@ -1,0 +1,31 @@
+model_id,priority,final_state,blocker_category,blocker_detail,exact_next_command
+sam-vit-l-onnx,P0,checkpoint_required,checkpoint_missing,sam_vit_l_0b3195.pth not cached — 1.2GB download required,visionservex pull sam-vit-l && visionservex sam export-onnx sam-vit-l --out models/sam-vit-l.onnx
+sam-vit-h-onnx,P0,checkpoint_required,checkpoint_missing,sam_vit_h_4b8939.pth not cached — 2.4GB download required,visionservex pull sam-vit-h && visionservex sam export-onnx sam-vit-h --out models/sam-vit-h.onnx
+efficientsam-onnx,P0,no_onnx_utils,package_missing_onnx_module,efficientsam package lacks SamOnnxModel — onnx export path not implemented in installed version,pip install efficientsam[onnx]
+sam2.1-onnx-tiny,P0,module_not_installed,sam2_not_installed,sam2 python module absent — No module named 'sam2',pip install "sam-2>=1.0"
+sam2.1-onnx-small,P0,module_not_installed,sam2_not_installed,sam2 python module absent — No module named 'sam2',pip install "sam-2>=1.0"
+sam2.1-onnx-base-plus,P0,module_not_installed,sam2_not_installed,sam2 python module absent — No module named 'sam2',pip install "sam-2>=1.0"
+sam2.1-onnx-large,P0,module_not_installed,sam2_not_installed,sam2 python module absent — No module named 'sam2',pip install "sam-2>=1.0"
+sam3-base,P2,auth_required,hf_gated,facebook/sam3 requires HF gated access — token not set in env,visit https://huggingface.co/facebook/sam3 accept terms && export HF_TOKEN=hf_...
+sam3-image,P2,not_released,not_published,no separate checkpoint released as of 2026-06-07,watch github.com/facebookresearch/sam3 releases
+sam3-video,P2,not_released,not_published,no separate checkpoint released as of 2026-06-07,watch github.com/facebookresearch/sam3 releases
+sam3-text-prompt,P2,not_released,not_published,no separate checkpoint released as of 2026-06-07,watch github.com/facebookresearch/sam3 releases
+sam3-visual-prompt,P2,not_released,not_published,no separate checkpoint released as of 2026-06-07,watch github.com/facebookresearch/sam3 releases
+sam3-exemplar-prompt,P2,not_released,not_published,no separate checkpoint released as of 2026-06-07,watch github.com/facebookresearch/sam3 releases
+sam3-open-vocabulary,P2,not_released,not_published,no separate checkpoint released as of 2026-06-07,watch github.com/facebookresearch/sam3 releases
+sam3-tracking,P2,not_released,not_published,no separate checkpoint released as of 2026-06-07,watch github.com/facebookresearch/sam3 releases
+dinov3-vitb16,P3,auth_required,hf_gated_custom_license,custom DINOv3 license gated on HF — token not set in env,export HF_TOKEN=<your_token> && visionservex dino status dinov3-vitb16
+dinov3-vits16,P3,legal_review_required,custom_license_unknown,DINOv3 license provenance not Apache-2.0 — legal review required before distribution,visionservex legal review dinov3-vits16
+dinov3-vitl16,P3,legal_review_required,custom_license_unknown,DINOv3 license provenance not Apache-2.0,visionservex legal review dinov3-vitl16
+dinov3-vit7b16,P3,legal_review_required,custom_license_unknown,DINOv3 license provenance not Apache-2.0,visionservex legal review dinov3-vit7b16
+dinov3-convnext-tiny,P3,legal_review_required,custom_license_unknown,DINOv3 custom license provenance unknown,visionservex legal review dinov3-convnext-tiny
+dinov3-convnext-small,P3,legal_review_required,custom_license_unknown,DINOv3 custom license provenance unknown,visionservex legal review dinov3-convnext-small
+dinov3-convnext-base,P3,legal_review_required,custom_license_unknown,DINOv3 custom license provenance unknown,visionservex legal review dinov3-convnext-base
+dinov3-convnext-large,P3,legal_review_required,custom_license_unknown,DINOv3 custom license provenance unknown,visionservex legal review dinov3-convnext-large
+grounding-dino-1.5,P4,auth_required,api_key_missing,DEEPDATASPACE_API_KEY not set in environment,export DEEPDATASPACE_API_KEY=<your_key> && visionservex dino api grounding-dino-1.5 image.jpg --text cat
+grounding-dino-1.6,P4,auth_required,api_key_missing,DEEPDATASPACE_API_KEY not set in environment,export DEEPDATASPACE_API_KEY=<your_key> && visionservex dino api grounding-dino-1.6 image.jpg --text cat
+dino-x-detection,P5,not_released,no_downloadable_weights,DINO-X sub-task weights not released publicly as of 2026-06-07,watch IDEACVR/DINO-X releases
+dino-x-segmentation,P5,not_released,no_downloadable_weights,DINO-X sub-task weights not released publicly as of 2026-06-07,watch IDEACVR/DINO-X releases
+dino-x-phrase-grounding,P5,not_released,no_downloadable_weights,DINO-X sub-task weights not released publicly as of 2026-06-07,watch IDEACVR/DINO-X releases
+dino-x-counting,P5,not_released,no_downloadable_weights,DINO-X sub-task weights not released publicly as of 2026-06-07,watch IDEACVR/DINO-X releases
+dino-x-region-captioning,P5,not_released,no_downloadable_weights,DINO-X sub-task weights not released publicly as of 2026-06-07,watch IDEACVR/DINO-X releases

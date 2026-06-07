@@ -40,8 +40,8 @@ def test_version_flag_returns_clean() -> None:
     res = _run(["--version"])
     assert res.returncode == 0, (res.stdout, res.stderr)
     assert "VisionServeX" in res.stdout
-    # Either v2.18.x or v2.19.x at the time this test runs.
-    assert "2." in res.stdout
+    import re
+    assert re.search(r"\d+\.\d+", res.stdout), f"No version number in: {res.stdout!r}"
 
 
 def test_short_version_flag() -> None:

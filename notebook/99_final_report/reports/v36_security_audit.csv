@@ -1,0 +1,11 @@
+check,result,details
+binary_artifacts_in_git,PASS,git ls-files | grep -E '\.(onnx|pt|pth|ckpt|safetensors|engine|trt|bin)$|^artifacts/' returns empty
+no_token_logging,PASS,_redact() applied in all CLI commands; HF_TOKEN never logged in full
+gated_models_excluded_from_default_safe,PASS,sam3-base auth_required; edge-sam excluded_restricted; grounding-dino-1.5 auth_required
+noncommercial_excluded_from_default_safe,PASS,locate-anything-* default_safe=false; commercial_safe=false
+no_gpl_agpl_in_core,PASS,All benchmark_passed default_safe=true models are Apache-2.0 or MIT
+byot_user_local_cache_only,PASS,locate_anything_runtime.py uses ~/.cache/visionservex/locate_anything/
+no_mirrored_weights,PASS,VisionServeX does not ship or mirror any model weights; all BYOT
+noncommercial_warning_on_every_command,PASS,_WARNING printed to stderr in cmd_run; also printed in cmd_list; _LocateAnythingHandle.locate() prints to stderr
+accept_noncommercial_flag_required,PASS,locateanything_commands.cmd_run() returns expected_blocker if not accept_noncommercial
+token_redaction_format,PASS,first 3 chars + *** + last 2 chars via _redact()

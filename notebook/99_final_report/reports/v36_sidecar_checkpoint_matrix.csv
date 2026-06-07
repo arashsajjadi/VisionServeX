@@ -1,0 +1,5 @@
+model_id,sidecar_type,install_command,state,evidence_artifact,test_file,notes
+medsam2,sidecar_required,pip install medsam2,sidecar_required,artifacts/v35/medsam_sidecar_attempt.json,test_v36_sidecar_checkpoint.py,MedSAM2 sidecar — weights exist via wanglab/MedSAM2 (missing preprocessor_config.json blocks HF load)
+maskdino-r50-coco,sidecar_required,pip install detectron2,sidecar_required,artifacts/v35/maskdino_sidecar_attempt.json,test_v36_sidecar_checkpoint.py,MaskDINO requires Detectron2 sidecar
+rtdetrv4-s,checkpoint_only,visionservex pull rtdetrv4-s,checkpoint_only,artifacts/v35/rtdetrv4_attempt.json,test_v36_sidecar_checkpoint.py,RT-DETRv4 checkpoint workflow
+locate-anything-3b,sidecar_required,git clone https://github.com/NVlabs/Eagle.git eagle && cd eagle/Embodied && pip install -e .,legal_review_required,none,test_v36_locateanything_sidecar.py,NVlabs Eagle sidecar — NVIDIA non-commercial license

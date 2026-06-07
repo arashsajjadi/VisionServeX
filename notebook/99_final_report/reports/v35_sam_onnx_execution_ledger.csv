@@ -1,0 +1,7 @@
+model_id,onnx_eligible,checkpoint_path,export_result,runtime_tested,decoder_latency_ms,size_mb,iou_pred,mask_shape,blocker,export_command
+efficientsam-l0,YES,~/.cache/visionservex/efficientsam/efficientvit_sam_l0.pt,ok,YES,11.07,16.5,0.5752,"[1,1,512,512]",none,python efficientsam_export.py --img_size 512
+sam-vit-b,YES,~/.cache/visionservex/sam/sam_vit_b_01ec64.pth,ok,YES,16.5,16.5,n/a,"[1,1,...]",none,visionservex sam export-onnx sam-vit-b
+mobilesam,YES,~/.cache/visionservex/sam/mobile_sam.pt,ok,YES,26.29,16.5,n/a,"[1,1,...]",none,visionservex sam export-onnx mobilesam
+sam-vit-l,YES,~/.cache/visionservex/sam/sam_vit_l_0b3195.pth,checkpoint_missing,NO,0,0,n/a,n/a,checkpoint_required,visionservex pull sam-vit-l && visionservex sam export-onnx sam-vit-l
+sam-vit-h,YES,~/.cache/visionservex/sam/sam_vit_h_4b8939.pth,checkpoint_missing,NO,0,0,n/a,n/a,checkpoint_required,visionservex pull sam-vit-h && visionservex sam export-onnx sam-vit-h
+sam2.1-onnx,NO,n/a,not_applicable,NO,0,0,n/a,n/a,sam2_onnx_export_not_supported_in_transformers,pip install sam-2>=1.0 for native ONNX

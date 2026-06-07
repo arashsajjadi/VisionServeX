@@ -1,0 +1,6 @@
+model_id,onnx_export_eligible,onnx_runtime_eligible,export_fixed_v36,export_latency_ms,runtime_latency_ms,artifact_path,engine,notes
+mobilesam,true,true,false,0,6.32,artifacts/v36/mobilesam_onnx_runtime.json,ort_cpu,Export OK since v3.2; runtime execution new in v3.6
+sam-vit-b,true,true,false,0,8.91,artifacts/v36/sam_vit_b_onnx_runtime.json,ort_cpu,Export OK since v3.2; runtime execution new in v3.6
+sam-vit-l,true,true,true,0,0,artifacts/v36/sam_vit_l_decoder.onnx,ort_cpu,CLI was broken (missing from _ONNX_ELIGIBLE) — FIXED in v3.6 Phase 1
+sam-vit-h,true,true,true,0,0,artifacts/v36/sam_vit_h_decoder.onnx,ort_cpu,CLI was broken (missing from _ONNX_ELIGIBLE) — FIXED in v3.6 Phase 1
+efficientsam-l0,true,true,false,0,11.07,artifacts/v35/efficientsam_l0_decoder.onnx,ort_cpu,EfficientSAM ONNX export from v3.5 (img_size=512 patch applied)

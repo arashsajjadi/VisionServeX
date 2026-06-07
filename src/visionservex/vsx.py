@@ -41,6 +41,31 @@ _DINO_FACTS = {
 }
 _ALIAS = {"sam-vit-b": "sam-vit-base", "sam-vit-l": "sam-vit-large", "sam-vit-h": "sam-vit-huge"}
 
+# LocateAnything-3B (NVIDIA License — non-commercial only, BYOT, --accept-noncommercial required).
+# VisionServeX does NOT ship or mirror the weights.
+_LOCATEANYTHING_FACTS: dict[str, str] = {
+    "_model_ids": (
+        "locate-anything-3b locate-anything-3b-v2 locate-anything-3b-grounded "
+        "locate-anything-3b-coco locate-anything-3b-lvis locate-anything-3b-objects365 "
+        "locate-anything-3b-open-vocab locate-anything-3b-caption "
+        "locate-anything-3b-video locate-anything-3b-ft"
+    ),
+    "_license": "NVIDIA License (non-commercial only)",
+    "_default_safe": "false",
+    "_commercial_safe": "false",
+    "_sidecar_install": (
+        "git clone https://github.com/NVlabs/Eagle.git eagle && "
+        "cd eagle/Embodied && pip install -e ."
+    ),
+    "_warning": (
+        "WARNING: LocateAnything-3B pretrained weights are released under the NVIDIA License "
+        "for non-commercial use only. Do not use this model for commercial products, paid SaaS, "
+        "client work, production annotation, or redistribution unless you have written commercial "
+        "permission from NVIDIA. VisionServeX does not ship or mirror the weights. "
+        "Use is BYOT/user-local-cache only."
+    ),
+}
+
 
 def _in(mid: str, csv: str) -> bool:
     return mid in csv.split()
@@ -145,14 +170,24 @@ class _SAMHandle(_Base):
         with VisionModel(self.model_id) as model:
             return model.predict(_load_image(image), box=box, points=points, **kw)
 
-    def track(self, frames, box=None, **kw):
-        """SAM2 video object tracking (transformers backend). ``frames`` = list of PIL frames."""
+    def track(self, frames, box=None, max_frames: int = 8, **kw):
+        """SAM2 video object tracking (transformers backend).
+
+        ``frames`` may be a list of PIL frames OR a path to a video file
+        (.mp4/.avi/...), which is decoded to frames automatically.
+        """
         if not (self.model_id.startswith("sam2") or "video" in self.model_id):
             raise VSXError(
                 f"{self.model_id}: video tracking is a SAM2 capability",
                 state="not_applicable",
                 next_command="use a sam2/sam2.1 model: VSX.sam('sam2.1-hiera-small').track(frames, box=...)",
             )
+        if isinstance(frames, str):
+            import imageio.v3 as iio
+            from PIL import Image
+
+            arr = iio.imread(frames, plugin="pyav")
+            frames = [Image.fromarray(f).convert("RGB") for f in arr[:max_frames]]
         from visionservex.sam2_runtime import track_video
 
         return track_video(self.model_id, frames, box=box, **kw)
@@ -351,16 +386,126 @@ class _Cv2Handle:
         return run_tool(self.tool_id, np.asarray(img)[..., ::-1], **params)  # PIL RGB -> BGR
 
 
+class _LocateAnythingHandle(_Base):
+    """Handle for NVIDIA LocateAnything-3B family (non-commercial, BYOT only).
+
+    Every execution path prints the NVIDIA non-commercial warning.
+    Requires ``--accept-noncommercial`` at the CLI level; ``.locate()`` requires
+    ``accept_noncommercial=True`` to be passed explicitly.
+    """
+
+    family = "locate_anything"
+
+    def explain(self) -> dict[str, Any]:
+        m = self.model_id
+        # v3.7: the model's OWN native license is NVIDIA non-commercial (not an
+        # inherited dependency) -> excluded_restricted, same class as EdgeSAM.
+        # BYOT sidecar path remains documented but it never enters commercial-safe core.
+        state = "excluded_restricted"
+        return {
+            "model_id": m,
+            "family": "locate_anything",
+            "task": "open_vocab_detect_and_ground",
+            "state": state,
+            "license": _LOCATEANYTHING_FACTS["_license"],
+            "default_safe": False,
+            "commercial_safe": False,
+            "install_extra": "visionservex[locateanything]",
+            "auth_required": False,
+            "byot": True,
+            "warning": _LOCATEANYTHING_FACTS["_warning"],
+            "sidecar_install": _LOCATEANYTHING_FACTS["_sidecar_install"],
+            "limitations": (
+                "Non-commercial NVIDIA License. BYOT/user-local-cache only. "
+                "Requires --accept-noncommercial flag. Not included in default-safe core."
+            ),
+            "next_command": (
+                f"visionservex locate-anything run {m} image.jpg "
+                f"--text 'cat' --accept-noncommercial --out result.json"
+            ),
+            "tutorial": f"notebook/tutorials/locate_anything/{m}.ipynb",
+        }
+
+    def locate(self, image, text: str, *, accept_noncommercial: bool = False, **kw):
+        """Run LocateAnything-3B grounded detection.
+
+        ``accept_noncommercial=True`` is required; omitting it raises VSXError to
+        ensure the caller has acknowledged the NVIDIA non-commercial license.
+        """
+        import sys
+
+        print(_LOCATEANYTHING_FACTS["_warning"], file=sys.stderr)
+        if not accept_noncommercial:
+            raise VSXError(
+                "LocateAnything-3B requires accept_noncommercial=True — "
+                "acknowledge the NVIDIA non-commercial license before running.",
+                state="excluded_restricted",
+                next_command=(
+                    f"VSX.locateanything('{self.model_id}').locate("
+                    "image, text='...', accept_noncommercial=True)"
+                ),
+            )
+        from visionservex.locate_anything_runtime import run_locate_anything
+
+        return run_locate_anything(self.model_id, _load_image(image), text=text, **kw)
+
+
+class _InteractiveHandle(_Base):
+    """Click-based interactive segmentation (ritm/clickseg/simpleclick/focalclick + classic).
+
+    ``VSX.interactive("ritm")(image, positive_points=[(x,y)], negative_points=[(x,y)])``.
+    Named deep models are BYOT (checkpoint) with honest license states; the classic
+    refiners (grabcut/watershed/...) run immediately, commercial-safe, CPU, weight-free.
+    """
+
+    family = "interactive"
+
+    def explain(self) -> dict[str, Any]:
+        from visionservex.interactive_runtime import explain as _ex
+        return _ex(self.model_id)
+
+    def __call__(self, image, positive_points=None, negative_points=None, **kw):
+        from visionservex.interactive_runtime import run_interactive
+        res = run_interactive(self.model_id, _load_image(image),
+                              positive_points=positive_points,
+                              negative_points=negative_points, **kw)
+        if isinstance(res, dict) and res.get("status") == "blocked":
+            raise VSXError(res["reason"], state=res["state"], next_command=res["next_command"])
+        return res
+
+    # alias matching the table's spec name
+    def run(self, image, positive_points=None, negative_points=None, **kw):
+        return self.__call__(image, positive_points, negative_points, **kw)
+
+
+class _RFDetrSegHandle(_Base):
+    """RF-DETR instance segmentation (Apache-2.0). ``VSX.rfdetr_seg("rfdetr-seg-small").segment_instances(img)``."""
+
+    family = "rf-detr"
+
+    def explain(self) -> dict[str, Any]:
+        from visionservex.rfdetr_seg_runtime import explain as _ex
+        return _ex(self.model_id)
+
+    def segment_instances(self, image, threshold: float = 0.3, **kw):
+        from visionservex.rfdetr_seg_runtime import segment_instances
+        return segment_instances(self.model_id, _load_image(image), threshold=threshold, **kw)
+
+
 class VSX:
     """Top-level facade. ``VSX(model_id)`` for prediction; classmethods for families."""
 
-    def __init__(self, model_id: str):
-        from visionservex.core.model import VisionModel
-
+    def __init__(self, model_id: str | None = None):
         self.model_id = model_id
-        self._model = VisionModel(model_id)
+        self._model = None
+        if model_id is not None:
+            from visionservex.core.model import VisionModel
+
+            self._model = VisionModel(model_id)
 
     def __call__(self, image, **kw):
+        if self._model is None:
+            raise ValueError("VSX was constructed without a model_id; pass one: VSX('dfine-x')")
         return self._model.predict(_load_image(image), **kw)
 
     @staticmethod
@@ -380,7 +525,42 @@ class VSX:
         return _Cv2Handle(tool_id)
 
     @staticmethod
-    def interactive(model_id: str):
-        from visionservex.smart_annotation import refine  # classic interactive refiners
+    def locateanything(model_id: str) -> _LocateAnythingHandle:
+        """Return a handle for NVIDIA LocateAnything-3B (non-commercial, BYOT).
 
-        return refine
+        Prints the NVIDIA non-commercial license warning on every call to
+        ``.locate()``. Requires ``accept_noncommercial=True`` at call time.
+        """
+        return _LocateAnythingHandle(model_id)
+
+    @staticmethod
+    def interactive(model_id: str) -> _InteractiveHandle:
+        """Click-based interactive segmentation handle.
+
+        ``VSX.interactive("ritm")(image, positive_points=[(x,y)], negative_points=[(x,y)])``.
+        Named deep models (ritm/clickseg/simpleclick/focalclick) carry honest BYOT/legal
+        states; classic refiners (grabcut/watershed/...) run immediately and commercial-safe.
+        """
+        return _InteractiveHandle(model_id)
+
+    @staticmethod
+    def rfdetr_seg(model_id: str) -> _RFDetrSegHandle:
+        """RF-DETR instance-segmentation handle (Apache-2.0, all 6 seg variants)."""
+        return _RFDetrSegHandle(model_id)
+
+    def segment_instances(self, image, threshold: float = 0.3, **kw):
+        """Instance segmentation for ``VSX("rfdetr-seg-small").segment_instances(image)``.
+
+        Routes RF-DETR-Seg model IDs to the rfdetr engine; raises for non-instance-seg models.
+        """
+        from visionservex.rfdetr_seg_runtime import segment_instances, variants
+        mid = self.model_id
+        if mid not in variants():
+            raise VSXError(
+                f"{mid} is not an instance-segmentation model; "
+                f"use one of {variants()} or VSX.sam(...)/VSX.rfdetr_seg(...)",
+                state="not_applicable",
+                next_command="visionservex segment-instances image.jpg --model rfdetr-seg-small --out out/",
+            )
+        return segment_instances(mid, _load_image(image), threshold=threshold, **kw)
+

@@ -1,0 +1,10 @@
+model_id,execution_type,result,n_segments,latency_ms,artifact_path,blocker,exact_command
+sam2-hiera-tiny,segmentation_image,ok,1,4033.2,artifacts/v35/sam2_hiera_segmentation.json,none,python -c "VisionModel('sam2-hiera-tiny').predict(img boxes=[[50,50,350,350]])"
+sam2-hiera-small,segmentation_image,ok,1,2017.2,artifacts/v35/sam2_hiera_segmentation.json,none,python -c "VisionModel('sam2-hiera-small').predict(img boxes=[[50,50,350,350]])"
+sam2-hiera-base-plus,segmentation_image,ok,1,2342.2,artifacts/v35/sam2_hiera_segmentation.json,none,python -c "VisionModel('sam2-hiera-base-plus').predict(img boxes=[[50,50,350,350]])"
+sam2-hiera-large,segmentation_image,ok,1,3245.1,artifacts/v35/sam2_hiera_segmentation.json,none,python -c "VisionModel('sam2-hiera-large').predict(img boxes=[[50,50,350,350]])"
+sam2.1-hiera-tiny,segmentation_image,benchmark_passed_v33,1,1416.0,v33_existing,none,VisionModel('sam2.1-hiera-tiny').predict
+sam2.1-hiera-small,segmentation_image,benchmark_passed_v33,1,n/a,v33_existing,none,VisionModel('sam2.1-hiera-small').predict
+sam2.1-hiera-small,multi_frame_sequential,ok,1+1,3368.5,artifacts/v35/sam21_video_tracking.json,none,python -c "m=VisionModel('sam2.1-hiera-small'); m.predict(f1 boxes=...); m.predict(f2 boxes=...)"
+sam2.1-hiera-base-plus,segmentation_image,benchmark_passed_v33,1,n/a,v33_existing,none,VisionModel('sam2.1-hiera-base-plus').predict
+sam2.1-hiera-large,segmentation_image,benchmark_passed_v33,1,n/a,v33_existing,none,VisionModel('sam2.1-hiera-large').predict

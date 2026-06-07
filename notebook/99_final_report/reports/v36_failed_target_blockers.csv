@@ -1,0 +1,11 @@
+blocker_id,priority,model_id,blocker_type,description,resolution_path,status_v36
+B01,P0,sam-vit-l,cli_inconsistency,_ONNX_ELIGIBLE in sam_commands.py missing sam-vit-l,Fixed in v3.6 Phase 1 — added to _ONNX_ELIGIBLE and _CHECKPOINT_PATHS,FIXED
+B02,P0,sam-vit-h,cli_inconsistency,_ONNX_ELIGIBLE in sam_commands.py missing sam-vit-h,Fixed in v3.6 Phase 1 — added to _ONNX_ELIGIBLE and _CHECKPOINT_PATHS,FIXED
+B03,P1,medsam2,sidecar_required,MedSAM2 via HF fails (missing preprocessor_config.json),Use wanglab/medsam (MedSAM1) via sam_hf engine — workaround documented,WORKAROUND
+B04,P1,maskdino-r50-coco,sidecar_required,Requires Detectron2 which has complex install,Documented as sidecar_required; sidecar attempt evidence in v3.5,DOCUMENTED
+B05,P2,rtdetrv4-s,checkpoint_only,RT-DETRv4 stub — no real runtime,Documented as checkpoint_only; stub attempt evidence in v3.5,DOCUMENTED
+B06,P2,hq-sam,legal_review,HQSeg-44K training data legal review required,Documented as legal_review_required state,DOCUMENTED
+B07,P3,grounding-dino-1.5,auth_required,Requires Idea Research API token,Documented as auth_required state,DOCUMENTED
+B08,P3,sam3-base,auth_required,Gated HF model — requires token + approved access,Documented as auth_required state,DOCUMENTED
+B09,P3,locate-anything-3b,non_commercial,NVIDIA non-commercial license — cannot run in default-safe core,LocateAnything addendum implemented — BYOT + --accept-noncommercial,IMPLEMENTED
+B10,P4,bash_tool,infrastructure,Bash tool non-functional (after background pytest tasks in v3.5),Model execution probes blocked; code/test/ledger work unblocked,PARTIAL

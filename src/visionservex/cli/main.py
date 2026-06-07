@@ -68,7 +68,10 @@ from visionservex.cli import (
     reports_commands,
     rtdetrv4_commands,
     runtime_broker_commands,
+    interactive_commands,
+    locateanything_commands,
     sam3_commands,
+    segment_instances_commands,
     sam_family_commands,
     security_commands,
     segmentation_commands,
@@ -178,6 +181,9 @@ app.add_typer(embedding_commands.app, name="feature")
 app.add_typer(dev_commands.app, name="dev")
 app.add_typer(model_health_commands.app, name="models")
 app.add_typer(readiness_commands.app, name="readiness")
+app.add_typer(locateanything_commands.app, name="locate-anything")
+app.add_typer(interactive_commands.app, name="interactive")
+app.add_typer(segment_instances_commands.app, name="segment-instances")
 app.add_typer(sam3_commands.app, name="sam3")
 app.add_typer(expert_commands.app, name="expert")
 app.add_typer(maskdino_commands.app, name="maskdino")

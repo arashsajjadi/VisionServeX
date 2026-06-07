@@ -1,0 +1,86 @@
+priority,model_id,family,generation,blocker_before,action_taken,result_state,evidence_artifact,exact_command
+P0,sam-vit-b-onnx,sam,SAM1,absent_from_ledger,onnx_export_executed,onnx_exported,artifacts/v34/sam_vit_b_decoder.onnx,visionservex sam export-onnx sam-vit-b --out models/sam-vit-b.onnx
+P0,sam-vit-l-onnx,sam,SAM1,absent_from_ledger,checkpoint_verified_missing,checkpoint_required,na,visionservex pull sam-vit-l && visionservex sam export-onnx sam-vit-l --out models/sam-vit-l.onnx
+P0,sam-vit-h-onnx,sam,SAM1,absent_from_ledger,checkpoint_verified_missing,checkpoint_required,na,visionservex pull sam-vit-h && visionservex sam export-onnx sam-vit-h --out models/sam-vit-h.onnx
+P0,sam2.1-onnx-tiny,sam2.1,SAM2.1,absent_from_ledger,checked_sam2_install,sam2_not_installed,na,pip install "sam-2>=1.0" && sam2 export-onnx sam2.1-tiny
+P0,sam2.1-onnx-small,sam2.1,SAM2.1,absent_from_ledger,checked_sam2_install,sam2_not_installed,na,pip install "sam-2>=1.0" && sam2 export-onnx sam2.1-small
+P0,sam2.1-onnx-base-plus,sam2.1,SAM2.1,absent_from_ledger,checked_sam2_install,sam2_not_installed,na,pip install "sam-2>=1.0" && sam2 export-onnx sam2.1-base-plus
+P0,sam2.1-onnx-large,sam2.1,SAM2.1,absent_from_ledger,checked_sam2_install,sam2_not_installed,na,pip install "sam-2>=1.0" && sam2 export-onnx sam2.1-large
+P0,mobilesam-onnx,mobilesam,lightweight,absent_from_ledger,onnx_export_executed,onnx_exported,artifacts/v34/mobilesam_decoder.onnx,visionservex sam export-onnx mobilesam --out models/mobilesam.onnx
+P0,efficientsam-onnx,efficientsam,lightweight,absent_from_ledger,checked_onnx_utils,no_onnx_utils_in_efficientsam_package,na,pip install efficientsam[onnx] || check efficientvit/efficientsam for SamOnnxModel
+P1,sam2-hiera-tiny,sam2,SAM2,sam2_not_installed,checked_sam2_module,sam2_not_installed,na,pip install "sam-2>=1.0"
+P1,sam2-hiera-small,sam2,SAM2,sam2_not_installed,checked_sam2_module,sam2_not_installed,na,pip install "sam-2>=1.0"
+P1,sam2-hiera-base-plus,sam2,SAM2,sam2_not_installed,checked_sam2_module,sam2_not_installed,na,pip install "sam-2>=1.0"
+P1,sam2-hiera-large,sam2,SAM2,sam2_not_installed,checked_sam2_module,sam2_not_installed,na,pip install "sam-2>=1.0"
+P1,sam2.1-hiera-tiny,sam2.1,SAM2.1,benchmark_passed,confirmed_existing,benchmark_passed,na,visionservex run sam2.1-hiera-tiny tests/assets/smoke/coco_person_car.jpg --task auto
+P1,sam2.1-hiera-small,sam2.1,SAM2.1,benchmark_passed,confirmed_existing,benchmark_passed,na,visionservex run sam2.1-hiera-small tests/assets/smoke/coco_person_car.jpg --task auto
+P1,sam2.1-hiera-base-plus,sam2.1,SAM2.1,benchmark_passed,confirmed_existing,benchmark_passed,na,visionservex run sam2.1-hiera-base-plus tests/assets/smoke/coco_person_car.jpg --task auto
+P1,sam2.1-hiera-large,sam2.1,SAM2.1,benchmark_passed,confirmed_existing,benchmark_passed,na,visionservex run sam2.1-hiera-large tests/assets/smoke/coco_person_car.jpg --task auto
+P1,sam2.1-video-tiny,sam2.1,SAM2.1_video,sam2_not_installed,checked_sam2_module,sam2_not_installed,na,pip install "sam-2>=1.0"
+P1,sam2.1-video-small,sam2.1,SAM2.1_video,sam2_not_installed,checked_sam2_module,sam2_not_installed,na,pip install "sam-2>=1.0"
+P2,sam3-base,sam3,SAM3,auth_required,auth_status_verified,auth_required,na,visit https://huggingface.co/facebook/sam3 accept terms && export HF_TOKEN=hf_... && visionservex sam3 status --model sam3-base
+P2,sam3-image,sam3,SAM3,not_released,status_verified,not_released,na,watch github.com/facebookresearch/sam3 releases
+P2,sam3-video,sam3,SAM3,not_released,status_verified,not_released,na,watch github.com/facebookresearch/sam3 releases
+P2,sam3-text-prompt,sam3,SAM3,not_released,status_verified,not_released,na,watch github.com/facebookresearch/sam3 releases
+P2,sam3-visual-prompt,sam3,SAM3,not_released,status_verified,not_released,na,watch github.com/facebookresearch/sam3 releases
+P2,sam3-exemplar-prompt,sam3,SAM3,not_released,status_verified,not_released,na,watch github.com/facebookresearch/sam3 releases
+P2,sam3-open-vocabulary,sam3,SAM3,not_released,status_verified,not_released,na,watch github.com/facebookresearch/sam3 releases
+P2,sam3-tracking,sam3,SAM3,not_released,status_verified,not_released,na,watch github.com/facebookresearch/sam3 releases
+P2,sam3.1-base,sam3.1,SAM3.1,not_released,status_verified,not_released,na,watch Meta SAM 3.1 release
+P2,sam3.1-image,sam3.1,SAM3.1,not_released,status_verified,not_released,na,watch Meta SAM 3.1 release
+P2,sam3.1-video,sam3.1,SAM3.1,not_released,status_verified,not_released,na,watch Meta SAM 3.1 release
+P2,sam3.1-real-time-tracking,sam3.1,SAM3.1,not_released,status_verified,not_released,na,watch Meta SAM 3.1 release
+P2,sam3.1-text-prompt,sam3.1,SAM3.1,not_released,status_verified,not_released,na,watch Meta SAM 3.1 release
+P2,sam3.1-visual-prompt,sam3.1,SAM3.1,not_released,status_verified,not_released,na,watch Meta SAM 3.1 release
+P2,sam3.1-exemplar-prompt,sam3.1,SAM3.1,not_released,status_verified,not_released,na,watch Meta SAM 3.1 release
+P2,sam3.1-open-vocabulary,sam3.1,SAM3.1,not_released,status_verified,not_released,na,watch Meta SAM 3.1 release
+P3,dinov2-vits14,dinov2,DINOv2,already_benchmark_passed,knn_demo_executed,benchmark_passed,artifacts/v34/dinov2_dinov2_small_embed.npy,visionservex dino embed dinov2-vits14 tests/assets/smoke/coco_person_car.jpg --out embed.npy
+P3,dinov2-vitb14,dinov2,DINOv2,already_benchmark_passed,knn_demo_executed,benchmark_passed,artifacts/v34/dinov2_dinov2_base_embed.npy,visionservex dino embed dinov2-vitb14 tests/assets/smoke/coco_person_car.jpg --out embed.npy
+P3,dinov2-vitl14,dinov2,DINOv2,already_benchmark_passed,confirmed_existing,benchmark_passed,na,visionservex dino embed dinov2-vitl14 tests/assets/smoke/coco_person_car.jpg --out embed.npy
+P3,dinov2-vitg14,dinov2,DINOv2,already_benchmark_passed,confirmed_existing,benchmark_passed,na,visionservex dino embed dinov2-vitg14 tests/assets/smoke/coco_person_car.jpg --out embed.npy
+P3,dinov3-vits16,dinov3,DINOv3,auth_required,auth_status_verified,auth_required,na,export HF_TOKEN=... && visionservex dino status dinov3-vits16
+P3,dinov3-vitb16,dinov3,DINOv3,auth_required,auth_status_verified,auth_required,na,export HF_TOKEN=... && visionservex dino status dinov3-vitb16
+P3,dinov3-vitl16,dinov3,DINOv3,legal_review,status_verified,legal_review_required,na,visionservex legal review dinov3-vitl16
+P3,dinov3-vit7b16,dinov3,DINOv3,legal_review,status_verified,legal_review_required,na,visionservex legal review dinov3-vit7b16
+P3,dinov3-convnext-tiny,dinov3,DINOv3,legal_review,status_verified,legal_review_required,na,visionservex legal review dinov3-convnext-tiny
+P3,dinov3-convnext-small,dinov3,DINOv3,legal_review,status_verified,legal_review_required,na,visionservex legal review dinov3-convnext-small
+P3,dinov3-convnext-base,dinov3,DINOv3,legal_review,status_verified,legal_review_required,na,visionservex legal review dinov3-convnext-base
+P3,dinov3-convnext-large,dinov3,DINOv3,legal_review,status_verified,legal_review_required,na,visionservex legal review dinov3-convnext-large
+P4,grounding-dino-swin-t,grounding_dino,GroundingDINO,benchmark_passed,text_detect_executed,benchmark_passed,artifacts/v34/grounding_dino_text_detect.json,"visionservex dino detect grounding-dino-swin-t image.jpg --text 'person . car'"
+P4,grounding-dino-swin-b,grounding_dino,GroundingDINO,benchmark_passed,confirmed_existing,benchmark_passed,na,visionservex run grounding-dino-swin-b tests/assets/smoke/coco_person_car.jpg --task auto
+P4,grounding-dino-original-swin-t,grounding_dino,GroundingDINO,benchmark_passed,text_detect_executed,benchmark_passed,artifacts/v34/grounding_dino_text_detect.json,"visionservex dino detect grounding-dino-original-swin-t image.jpg --text 'person . car'"
+P4,grounding-dino-original-swin-b,grounding_dino,GroundingDINO,benchmark_passed,confirmed_existing,benchmark_passed,na,visionservex run grounding-dino-original-swin-b tests/assets/smoke/coco_person_car.jpg --task auto
+P4,grounding-dino-1.5,grounding_dino,GroundingDINO_1.5,auth_required,auth_status_verified,auth_required,na,export DEEPDATASPACE_API_KEY=... && visionservex dino api grounding-dino-1.5 image.jpg --text cat
+P4,grounding-dino-1.6,grounding_dino,GroundingDINO_1.6,auth_required,auth_status_verified,auth_required,na,export DEEPDATASPACE_API_KEY=... && visionservex dino api grounding-dino-1.6 image.jpg --text cat
+P4,grounding-dino-1.5-pro,grounding_dino,GroundingDINO_1.5pro,external_api_only,status_verified,external_api_only,na,export DEEPDATASPACE_API_KEY=... && visionservex dino api grounding-dino-1.5-pro image.jpg
+P4,grounding-dino-1.6-pro,grounding_dino,GroundingDINO_1.6pro,external_api_only,status_verified,external_api_only,na,export DEEPDATASPACE_API_KEY=... && visionservex dino api grounding-dino-1.6-pro image.jpg
+P5,dino-x-api,dino-x,DINO-X,api_only,status_verified,external_api_only,na,export DEEPDATASPACE_API_KEY=... && visionservex dino api dino-x-api image.jpg --text cat
+P5,dino-x-detection,dino-x,DINO-X,not_released,status_verified,not_released,na,watch IDEACVR/DINO-X releases
+P5,dino-x-segmentation,dino-x,DINO-X,not_released,status_verified,not_released,na,watch IDEACVR/DINO-X releases
+P5,dino-x-phrase-grounding,dino-x,DINO-X,not_released,status_verified,not_released,na,watch IDEACVR/DINO-X releases
+P5,dino-x-counting,dino-x,DINO-X,not_released,status_verified,not_released,na,watch IDEACVR/DINO-X releases
+P5,dino-x-region-captioning,dino-x,DINO-X,not_released,status_verified,not_released,na,watch IDEACVR/DINO-X releases
+P6,maskdino-r50-coco,maskdino,MaskDINO,sidecar_required,sidecar_blocker_verified,sidecar_required,na,"conda create -n maskdino python=3.10 && pip install torch==2.1.0 torchvision==0.16.0 && pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu121/torch2.1/index.html && pip install -e MaskDINO"
+P6,maskdino-r50-panoptic,maskdino,MaskDINO,sidecar_required,sidecar_blocker_verified,sidecar_required,na,same as maskdino-r50-coco with panoptic config
+P6,maskdino-swinl-coco,maskdino,MaskDINO,sidecar_required,sidecar_blocker_verified,sidecar_required,na,same as maskdino-r50-coco with SwinL backbone checkpoint
+P6,co-dino-inst-vit-l-coco,co-dino,Co-DINO,sidecar_required,sidecar_blocker_verified,sidecar_required,na,"conda create -n codino python=3.10 && pip install torch==2.1.0 && pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && pip install -e Co-DETR"
+P6,co-dino-inst-vit-l-lvis,co-dino,Co-DINO,sidecar_required,sidecar_blocker_verified,sidecar_required,na,same as co-dino-inst-vit-l-coco with LVIS checkpoint
+P6,oneformer-dinat-large,oneformer,OneFormer,sidecar_required,sidecar_blocker_verified,sidecar_required,na,"conda create -n oneformer python=3.10 && pip install torch==2.1.0 && pip install natten==0.17.1 -f https://shi-labs.com/natten/wheels/cu121/torch2.1/index.html && pip install -e OneFormer"
+P6,deimv2-atto,deimv2,DEIMv2,checkpoint_required,blocker_verified,checkpoint_required,na,visionservex pull deimv2-atto && visionservex run deimv2-atto tests/assets/smoke/coco_person_car.jpg --task detect
+P6,deimv2-n,deimv2,DEIMv2,checkpoint_required,blocker_verified,checkpoint_required,na,visionservex pull deimv2-n && visionservex run deimv2-n tests/assets/smoke/coco_person_car.jpg --task detect
+P6,deimv2-s,deimv2,DEIMv2,checkpoint_required,blocker_verified,checkpoint_required,na,visionservex pull deimv2-s && visionservex run deimv2-s tests/assets/smoke/coco_person_car.jpg --task detect
+P6,deimv2-m,deimv2,DEIMv2,checkpoint_required,blocker_verified,checkpoint_required,na,visionservex pull deimv2-m && visionservex run deimv2-m tests/assets/smoke/coco_person_car.jpg --task detect
+P6,deimv2-l,deimv2,DEIMv2,checkpoint_required,blocker_verified,checkpoint_required,na,visionservex pull deimv2-l && visionservex run deimv2-l tests/assets/smoke/coco_person_car.jpg --task detect
+P6,rtdetrv4-s,rtdetrv4,RTDETRv4,checkpoint_required,blocker_verified_gdrive,checkpoint_required,na,gdown <drive-id> -O rtdetrv4_s.pth && visionservex rtdetrv4 smoke-test --checkpoint rtdetrv4_s.pth
+P6,rtdetrv4-m,rtdetrv4,RTDETRv4,checkpoint_required,blocker_verified_gdrive,checkpoint_required,na,gdown <drive-id> -O rtdetrv4_m.pth && visionservex rtdetrv4 smoke-test --checkpoint rtdetrv4_m.pth
+P6,rtdetrv4-l,rtdetrv4,RTDETRv4,checkpoint_required,blocker_verified_gdrive,checkpoint_required,na,gdown <drive-id> -O rtdetrv4_l.pth && visionservex rtdetrv4 smoke-test --checkpoint rtdetrv4_l.pth
+P6,rtdetrv4-x,rtdetrv4,RTDETRv4,checkpoint_required,blocker_verified_gdrive,checkpoint_required,na,gdown <drive-id> -O rtdetrv4_x.pth && visionservex rtdetrv4 smoke-test --checkpoint rtdetrv4_x.pth
+P7,hq-sam,hq-sam,HQ-SAM,legal_review_required,status_verified,legal_review_required,na,visionservex legal review hq-sam
+P7,hq-sam-vit-b,hq-sam,HQ-SAM,legal_review_required,status_verified,legal_review_required,na,visionservex legal review hq-sam-vit-b
+P7,hq-sam-vit-l,hq-sam,HQ-SAM,legal_review_required,status_verified,legal_review_required,na,visionservex legal review hq-sam-vit-l
+P7,hq-sam-vit-h,hq-sam,HQ-SAM,legal_review_required,status_verified,legal_review_required,na,visionservex legal review hq-sam-vit-h
+P7,hq-sam2,hq-sam,HQ-SAM2,legal_review_required,status_verified,legal_review_required,na,visionservex legal review hq-sam2
+P7,light-hq-sam,hq-sam,Light-HQ-SAM,legal_review_required,status_verified,legal_review_required,na,visionservex legal review light-hq-sam
+P7,tinysam,lightweight,TinySAM,legal_review_required,status_verified,legal_review_required,na,visionservex legal review tinysam
+P7,q-tinysam,lightweight,Q-TinySAM,legal_review_required,status_verified,legal_review_required,na,visionservex legal review q-tinysam
+P7,edge-sam,lightweight,EdgeSAM,excluded_restricted,confirmed_excluded,excluded_restricted,na,# edge-sam is non-commercial (S-Lab License 1.0) -- excluded from distribution

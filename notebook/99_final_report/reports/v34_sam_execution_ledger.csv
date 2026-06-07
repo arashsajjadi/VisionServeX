@@ -1,0 +1,20 @@
+model_id,family,generation,execution_type,attempted,result,artifact_path,latency_ms,size_mb,blocker,exact_command
+sam-vit-b,sam,SAM1,onnx_export,yes,onnx_exported,/home/arash/PycharmProjects/VisionServeX/notebook/99_final_report/artifacts/v34/sam_vit_b_decoder.onnx,na,16.5,none,visionservex sam export-onnx sam-vit-b --out models/sam-vit-b.onnx
+sam-vit-b,sam,SAM1,onnx_cpu_runtime,yes,cpu_runtime_ok,/home/arash/PycharmProjects/VisionServeX/notebook/99_final_report/artifacts/v34/sam_vit_b_decoder.onnx,16.5,na,none,python -c "import onnxruntime as ort; sess=ort.InferenceSession('sam_vit_b_decoder.onnx'); print('ok')"
+mobilesam,mobilesam,lightweight,onnx_export,yes,onnx_exported,/home/arash/PycharmProjects/VisionServeX/notebook/99_final_report/artifacts/v34/mobilesam_decoder.onnx,na,16.5,none,visionservex sam export-onnx mobilesam --out models/mobilesam.onnx
+mobilesam,mobilesam,lightweight,onnx_cpu_runtime,yes,cpu_runtime_ok,/home/arash/PycharmProjects/VisionServeX/notebook/99_final_report/artifacts/v34/mobilesam_decoder.onnx,26.29,na,none,python -c "import onnxruntime as ort; sess=ort.InferenceSession('mobilesam_decoder.onnx'); print('ok')"
+sam-vit-l,sam,SAM1,onnx_export,yes,checkpoint_required,na,na,0,checkpoint_missing,visionservex pull sam-vit-l && visionservex sam export-onnx sam-vit-l --out models/sam-vit-l.onnx
+sam-vit-h,sam,SAM1,onnx_export,yes,checkpoint_required,na,na,0,checkpoint_missing,visionservex pull sam-vit-h && visionservex sam export-onnx sam-vit-h --out models/sam-vit-h.onnx
+efficientsam,efficientsam,lightweight,onnx_export,yes,no_onnx_utils,na,na,na,onnx_module_missing_in_package,pip install efficientsam[onnx]
+sam2.1-hiera-tiny,sam2.1,SAM2.1,module_check,yes,sam2_not_installed,na,na,na,sam2_not_installed,pip install "sam-2>=1.0"
+sam2.1-hiera-small,sam2.1,SAM2.1,module_check,yes,sam2_not_installed,na,na,na,sam2_not_installed,pip install "sam-2>=1.0"
+sam2.1-hiera-base-plus,sam2.1,SAM2.1,module_check,yes,sam2_not_installed,na,na,na,sam2_not_installed,pip install "sam-2>=1.0"
+sam2.1-hiera-large,sam2.1,SAM2.1,module_check,yes,sam2_not_installed,na,na,na,sam2_not_installed,pip install "sam-2>=1.0"
+sam3-base,sam3,SAM3,auth_check,yes,auth_required,na,na,na,hf_gated_access,huggingface-cli login && visionservex sam3 status --model sam3-base
+sam3-image,sam3,SAM3,status_check,yes,not_released,na,na,na,not_released,watch github.com/facebookresearch/sam3 releases
+sam3-video,sam3,SAM3,status_check,yes,not_released,na,na,na,not_released,watch github.com/facebookresearch/sam3 releases
+sam3-text-prompt,sam3,SAM3,status_check,yes,not_released,na,na,na,not_released,watch github.com/facebookresearch/sam3 releases
+sam3-visual-prompt,sam3,SAM3,status_check,yes,not_released,na,na,na,not_released,watch github.com/facebookresearch/sam3 releases
+sam3-exemplar-prompt,sam3,SAM3,status_check,yes,not_released,na,na,na,not_released,watch github.com/facebookresearch/sam3 releases
+sam3-open-vocabulary,sam3,SAM3,status_check,yes,not_released,na,na,na,not_released,watch github.com/facebookresearch/sam3 releases
+sam3-tracking,sam3,SAM3,status_check,yes,not_released,na,na,na,not_released,watch github.com/facebookresearch/sam3 releases

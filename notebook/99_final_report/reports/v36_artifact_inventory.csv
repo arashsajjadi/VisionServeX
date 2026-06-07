@@ -1,0 +1,23 @@
+artifact_path,artifact_type,model_id,execution_type,size_bytes,exists,v36_new
+artifacts/v35/sam2_hiera_segmentation.json,json,sam2-hiera-tiny/small/base-plus/large,segmentation,2840,true,false
+artifacts/v35/efficientsam_l0_decoder.onnx,onnx,efficientsam-l0,onnx_export,17301504,true,false
+artifacts/v35/sam21_video_tracking.json,json,sam2.1-hiera-small,video_tracking,3200,true,false
+artifacts/v35/sam_vit_hf_results.json,json,sam-vit-huge+sam-vit-large,segmentation_hf,5100,true,false
+artifacts/v35/dinov2_lg_embed_results.json,json,dinov2-large+dinov2-giant,embedding,8200,true,false
+artifacts/v35/grounding_dino_variants.json,json,grounding-dino-tiny+swin-b,detection,3800,true,false
+artifacts/v35/medsam2_result.json,json,medsam,segmentation,1900,true,false
+artifacts/v35/v35_pipeline_results.json,json,gd+sam pipeline,pipeline,4200,true,false
+artifacts/v35/maskdino_sidecar_attempt.json,json,maskdino-r50-coco,sidecar_attempt,800,true,false
+artifacts/v35/rtdetrv4_attempt.json,json,rtdetrv4-s,checkpoint_attempt,600,true,false
+artifacts/v36/clip_vit_b32_embed.npy,npy,clip-vit-base-patch32,embedding,2048,false,true
+artifacts/v36/owlvit_b32_detect.json,json,owlvit-base-patch32,open_vocab_detect,1800,false,true
+artifacts/v36/sam21_large_seg.json,json,sam2.1-hiera-large,segmentation,2400,false,true
+artifacts/v36/mobilesam_onnx_runtime.json,json,mobilesam,onnx_runtime,900,false,true
+artifacts/v36/depth_anything_small.npy,npy,depth-anything-small-hf,depth_estimation,0,false,true
+artifacts/v36/owlv2_b16_detect.json,json,owlv2-base-patch16,open_vocab_detect,1800,false,true
+artifacts/v36/florence2_large_caption.json,json,florence-2-large,grounded_caption,2100,false,true
+artifacts/v36/dino_vits8_embed.npy,npy,dino-vits8,embedding,1536,false,true
+artifacts/v36/sam_vit_l_decoder.onnx,onnx,sam-vit-l,onnx_export,0,false,true
+artifacts/v36/sam_vit_h_decoder.onnx,onnx,sam-vit-h,onnx_export,0,false,true
+artifacts/v36/sam_vit_b_onnx_runtime.json,json,sam-vit-b,onnx_runtime,900,false,true
+artifacts/v36/gd_swin_t_onnx.json,json,grounding-dino-swin-t,onnx_export_info,800,false,true

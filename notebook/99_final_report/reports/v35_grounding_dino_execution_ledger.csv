@@ -1,0 +1,7 @@
+model_id,hf_id,execution_type,n_detections,latency_ms,artifact_path,blocker,exact_command
+grounding-dino-swin-t,IDEA-Research/grounding-dino-base,text_detection,2,5388.02,artifacts/v34/grounding_dino_text_detect.json,none,VisionModel('grounding-dino-swin-t').predict(img text='person . car')
+grounding-dino-original-swin-t,IDEA-Research/grounding-dino,text_detection,2,2238.16,artifacts/v34/grounding_dino_text_detect.json,none,VisionModel('grounding-dino-original-swin-t').predict
+grounding-dino-tiny,IDEA-Research/grounding-dino-tiny,text_detection,2,5035.3,artifacts/v35/grounding_dino_variants.json,none,VisionModel('grounding-dino-tiny').predict(img text='person . car . vehicle')
+grounding-dino-swin-b,IDEA-Research/grounding-dino-base-swin-b,text_detection,3,4119.5,artifacts/v35/grounding_dino_variants.json,none,VisionModel('grounding-dino-swin-b').predict(img text='person . car . vehicle')
+grounding-dino-1.5,DEEPDATASPACE/grounding-dino-1.5,api_gated,0,n/a,n/a,DEEPDATASPACE_API_KEY required,export DEEPDATASPACE_API_KEY=xxx && visionservex dino api grounding-dino-1.5 img.jpg
+grounding-dino-1.6,DEEPDATASPACE/grounding-dino-1.6,api_gated,0,n/a,n/a,DEEPDATASPACE_API_KEY required,export DEEPDATASPACE_API_KEY=xxx

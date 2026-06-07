@@ -1,0 +1,10 @@
+model_id,priority,final_state,blocker_category,blocker_detail,exact_next_command
+sam-vit-l-onnx,P0,checkpoint_required,missing_local_checkpoint,sam_vit_l_0b3195.pth not at ~/.cache/visionservex/sam/,visionservex pull sam-vit-l && visionservex sam export-onnx sam-vit-l
+sam-vit-h-onnx,P0,checkpoint_required,missing_local_checkpoint,sam_vit_h_4b8939.pth not at ~/.cache/visionservex/sam/,visionservex pull sam-vit-h && visionservex sam export-onnx sam-vit-h
+sam2.1-onnx,P1,not_supported,no_onnx_export_in_transformers,transformers Sam2Model has no ONNX export path; sam2 package needed,pip install sam-2>=1.0 && python export_sam2_onnx.py
+maskdino-r50-coco,P5,sidecar_required,detectron2_incompatible,detectron2 build fails on torch2.11+cu130,conda create -n maskdino python=3.10 && pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu121 && pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu121/torch2.1/index.html
+co-dino-inst-vit-l-coco,P5,sidecar_required,mmcv_not_installed,OpenMMLab mmcv2 chain not in standard visionservex env,pip install mmcv2 mmdet
+rtdetrv4-s,P5,checkpoint_only,no_runner,RT-DETRv4 uses _stub engine; checkpoint exists but no runner implemented,implement RTDETRv4Runner in visionservex then: python -c "VisionModel('rtdetrv4-s').predict(img)"
+sam3-base,P6,auth_required,hf_gated,facebook/sam3 requires HF access agreement and token,visit https://huggingface.co/facebook/sam3 accept && export HF_TOKEN=hf_xxx
+grounding-dino-1.5,P6,auth_required,api_key_required,DEEPDATASPACE API key needed,export DEEPDATASPACE_API_KEY=xxx && visionservex dino api grounding-dino-1.5 image.jpg --text person
+wanglab/MedSAM2,P5,hf_format_error,no_preprocessor_config,wanglab/MedSAM2 has no preprocessor_config.json for AutoProcessor,use wanglab/medsam2 lowercase or custom preprocessing script

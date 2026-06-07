@@ -1,0 +1,13 @@
+notebook_id,filename,topic,v35_new_topics,key_model_ids,key_artifact
+01,01_efficientsam_onnx_export.ipynb,EfficientSAM ONNX export,YES,efficientsam-l0,artifacts/v35/efficientsam_l0_decoder.onnx
+02,02_sam2_hiera_native_image.ipynb,SAM2-hiera segmentation,YES,sam2-hiera-tiny/small/base-plus/large,artifacts/v35/sam2_hiera_segmentation.json
+03,03_sam21_video_tracking.ipynb,SAM2.1 multi-frame tracking,YES,sam2.1-hiera-small,artifacts/v35/sam21_video_tracking.json
+04,04_sam_vit_hf_runtime.ipynb,SAM-ViT-H/L HF runtime,YES,sam-vit-huge/sam-vit-large,artifacts/v35/sam_vit_hf_results.json
+05,05_dinov2_all_sizes.ipynb,DINOv2 S/B/L/G embeddings,YES,dinov2-small/base/large/giant,artifacts/v35/dinov2_lg_embed_results.json
+06,06_dinov2_large_giant_new.ipynb,DINOv2-L/G deep dive,YES,dinov2-large/dinov2-giant,artifacts/v35/dinov2_dinov2_large_embed.npy
+07,07_grounding_dino_tiny_swin_b.ipynb,GroundingDINO tiny+swin-b,YES,grounding-dino-tiny/grounding-dino-swin-b,artifacts/v35/grounding_dino_variants.json
+08,08_grounding_dino_sam2_pipeline.ipynb,GD+SAM2 two-stage pipeline,YES,grounding-dino-swin-t/sam2-hiera-tiny,artifacts/v35/v35_pipeline_results.json
+09,09_medsam_checkpoint.ipynb,MedSAM checkpoint execution,YES,medsam,artifacts/v35/medsam2_result.json
+10,10_maskdino_sidecar_isolation.ipynb,MaskDINO sidecar documentation,YES,maskdino-r50-coco,artifacts/v35/maskdino_sidecar_attempt.json
+11,11_rtdetrv4_checkpoint_smoke.ipynb,RT-DETRv4 checkpoint inventory,YES,rtdetrv4-s/m/l/x,artifacts/v35/rtdetrv4_attempt.json
+12,12_v35_sprint_summary.ipynb,Sprint v3.5 full summary,YES,all_16_new,reports/v35_new_model_execution_ledger.csv
