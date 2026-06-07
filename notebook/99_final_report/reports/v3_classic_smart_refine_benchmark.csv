@@ -1,9 +1,9 @@
 method,n,mean_iou,boundary_iou,success_rate_at_iou_50,success_rate_at_iou_75,latency_ms_mean,latency_ms_p50,cpu_only_ok,errors
-classic-intelligent-scissors,40,0.7741,0.796,0.925,0.75,133.01,126.936,True,0
-classic-grabcut,40,0.4232,0.3584,0.35,0.125,163.353,122.738,True,0
-classic-marker-watershed,40,0.3843,0.3605,0.4,0.075,1.284,1.26,True,0
-classic-edge-plus,40,0.3671,0.3346,0.375,0.075,167.081,123.482,True,0
-classic-slic-graphcut,40,0.3333,0.2895,0.2,0.025,189.642,147.727,True,0
-classic-random-walker,40,0.2699,0.2336,0.225,0.025,112.467,109.669,True,0
-classic-slic-rf-smooth,40,0.135,0.1183,0.025,0.0,53.237,52.427,True,0
-classic-interactive-rf,40,0.0999,0.0752,0.0,0.0,39.253,38.686,True,0
+classic-intelligent-scissors,40,0.7741,0.796,0.925,0.75,133.156,126.631,True,0
+classic-grabcut,40,0.4232,0.3584,0.35,0.125,163.681,122.849,True,0
+classic-marker-watershed,40,0.3843,0.3605,0.4,0.075,1.295,1.265,True,0
+classic-edge-plus,40,0.3671,0.3346,0.375,0.075,166.59,123.84,True,0
+classic-slic-graphcut,40,0.3333,0.2895,0.2,0.025,189.687,148.191,True,0
+classic-random-walker,40,0.2699,0.2336,0.225,0.025,112.641,108.887,True,0
+classic-slic-rf-smooth,40,0.135,0.1183,0.025,0.0,53.247,52.661,True,0
+classic-interactive-rf,40,0.0999,0.0752,0.0,0.0,39.361,38.319,True,0

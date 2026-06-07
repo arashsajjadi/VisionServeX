@@ -1,5 +1,5 @@
-pipeline_id,kind,detector_model_id,detector_final_state,segmenter_model_id,segmenter_final_state,both_parts_benchmark_passed,pipeline_status,is_single_model,exact_benchmark_command
-grounding-dino-swin-b+sam2.1-hiera-large,text_to_mask,grounding-dino-swin-b,benchmark_passed,sam2.1-hiera-large,benchmark_passed,True,ready_to_benchmark,False,visionservex benchmark-text-to-mask --pipelines grounding-dino-swin-b+sam2.1-hiera-large --dataset coco:/home/arash/datasets/coco_val2017_400_vsx
-grounding-dino-swin-t+sam2.1-hiera-small,text_to_mask,grounding-dino-swin-t,benchmark_passed,sam2.1-hiera-small,benchmark_passed,True,ready_to_benchmark,False,visionservex benchmark-text-to-mask --pipelines grounding-dino-swin-t+sam2.1-hiera-small --dataset coco:/home/arash/datasets/coco_val2017_400_vsx
-grounding-dino-tiny+sam2-hiera-tiny,text_to_mask,grounding-dino-tiny,benchmark_passed,sam2-hiera-tiny,benchmark_passed,True,ready_to_benchmark,False,visionservex benchmark-text-to-mask --pipelines grounding-dino-tiny+sam2-hiera-tiny --dataset coco:/home/arash/datasets/coco_val2017_400_vsx
-grounding-dino-original-swin-b+sam-vit-huge,text_to_mask,grounding-dino-original-swin-b,benchmark_passed,sam-vit-huge,benchmark_passed,True,ready_to_benchmark,False,visionservex benchmark-text-to-mask --pipelines grounding-dino-original-swin-b+sam-vit-huge --dataset coco:/home/arash/datasets/coco_val2017_400_vsx
+pipeline_id,kind,detector_model_id,detector_final_state,segmenter_model_id,segmenter_final_state,both_parts_benchmark_passed,is_single_model
+grounding-dino-swin-b+sam2.1-hiera-large,text_to_mask,grounding-dino-swin-b,benchmark_passed,sam2.1-hiera-large,benchmark_passed,True,False
+grounding-dino-swin-t+sam2.1-hiera-small,text_to_mask,grounding-dino-swin-t,benchmark_passed,sam2.1-hiera-small,benchmark_passed,True,False
+grounding-dino-tiny+sam2-hiera-tiny,text_to_mask,grounding-dino-tiny,benchmark_passed,sam2-hiera-tiny,benchmark_passed,True,False
+grounding-dino-original-swin-b+sam-vit-huge,text_to_mask,grounding-dino-original-swin-b,benchmark_passed,sam-vit-huge,benchmark_passed,True,False

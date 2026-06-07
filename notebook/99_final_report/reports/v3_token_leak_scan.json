@@ -1,7 +1,7 @@
 {
   "schema": "v3_token_leak_scan.v1",
-  "files_scanned": 58,
+  "files_scanned": 59,
   "real_secret_value_leaks": [],
   "real_leak_count": 0,
-  "verdict": "PASS \u2014 0 real secret leaks"
+  "verdict": "PASS"
 }

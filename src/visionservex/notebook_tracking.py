@@ -414,6 +414,36 @@ def load_jsonl_ledger(
     return events
 
 
+# Metric columns that count as a real benchmark result across tasks
+# (detection/seg mAP, promptable/seg IoU, embedding kNN, classification accuracy).
+_BENCHMARK_METRIC_KEYS = (
+    "mAP50_95",
+    "map50_95",
+    "mask_mAP50_95",
+    "mask_map50_95",
+    "mean_iou",
+    "mask_iou",
+    "boundary_iou",
+    "knn_accuracy",
+    "accuracy",
+    "top1",
+    "top1_accuracy",
+)
+
+
+def _benchmark_metric(row: dict[str, Any]) -> float | None:
+    """Return the first recognized benchmark metric value (float) in ``row``, or None."""
+    for k in _BENCHMARK_METRIC_KEYS:
+        v = row.get(k)
+        if v in (None, "", "nan", "NaN"):
+            continue
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            continue
+    return None
+
+
 def scan_task_outputs(
     task_reports_root: Path | str,
     run_id: str,
@@ -469,7 +499,7 @@ def scan_task_outputs(
                 if not mid:
                     continue
                 status_val = (row.get("status") or "").lower()
-                map95 = row.get("mAP50_95") or row.get("map50_95") or row.get("mask_mAP50_95")
+                map95 = _benchmark_metric(row)
                 if status_val in {"ok", "benchmark_passed"} and map95 is not None:
                     call_t = "benchmark"
                     stat = "success"
@@ -500,9 +530,9 @@ def scan_task_outputs(
                 mid = (row.get("model_id") or row.get("name") or "").strip()
                 if not mid:
                     continue
-                map95 = row.get("mAP50_95") or row.get("mask_mAP50_95")
+                map95 = _benchmark_metric(row)
                 status_val = (row.get("status") or "").lower()
-                if status_val == "ok" and map95:
+                if status_val == "ok" and map95 is not None:
                     call_t = "benchmark"
                     stat = "success"
                 else:

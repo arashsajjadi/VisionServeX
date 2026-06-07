@@ -38,7 +38,7 @@ def main():
     coco_gt = COCO(COCO_ANN)
     cats = sorted(coco_gt.cats.values(), key=lambda c: c["id"])
     cat_names = [c["name"] for c in cats]
-    cat_id_to_idx = {c["id"]: i for i, c in enumerate(cats)}
+    {c["id"]: i for i, c in enumerate(cats)}
     idx_to_cat_id = {i: c["id"] for i, c in enumerate(cats)}
 
     img_infos = list(coco_gt.imgs.values())[:MAX_IMAGES]
@@ -67,7 +67,7 @@ def main():
             "n_images": len(img_records),
         }
         try:
-            from visionservex.cli.benchmark_open_vocab import _benchmark_one_model
+            pass
         except Exception as e:
             result["code"] = "IMPORT_FAILED"
             result["error"] = str(e)[:300]
@@ -105,12 +105,14 @@ def main():
                     if not box or len(box) != 4:
                         continue
                     x1, y1, x2, y2 = box
-                    preds.append({
-                        "image_id": img_id,
-                        "category_id": cat_id,
-                        "bbox": [float(x1), float(y1), float(x2 - x1), float(y2 - y1)],
-                        "score": float(det.get("score", 0.5)),
-                    })
+                    preds.append(
+                        {
+                            "image_id": img_id,
+                            "category_id": cat_id,
+                            "bbox": [float(x1), float(y1), float(x2 - x1), float(y2 - y1)],
+                            "score": float(det.get("score", 0.5)),
+                        }
+                    )
 
             if not preds:
                 result["code"] = "NO_PREDICTIONS"
@@ -120,21 +122,29 @@ def main():
             coco_dt = coco_gt.loadRes(preds)
             ev = COCOeval(coco_gt, coco_dt, iouType="bbox")
             ev.params.imgIds = [r[0] for r in img_records]
-            ev.evaluate(); ev.accumulate(); ev.summarize()
+            ev.evaluate()
+            ev.accumulate()
+            ev.summarize()
             lats = sorted(latencies)
             p50 = lats[len(lats) // 2] if lats else None
             fps = 1000.0 / (sum(latencies) / len(latencies)) if latencies else None
-            result.update({
-                "status": "ok",
-                "code": "OK",
-                "mAP50_95": round(float(ev.stats[0]), 4),
-                "AP50": round(float(ev.stats[1]), 4),
-                "AP75": round(float(ev.stats[2]), 4),
-                "latency_ms_p50": round(p50, 1) if p50 else None,
-                "fps": round(fps, 1) if fps else None,
-                "prompt_category_coverage": round(len(set(d["category_id"] for d in preds)) / 80, 3),
-            })
-            print(f"  mAP50:95={ev.stats[0]:.4f} AP50={ev.stats[1]:.4f} coverage={result['prompt_category_coverage']}")
+            result.update(
+                {
+                    "status": "ok",
+                    "code": "OK",
+                    "mAP50_95": round(float(ev.stats[0]), 4),
+                    "AP50": round(float(ev.stats[1]), 4),
+                    "AP75": round(float(ev.stats[2]), 4),
+                    "latency_ms_p50": round(p50, 1) if p50 else None,
+                    "fps": round(fps, 1) if fps else None,
+                    "prompt_category_coverage": round(
+                        len({d["category_id"] for d in preds}) / 80, 3
+                    ),
+                }
+            )
+            print(
+                f"  mAP50:95={ev.stats[0]:.4f} AP50={ev.stats[1]:.4f} coverage={result['prompt_category_coverage']}"
+            )
         except Exception as e:
             result["code"] = "BENCHMARK_FAILED"
             result["error"] = str(e)[:300]
@@ -145,7 +155,7 @@ def main():
     with open(OUT_JSON, "w") as f:
         json.dump({"benchmark_type": "open_vocab_coco", "models": results}, f, indent=2)
     print(f"\nWritten: {OUT_JSON}")
-    print(f"OK: {sum(1 for r in results if r['status']=='ok')}/{len(results)}")
+    print(f"OK: {sum(1 for r in results if r['status'] == 'ok')}/{len(results)}")
     return 0
 
 

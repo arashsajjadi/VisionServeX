@@ -1,6 +1,6 @@
 {
   "schema": "smart_tool_coverage_ledger.v3",
-  "note": "Classic weight-free tools, separate from model leaderboard (V3-13).",
+  "note": "classic weight-free tools, separate (V3-13)",
   "dataset": "coco_val2017_400_vsx:promptable-derived-from-GT",
   "tools": [
     {
@@ -13,15 +13,13 @@
       "gated_or_auth_required": false,
       "device": "cpu",
       "benchmark_dataset": "coco_val2017_400_vsx:promptable-derived-from-GT",
-      "instances_evaluated": 40,
       "mean_iou": 0.7741,
       "boundary_iou": 0.796,
       "success_rate_at_iou_50": 0.925,
-      "latency_ms_mean": 133.01,
+      "latency_ms_mean": 133.156,
       "cpu_only_ok": true,
       "final_state": "benchmark_passed",
-      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json",
-      "description": "Live-wire contour"
+      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json"
     },
     {
       "tool_id": "classic-grabcut",
@@ -33,15 +31,13 @@
       "gated_or_auth_required": false,
       "device": "cpu",
       "benchmark_dataset": "coco_val2017_400_vsx:promptable-derived-from-GT",
-      "instances_evaluated": 40,
       "mean_iou": 0.4232,
       "boundary_iou": 0.3584,
       "success_rate_at_iou_50": 0.35,
-      "latency_ms_mean": 163.353,
+      "latency_ms_mean": 163.681,
       "cpu_only_ok": true,
       "final_state": "benchmark_passed",
-      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json",
-      "description": "GrabCut GMM graph-cut"
+      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json"
     },
     {
       "tool_id": "classic-marker-watershed",
@@ -53,15 +49,13 @@
       "gated_or_auth_required": false,
       "device": "cpu",
       "benchmark_dataset": "coco_val2017_400_vsx:promptable-derived-from-GT",
-      "instances_evaluated": 40,
       "mean_iou": 0.3843,
       "boundary_iou": 0.3605,
       "success_rate_at_iou_50": 0.4,
-      "latency_ms_mean": 1.284,
+      "latency_ms_mean": 1.295,
       "cpu_only_ok": true,
       "final_state": "benchmark_passed",
-      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json",
-      "description": "Marker watershed"
+      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json"
     },
     {
       "tool_id": "classic-edge-plus",
@@ -73,15 +67,13 @@
       "gated_or_auth_required": false,
       "device": "cpu",
       "benchmark_dataset": "coco_val2017_400_vsx:promptable-derived-from-GT",
-      "instances_evaluated": 40,
       "mean_iou": 0.3671,
       "boundary_iou": 0.3346,
       "success_rate_at_iou_50": 0.375,
-      "latency_ms_mean": 167.081,
+      "latency_ms_mean": 166.59,
       "cpu_only_ok": true,
       "final_state": "benchmark_passed",
-      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json",
-      "description": "GrabCut + Canny edges"
+      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json"
     },
     {
       "tool_id": "classic-slic-graphcut",
@@ -93,15 +85,13 @@
       "gated_or_auth_required": false,
       "device": "cpu",
       "benchmark_dataset": "coco_val2017_400_vsx:promptable-derived-from-GT",
-      "instances_evaluated": 40,
       "mean_iou": 0.3333,
       "boundary_iou": 0.2895,
       "success_rate_at_iou_50": 0.2,
-      "latency_ms_mean": 189.642,
+      "latency_ms_mean": 189.687,
       "cpu_only_ok": true,
       "final_state": "benchmark_passed",
-      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json",
-      "description": "SLIC + GrabCut snap"
+      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json"
     },
     {
       "tool_id": "classic-random-walker",
@@ -113,15 +103,13 @@
       "gated_or_auth_required": false,
       "device": "cpu",
       "benchmark_dataset": "coco_val2017_400_vsx:promptable-derived-from-GT",
-      "instances_evaluated": 40,
       "mean_iou": 0.2699,
       "boundary_iou": 0.2336,
       "success_rate_at_iou_50": 0.225,
-      "latency_ms_mean": 112.467,
+      "latency_ms_mean": 112.641,
       "cpu_only_ok": true,
       "final_state": "benchmark_passed",
-      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json",
-      "description": "Random walker"
+      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json"
     },
     {
       "tool_id": "classic-slic-rf-smooth",
@@ -133,15 +121,13 @@
       "gated_or_auth_required": false,
       "device": "cpu",
       "benchmark_dataset": "coco_val2017_400_vsx:promptable-derived-from-GT",
-      "instances_evaluated": 40,
       "mean_iou": 0.135,
       "boundary_iou": 0.1183,
       "success_rate_at_iou_50": 0.025,
-      "latency_ms_mean": 53.237,
+      "latency_ms_mean": 53.247,
       "cpu_only_ok": true,
       "final_state": "benchmark_passed",
-      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json",
-      "description": "RandomForest over SLIC"
+      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json"
     },
     {
       "tool_id": "classic-interactive-rf",
@@ -153,15 +139,13 @@
       "gated_or_auth_required": false,
       "device": "cpu",
       "benchmark_dataset": "coco_val2017_400_vsx:promptable-derived-from-GT",
-      "instances_evaluated": 40,
       "mean_iou": 0.0999,
       "boundary_iou": 0.0752,
       "success_rate_at_iou_50": 0.0,
-      "latency_ms_mean": 39.253,
+      "latency_ms_mean": 39.361,
       "cpu_only_ok": true,
       "final_state": "benchmark_passed",
-      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json",
-      "description": "Per-pixel RandomForest"
+      "evidence_artifact": "reports/v3_classic_smart_refine_benchmark.json"
     }
   ]
 }

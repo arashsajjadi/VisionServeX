@@ -1,4 +1,4 @@
-v2.60.0 V3 NOT RELEASED
-v3_ready=False
-blocking_gate_failures=V3-11
-reason=blocking V3 gates fail: V3-11
+v3.0.0 V3 RELEASED
+v3_ready=True
+blocking_gate_failures=none
+reason=all blocking V3 gates pass

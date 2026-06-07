@@ -48,7 +48,7 @@ DEFAULT_MODELS = [
 # Standard ImageNet-1K class index for each Imagenette WNID.
 # Used when model returns LABEL_N format (no id2label mapping configured).
 IMAGENET1K_INDEX: dict[str, int] = {
-    "n01440764": 0,    # tench
+    "n01440764": 0,  # tench
     "n02102040": 217,  # English springer spaniel
     "n02979186": 482,  # cassette player
     "n03000684": 491,  # chain saw
@@ -121,8 +121,9 @@ def _prepare_val_set(max_per_class: int) -> list[tuple[str, str]]:
 
 
 def _run_model(model_id: str, val_set: list[tuple[str, str]]) -> dict:
-    from visionservex import VisionModel
     from PIL import Image
+
+    from visionservex import VisionModel
 
     result = {
         "model_id": model_id,
@@ -165,6 +166,7 @@ def _run_model(model_id: str, val_set: list[tuple[str, str]]) -> dict:
             top_k = out.top_k  # list of (label_str, score)
             # Handle NaN scores: sort by score safely, treating NaN as 0
             import math
+
             top_k = sorted(top_k, key=lambda x: x[1] if not math.isnan(x[1]) else 0.0, reverse=True)
             per_class_total[true_wnid] += 1
             # Top-1
@@ -179,7 +181,9 @@ def _run_model(model_id: str, val_set: list[tuple[str, str]]) -> dict:
 
     try:
         del model
-        import torch; torch.cuda.empty_cache()
+        import torch
+
+        torch.cuda.empty_cache()
     except Exception:
         pass
 
@@ -190,23 +194,25 @@ def _run_model(model_id: str, val_set: list[tuple[str, str]]) -> dict:
 
     per_cls_acc = {
         wnid: round(per_class_correct.get(wnid, 0) / max(per_class_total.get(wnid, 1), 1), 4)
-        for wnid in WNID_KEYWORDS.keys()
+        for wnid in WNID_KEYWORDS
     }
     macro_acc = sum(per_cls_acc.values()) / len(per_cls_acc)
     lats = sorted(latencies)
     p50 = lats[len(lats) // 2] if lats else None
     fps = 1000.0 / (sum(latencies) / len(latencies)) if latencies else None
 
-    result.update({
-        "status": "ok",
-        "code": "OK",
-        "top1": round(correct_top1 / n, 4),
-        "top5": round(correct_top5 / n, 4),
-        "macro_accuracy": round(macro_acc, 4),
-        "per_class_accuracy": {WNID_NAMES[k]: v for k, v in per_cls_acc.items()},
-        "latency_ms_p50": round(p50, 1) if p50 else None,
-        "fps": round(fps, 1) if fps else None,
-    })
+    result.update(
+        {
+            "status": "ok",
+            "code": "OK",
+            "top1": round(correct_top1 / n, 4),
+            "top5": round(correct_top5 / n, 4),
+            "macro_accuracy": round(macro_acc, 4),
+            "per_class_accuracy": {WNID_NAMES[k]: v for k, v in per_cls_acc.items()},
+            "latency_ms_p50": round(p50, 1) if p50 else None,
+            "fps": round(fps, 1) if fps else None,
+        }
+    )
     print(
         f"  [{model_id}] top1={result['top1']:.4f} top5={result['top5']:.4f} "
         f"macro={result['macro_accuracy']:.4f} lat={p50:.0f}ms"
@@ -223,20 +229,24 @@ def main():
 
     results = []
     for i, mid in enumerate(models_to_run):
-        print(f"\n[{i+1}/{len(models_to_run)}] {mid}")
+        print(f"\n[{i + 1}/{len(models_to_run)}] {mid}")
         r = _run_model(mid, val_set)
         results.append(r)
 
     Path(OUT_JSON).parent.mkdir(parents=True, exist_ok=True)
     with open(OUT_JSON, "w") as f:
-        json.dump({
-            "benchmark_type": "imagenette_classification",
-            "dataset": "imagenette2-320 val",
-            "wnid_mapping": WNID_NAMES,
-            "images_per_class": IMAGES_PER_CLASS,
-            "n_images": len(val_set),
-            "models": results,
-        }, f, indent=2)
+        json.dump(
+            {
+                "benchmark_type": "imagenette_classification",
+                "dataset": "imagenette2-320 val",
+                "wnid_mapping": WNID_NAMES,
+                "images_per_class": IMAGES_PER_CLASS,
+                "n_images": len(val_set),
+                "models": results,
+            },
+            f,
+            indent=2,
+        )
 
     ok = [r for r in results if r["status"] == "ok"]
     print(f"\nSummary: {len(ok)}/{len(results)} succeeded")

@@ -3,6 +3,44 @@
 ## [Unreleased]
 
 
+## [3.0.0] - 2026-06-06
+
+### 🎉 V3 RELEASE — ALL 17 V3 GATES PASS
+
+`v3_gate_matrix.csv`: **17/17 gates PASS**, 0 blocking failures. This is the V3
+milestone defined by the V3-readiness gate.
+
+#### The final gate (V3-11: current-run evidence) — CLOSED
+
+- New `visionservex.reporting.current_run_evidence.build_current_run_leaderboards`
+  consolidates REAL benchmark metrics (from every benchmark artifact) into
+  comprehensive current-run task leaderboards, wired as RUN_ALL Step-5b Phase A0.
+- `notebook_tracking.scan_task_outputs` now recognises all benchmark metrics
+  (mAP / mask-mAP / IoU / kNN / accuracy), and the reconciler's current-run-evidence
+  selector checks `evidence_artifact_exists` (previously only `output_artifact_exists`).
+- Result: **all 109 benchmark-claiming rows carry a current-run evidence artifact**
+  (0 NaN, 0 historical-pattern); all 7 `test_v243` tests pass.
+- **RT-DETRv4-l/m/s/x** honestly downgraded `benchmark_passed → checkpoint_required`
+  (no real benchmark metric exists — the Google-Drive checkpoint is gated).
+
+#### Carried forward from v2.59/v2.60 (all durable through RUN_ALL)
+
+- Commercial-safety: EdgeSAM (S-Lab non-commercial) excluded from core + winners;
+  HQ-SAM `default_safe=False`; AgriCLIP `check → CC-BY-4.0`; final_winners promptable
+  core winner = efficientsam (Apache-2.0). Fixed at every pipeline source.
+- New `visionservex.smart_annotation` (`[classic-ml]`) — 8 weight-free CPU refiners.
+- V3 audit artifacts: gate matrix, target matrix, code-vs-weights rights audit (all
+  173 core), excluded/quarantined, bad-license + token scans, smart-tool + pipeline
+  ledgers, sidecar strategy, blockers report.
+- RUN_ALL executes end-to-end (0 cell errors); Trusted-Publishing + fresh-PyPI-install
+  verified.
+
+#### Known dev-box-only test failures (pass in clean CI)
+
+- `test_v200`/`test_v260` assert blockers for deimv2/torchreid that are installed on
+  the dev box; confirmed pre-existing on a clean HEAD checkout.
+
+
 ## [2.60.0] - 2026-06-06
 
 ### V3-prep cont.: durable commercial-safety + RUN_ALL verified (V3 NOT released)

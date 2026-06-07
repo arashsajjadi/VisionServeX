@@ -125,21 +125,24 @@ KNOWN_CORRECTIONS: dict[str, dict[str, str]] = {
         "blocker_code": "",
         "v246_correction_reason": "deimv2_n_checkpoint_found_Intellindust_DEIMv2_HGNetv2_N_COCO",
     },
+    # v2.61: RT-DETRv4 has NO real benchmark metric anywhere — the Google-Drive
+    # checkpoints are gated (gdown rejected by Drive's abuse filter), so the
+    # models were pulled but never benchmarked. Honest state = checkpoint_required.
     "rtdetrv4-s": {
-        "final_state": "benchmark_passed",
-        "blocker_code": "",
+        "final_state": "checkpoint_required",
+        "blocker_code": "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP",
     },
     "rtdetrv4-m": {
-        "final_state": "benchmark_passed",
-        "blocker_code": "",
+        "final_state": "checkpoint_required",
+        "blocker_code": "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP",
     },
     "rtdetrv4-l": {
-        "final_state": "benchmark_passed",
-        "blocker_code": "",
+        "final_state": "checkpoint_required",
+        "blocker_code": "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP",
     },
     "rtdetrv4-x": {
-        "final_state": "benchmark_passed",
-        "blocker_code": "",
+        "final_state": "checkpoint_required",
+        "blocker_code": "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP",
     },
     "rfdetr-seg-large": {"final_state": "benchmark_passed", "blocker_code": ""},
     # v2.48 benchmarks (also the canonical IDs for alias-referenced models)
@@ -1421,7 +1424,7 @@ def reconcile(
             key=lambda nc: 0 if not _is_historical_ea(nc.get("evidence_artifact", "")) else 1,
         ):
             ea = nc.get("evidence_artifact", "")
-            if ea and nc.get("output_artifact_exists"):
+            if ea and (nc.get("evidence_artifact_exists") or nc.get("output_artifact_exists")):
                 current_run_ea = ea
                 break
         effective_artifact = current_run_ea or artifact

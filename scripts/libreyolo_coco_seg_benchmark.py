@@ -61,7 +61,7 @@ def _get_cls(name: str):
 
 
 def _coco_cat_map(coco_gt):
-    return {i: cat_id for i, cat_id in enumerate(sorted(coco_gt.cats.keys()))}
+    return dict(enumerate(sorted(coco_gt.cats.keys())))
 
 
 def _encode_mask(mask_t):
@@ -138,7 +138,7 @@ def _run_model(model_id: str, coco_gt, img_ids, img_paths, cat_map):
 
     preds = []
     latencies = []
-    for img_id, img_path in zip(img_ids, img_paths):
+    for img_id, img_path in zip(img_ids, img_paths, strict=False):
         try:
             t0 = time.perf_counter()
             out = model(source=img_path, save=False, verbose=False)
@@ -242,7 +242,9 @@ def main():
     ok = sum(1 for r in results if r["status"] == "ok")
     mismatch = sum(1 for r in results if r["status"] == "capability_mismatch")
     failed = len(results) - ok - mismatch
-    print(f"\nSummary: {ok} benchmark_passed, {mismatch} capability_mismatch, {failed} other failed")
+    print(
+        f"\nSummary: {ok} benchmark_passed, {mismatch} capability_mismatch, {failed} other failed"
+    )
     if ok:
         best = max((r["mask_mAP50_95"] for r in results if r["status"] == "ok"), default=0)
         print(f"Best mask mAP50:95: {best:.4f}")

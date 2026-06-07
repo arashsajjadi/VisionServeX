@@ -1,9 +1,9 @@
-family,models,n,estimated_effort,v3_relevance,next_command,why_not_solved_now
-co-dino,co-dino-inst-vit-l-coco,1,high,low,visionservex sidecar create co-dino --execute,heavy sidecar env build deferred under AGENT_RULES; serialize one at a time
-codetr,co-dino-inst-vit-l-lvis,1,high,low,visionservex sidecar create codetr --execute,heavy sidecar env build deferred under AGENT_RULES; serialize one at a time
-internimage,"internimage-b,internimage-h,internimage-l,internimage-s,internimage-t",5,med,low,visionservex sidecar create internimage --execute,heavy sidecar env build deferred under AGENT_RULES; serialize one at a time
-maskdino,"maskdino-r50-coco,maskdino-r50-panoptic,maskdino-swinl-coco",3,high,low,visionservex sidecar create maskdino --execute,heavy sidecar env build deferred under AGENT_RULES; serialize one at a time
-medsam2,medsam2,1,low-med,medium,visionservex sidecar create medsam2 --execute,heavy sidecar env build deferred under AGENT_RULES; serialize one at a time
-oneformer,oneformer-dinat-large,1,med,medium,visionservex sidecar create oneformer --execute,heavy sidecar env build deferred under AGENT_RULES; serialize one at a time
-rtmdet,"rtmdet-r-l,rtmdet-r-m,rtmdet-r-s,rtmdet-r-t,rtmdet-r2-l,rtmdet-r2-m,rtmdet-r2-t",7,med-high,low,visionservex sidecar create rtmdet --execute,heavy sidecar env build deferred under AGENT_RULES; serialize one at a time
-seem,"seem-davit-d3,seem-focal-t",2,high,low,visionservex sidecar create seem --execute,heavy sidecar env build deferred under AGENT_RULES; serialize one at a time
+family,models,n,next_command,why_not_solved_now
+co-dino,co-dino-inst-vit-l-coco,1,visionservex sidecar create co-dino --execute,heavy sidecar build deferred under AGENT_RULES
+codetr,co-dino-inst-vit-l-lvis,1,visionservex sidecar create codetr --execute,heavy sidecar build deferred under AGENT_RULES
+internimage,"internimage-b,internimage-h,internimage-l,internimage-s,internimage-t",5,visionservex sidecar create internimage --execute,heavy sidecar build deferred under AGENT_RULES
+maskdino,"maskdino-r50-coco,maskdino-r50-panoptic,maskdino-swinl-coco",3,visionservex sidecar create maskdino --execute,heavy sidecar build deferred under AGENT_RULES
+medsam2,medsam2,1,visionservex sidecar create medsam2 --execute,heavy sidecar build deferred under AGENT_RULES
+oneformer,oneformer-dinat-large,1,visionservex sidecar create oneformer --execute,heavy sidecar build deferred under AGENT_RULES
+rtmdet,"rtmdet-r-l,rtmdet-r-m,rtmdet-r-s,rtmdet-r-t,rtmdet-r2-l,rtmdet-r2-m,rtmdet-r2-t",7,visionservex sidecar create rtmdet --execute,heavy sidecar build deferred under AGENT_RULES
+seem,"seem-davit-d3,seem-focal-t",2,visionservex sidecar create seem --execute,heavy sidecar build deferred under AGENT_RULES

@@ -47,11 +47,12 @@ def test_known_corrections_present() -> None:
         "oneformer-convnext-large": "wired",
         "deim-m": "wired",
         "deim-s": "wired",
-        # v2.41: all 4 RT-DETRv4 variants benchmarked (mAP50:95 0.40-0.48)
-        "rtdetrv4-s": "benchmark_passed",
-        "rtdetrv4-m": "benchmark_passed",
-        "rtdetrv4-l": "benchmark_passed",
-        "rtdetrv4-x": "benchmark_passed",
+        # v2.61: RT-DETRv4 has no real benchmark (gated Google-Drive checkpoint)
+        # -> honest state checkpoint_required, not benchmark_passed.
+        "rtdetrv4-s": "checkpoint_required",
+        "rtdetrv4-m": "checkpoint_required",
+        "rtdetrv4-l": "checkpoint_required",
+        "rtdetrv4-x": "checkpoint_required",
     }
     for mid, state in expected.items():
         assert mid in KNOWN_CORRECTIONS, f"{mid} not in KNOWN_CORRECTIONS"

@@ -55,9 +55,10 @@ def _run_model(
     threshold: float,
 ) -> dict:
     """Benchmark one open-vocab model against COCO GT."""
-    from visionservex import VisionModel
     from PIL import Image
     from pycocotools.cocoeval import COCOeval
+
+    from visionservex import VisionModel
 
     result = {
         "model_id": model_id,
@@ -102,7 +103,7 @@ def _run_model(
     preds: list[dict] = []
     latencies: list[float] = []
 
-    for img_id, img_path in zip(eff_ids, eff_paths):
+    for img_id, img_path in zip(eff_ids, eff_paths, strict=False):
         try:
             img = Image.open(img_path).convert("RGB")
             t0 = time.perf_counter()
@@ -133,18 +134,22 @@ def _run_model(
                     continue
                 x1, y1 = float(box.x1), float(box.y1)
                 x2, y2 = float(box.x2), float(box.y2)
-                preds.append({
-                    "image_id": img_id,
-                    "category_id": cat_id,
-                    "bbox": [x1, y1, x2 - x1, y2 - y1],
-                    "score": score,
-                })
+                preds.append(
+                    {
+                        "image_id": img_id,
+                        "category_id": cat_id,
+                        "bbox": [x1, y1, x2 - x1, y2 - y1],
+                        "score": score,
+                    }
+                )
         except Exception:
             continue
 
     try:
         del model
-        import torch; torch.cuda.empty_cache()
+        import torch
+
+        torch.cuda.empty_cache()
     except Exception:
         pass
 
@@ -159,20 +164,24 @@ def _run_model(
         coco_dt = coco_gt.loadRes(preds)
         ev = COCOeval(coco_gt, coco_dt, iouType="bbox")
         ev.params.imgIds = img_ids
-        ev.evaluate(); ev.accumulate(); ev.summarize()
+        ev.evaluate()
+        ev.accumulate()
+        ev.summarize()
         lats = sorted(latencies)
         p50 = lats[len(lats) // 2] if lats else None
         fps = 1000.0 / (sum(latencies) / len(latencies)) if latencies else None
-        result.update({
-            "status": "ok",
-            "code": "OK",
-            "mAP50_95": round(float(ev.stats[0]), 4),
-            "AP50": round(float(ev.stats[1]), 4),
-            "AP75": round(float(ev.stats[2]), 4),
-            "AR100": round(float(ev.stats[8]), 4),
-            "latency_ms_p50": round(p50, 1) if p50 else None,
-            "fps": round(fps, 1) if fps else None,
-        })
+        result.update(
+            {
+                "status": "ok",
+                "code": "OK",
+                "mAP50_95": round(float(ev.stats[0]), 4),
+                "AP50": round(float(ev.stats[1]), 4),
+                "AP75": round(float(ev.stats[2]), 4),
+                "AR100": round(float(ev.stats[8]), 4),
+                "latency_ms_p50": round(p50, 1) if p50 else None,
+                "fps": round(fps, 1) if fps else None,
+            }
+        )
         print(
             f"  [{model_id}] mAP50:95={ev.stats[0]:.4f} AP50={ev.stats[1]:.4f} "
             f"lat={p50:.0f}ms fps={fps:.0f}"
@@ -210,20 +219,24 @@ def main():
 
     results = []
     for i, mid in enumerate(models_to_run):
-        print(f"\n[{i+1}/{len(models_to_run)}] {mid}")
+        print(f"\n[{i + 1}/{len(models_to_run)}] {mid}")
         r = _run_model(mid, coco_gt, img_ids, img_paths, cat_names, name_to_cat_id, THRESHOLD)
         results.append(r)
 
     Path(OUT_JSON).parent.mkdir(parents=True, exist_ok=True)
     with open(OUT_JSON, "w") as f:
-        json.dump({
-            "benchmark_type": "open_vocab_coco_mAP",
-            "prompt_source": PROMPT_SOURCE,
-            "coco_categories": cat_names,
-            "n_images": len(img_ids),
-            "threshold": THRESHOLD,
-            "models": results,
-        }, f, indent=2)
+        json.dump(
+            {
+                "benchmark_type": "open_vocab_coco_mAP",
+                "prompt_source": PROMPT_SOURCE,
+                "coco_categories": cat_names,
+                "n_images": len(img_ids),
+                "threshold": THRESHOLD,
+                "models": results,
+            },
+            f,
+            indent=2,
+        )
 
     ok = [r for r in results if r["status"] == "ok"]
     print(f"\nSummary: {len(ok)}/{len(results)} benchmark_passed")

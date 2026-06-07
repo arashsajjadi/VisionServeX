@@ -116,12 +116,14 @@ def test_csv_json_row_count_match() -> None:
     )
 
 
-def test_rtdetrv4_x_is_benchmark_passed() -> None:
+def test_rtdetrv4_x_is_checkpoint_required() -> None:
+    # v2.61: RT-DETRv4 has NO real benchmark metric anywhere (Google-Drive
+    # checkpoints are gated). Honest state = checkpoint_required, not benchmark_passed.
     rows = {r["model_id"]: r for r in _load_csv()}
     if "rtdetrv4-x" in rows:
-        assert rows["rtdetrv4-x"]["final_state"] == "benchmark_passed", (
-            f"rtdetrv4-x: stale state {rows['rtdetrv4-x']['final_state']!r} — "
-            "v2.41 benchmarked all RT-DETRv4 variants"
+        assert rows["rtdetrv4-x"]["final_state"] == "checkpoint_required", (
+            f"rtdetrv4-x: {rows['rtdetrv4-x']['final_state']!r} — expected checkpoint_required "
+            "(no real benchmark; gated checkpoint)"
         )
 
 

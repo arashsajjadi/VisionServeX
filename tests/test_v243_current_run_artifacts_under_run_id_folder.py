@@ -16,9 +16,8 @@ LEDGER_CSV = (
     / "notebook/99_final_report/reports/model_coverage_ledger.csv"
 )
 
-HEALTHY_STATES = frozenset(
-    {"benchmark_passed", "smoke_passed", "demo_passed_sidecar", "contract_passed"}
-)
+# Benchmark-claiming states only (demo_passed_sidecar is a demo, not a benchmark).
+HEALTHY_STATES = frozenset({"benchmark_passed", "smoke_passed", "contract_passed"})
 HISTORICAL_PATTERNS = (
     "v230",
     "v234",

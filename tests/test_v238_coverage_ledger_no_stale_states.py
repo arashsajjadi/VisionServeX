@@ -84,9 +84,11 @@ def test_deimv2_smaller_sizes_are_benchmark_passed() -> None:
 
 
 def test_rtdetrv4_checkpoint_downloaded_or_benchmark() -> None:
-    """v2.38 said checkpoint_downloaded; v2.41 benchmarked all 4 variants."""
+    """v2.38 checkpoint_downloaded; v2.41 marked benchmark_passed; v2.61 corrected to
+    checkpoint_required (no real benchmark metric exists — the Google-Drive checkpoint
+    is gated, so the variants were pulled but never benchmarked)."""
     rows = {r["model_id"]: r for r in _load()}
-    allowed = {"checkpoint_downloaded", "benchmark_passed", "smoke_passed"}
+    allowed = {"checkpoint_downloaded", "checkpoint_required", "benchmark_passed", "smoke_passed"}
     for size in ["s", "m", "l", "x"]:
         mid = f"rtdetrv4-{size}"
         r = rows.get(mid)

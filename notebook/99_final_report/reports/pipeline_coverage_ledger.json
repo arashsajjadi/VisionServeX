@@ -1,6 +1,5 @@
 {
   "schema": "pipeline_coverage_ledger.v1",
-  "note": "Composed text-to-mask pipelines; NOT counted as single models.",
   "pipelines": [
     {
       "pipeline_id": "grounding-dino-swin-b+sam2.1-hiera-large",
@@ -10,9 +9,7 @@
       "segmenter_model_id": "sam2.1-hiera-large",
       "segmenter_final_state": "benchmark_passed",
       "both_parts_benchmark_passed": true,
-      "pipeline_status": "ready_to_benchmark",
-      "is_single_model": false,
-      "exact_benchmark_command": "visionservex benchmark-text-to-mask --pipelines grounding-dino-swin-b+sam2.1-hiera-large --dataset coco:/home/arash/datasets/coco_val2017_400_vsx"
+      "is_single_model": false
     },
     {
       "pipeline_id": "grounding-dino-swin-t+sam2.1-hiera-small",
@@ -22,9 +19,7 @@
       "segmenter_model_id": "sam2.1-hiera-small",
       "segmenter_final_state": "benchmark_passed",
       "both_parts_benchmark_passed": true,
-      "pipeline_status": "ready_to_benchmark",
-      "is_single_model": false,
-      "exact_benchmark_command": "visionservex benchmark-text-to-mask --pipelines grounding-dino-swin-t+sam2.1-hiera-small --dataset coco:/home/arash/datasets/coco_val2017_400_vsx"
+      "is_single_model": false
     },
     {
       "pipeline_id": "grounding-dino-tiny+sam2-hiera-tiny",
@@ -34,9 +29,7 @@
       "segmenter_model_id": "sam2-hiera-tiny",
       "segmenter_final_state": "benchmark_passed",
       "both_parts_benchmark_passed": true,
-      "pipeline_status": "ready_to_benchmark",
-      "is_single_model": false,
-      "exact_benchmark_command": "visionservex benchmark-text-to-mask --pipelines grounding-dino-tiny+sam2-hiera-tiny --dataset coco:/home/arash/datasets/coco_val2017_400_vsx"
+      "is_single_model": false
     },
     {
       "pipeline_id": "grounding-dino-original-swin-b+sam-vit-huge",
@@ -46,9 +39,7 @@
       "segmenter_model_id": "sam-vit-huge",
       "segmenter_final_state": "benchmark_passed",
       "both_parts_benchmark_passed": true,
-      "pipeline_status": "ready_to_benchmark",
-      "is_single_model": false,
-      "exact_benchmark_command": "visionservex benchmark-text-to-mask --pipelines grounding-dino-original-swin-b+sam-vit-huge --dataset coco:/home/arash/datasets/coco_val2017_400_vsx"
+      "is_single_model": false
     }
   ]
 }

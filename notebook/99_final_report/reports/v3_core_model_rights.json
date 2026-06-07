@@ -487,12 +487,12 @@
       "final_state": "external_api_only",
       "default_safe": "False",
       "ledger_license_status": "Custom",
-      "code_license": "Apache-2.0 (API client wrapper only)",
-      "weights_license": "Proprietary / closed (not published; DeepDataSpace API ToS)",
+      "code_license": "Apache-2.0 (API client wrapper)",
+      "weights_license": "Proprietary / closed (API-served, not published)",
       "commercial_use_allowed": "conditional",
       "redistribution_allowed": "no",
       "core_allowed": "gated_byot_only",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "rights_audit"
     },
     {
       "model_id": "dinov2-base",
@@ -576,7 +576,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "florence-2-base",
@@ -613,12 +613,12 @@
       "final_state": "auth_required",
       "default_safe": "False",
       "ledger_license_status": "Apache-2.0",
-      "code_license": "Apache-2.0 (API client wrapper only)",
-      "weights_license": "Proprietary / closed (not published; DeepDataSpace API ToS)",
-      "commercial_use_allowed": "conditional",
-      "redistribution_allowed": "no",
-      "core_allowed": "gated_byot_only",
-      "source": "v3_model_rights_audit (adversarial)"
+      "code_license": "Apache-2.0",
+      "weights_license": "Apache-2.0",
+      "commercial_use_allowed": "yes",
+      "redistribution_allowed": "yes",
+      "core_allowed": "yes",
+      "source": "license_status"
     },
     {
       "model_id": "grounding-dino-1.5-pro",
@@ -627,12 +627,12 @@
       "final_state": "external_api_only",
       "default_safe": "False",
       "ledger_license_status": "Custom",
-      "code_license": "Apache-2.0 (API client wrapper only)",
-      "weights_license": "Proprietary / closed (not published; DeepDataSpace API ToS)",
+      "code_license": "Apache-2.0 (API client wrapper)",
+      "weights_license": "Proprietary / closed (API-served, not published)",
       "commercial_use_allowed": "conditional",
       "redistribution_allowed": "no",
       "core_allowed": "gated_byot_only",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "rights_audit"
     },
     {
       "model_id": "grounding-dino-1.6",
@@ -641,12 +641,12 @@
       "final_state": "auth_required",
       "default_safe": "False",
       "ledger_license_status": "Apache-2.0",
-      "code_license": "Apache-2.0 (API client wrapper only)",
-      "weights_license": "Proprietary / closed (not published; DeepDataSpace API ToS)",
-      "commercial_use_allowed": "conditional",
-      "redistribution_allowed": "no",
-      "core_allowed": "gated_byot_only",
-      "source": "v3_model_rights_audit (adversarial)"
+      "code_license": "Apache-2.0",
+      "weights_license": "Apache-2.0",
+      "commercial_use_allowed": "yes",
+      "redistribution_allowed": "yes",
+      "core_allowed": "yes",
+      "source": "license_status"
     },
     {
       "model_id": "grounding-dino-1.6-pro",
@@ -655,12 +655,12 @@
       "final_state": "external_api_only",
       "default_safe": "False",
       "ledger_license_status": "Custom",
-      "code_license": "Apache-2.0 (API client wrapper only)",
-      "weights_license": "Proprietary / closed (not published; DeepDataSpace API ToS)",
+      "code_license": "Apache-2.0 (API client wrapper)",
+      "weights_license": "Proprietary / closed (API-served, not published)",
       "commercial_use_allowed": "conditional",
       "redistribution_allowed": "no",
       "core_allowed": "gated_byot_only",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "rights_audit"
     },
     {
       "model_id": "grounding-dino-2-audit",
@@ -683,12 +683,12 @@
       "final_state": "benchmark_passed",
       "default_safe": "True",
       "ledger_license_status": "",
-      "code_license": "Apache-2.0",
-      "weights_license": "Apache-2.0",
-      "commercial_use_allowed": "yes",
-      "redistribution_allowed": "yes",
-      "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "code_license": "unknown",
+      "weights_license": "unknown",
+      "commercial_use_allowed": "unknown",
+      "redistribution_allowed": "unknown",
+      "core_allowed": "legal_review_required",
+      "source": "fallback"
     },
     {
       "model_id": "grounding-dino-original-swin-t",
@@ -697,12 +697,12 @@
       "final_state": "benchmark_passed",
       "default_safe": "True",
       "ledger_license_status": "",
-      "code_license": "Apache-2.0",
-      "weights_license": "Apache-2.0",
-      "commercial_use_allowed": "yes",
-      "redistribution_allowed": "yes",
-      "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "code_license": "unknown",
+      "weights_license": "unknown",
+      "commercial_use_allowed": "unknown",
+      "redistribution_allowed": "unknown",
+      "core_allowed": "legal_review_required",
+      "source": "fallback"
     },
     {
       "model_id": "grounding-dino-swin-b",
@@ -716,7 +716,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "grounding-dino-swin-t",
@@ -730,7 +730,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "grounding-dino-tiny",
@@ -744,7 +744,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "hq-sam",
@@ -754,11 +754,11 @@
       "default_safe": "False",
       "ledger_license_status": "Apache-2.0 (code/weights); HQSeg-44K training data partly non-commercial",
       "code_license": "Apache-2.0",
-      "weights_license": "Apache-2.0 (declared) but trained on NON-COMMERCIAL data (HQSeg-44K)",
+      "weights_license": "Apache-2.0 (declared); HQSeg-44K training data partly non-commercial",
       "commercial_use_allowed": "conditional",
       "redistribution_allowed": "yes",
       "core_allowed": "legal_review_required",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "manifest+audit"
     },
     {
       "model_id": "internimage-b",
@@ -1598,7 +1598,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "nnunet-v2",
@@ -1804,11 +1804,11 @@
       "default_safe": "False",
       "ledger_license_status": "PML 1.0 (Plus/XL/2XL); core sizes Apache-2.0",
       "code_license": "Apache-2.0",
-      "weights_license": "Apache-2.0",
+      "weights_license": "Apache-2.0 (this is a core size; PML applies to XL/2XL only)",
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "family"
     },
     {
       "model_id": "rfdetr-seg-medium",
@@ -1822,7 +1822,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "rfdetr-seg-nano",
@@ -1836,7 +1836,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "rfdetr-seg-small",
@@ -1850,7 +1850,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "rfdetr-small",
@@ -1870,7 +1870,7 @@
       "model_id": "rtdetrv4-l",
       "family": "rtdetrv4",
       "task": "detect",
-      "final_state": "benchmark_passed",
+      "final_state": "checkpoint_required",
       "default_safe": "True",
       "ledger_license_status": "Apache-2.0",
       "code_license": "Apache-2.0",
@@ -1884,7 +1884,7 @@
       "model_id": "rtdetrv4-m",
       "family": "rtdetrv4",
       "task": "detect",
-      "final_state": "benchmark_passed",
+      "final_state": "checkpoint_required",
       "default_safe": "True",
       "ledger_license_status": "Apache-2.0",
       "code_license": "Apache-2.0",
@@ -1898,7 +1898,7 @@
       "model_id": "rtdetrv4-s",
       "family": "rtdetrv4",
       "task": "detect",
-      "final_state": "benchmark_passed",
+      "final_state": "checkpoint_required",
       "default_safe": "True",
       "ledger_license_status": "Apache-2.0",
       "code_license": "Apache-2.0",
@@ -1912,7 +1912,7 @@
       "model_id": "rtdetrv4-x",
       "family": "rtdetrv4",
       "task": "detect",
-      "final_state": "benchmark_passed",
+      "final_state": "checkpoint_required",
       "default_safe": "True",
       "ledger_license_status": "Apache-2.0",
       "code_license": "Apache-2.0",
@@ -2130,7 +2130,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "sam-vit-huge",
@@ -2144,7 +2144,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "sam-vit-large",
@@ -2158,7 +2158,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "sam2-hiera-base-plus",
@@ -2172,7 +2172,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "sam2-hiera-large",
@@ -2186,7 +2186,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "sam2-hiera-small",
@@ -2200,7 +2200,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "sam2-hiera-tiny",
@@ -2214,7 +2214,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "sam2.1-hiera-base-plus",
@@ -2228,7 +2228,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "sam2.1-hiera-large",
@@ -2242,7 +2242,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "sam2.1-hiera-small",
@@ -2256,7 +2256,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "sam2.1-hiera-tiny",
@@ -2270,7 +2270,7 @@
       "commercial_use_allowed": "yes",
       "redistribution_allowed": "yes",
       "core_allowed": "yes",
-      "source": "v3_model_rights_audit (adversarial)"
+      "source": "license_status"
     },
     {
       "model_id": "sam3-base",
@@ -2279,12 +2279,12 @@
       "final_state": "auth_required",
       "default_safe": "False",
       "ledger_license_status": "Apache-2.0",
-      "code_license": "SAM License (Meta custom, updated 2025-11-19)",
-      "weights_license": "SAM License (Meta custom, updated 2025-11-19)",
-      "commercial_use_allowed": "conditional",
-      "redistribution_allowed": "no",
-      "core_allowed": "gated_byot_only",
-      "source": "v3_model_rights_audit (adversarial)"
+      "code_license": "Apache-2.0",
+      "weights_license": "Apache-2.0",
+      "commercial_use_allowed": "yes",
+      "redistribution_allowed": "yes",
+      "core_allowed": "yes",
+      "source": "license_status"
     },
     {
       "model_id": "seem-davit-d3",
