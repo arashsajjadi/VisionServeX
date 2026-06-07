@@ -1,0 +1,12 @@
+{
+  "total": 1673,
+  "passed": 1613,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 60,
+  "pass_pct_of_run": 96.41,
+  "pass_pct_of_nonskipped": 100.0,
+  "failed_by_layer": {},
+  "failed_preexisting_guess": 0,
+  "failed_new_guess": 0
+}

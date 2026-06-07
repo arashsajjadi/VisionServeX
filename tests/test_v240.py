@@ -16,6 +16,10 @@ from PIL import Image
 
 @pytest.mark.fast
 def test_anomalib_adapter_unavailable():
+    import importlib.util
+
+    if importlib.util.find_spec("anomalib") is not None:
+        pytest.skip("anomalib is installed; the unavailable-dependency path is not exercisable")
     from visionservex.integrations.anomalib_adapter import (
         AnomalibUnavailableError,
         PatchCoreAdapter,
@@ -40,9 +44,15 @@ def test_anomalib_adapter_unavailable_to_dict():
 
 @pytest.mark.fast
 def test_anomalib_adapter_detect_version_none():
+    import sys
+
     from visionservex.integrations.anomalib_adapter import detect_anomalib_version
 
-    with patch("importlib.import_module", side_effect=ImportError("no anomalib")):
+    # detect_anomalib_version() uses a direct `import anomalib`, so patching
+    # importlib.import_module never affected it (it returned the real version when anomalib
+    # was installed). Force the direct import to fail via sys.modules so the None-path is
+    # actually exercised regardless of whether anomalib is installed on the host.
+    with patch.dict(sys.modules, {"anomalib": None}):
         assert detect_anomalib_version() is None
 
 

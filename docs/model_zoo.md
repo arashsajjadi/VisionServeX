@@ -2,6 +2,13 @@
 
 The bundled registry (`visionservex list-models`) is always authoritative. This page is a curated, human-readable overview. Run `visionservex list-models --json` for machine-readable data.
 
+> **Measured coverage (v3.3 truth audit).** Of 173 core model rows: **111 PASS (64.16%)**,
+> 44 blocked (gated/checkpoint/sidecar/legal — honest, not failures), 16 excluded
+> (non-commercial/restricted, quarantined to external baselines), 0 FAIL. Default-safe pass
+> 70.7%; **evidence completeness 100%** (every PASS row has a real on-disk, task-appropriate
+> metric); 0 bad-license default-safe rows. Pipelines 4/4 and tools 21/21 pass. See
+> [reports.md](reports.md) and `notebook/99_final_report/reports/v33_*` for the full matrices.
+
 ## Status legend
 
 | Status | Meaning |

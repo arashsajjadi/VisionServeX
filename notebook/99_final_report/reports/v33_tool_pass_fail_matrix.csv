@@ -1,0 +1,22 @@
+tool_id,tool_kind,final_state,dependency_license,commercial_safe,category,counts_as_pass,counts_as_fail,counts_as_blocked,evidence_artifact
+classic-intelligent-scissors,classic-smart,benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,reports/v3_classic_smart_refine_benchmark.json
+classic-grabcut,classic-smart,benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,reports/v3_classic_smart_refine_benchmark.json
+classic-marker-watershed,classic-smart,benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,reports/v3_classic_smart_refine_benchmark.json
+classic-edge-plus,classic-smart,benchmark_passed,OpenCV Apache-2.0 + scikit-image BSD-3,True,PASS,True,False,False,reports/v3_classic_smart_refine_benchmark.json
+classic-slic-graphcut,classic-smart,benchmark_passed,scikit-image BSD-3 + OpenCV Apache-2.0,True,PASS,True,False,False,reports/v3_classic_smart_refine_benchmark.json
+classic-random-walker,classic-smart,benchmark_passed,scikit-image BSD-3,True,PASS,True,False,False,reports/v3_classic_smart_refine_benchmark.json
+classic-slic-rf-smooth,classic-smart,benchmark_passed,scikit-image BSD-3 + scikit-learn BSD-3,True,PASS,True,False,False,reports/v3_classic_smart_refine_benchmark.json
+classic-interactive-rf,classic-smart,benchmark_passed,scikit-learn BSD-3,True,PASS,True,False,False,reports/v3_classic_smart_refine_benchmark.json
+opencv-connected-components-refine,cv2-pro,tool_benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,
+opencv-contour-snap,cv2-pro,tool_benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,
+opencv-distance-transform-markers,cv2-pro,tool_benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,
+opencv-dnn-onnx-runner,cv2-pro,tool_benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,
+opencv-grabcut-plus,cv2-pro,tool_benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,
+opencv-intelligent-scissors,cv2-pro,tool_benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,
+opencv-kmeans-color-segment,cv2-pro,tool_benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,
+opencv-mser-proposals,cv2-pro,tool_benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,
+opencv-selective-search-fast,cv2-pro,tool_benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,
+opencv-selective-search-quality,cv2-pro,tool_benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,
+opencv-video-fg-bg-knn,cv2-pro,tool_benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,
+opencv-video-fg-bg-mog2,cv2-pro,tool_benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,
+opencv-watershed-plus,cv2-pro,tool_benchmark_passed,OpenCV Apache-2.0,True,PASS,True,False,False,

@@ -249,7 +249,15 @@ def test_deimv2_and_rtdetrv4_have_blockers():
 
     deimv2_entries = {k for k in SOURCE_MANIFEST if k.startswith("deimv2")}
     assert deimv2_entries, "No DEIMv2 entries in manifest"
+    # v2.48+: DEIMv2 was genuinely wired and benchmarked — most variants
+    # (atto/femto/pico/n/m/l/x) are now benchmark_passed in model_coverage_ledger.csv,
+    # so they are no longer non-runnable stubs. The original v2.00 assertion ("all DEIMv2
+    # entries are stubs") is stale. Current truth: any entry still marked non-runnable must
+    # document its exact blocker, and at least one variant must now be runnable.
     for k in deimv2_entries:
         e = SOURCE_MANIFEST[k]
-        assert not e.runnable_in_visionservex, f"{k} should not be runnable (stub)"
-        assert e.known_blockers, f"{k} must have known_blockers"
+        if not e.runnable_in_visionservex:
+            assert e.known_blockers, f"{k} (non-runnable) must document known_blockers"
+    assert any(
+        SOURCE_MANIFEST[k].runnable_in_visionservex for k in deimv2_entries
+    ), "expected at least one runnable DEIMv2 variant after the v2.48 wiring"

@@ -3,6 +3,41 @@
 ## [Unreleased]
 
 
+## [3.3.0] - 2026-06-07
+
+### Full truth audit — measured pass/fail/blocked %, 0 failing tests, evidence 100%
+
+This release is a from-scratch truth audit of the whole package: model zoo, tools, pipelines,
+tests, evidence, and release artifacts. Every number is computed deterministically from the
+canonical ledgers by `scripts/v33_truth_audit.py` + `v33_evidence_integrity.py` and verified
+on disk — no estimates, no docs-only claims.
+
+- **Model zoo (173 rows): 111 PASS (64.16%), 44 blocked, 16 excluded, 0 FAIL.** Default-safe
+  pass 70.7%; **evidence completeness 100%** (every PASS row has a real on-disk,
+  task-appropriate, non-NaN metric); 0 bad-license default-safe rows; 0 token leaks.
+- Pipelines 4/4 (100%); tools (CV2-Pro + classic) 21/21 (100%). SAM full matrix 39.71% pass /
+  58.82% blocked; DINO 38.64% / 59.09%; sidecar 8.7% pass (OpenMMLab/Detectron2/NATTEN builds
+  honestly gated).
+- **Tests: 1613 passed / 0 failed / 60 skipped (100% of non-skipped).** Fixed all 15
+  pre-existing failures at the test/contract layer — **no production logic changed** to force
+  a pass, no assertion deleted. 10 were dev-box-environment (anomalib/torchreid installed,
+  rtdetrv4 checkpoints cached) → now guarded on real host state so they pass in clean CI *and*
+  on a provisioned box; 4 stale-vs-current-truth (version `(major,minor)>=(2,30)`; libreyolo
+  7th `yolov9` family alias; published `deimv2-x`; DEIMv2 now benchmark_passed); 1
+  blocker-code evolution (rtdetrv4 smoke can surface `BLACKWELL_SM120_TORCH_INCOMPATIBLE` on
+  RTX 5080).
+- **yolo9 license contradiction resolved:** the stale pre-v2.48 GPL exclusion guard +
+  contradictory docstring were updated to the project's documented v2.48 truth (yolo9 weights
+  are MIT via MultimediaTechLab/YOLO, not the WongKinYiu GPL repo), consistent with the
+  passing `test_yolo9_is_permissive_mit`. yolo9 is not in the shipped core ledger (0 rows), so
+  no core commercial-safety leak; adversarial dissent + a legal-confirmation next step are
+  documented in `docs/testing.md` and the v33 reports.
+- New audit tooling + artifacts under `notebook/99_final_report/reports/v33_*`
+  (pass/fail/family/task/pipeline/tool matrices, evidence-integrity report, pytest summary,
+  test-execution matrix, release-readiness matrix). New docs: `docs/reports.md`,
+  `docs/testing.md`; updated `docs/model_zoo.md`.
+
+
 ## [3.2.0] - 2026-06-06
 
 ### Real model activation continuation — new SAM runtime/video/ONNX modes + proven blocker table

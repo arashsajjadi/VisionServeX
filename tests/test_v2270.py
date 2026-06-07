@@ -35,15 +35,17 @@ def test_libreyolo_doctor_returns_structured(tmp_path: Path) -> None:
     assert "libreyolo_installed" in d
 
 
-def test_libreyolo_license_audit_has_six_families(tmp_path: Path) -> None:
+def test_libreyolo_license_audit_has_seven_families(tmp_path: Path) -> None:
     out = tmp_path / "audit.json"
     res = _run(["libreyolo", "license-audit", "--format", "json", "--out", str(out)])
     assert res.returncode == 0
     d = json.loads(out.read_text())
     assert d["status"] == "ok"
-    assert d["n_families"] == 6
+    # v2.56 added the "yolov9" family alias (libreyolo-yolov9-* IDs parse to family "yolov9",
+    # same MIT weights as "yolo9"), so the audit now reports 7 families, not 6.
+    assert d["n_families"] == 7
     families = {r["family"] for r in d["rows"]}
-    assert {"yolox", "yolo9", "yolonas", "dfine", "rtdetr", "rfdetr"}.issubset(families)
+    assert {"yolox", "yolo9", "yolov9", "yolonas", "dfine", "rtdetr", "rfdetr"}.issubset(families)
     # yolonas must be flagged non-commercial
     nas = next(r for r in d["rows"] if r["family"] == "yolonas")
     assert nas["license_risk"] == "non_commercial"

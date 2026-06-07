@@ -170,11 +170,14 @@ def test_video_search_reid_models_json():
     runner = CliRunner()
     result = runner.invoke(app, ["reid-models", "--json"])
     assert result.exit_code == 0, result.output
+    import importlib.util
+
     data = json.loads(result.output.strip())
     assert "cosine-siglip2" in data
     assert data["cosine-siglip2"]["installed"] is True
     assert "osnet" in data
-    assert data["osnet"]["installed"] is False
+    # osnet availability tracks whether torchreid is installed on the host (absent in clean CI).
+    assert data["osnet"]["installed"] is (importlib.util.find_spec("torchreid") is not None)
 
 
 @pytest.mark.fast
@@ -201,10 +204,16 @@ def test_video_search_doctor_osnet_missing():
     runner = CliRunner()
     result = runner.invoke(app, ["doctor", "--reid", "osnet", "--json"])
     assert result.exit_code == 0, result.output
+    import importlib.util
+
     data = json.loads(result.output.strip())
-    assert data["reid"]["installed"] is False
-    assert data["reid"]["code"] == "TORCHREID_REQUIRED"
-    assert "torchreid" in data["reid"]["install"]
+    if importlib.util.find_spec("torchreid") is not None:
+        # torchreid installed on the host -> osnet reports available, no missing-dep blocker.
+        assert data["reid"]["installed"] is True
+    else:
+        assert data["reid"]["installed"] is False
+        assert data["reid"]["code"] == "TORCHREID_REQUIRED"
+        assert "torchreid" in data["reid"]["install"]
 
 
 @pytest.mark.fast

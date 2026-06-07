@@ -1,0 +1,30 @@
+{
+  "source": "local-wheel",
+  "version": "3.3.0",
+  "from_site_packages": true,
+  "file": "/tmp/vsx_v33_truth/lib/python3.13/site-packages/visionservex/__init__.py",
+  "modules": {
+    "visionservex.onnx_export": true,
+    "visionservex.sam2_runtime": true,
+    "visionservex.vsx": true,
+    "visionservex.cli.vsx_commands": true,
+    "visionservex.cli.libreyolo_commands": true
+  },
+  "cli": {
+    "root": true,
+    "sam": true,
+    "dino": true,
+    "pipeline": true,
+    "cv2-pro": true,
+    "run": true,
+    "list-models": true
+  },
+  "api_smoke": {
+    "sam_mobilesam_status": "benchmark_passed",
+    "onnx_eligible": [
+      "mobilesam",
+      "sam-vit-b"
+    ],
+    "ok": true
+  }
+}

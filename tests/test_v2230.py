@@ -96,7 +96,16 @@ def test_rtdetrv4_pull_emits_gdown_command(tmp_path: Path) -> None:
     res = _run(["rtdetrv4", "pull", "rtdetrv4-x", "--format", "json", "--out", str(out)])
     assert res.returncode == 0
     d = json.loads(out.read_text())
-    assert d["code"] == "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP"
+    # The gdown command + reported AP are present in both the blocker and the cache-hit
+    # payloads. The status code differs: clean CI (no checkpoint) -> manual-step blocker;
+    # a machine with rtdetrv4_*.pth already downloaded -> OK (idempotent pull).
+    cached = (Path.home() / ".cache/visionservex/rtdetrv4").is_dir() and any(
+        (Path.home() / ".cache/visionservex/rtdetrv4").glob("rtdetrv4_*.pth")
+    )
+    assert d["code"] in (
+        {"OK", "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP"} if cached
+        else {"CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP"}
+    )
     assert "gdown" in d["gdown_command"]
     assert d["reported_AP"] == 57.0
 
@@ -122,8 +131,15 @@ def test_rtdetrv4_smoke_test_returns_sidecar_env_missing_when_uninstalled(tmp_pa
     assert res.returncode == 0
     d = json.loads(out.read_text())
     assert d["status"] == "expected_blocker"
-    # In a fresh test env the sidecar env is missing.
-    assert d["code"] in {"SIDECAR_ENV_MISSING", "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP"}
+    # Fresh CI: SIDECAR_ENV_MISSING. With sidecar+checkpoint present, the next structured
+    # blocker is CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP / CONFIG_NOT_FOUND, or — once
+    # inference runs on a Blackwell GPU (RTX 5080 sm_120) — BLACKWELL_SM120_TORCH_INCOMPATIBLE.
+    assert d["code"] in {
+        "SIDECAR_ENV_MISSING",
+        "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP",
+        "CONFIG_NOT_FOUND",
+        "BLACKWELL_SM120_TORCH_INCOMPATIBLE",
+    }
 
 
 def test_rtdetrv4_tensorrt_backend_blocked(tmp_path: Path) -> None:

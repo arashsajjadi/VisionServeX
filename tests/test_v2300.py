@@ -26,7 +26,10 @@ def test_version_is_at_least_2_30() -> None:
     import visionservex
 
     parts = visionservex.__version__.split(".")
-    assert int(parts[0]) >= 2 and int(parts[1]) >= 30, visionservex.__version__
+    # Proper semantic-version tuple comparison: (3, 2) >= (2, 30) is True.
+    # The old `parts[0] >= 2 and parts[1] >= 30` wrongly failed once major bumped to 3.x.
+    major, minor = int(parts[0]), int(parts[1])
+    assert (major, minor) >= (2, 30), visionservex.__version__
 
 
 def test_summarize_smoke_matrix_cli_help() -> None:

@@ -116,13 +116,22 @@ def test_list_reid_includes_osnet():
 
 @pytest.mark.fast
 def test_build_reid_extractor_missing_torchreid():
+    import importlib.util
+
     from visionservex.runtime.reid import ReIDUnavailableError, build_reid_extractor
 
     with pytest.raises(ReIDUnavailableError) as exc:
         build_reid_extractor("osnet")
     payload = exc.value.to_dict()
-    assert payload["code"] in {"TORCHREID_REQUIRED", "REID_UNAVAILABLE"}
-    assert "torchreid" in payload["install"].lower() or "deep-person-reid" in payload["install"]
+    if importlib.util.find_spec("torchreid") is not None:
+        # torchreid present -> import check passes; the next blocker is the missing checkpoint.
+        assert payload["code"] == "REID_CHECKPOINT_REQUIRED"
+    else:
+        assert payload["code"] in {"TORCHREID_REQUIRED", "REID_UNAVAILABLE"}
+        assert (
+            "torchreid" in payload["install"].lower()
+            or "deep-person-reid" in payload["install"]
+        )
 
 
 @pytest.mark.fast

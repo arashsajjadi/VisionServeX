@@ -62,10 +62,22 @@ def test_libreyolo_default_safe_excludes_yolonas() -> None:
         assert m.get("family") != "yolonas", f"YOLO-NAS leaked into default-safe: {m}"
 
 
-def test_libreyolo_default_safe_excludes_yolo9() -> None:
-    """YOLOv9 weights must never enter default-safe (GPL)."""
+def test_libreyolo_default_safe_includes_yolo9() -> None:
+    """yolo9 is permissive MIT and IS allowed in default-safe.
+
+    v2.48 relicensing audit (re-affirmed by the v3.3 truth audit): LibreYOLO pulls yolo9
+    weights from the MIT-licensed MultimediaTechLab/YOLO upstream, NOT the original
+    WongKinYiu/yolov9 GPL-3.0 repo — see ``test_yolo9_is_permissive_mit``. This was
+    previously an exclusion guard from the pre-v2.48 GPL era; it never got updated when the
+    relicensing was decided, so it had been failing. Updated to the project's current truth:
+    yolo9 (MIT) may be default-safe; the genuinely non-commercial family (yolonas) is the one
+    that must stay excluded (guarded by ``test_libreyolo_default_safe_excludes_yolonas``).
+    """
     from run_model_smoke_matrix import _get_libreyolo_default_safe_models
 
     models = _get_libreyolo_default_safe_models()
-    for m in models:
-        assert m.get("family") != "yolo9", f"YOLOv9 leaked into default-safe: {m}"
+    families = {m.get("family") for m in models}
+    # The non-commercial family must never be default-safe.
+    assert "yolonas" not in families, f"YOLO-NAS leaked into default-safe: {families}"
+    # yolo9 (MIT via MultimediaTechLab/YOLO) is permissive and present in default-safe.
+    assert "yolo9" in families, "yolo9 (MIT, v2.48 relicensing) should be in default-safe"

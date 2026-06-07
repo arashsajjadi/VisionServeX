@@ -1,0 +1,5 @@
+pipeline_id,kind,detector_final_state,segmenter_final_state,both_parts_benchmark_passed,category,counts_as_pass,counts_as_fail,counts_as_blocked
+grounding-dino-swin-b+sam2.1-hiera-large,text_to_mask,benchmark_passed,benchmark_passed,True,PASS,True,False,False
+grounding-dino-swin-t+sam2.1-hiera-small,text_to_mask,benchmark_passed,benchmark_passed,True,PASS,True,False,False
+grounding-dino-tiny+sam2-hiera-tiny,text_to_mask,benchmark_passed,benchmark_passed,True,PASS,True,False,False
+grounding-dino-original-swin-b+sam-vit-huge,text_to_mask,benchmark_passed,benchmark_passed,True,PASS,True,False,False

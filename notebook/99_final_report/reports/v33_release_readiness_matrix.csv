@@ -1,0 +1,7 @@
+item,value,of_total_rows
+model_pass_pct,64.16,173
+default_safe_pass_pct,70.7,157
+evidence_completeness_pct,100.0,111
+pipeline_pass_pct,100.0,4
+tool_pass_pct,100.0,21
+bad_license_default_safe_rows,0,173

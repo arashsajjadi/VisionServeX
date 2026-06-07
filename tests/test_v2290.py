@@ -161,7 +161,14 @@ def test_anomaly_doctor_returns_expected_blocker() -> None:
         data = json.loads(res.stdout.strip())
     except Exception:
         data = json.loads(Path("/tmp/anomaly_doctor_v229.json").read_text())
-    assert data.get("status") == "expected_blocker" or data.get("code") == "ANOMALIB_REQUIRED"
+    # Guarded on actual install state: in clean CI (no [anomaly] extra) the doctor returns
+    # the ANOMALIB_REQUIRED structured blocker; when anomalib IS installed it returns ok/OK.
+    import importlib.util
+
+    if importlib.util.find_spec("anomalib") is not None:
+        assert data.get("status") == "ok" or data.get("code") == "OK"
+    else:
+        assert data.get("status") == "expected_blocker" or data.get("code") == "ANOMALIB_REQUIRED"
 
 
 def test_bytetrack_returns_expected_blocker() -> None:

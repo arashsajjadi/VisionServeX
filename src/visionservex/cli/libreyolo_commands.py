@@ -16,8 +16,9 @@ Commands:
 
 Weight licenses (verified 2026-05-18):
 - libreyolo-yolox-*  : YOLOX upstream Apache-2.0 (permissive). Pulled by default.
-- libreyolo-yolo9-*  : YOLOv9 upstream GPL-3.0. Source code is GPL; weights
-                       are derived. Marked LICENSE_RISK=gpl by default.
+- libreyolo-yolo9-*  : MIT via the MultimediaTechLab/YOLO upstream (v2.48 relicensing
+                       audit; NOT the original WongKinYiu/yolov9 GPL-3.0 repo).
+                       Permissive — pulled by default. See WEIGHT_LICENSE_TABLE["yolo9"].
 - libreyolo-yolonas-*: Deci.AI proprietary, non-commercial. **BLOCKED by
                        default** → ``LIBREYOLO_WEIGHT_LICENSE_NONCOMMERCIAL``.
 - libreyolo-dfine-*  : D-FINE upstream Apache-2.0. Pulled by default.
