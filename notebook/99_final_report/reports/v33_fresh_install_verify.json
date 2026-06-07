@@ -1,5 +1,5 @@
 {
-  "source": "local-wheel",
+  "source": "pypi",
   "version": "3.3.0",
   "from_site_packages": true,
   "file": "/tmp/vsx_v33_truth/lib/python3.13/site-packages/visionservex/__init__.py",

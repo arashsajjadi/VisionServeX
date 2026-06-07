@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-2.23.0-informational.svg" alt="v2.23.0">
+  <img src="https://img.shields.io/badge/version-3.3.0-informational.svg" alt="v3.3.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -23,6 +23,8 @@
 ## What is VisionServeX?
 
 VisionServeX is an open-source, permissive-license-aware Python framework for running modern computer vision models locally and exposing them through a stable HTTP API. It works as a **local model gateway**: start it once, call any supported model through one clean API.
+
+> **v3.3 truth audit (measured, not claimed):** 173 core model rows → **111 PASS (64.16%)**, 44 blocked (gated/checkpoint/sidecar/legal), 16 excluded (restricted licenses), **0 FAIL**; default-safe pass 70.7%; **evidence completeness 100%**; pipelines 4/4 and tools 21/21 pass; **0 bad-license default-safe rows, 0 token leaks**. Tests: **1613 passed / 0 failed / 60 skipped**. Every number is computed from the canonical ledgers — see [docs/reports.md](docs/reports.md) and [docs/testing.md](docs/testing.md).
 
 **Accuracy-aware and scientifically usable:**  
 Every model carries an explicit accuracy taxonomy label: `demo_fast`, `production_recommended`, `accuracy_grade`, `experimental_sota`, `expert_sidecar`, `external_api`, or `unavailable_with_reason`. The recommender, benchmark tools, and registry are aligned to these labels so you always know what tier you are running. Real AP50/mAP50:95 is computed when you provide an annotated dataset.
