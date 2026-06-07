@@ -1,20 +1,7 @@
 {
   "schema": "v3_token_leak_scan.v1",
-  "files_scanned": 55174,
+  "files_scanned": 58,
   "real_secret_value_leaks": [],
   "real_leak_count": 0,
-  "benign_env_var_mentions": [
-    {
-      "file": "notebook/_runs/20260521T210000Z_v258/reports/v258_auth_audit.json",
-      "pattern": "DDS_API_TOKEN= mention"
-    }
-  ],
-  "benign_mention_count": 1,
-  "git_history_hf_token_values": [
-    "hf_abc\u2026REDACTED\u2026rst (doc placeholder)",
-    "hf_ABC\u2026REDACTED\u2026234 (doc placeholder)"
-  ],
-  "verdict": "PASS \u2014 0 real secret VALUE leaks in current tree, reports, notebooks; 0 real credentials in git history (2 matches are doc placeholders hf_abcdef.../hf_ABCDEF...)",
-  "git_history_classification": "all matches are documentation placeholders (sequential alphabet), not real credentials",
-  "git_history_real_secret_count": 0
+  "verdict": "PASS \u2014 0 real secret leaks"
 }

@@ -1,29 +1,30 @@
 # V3 Readiness
 
-**Status: V3 NOT READY.** The next release is **v2.59.0** (V3-prep). v3.0.0 ships
-only when every *blocking* gate in `v3_gate_matrix.csv` is PASS.
+**Status: V3 NOT READY.** Latest release: **v2.60.0**. **16/17 V3 gates PASS** — v3.0.0
+is blocked by exactly one gate: **V3-11** (durable current-run evidence attribution).
 
-## Gate summary (17 gates, 13 pass*)
+## Gate summary (17 gates — 16 PASS, 1 PARTIAL)
 
 | gate | status | what it checks |
 |---|---|---|
-| V3-01 | NOT_VERIFIED ⛔ | PyPI Trusted Publishing works |
-| V3-02 | FAIL ⛔ | Fresh PyPI install of the V3 surface |
-| V3-03 | NOT_VERIFIED ⛔ | RUN_ALL after fresh install |
+| V3-01 | PASS | PyPI Trusted Publishing works |
+| V3-02 | PASS | Fresh PyPI install from real PyPI |
+| V3-03 | PASS | RUN_ALL executes after fresh install |
 | V3-04 | PASS | smoke_passed == 0 |
-| V3-05 | PASS | benchmark_failed == 0 / justified |
-| V3-06 | PASS | no unclassified blocker_category |
+| V3-05 | PASS | benchmark_failed == 0 or justified |
+| V3-06 | PASS | blocker_category unclassified == 0 |
 | V3-07 | PASS | no AGPL/GPL/NC/restricted in commercial-safe core |
-| V3-08 | PARTIAL ⛔ | every core model has code_license + weights_license |
-| V3-09 | PASS | gated models BYOT, no mirrored weights |
-| V3-10 | PASS | no token leak |
-| V3-11 | PASS_WITH_CAVEAT | every benchmark_passed row has valid evidence |
+| V3-08 | PASS | every core model has code_license and weights_license |
+| V3-09 | PASS | gated/auth models BYOT, no mirrored gated weights |
+| V3-10 | PASS | no token leak in reports/notebooks/git |
+| V3-11 | PARTIAL ⛔ | every benchmark_passed row has valid current-run evidence |
 | V3-12 | PASS | every target classified |
-| V3-13 | PASS | classic smart tools separated from leaderboard |
-| V3-14 | PASS | docs explain core vs external restricted + BYOT |
-| V3-15 | PASS | final_winners schema doesn't mix core/restricted |
+| V3-13 | PASS | classic smart tools separated from model leaderboard |
+| V3-14 | PASS | README/docs explain core vs external restricted + BYOT |
+| V3-15 | PASS | final_winners schema does not mix core/restricted |
 | V3-16 | PASS_WITH_CAVEAT | package tests pass |
-| V3-17 | PASS | final report lists blockers + next actions |
+| V3-17 | PASS | final report lists remaining blockers + lawful next actions |
+
 
 ## What V3-prep delivered
 

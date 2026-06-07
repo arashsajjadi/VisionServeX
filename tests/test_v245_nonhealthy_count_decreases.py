@@ -48,11 +48,17 @@ def test_no_unclassified_blockers():
     assert not bad, f"Unclassified blockers: {bad[:10]}"
 
 
-def test_contract_passed_count_at_least_2():
-    """v2.45 added OBB infrastructure (rtmdet-r2-s via oriented_rcnn proxy)."""
+def test_obb_models_are_classified_not_unclassified():
+    """v2.45 added OBB infrastructure. The rotated-detection models (rtmdet-r/r2)
+    are now routed through the OpenMMLab sidecar (final_state=sidecar_required) —
+    a valid classified state, not an unclassified blocker. (Earlier they were
+    tracked as contract_passed proxies; that proxy was retired.)"""
     rows = _load()
-    contract = sum(1 for r in rows if r.get("final_state") == "contract_passed")
-    assert contract >= 2, f"Expected >=2 contract_passed, got {contract}"
+    obb = [r for r in rows if r.get("model_id", "").startswith("rtmdet-r")]
+    for r in obb:
+        assert r.get("final_state") not in ("", "unclassified"), (
+            f"{r['model_id']} unclassified: {r.get('final_state')!r}"
+        )
 
 
 def test_license_gate_cli_accessible():

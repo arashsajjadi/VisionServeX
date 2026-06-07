@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-"""v2.38.0: final_winners.json must reflect current results."""
+"""final_winners.json must reflect the current v3 core/external schema and must
+never name a restricted (non-commercial / AGPL) model as a commercial-safe core
+winner. (v3-prep: EdgeSAM S-Lab non-commercial must not be a core winner.)"""
 
 from __future__ import annotations
 
@@ -8,28 +10,73 @@ from pathlib import Path
 
 import pytest
 
+_FW = Path(__file__).parent.parent / "notebook/99_final_report/reports/final_winners.json"
 
-def test_final_winners_detection_current() -> None:
-    p = Path(__file__).parent.parent / "notebook/99_final_report/reports/final_winners.json"
-    if not p.exists():
+# Models that must NEVER appear as a commercial-safe core winner.
+_RESTRICTED = {
+    "edgesam",
+    "fastsam-s",
+    "fastsam-x",
+    "yolo-world",
+    "yolo11x.pt",
+    "yolo26x.pt",
+    "yolov8x.pt",
+    "rfdetr-seg-xlarge",
+    "rfdetr-seg-2xlarge",
+    "totalsegmentator",
+}
+
+
+def _load():
+    if not _FW.exists():
         pytest.skip("final_winners.json not present")
-    d = json.loads(p.read_text())
-    # Detection winner must be libreyolo-dfine-x (not yolo26x — stale)
-    assert "libreyolo-dfine-x" in d.get("detection_winner_overall", "")
+    return json.loads(_FW.read_text())
 
 
-def test_final_winners_segmentation_current() -> None:
-    p = Path(__file__).parent.parent / "notebook/99_final_report/reports/final_winners.json"
-    if not p.exists():
-        pytest.skip("final_winners.json not present")
-    d = json.loads(p.read_text())
-    # VisionServeX seg winner must be oneformer-swin-large from v2.36
-    assert "oneformer-swin-large" in d.get("auto_segmentation_winner_visionservex", "")
+def test_final_winners_uses_core_external_schema() -> None:
+    d = _load()
+    for key in (
+        "detection_core_winner",
+        "auto_segmentation_core_winner",
+        "promptable_segmentation_core_winner",
+    ):
+        assert key in d, f"final_winners missing v3 schema key {key}"
 
 
-def test_final_winners_promptable_current() -> None:
-    p = Path(__file__).parent.parent / "notebook/99_final_report/reports/final_winners.json"
-    if not p.exists():
-        pytest.skip("final_winners.json not present")
-    d = json.loads(p.read_text())
-    assert "sam2.1-hiera-large" in d.get("promptable_segmentation_winner", "")
+def test_detection_headline_names_real_core_winner() -> None:
+    d = _load()
+    # The real 400-image detection core winner (libreyolo-dfine-x) is recorded in
+    # the headline; the computed core winner must be a permissive core model.
+    assert "libreyolo-dfine-x" in d.get("detection_headline_core", "")
+    assert d.get("detection_core_winner") not in _RESTRICTED
+
+
+def test_no_restricted_model_is_a_core_winner() -> None:
+    d = _load()
+    for key in (
+        "detection_core_winner",
+        "auto_segmentation_core_winner",
+        "promptable_segmentation_core_winner",
+    ):
+        assert d.get(key) not in _RESTRICTED, (
+            f"{key}={d.get(key)!r} is a restricted/non-commercial model — "
+            "must not be a commercial-safe core winner"
+        )
+
+
+def test_promptable_core_winner_is_commercial_safe() -> None:
+    d = _load()
+    # EdgeSAM (S-Lab non-commercial) was wrongly the core promptable winner; the
+    # commercial-safe winner must be a permissive SAM-family model.
+    winner = d.get("promptable_segmentation_core_winner", "")
+    assert winner != "edgesam"
+    assert winner in {
+        "efficientsam",
+        "mobilesam",
+        "hq-sam",
+        "sam2.1-hiera-large",
+        "sam2-hiera-large",
+        "sam-vit-huge",
+        "medsam",
+        "no_benchmark_data",
+    }, f"unexpected promptable core winner: {winner!r}"

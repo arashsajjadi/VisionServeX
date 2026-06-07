@@ -3,6 +3,43 @@
 ## [Unreleased]
 
 
+## [2.60.0] - 2026-06-06
+
+### V3-prep cont.: durable commercial-safety + RUN_ALL verified (V3 NOT released)
+
+**16 / 17 V3 gates PASS.** v3.0.0 is blocked by exactly **one** gate — **V3-11**
+(durable current-run evidence attribution; the reconciler does not yet link each
+task's current-run leaderboard to every benchmarked model, so ~13 healthy rows
+keep historical_validated evidence and the project's own test_v243 stays red).
+Full status in `docs/v3_readiness.md` and `reports/v3_gate_matrix.csv`.
+
+#### Commercial-safety — now DURABLE through RUN_ALL (GATE V3-07 / V3-15)
+
+- **EdgeSAM** (NTU S-Lab License 1.0, **non-commercial**) is excluded from
+  commercial-safe core at *every* source the pipeline reads: `manifest.py`,
+  `extended_manifest_v240.py`, `_compute_final_winners`, `reports_commands._RESTRICTED`,
+  and RUN_ALL Step-6b. `jupyter nbconvert --execute RUN_ALL.ipynb` now regenerates
+  the corrected state (edgesam → external_restricted_baselines) with 0 cell errors.
+- **final_winners commercial-safety bug FIXED:** EdgeSAM was the computed promptable
+  CORE winner; `_compute_final_winners` is now `default_safe`-aware → core promptable
+  winner is **efficientsam** (Apache-2.0).
+- **HQ-SAM** `default_safe=False` (HQSeg-44K non-commercial training data).
+- **AgriCLIP** license ambiguity resolved: `check` → **CC-BY-4.0**.
+
+#### GATE V3-03 + V3-08
+
+- **V3-03 PASS:** RUN_ALL executes end-to-end (0 cell errors) after installing
+  v2.60.0 into the notebook kernel venv.
+- **V3-08 PASS:** explicit `code_license` + `weights_license` for ALL 173 core
+  models (`v3_core_model_rights.csv`).
+
+#### Tests
+
+- ~12 stale tests corrected to current truth (EdgeSAM license, ext-baseline count,
+  yolo9 MIT, oneformer/deim `wired`, final_winners v3 schema, swinv2 benchmark_passed,
+  CSV/JSON ledger schema, libreyolo-seg exception, clean-outputs preserve, OBB).
+
+
 ## [2.59.0] - 2026-06-06
 
 ### V3-prep: commercial-safety audit + classic smart-annotation toolkit (V3 NOT released)

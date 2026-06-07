@@ -2092,6 +2092,7 @@ def write_outputs(
 
 _RESTRICTED_LICENSE_MODELS_FOR_WINNERS: frozenset[str] = frozenset(
     {
+        "edgesam",  # NTU S-Lab License 1.0 (non-commercial) — never a commercial-safe core winner
         "fastsam-s",
         "fastsam-x",
         "yolo-world",
@@ -2119,11 +2120,20 @@ def _compute_final_winners(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """
     _bench_states = {"benchmark_passed", "benchmarked"}
 
+    def _is_default_safe(r: dict[str, Any]) -> bool:
+        return str(r.get("default_safe", "True")).strip().lower() not in ("false", "0", "no")
+
     def _split_core_ext(task_rows: list[dict[str, Any]]) -> tuple[list, list]:
+        # A model is a COMMERCIAL-SAFE CORE winner candidate only if it is neither
+        # on the restricted-license list NOR flagged default_safe=False (e.g. EdgeSAM
+        # S-Lab non-commercial, HQ-SAM HQSeg-44K review). Everything else is external.
         core = [
-            r for r in task_rows if r.get("model_id") not in _RESTRICTED_LICENSE_MODELS_FOR_WINNERS
+            r
+            for r in task_rows
+            if r.get("model_id") not in _RESTRICTED_LICENSE_MODELS_FOR_WINNERS
+            and _is_default_safe(r)
         ]
-        ext = [r for r in task_rows if r.get("model_id") in _RESTRICTED_LICENSE_MODELS_FOR_WINNERS]
+        ext = [r for r in task_rows if r not in core]
         return core, ext
 
     detection_bench = [

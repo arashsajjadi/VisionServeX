@@ -11,7 +11,6 @@ from visionservex.reporting.v239_reconciler import (
     _derive_execution_origin,
 )
 
-
 # ---------------------------------------------------------------------------
 # _derive_covered_by_notebook
 # ---------------------------------------------------------------------------
@@ -23,7 +22,12 @@ def test_healthy_states_are_covered() -> None:
 
 
 def test_license_gated_states_are_covered() -> None:
-    for state in ("opt_in_license_required", "license_blocked", "auth_required", "external_api_only"):
+    for state in (
+        "opt_in_license_required",
+        "license_blocked",
+        "auth_required",
+        "external_api_only",
+    ):
         assert _derive_covered_by_notebook(state, "", False, False) is True
 
 
@@ -36,7 +40,10 @@ def test_current_rerun_is_covered() -> None:
 
 
 def test_historical_validated_is_covered() -> None:
-    assert _derive_covered_by_notebook("sidecar_required", "historical_validated", False, False) is True
+    assert (
+        _derive_covered_by_notebook("sidecar_required", "historical_validated", False, False)
+        is True
+    )
 
 
 def test_historical_fallback_is_covered() -> None:
@@ -60,12 +67,16 @@ def test_sidecar_command_includes_model_and_runtime() -> None:
 
 
 def test_license_command_yolo_uses_accept_agpl() -> None:
-    cmd = _derive_command_attempted("yolo11x.pt", "opt_in_license_required", "OPT_IN_LICENSE_REQUIRED", "")
+    cmd = _derive_command_attempted(
+        "yolo11x.pt", "opt_in_license_required", "OPT_IN_LICENSE_REQUIRED", ""
+    )
     assert "--accept-agpl" in cmd
 
 
 def test_license_command_pml_uses_accept_pml() -> None:
-    cmd = _derive_command_attempted("rfdetr-seg-xlarge", "opt_in_license_required", "OPT_IN_LICENSE_REQUIRED", "")
+    cmd = _derive_command_attempted(
+        "rfdetr-seg-xlarge", "opt_in_license_required", "OPT_IN_LICENSE_REQUIRED", ""
+    )
     assert "--accept-pml" in cmd
 
 
@@ -111,19 +122,30 @@ def test_command_not_blank_for_all_typical_states() -> None:
 
 
 def test_historical_origin_from_metric_origin() -> None:
-    assert _derive_execution_origin("smoke_passed", "", "historical_validated", False, "") == "historical_validated"
+    assert (
+        _derive_execution_origin("smoke_passed", "", "historical_validated", False, "")
+        == "historical_validated"
+    )
 
 
 def test_current_run_executed_when_called() -> None:
-    assert _derive_execution_origin("smoke_passed", "", "current_rerun", True, "") == "current_run_executed"
+    assert (
+        _derive_execution_origin("smoke_passed", "", "current_rerun", True, "")
+        == "current_run_executed"
+    )
 
 
 def test_current_run_status_gate_when_not_called() -> None:
-    assert _derive_execution_origin("smoke_passed", "", "current_rerun", False, "") == "current_run_status_gate"
+    assert (
+        _derive_execution_origin("smoke_passed", "", "current_rerun", False, "")
+        == "current_run_status_gate"
+    )
 
 
 def test_api_origin() -> None:
-    assert _derive_execution_origin("external_api_only", "", "", False, "") == "external_api_required"
+    assert (
+        _derive_execution_origin("external_api_only", "", "", False, "") == "external_api_required"
+    )
 
 
 def test_auth_origin() -> None:
@@ -131,7 +153,10 @@ def test_auth_origin() -> None:
 
 
 def test_alias_origin() -> None:
-    assert _derive_execution_origin("wired", "", "", False, "alias_resolved_to_deimv2-m") == "registry_alias"
+    assert (
+        _derive_execution_origin("wired", "", "", False, "alias_resolved_to_deimv2-m")
+        == "registry_alias"
+    )
 
 
 # ---------------------------------------------------------------------------

@@ -26,6 +26,7 @@ def _require_json() -> None:
     if not JSON_PATH.exists():
         pytest.skip("v246 recovery plan JSON not present (reports/ is gitignored)")
 
+
 REQUIRED_COLUMNS: tuple[str, ...] = (
     "model_id",
     "current_state",

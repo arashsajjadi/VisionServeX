@@ -46,6 +46,9 @@ def test_clean_outputs_removes_99_final_report_old_artifacts(tmp_path):
             "clean-outputs",
             "--root",
             str(fake),
+            # v2.46 preserves environment_v*.json as historical evidence by default;
+            # this test exercises the full-clean mode where old artifacts are deleted.
+            "--no-preserve-historical-evidence",
             "--format",
             "json",
         ],

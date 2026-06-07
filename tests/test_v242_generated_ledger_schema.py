@@ -109,9 +109,10 @@ def test_csv_json_row_count_match() -> None:
         pytest.skip("model_coverage_ledger.json not present")
     rows_csv = _load_csv()
     data = json.loads(LEDGER_JSON.read_text())
-    assert len(rows_csv) == data.get("total", 0), (
-        f"CSV has {len(rows_csv)} rows but JSON has {data.get('total')} — "
-        "CSV was not regenerated from the JSON payload."
+    # Canonical JSON schema is a dict {schema_version, core_row_count, rows}.
+    json_count = data.get("core_row_count", data.get("total", len(data.get("rows", []))))
+    assert len(rows_csv) == json_count, (
+        f"CSV has {len(rows_csv)} rows but JSON has {json_count} — CSV/JSON ledger out of sync."
     )
 
 
@@ -132,9 +133,11 @@ def test_rfdetr_seg_large_not_license_blocked() -> None:
         )
 
 
-def test_swinv2_large_is_smoke_passed() -> None:
+def test_swinv2_large_is_benchmark_passed() -> None:
+    # swinv2-large was later promoted smoke -> benchmark_passed; smoke_passed is a
+    # forbidden final_state under the V3 gate (V3-04: smoke_passed == 0).
     rows = {r["model_id"]: r for r in _load_csv()}
     if "swinv2-large" in rows:
-        assert rows["swinv2-large"]["final_state"] == "smoke_passed", (
-            f"swinv2-large: expected smoke_passed, got {rows['swinv2-large']['final_state']!r}"
+        assert rows["swinv2-large"]["final_state"] == "benchmark_passed", (
+            f"swinv2-large: expected benchmark_passed, got {rows['swinv2-large']['final_state']!r}"
         )

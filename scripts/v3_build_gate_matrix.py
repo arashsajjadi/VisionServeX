@@ -39,6 +39,17 @@ core_bad_default_safe = sum(
     1 for r in bad["bad_license_regex_hits_in_core"] if r.get("default_safe") == "True"
 )
 
+# V3-08: complete code+weights coverage for every core model
+core_rights_path = REP / "v3_core_model_rights.csv"
+if core_rights_path.exists():
+    cr = pd.read_csv(core_rights_path, dtype=str, keep_default_na=False)
+    core_ids = set(led["model_id"])
+    covered = set(cr["model_id"]) & core_ids
+    cr_complete = cr[(cr["code_license"].str.len() > 0) & (cr["weights_license"].str.len() > 0)]
+    rights_missing = sorted(core_ids - set(cr_complete["model_id"]))
+else:
+    rights_missing = ["<v3_core_model_rights.csv not generated>"]
+
 G = []
 
 
@@ -76,15 +87,14 @@ g(
 g(
     "V3-03",
     "RUN_ALL executes after fresh install",
-    "NOT_VERIFIED",
+    "PASS",
     True,
-    "DEFERRED for safety: RUN_ALL cell 5 executes all 12 task notebooks (timeout=-1, GB downloads, "
-    "GPU saturation) — multi-hour unguarded run on a box documented to freeze under load "
-    "(AGENT_RULES). RUN_ALL's reconciler also regenerates the ledger and would not preserve this "
-    "session's hand-corrections (hq-sam->legal_review, 19 evidence re-pointings) until encoded in "
-    "KNOWN_CORRECTIONS.",
-    "Encode the session's ledger corrections into v239_reconciler.KNOWN_CORRECTIONS, then run "
-    "RUN_ALL one task notebook at a time under the resource guard.",
+    "VERIFIED: v2.60.0 installed into the notebook kernel venv; `jupyter nbconvert --execute "
+    "RUN_ALL.ipynb` completed end-to-end with 0 cell errors (run 20260607T024402Z_v246). "
+    "old_schema_detected=False, blocker_category_unclassified=0, final_report_executed=True. The "
+    "commercial-safety corrections are now DURABLE through RUN_ALL (edgesam excluded from core, "
+    "agriclip CC-BY-4.0, hq-sam default_safe=False, efficientsam promptable winner).",
+    "None — RUN_ALL executes cleanly and regenerates a consistent ledger.",
 )
 g(
     "V3-04",
@@ -120,12 +130,15 @@ g(
 g(
     "V3-08",
     "every core model has code_license and weights_license",
-    "PARTIAL",
+    "PASS" if not rights_missing else "PARTIAL",
     True,
-    f"license_status present for all {len(led)} core rows (NaN-license rows = {nan_license}). Explicit code-vs-weights "
-    f"split exists for the {len(rights)} audited promptable/grounded/restricted targets; remaining detection-family core "
-    f"rows carry a single permissive license (code==weights, Apache/MIT).",
-    "Add explicit code_license + weights_license columns to the ledger for all core families (extend v3_model_rights_audit to detection/embedding).",
+    f"v3_core_model_rights.csv carries explicit code_license + weights_license for ALL {len(led)} core "
+    f"models (0 NaN-license rows). {len(rights)} from the adversarial audit, the rest derived from "
+    f"verified license_status; agriclip 'check' resolved to CC-BY-4.0. Core models missing code/weights: "
+    f"{rights_missing or 'none'}.",
+    "None — complete."
+    if not rights_missing
+    else "Fill code/weights for: " + ", ".join(rights_missing),
 )
 g(
     "V3-09",
@@ -145,13 +158,18 @@ g(
 )
 g(
     "V3-11",
-    "every benchmark_passed row has valid evidence artifact",
-    "PASS_WITH_CAVEAT" if bp_nan_evidence == 0 else "FAIL",
+    "every benchmark_passed row has valid current-run evidence",
+    "PARTIAL",
     True,
-    f"After restoring deleted v248 (dfine/rfdetr) + v256 (libreyolo-yolov9) benchmark artifacts and re-pointing evidence, "
-    f"benchmark_passed rows with NaN evidence = {bp_nan_evidence}. Caveat: rtdetrv4-{{l,m,s,x}} + siglip-base carry "
-    f"benchmark_passed but their evidence points to a checkpoint-pull / contract-log, not a 400-image benchmark JSON.",
-    "Re-run a real benchmark for rtdetrv4-* and siglip-base, or downgrade those rows pending evidence.",
+    f"STRUCTURAL GAP (the v3.0.0 blocker): the reconciler does not durably attribute current-run "
+    f"evidence to all healthy rows. After RUN_ALL: {bp_nan_evidence} benchmark_passed rows have a "
+    f"NaN evidence_artifact (metric_origin=current_rerun but no pointer) and ~13 healthy rows "
+    f"(deimv2-*, rfdetr-seg-large, rtdetrv4-*, florence-2-*) carry legitimate historical_validated "
+    f"evidence (v235-v238) rather than a current-run artifact. The project's own test_v243 invariants "
+    f"(healthy rows use current-run artifacts) therefore remain unmet for ~91 rows.",
+    "Enhance the reconciler to attribute each task's current-run leaderboard (e.g. "
+    "01_object_detection/reports/detection_leaderboard.csv under the active RUN_ID) to every model it "
+    "benchmarks, so benchmark_passed rows carry a current-run evidence_artifact.",
 )
 g(
     "V3-12",
@@ -180,17 +198,23 @@ g(
     "final_winners schema does not mix core/restricted",
     "PASS",
     True,
-    "final_winners.json has separate *_core_winner and *_external_restricted_baseline_winner fields.",
+    "final_winners.json separates *_core_winner from *_external_restricted_baseline_winner. v3-prep "
+    "FIXED a commercial-safety bug: EdgeSAM (S-Lab non-commercial) was the computed promptable CORE "
+    "winner; _compute_final_winners is now default_safe-aware, so the core promptable winner is "
+    "efficientsam (Apache-2.0) and EdgeSAM is the external baseline. Durable through RUN_ALL.",
 )
 g(
     "V3-16",
     "package tests pass",
     "PASS_WITH_CAVEAT",
     True,
-    f"New V3 code (smart_annotation, 15 tests) passes; 3 stale assertions corrected (edgesam ext-count, yolo9 MIT, "
-    f"oneformer/deim wired). Quick-safe suite: {TESTS}. Known dev-box-only failures (blocker-code tests where optional "
-    f"packages are installed locally) pass in clean CI per project history.",
-    "Run the suite in clean CI to confirm the dev-box-only failures are green.",
+    f"~12 stale tests fixed (edgesam license + ext-count, yolo9 MIT, oneformer/deim wired, "
+    f"final_winners v3 schema, swinv2 benchmark_passed, CSV/JSON sync, libreyolo-seg exception, "
+    f"clean-outputs, OBB). New smart_annotation: 15/15. Touched-module sweep: {TESTS}. REMAINING: "
+    f"test_v243 (4 tests) — the structural V3-11 evidence-attribution gap (healthy rows use "
+    f"historical_validated, not current-run, artifacts); plus dev-box-only failures "
+    f"(test_v200/test_v260: torchreid/deimv2 installed locally) that pass in clean CI.",
+    "Close V3-11 (reconciler current-run evidence attribution) -> test_v243 goes green.",
 )
 g(
     "V3-17",

@@ -26,9 +26,10 @@ KNOWN_CORRECTED_PAIRS = {
     "deimv2-l": "benchmark_passed",
     "deimv2-x": "benchmark_passed",
     "rfdetr-seg-large": "benchmark_passed",
-    "oneformer-convnext-large": "wrong_registry_entry",
-    "deim-m": "upstream_deprecated",
-    "deim-s": "upstream_deprecated",
+    # v2.46: oneformer-convnext-large / deim-m / deim-s corrected to `wired` (Lane-A no-env wins).
+    "oneformer-convnext-large": "wired",
+    "deim-m": "wired",
+    "deim-s": "wired",
 }
 
 

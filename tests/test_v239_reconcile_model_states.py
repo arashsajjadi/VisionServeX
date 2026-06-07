@@ -43,9 +43,10 @@ def test_known_corrections_present() -> None:
         "rfdetr-seg-large": "benchmark_passed",
         "rfdetr-seg-xlarge": "opt_in_license_required",
         "rfdetr-seg-2xlarge": "opt_in_license_required",
-        "oneformer-convnext-large": "wrong_registry_entry",
-        "deim-m": "upstream_deprecated",
-        "deim-s": "upstream_deprecated",
+        # v2.46: corrected to `wired` (Lane-A no-env wins).
+        "oneformer-convnext-large": "wired",
+        "deim-m": "wired",
+        "deim-s": "wired",
         # v2.41: all 4 RT-DETRv4 variants benchmarked (mAP50:95 0.40-0.48)
         "rtdetrv4-s": "benchmark_passed",
         "rtdetrv4-m": "benchmark_passed",

@@ -772,13 +772,17 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         family="agriclip",
         task="embed",
         official_repo="https://github.com/umair1221/AgriCLIP",
-        license="check",
-        license_risk="check",
+        license="CC-BY-4.0",
+        license_risk="none",
         runnable_in_visionservex=False,
         access_status="open",
         domain="agriculture",
-        known_blockers=["License and HF availability not verified live."],
-        recommended_action="audit_only",
+        known_blockers=[],
+        recommended_action="wire",
+        notes=(
+            "AgriCLIP (Umair et al.) is released under CC-BY-4.0 — commercial use is "
+            "permitted with attribution. Verified by deep-research license audit."
+        ),
     ),
     # =====================================================================
     # YOLO-World — license issue (likely GPL/AGPL)

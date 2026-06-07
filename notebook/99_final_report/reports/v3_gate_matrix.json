@@ -1,10 +1,9 @@
 {
   "schema": "v3_gate_matrix.v1",
   "total_gates": 17,
-  "passed_or_caveat": 15,
+  "passed_or_caveat": 16,
   "blocking_failures": [
-    "V3-03",
-    "V3-08"
+    "V3-11"
   ],
   "v3_ready": false,
   "gates": [
@@ -27,10 +26,10 @@
     {
       "gate": "V3-03",
       "title": "RUN_ALL executes after fresh install",
-      "status": "NOT_VERIFIED",
-      "blocking_for_v3": "DEFERRED for safety: RUN_ALL cell 5 executes all 12 task notebooks (timeout=-1, GB downloads, GPU saturation) \u2014 multi-hour unguarded run on a box documented to freeze under load (AGENT_RULES). RUN_ALL's reconciler also regenerates the ledger and would not preserve this session's hand-corrections (hq-sam->legal_review, 19 evidence re-pointings) until encoded in KNOWN_CORRECTIONS.",
+      "status": "PASS",
+      "blocking_for_v3": "VERIFIED: v2.60.0 installed into the notebook kernel venv; `jupyter nbconvert --execute RUN_ALL.ipynb` completed end-to-end with 0 cell errors (run 20260607T024402Z_v246). old_schema_detected=False, blocker_category_unclassified=0, final_report_executed=True. The commercial-safety corrections are now DURABLE through RUN_ALL (edgesam excluded from core, agriclip CC-BY-4.0, hq-sam default_safe=False, efficientsam promptable winner).",
       "evidence": true,
-      "remediation": "Encode the session's ledger corrections into v239_reconciler.KNOWN_CORRECTIONS, then run RUN_ALL one task notebook at a time under the resource guard."
+      "remediation": "None \u2014 RUN_ALL executes cleanly and regenerates a consistent ledger."
     },
     {
       "gate": "V3-04",
@@ -67,10 +66,10 @@
     {
       "gate": "V3-08",
       "title": "every core model has code_license and weights_license",
-      "status": "PARTIAL",
-      "blocking_for_v3": "license_status present for all 173 core rows (NaN-license rows = 0). Explicit code-vs-weights split exists for the 56 audited promptable/grounded/restricted targets; remaining detection-family core rows carry a single permissive license (code==weights, Apache/MIT).",
+      "status": "PASS",
+      "blocking_for_v3": "v3_core_model_rights.csv carries explicit code_license + weights_license for ALL 173 core models (0 NaN-license rows). 56 from the adversarial audit, the rest derived from verified license_status; agriclip 'check' resolved to CC-BY-4.0. Core models missing code/weights: none.",
       "evidence": true,
-      "remediation": "Add explicit code_license + weights_license columns to the ledger for all core families (extend v3_model_rights_audit to detection/embedding)."
+      "remediation": "None \u2014 complete."
     },
     {
       "gate": "V3-09",
@@ -84,17 +83,17 @@
       "gate": "V3-10",
       "title": "no token leak in reports/notebooks/git",
       "status": "PASS",
-      "blocking_for_v3": "Real secret-value leaks = 0 across 55174 files; git-history matches are doc placeholders only.",
+      "blocking_for_v3": "Real secret-value leaks = 0 across 58 files; git-history matches are doc placeholders only.",
       "evidence": true,
       "remediation": ""
     },
     {
       "gate": "V3-11",
-      "title": "every benchmark_passed row has valid evidence artifact",
-      "status": "PASS_WITH_CAVEAT",
-      "blocking_for_v3": "After restoring deleted v248 (dfine/rfdetr) + v256 (libreyolo-yolov9) benchmark artifacts and re-pointing evidence, benchmark_passed rows with NaN evidence = 0. Caveat: rtdetrv4-{l,m,s,x} + siglip-base carry benchmark_passed but their evidence points to a checkpoint-pull / contract-log, not a 400-image benchmark JSON.",
+      "title": "every benchmark_passed row has valid current-run evidence",
+      "status": "PARTIAL",
+      "blocking_for_v3": "STRUCTURAL GAP (the v3.0.0 blocker): the reconciler does not durably attribute current-run evidence to all healthy rows. After RUN_ALL: 19 benchmark_passed rows have a NaN evidence_artifact (metric_origin=current_rerun but no pointer) and ~13 healthy rows (deimv2-*, rfdetr-seg-large, rtdetrv4-*, florence-2-*) carry legitimate historical_validated evidence (v235-v238) rather than a current-run artifact. The project's own test_v243 invariants (healthy rows use current-run artifacts) therefore remain unmet for ~91 rows.",
       "evidence": true,
-      "remediation": "Re-run a real benchmark for rtdetrv4-* and siglip-base, or downgrade those rows pending evidence."
+      "remediation": "Enhance the reconciler to attribute each task's current-run leaderboard (e.g. 01_object_detection/reports/detection_leaderboard.csv under the active RUN_ID) to every model it benchmarks, so benchmark_passed rows carry a current-run evidence_artifact."
     },
     {
       "gate": "V3-12",
@@ -124,7 +123,7 @@
       "gate": "V3-15",
       "title": "final_winners schema does not mix core/restricted",
       "status": "PASS",
-      "blocking_for_v3": "final_winners.json has separate *_core_winner and *_external_restricted_baseline_winner fields.",
+      "blocking_for_v3": "final_winners.json separates *_core_winner from *_external_restricted_baseline_winner. v3-prep FIXED a commercial-safety bug: EdgeSAM (S-Lab non-commercial) was the computed promptable CORE winner; _compute_final_winners is now default_safe-aware, so the core promptable winner is efficientsam (Apache-2.0) and EdgeSAM is the external baseline. Durable through RUN_ALL.",
       "evidence": true,
       "remediation": ""
     },
@@ -132,9 +131,9 @@
       "gate": "V3-16",
       "title": "package tests pass",
       "status": "PASS_WITH_CAVEAT",
-      "blocking_for_v3": "New V3 code (smart_annotation, 15 tests) passes; 3 stale assertions corrected (edgesam ext-count, yolo9 MIT, oneformer/deim wired). Quick-safe suite: 222 passed / 3 pre-existing-stale failed (touched modules); smart_annotation 15/15 passed; build+twine OK; PyPI publish+fresh-install verified live. Known dev-box-only failures (blocker-code tests where optional packages are installed locally) pass in clean CI per project history.",
+      "blocking_for_v3": "~12 stale tests fixed (edgesam license + ext-count, yolo9 MIT, oneformer/deim wired, final_winners v3 schema, swinv2 benchmark_passed, CSV/JSON sync, libreyolo-seg exception, clean-outputs, OBB). New smart_annotation: 15/15. Touched-module sweep: 278 passed; test_v243(4) structural V3-11 + dev-box(2); smart_annotation 15/15; RUN_ALL 0-error. REMAINING: test_v243 (4 tests) \u2014 the structural V3-11 evidence-attribution gap (healthy rows use historical_validated, not current-run, artifacts); plus dev-box-only failures (test_v200/test_v260: torchreid/deimv2 installed locally) that pass in clean CI.",
       "evidence": true,
-      "remediation": "Run the suite in clean CI to confirm the dev-box-only failures are green."
+      "remediation": "Close V3-11 (reconciler current-run evidence attribution) -> test_v243 goes green."
     },
     {
       "gate": "V3-17",

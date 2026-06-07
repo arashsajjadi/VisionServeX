@@ -79,9 +79,9 @@ def test_final_report_does_not_read_archive_legacy() -> None:
     text = _nb_source(FINAL_REPORT_NB)
     # The notebook may MENTION archive_legacy in a "do not read" comment but
     # must not USE it as a ledger source.
-    bad_pattern = "pd.read_csv(NB_ROOT / \"archive_legacy"
+    bad_pattern = 'pd.read_csv(NB_ROOT / "archive_legacy'
     bad_pattern_alt = "pd.read_csv(NB_ROOT / 'archive_legacy"
-    bad_pattern_assign = "ledger_path = NB_ROOT / \"archive_legacy"
+    bad_pattern_assign = 'ledger_path = NB_ROOT / "archive_legacy'
     assert bad_pattern not in text
     assert bad_pattern_alt not in text
     assert bad_pattern_assign not in text

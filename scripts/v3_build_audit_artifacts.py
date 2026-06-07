@@ -385,7 +385,12 @@ for _, er in ext.iterrows():
             "evidence": er.get("reason_excluded_from_core", ""),
         }
     )
-exc_nc = pd.read_csv(REP / "excluded_noncommercial_models.csv", dtype=str, keep_default_na=False)
+_exc_path = REP / "excluded_noncommercial_models.csv"
+exc_nc = (
+    pd.read_csv(_exc_path, dtype=str, keep_default_na=False)
+    if _exc_path.exists()
+    else pd.DataFrame(columns=["model_id", "family", "license_status", "exclusion_reason"])
+)
 for _, er in exc_nc.iterrows():
     q.append(
         {

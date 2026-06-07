@@ -20,9 +20,24 @@ def _load() -> list[dict]:
 
 
 def test_no_expected_blocker_rows() -> None:
-    """Zero rows may show expected_blocker as final_state."""
+    """No row may show a STALE expected_blocker final_state.
+
+    The one documented exception (added v2.48) is the LibreYOLO segmentation
+    family, whose seg head is genuinely not runnable in this build
+    (blocker_code=MODEL_NOT_RUNNABLE_IN_THIS_BUILD). Those are honestly
+    classified, not stale.
+    """
     rows = _load()
-    bad = [r["model_id"] for r in rows if r["final_state"] == "expected_blocker"]
+    bad = [
+        r["model_id"]
+        for r in rows
+        if r["final_state"] == "expected_blocker"
+        and not (
+            r["model_id"].startswith("libreyolo-")
+            and r["model_id"].endswith("-seg")
+            and r.get("blocker_code") == "MODEL_NOT_RUNNABLE_IN_THIS_BUILD"
+        )
+    ]
     assert not bad, f"Stale expected_blocker rows: {bad}"
 
 
@@ -100,25 +115,23 @@ def test_rfdetr_seg_large_not_license_blocked() -> None:
     )
 
 
-def test_oneformer_convnext_is_wrong_registry_entry() -> None:
+def test_oneformer_convnext_is_wired() -> None:
+    # v2.46: oneformer-convnext-large corrected to `wired` (Lane-A no-env win, Apache-2.0).
     rows = {r["model_id"]: r for r in _load()}
     r = rows.get("oneformer-convnext-large")
     if r is None:
         pytest.skip("oneformer-convnext-large not in ledger")
-    assert r["final_state"] == "wrong_registry_entry", (
-        f"expected wrong_registry_entry, got {r['final_state']}"
-    )
+    assert r["final_state"] == "wired", f"expected wired, got {r['final_state']}"
 
 
-def test_deim_legacy_is_upstream_deprecated() -> None:
+def test_deim_legacy_is_wired() -> None:
+    # v2.46: deim-m / deim-s corrected to `wired` (Lane-A no-env wins).
     rows = {r["model_id"]: r for r in _load()}
     for mid in ["deim-m", "deim-s"]:
         r = rows.get(mid)
         if r is None:
             pytest.skip(f"{mid} not in ledger")
-        assert r["final_state"] == "upstream_deprecated", (
-            f"{mid}: expected upstream_deprecated, got {r['final_state']}"
-        )
+        assert r["final_state"] == "wired", f"{mid}: expected wired, got {r['final_state']}"
 
 
 def test_rfdetr_seg_xlarge_is_opt_in() -> None:

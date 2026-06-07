@@ -1,0 +1,174 @@
+model_id,family,task,final_state,default_safe,ledger_license_status,code_license,weights_license,commercial_use_allowed,redistribution_allowed,core_allowed,source
+agriclip,agriclip,embed,wired,True,CC-BY-4.0,CC-BY-4.0,CC-BY-4.0,yes,yes,yes,deep-research
+anomalib-patchcore,anomalib,anomaly,dataset_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+bytetrack,bytetrack,track,micro_benchmark_passed,False,MIT,MIT,MIT,yes,yes,yes,license_status
+clip-vit-base-patch32,clip,embed,benchmark_passed,True,MIT,MIT,MIT,yes,yes,yes,license_status
+clip-vit-large-patch14,clip,embed,benchmark_passed,True,MIT,MIT,MIT,yes,yes,yes,license_status
+co-dino-inst-vit-l-coco,co-dino,segment,sidecar_required,False,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+co-dino-inst-vit-l-lvis,codetr,segment,sidecar_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+convnextv2-base,convnextv2,classify,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+convnextv2-large,convnextv2,classify,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+convnextv2-tiny,convnextv2,classify,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+deim-m,deim,detect,wired,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+deim-s,deim,detect,wired,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+deimv2-atto,deimv2,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+deimv2-femto,deimv2,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+deimv2-l,deimv2,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+deimv2-m,deimv2,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+deimv2-n,deimv2,detect,wired,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+deimv2-pico,deimv2,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+deimv2-s,deimv2,detect,benchmark_passed,False,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+deimv2-x,deimv2,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dfine-l,dfine,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dfine-l-coco,dfine,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dfine-l-o365-coco,dfine,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dfine-m,dfine,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dfine-m-coco,dfine,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dfine-m-o365-coco,dfine,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dfine-n,dfine,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dfine-n-coco,dfine,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dfine-s,dfine,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dfine-s-coco,dfine,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dfine-s-o365-coco,dfine,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dfine-x,dfine,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dfine-x-coco,dfine,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dfine-x-o365-coco,dfine,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dino-x-api,dino-x,open_vocab_detect,external_api_only,False,Custom,Apache-2.0 (API client wrapper only),Proprietary / closed (not published; DeepDataSpace API ToS),conditional,no,gated_byot_only,v3_model_rights_audit (adversarial)
+dinov2-base,dinov2,embed,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dinov2-giant,dinov2,embed,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dinov2-large,dinov2,embed,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dinov2-small,dinov2,embed,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+dinov3-vitb16,dinov3,embed,wired,False,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+efficientsam,efficientsam,foundation_segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+florence-2-base,florence-2,vlm,demo_passed_sidecar,True,MIT,MIT,MIT,yes,yes,yes,license_status
+florence-2-large,florence-2,vlm,demo_passed_sidecar,True,MIT,MIT,MIT,yes,yes,yes,license_status
+grounding-dino-1.5,grounding_dino,open_vocab,auth_required,False,Apache-2.0,Apache-2.0 (API client wrapper only),Proprietary / closed (not published; DeepDataSpace API ToS),conditional,no,gated_byot_only,v3_model_rights_audit (adversarial)
+grounding-dino-1.5-pro,grounding-dino,open_vocab_detect,external_api_only,False,Custom,Apache-2.0 (API client wrapper only),Proprietary / closed (not published; DeepDataSpace API ToS),conditional,no,gated_byot_only,v3_model_rights_audit (adversarial)
+grounding-dino-1.6,grounding_dino,open_vocab,auth_required,False,Apache-2.0,Apache-2.0 (API client wrapper only),Proprietary / closed (not published; DeepDataSpace API ToS),conditional,no,gated_byot_only,v3_model_rights_audit (adversarial)
+grounding-dino-1.6-pro,grounding-dino,open_vocab_detect,external_api_only,False,Custom,Apache-2.0 (API client wrapper only),Proprietary / closed (not published; DeepDataSpace API ToS),conditional,no,gated_byot_only,v3_model_rights_audit (adversarial)
+grounding-dino-2-audit,grounding_dino,open_vocab,not_advertised,True,,n/a,n/a (not advertised; official source not found),unknown,no,not_applicable,audit_stub
+grounding-dino-original-swin-b,grounding_dino,open_vocab,benchmark_passed,True,,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+grounding-dino-original-swin-t,grounding_dino,open_vocab,benchmark_passed,True,,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+grounding-dino-swin-b,grounding_dino,open_vocab,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+grounding-dino-swin-t,grounding_dino,open_vocab,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+grounding-dino-tiny,grounding_dino,open_vocab,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+hq-sam,hq-sam,foundation_segment,benchmark_passed,False,Apache-2.0 (code/weights); HQSeg-44K training data partly non-commercial,Apache-2.0,Apache-2.0 (declared) but trained on NON-COMMERCIAL data (HQSeg-44K),conditional,yes,legal_review_required,v3_model_rights_audit (adversarial)
+internimage-b,internimage,classify,sidecar_required,True,MIT,MIT,MIT,yes,yes,yes,license_status
+internimage-h,internimage,classify,sidecar_required,True,MIT,MIT,MIT,yes,yes,yes,license_status
+internimage-l,internimage,classify,sidecar_required,True,MIT,MIT,MIT,yes,yes,yes,license_status
+internimage-s,internimage,classify,sidecar_required,True,MIT,MIT,MIT,yes,yes,yes,license_status
+internimage-t,internimage,classify,sidecar_required,True,MIT,MIT,MIT,yes,yes,yes,license_status
+libreyolo-dfine-l,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-dfine-l-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-dfine-m,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-dfine-m-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-dfine-n,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-dfine-n-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-dfine-s,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-dfine-s-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-dfine-x,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-dfine-x-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-rfdetr-l,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-rfdetr-l-seg,libreyolo,segment,benchmark_passed,True,Apache-2.0,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-rfdetr-m,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-rfdetr-m-seg,libreyolo,segment,benchmark_passed,True,Apache-2.0,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-rfdetr-n,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-rfdetr-n-seg,libreyolo,segment,benchmark_passed,True,Apache-2.0,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-rfdetr-s,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-rfdetr-s-seg,libreyolo,segment,benchmark_passed,True,Apache-2.0,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-rtdetr-l,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-rtdetr-l-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-rtdetr-r101,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-rtdetr-r101-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-rtdetr-r18,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-rtdetr-r18-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-rtdetr-r34,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-rtdetr-r34-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-rtdetr-r50,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-rtdetr-r50-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-rtdetr-r50m,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-rtdetr-r50m-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-rtdetr-x,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-rtdetr-x-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-yolov9-c,libreyolo,detect,benchmark_passed,True,MIT,MIT,MIT,yes,yes,yes,license_status
+libreyolo-yolov9-m,libreyolo,detect,benchmark_passed,True,MIT,MIT,MIT,yes,yes,yes,license_status
+libreyolo-yolov9-s,libreyolo,detect,benchmark_passed,True,MIT,MIT,MIT,yes,yes,yes,license_status
+libreyolo-yolov9-t,libreyolo,detect,benchmark_passed,True,MIT,MIT,MIT,yes,yes,yes,license_status
+libreyolo-yolox-l,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-yolox-l-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-yolox-m,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-yolox-m-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-yolox-n,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-yolox-n-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-yolox-s,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-yolox-s-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-yolox-t,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-yolox-t-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+libreyolo-yolox-x,libreyolo,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+libreyolo-yolox-x-seg,libreyolo,segment,expected_blocker,True,,MIT (LibreYOLO engine),Apache-2.0 (seg head not runnable in this build),yes,yes,yes,family
+maskdino-r50-coco,maskdino,segment,sidecar_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+maskdino-r50-panoptic,maskdino,segment,sidecar_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+maskdino-swinl-coco,maskdino,segment,sidecar_required,False,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+maxvit-tiny-tf-224,maxvit,classify,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+medsam,medsam,foundation_segment,benchmark_passed,False,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+medsam2,medsam2,foundation_segment,sidecar_required,False,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+mobilesam,mobilesam,foundation_segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+nnunet-v2,nnunet,segment,dataset_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+oneformer-convnext-large,oneformer,segment,wired,True,MIT,MIT,MIT,yes,yes,yes,license_status
+oneformer-dinat-large,oneformer,segment,sidecar_required,True,MIT,MIT,MIT,yes,yes,yes,license_status
+oneformer-swin-large,oneformer,segment,benchmark_passed,True,MIT,MIT,MIT,yes,yes,yes,license_status
+osnet-x1.0,osnet,reid,dataset_required,True,MIT,MIT,MIT,yes,yes,yes,license_status
+owlv2-base-patch16,owlv2,open_vocab_detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+owlv2-large-patch14,owlv2,open_vocab_detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+owlvit-base-patch32,owlvit,open_vocab_detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+owlvit-large-patch14,owlvit,open_vocab_detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+prithvi-eo-2.0,prithvi,embed,wired,False,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rfdetr-base,rfdetr,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rfdetr-large,rfdetr,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rfdetr-medium,rfdetr,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rfdetr-nano,rfdetr,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rfdetr-seg-large,rfdetr,segment,benchmark_passed,False,PML 1.0 (Plus/XL/2XL); core sizes Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+rfdetr-seg-medium,rfdetr,segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+rfdetr-seg-nano,rfdetr_seg,segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+rfdetr-seg-small,rfdetr_seg,segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+rfdetr-small,rfdetr,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtdetrv4-l,rtdetrv4,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtdetrv4-m,rtdetrv4,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtdetrv4-s,rtdetrv4,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtdetrv4-x,rtdetrv4,detect,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtmdet-r-l,rtmdet,obb,sidecar_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtmdet-r-m,rtmdet,obb,sidecar_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtmdet-r-s,rtmdet,obb,sidecar_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtmdet-r-t,rtmdet,obb,sidecar_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtmdet-r2-l,rtmdet,obb,sidecar_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtmdet-r2-m,rtmdet,obb,sidecar_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtmdet-r2-s,rtmdet,obb,dataset_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtmdet-r2-t,rtmdet,obb,sidecar_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtmpose-l,rtmpose,pose,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtmpose-l-384x288,rtmpose,pose,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtmpose-m,rtmpose,pose,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtmpose-m-384x288,rtmpose,pose,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtmpose-s,rtmpose,pose,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+rtmpose-t,rtmpose,pose,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+sam-vit-base,sam,foundation_segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+sam-vit-huge,sam,foundation_segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+sam-vit-large,sam,foundation_segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+sam2-hiera-base-plus,sam2,foundation_segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+sam2-hiera-large,sam2,foundation_segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+sam2-hiera-small,sam2,foundation_segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+sam2-hiera-tiny,sam2,foundation_segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+sam2.1-hiera-base-plus,sam2.1,foundation_segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+sam2.1-hiera-large,sam2.1,foundation_segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+sam2.1-hiera-small,sam2.1,foundation_segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+sam2.1-hiera-tiny,sam2.1,foundation_segment,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,v3_model_rights_audit (adversarial)
+sam3-base,sam3,foundation_segment,auth_required,False,Apache-2.0,"SAM License (Meta custom, updated 2025-11-19)","SAM License (Meta custom, updated 2025-11-19)",conditional,no,gated_byot_only,v3_model_rights_audit (adversarial)
+seem-davit-d3,seem,segment,sidecar_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+seem-focal-t,seem,segment,sidecar_required,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+siglip-base-patch16-224,siglip,embed,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+siglip2-base-patch16-224,siglip2,embed,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+siglip2-large-patch16-256,siglip2,embed,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+siglip2-so400m-patch14-384,siglip2,embed,benchmark_passed,True,Apache-2.0,Apache-2.0,Apache-2.0,yes,yes,yes,license_status
+swinv2-base,swinv2,classify,benchmark_passed,True,MIT,MIT,MIT,yes,yes,yes,license_status
+swinv2-large,swinv2,classify,benchmark_passed,True,MIT,MIT,MIT,yes,yes,yes,license_status
+swinv2-small,swinv2,classify,benchmark_passed,True,MIT,MIT,MIT,yes,yes,yes,license_status
+swinv2-tiny,swinv2,classify,benchmark_passed,True,MIT,MIT,MIT,yes,yes,yes,license_status

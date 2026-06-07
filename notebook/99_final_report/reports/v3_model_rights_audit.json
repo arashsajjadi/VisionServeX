@@ -877,7 +877,7 @@
       "confidence": "medium",
       "exists_in_ledger": true,
       "ledger_model_id": "hq-sam",
-      "ledger_final_state": "legal_review_required",
+      "ledger_final_state": "benchmark_passed",
       "ledger_location": "core_ledger",
       "provenance": "GitHub SysCV/sam-hq LICENSE = Apache-2.0; HQSeg-44K composition + DIS5K Terms-of-Use (non-commercial) and ThinObject-5K (CC-BY-NC-4.0) web-verified 2026-06.",
       "notes": "LANDMINE (training data). Code Apache-2.0 and base SAM Apache-2.0. The HQ-output-token weights are fine-tuned on HQSeg-44K, which aggregates explicitly NON-COMMERCIAL datasets: DIS5K (research/educational-only ToU), ThinObject-5K (CC-BY-NC-4.0), plus academic saliency sets (ECSSD, MSRA-10K, DUT-OMRON). Weights are mirrorable (Apache-declared, open, not gated) but COMMERCIAL USE of the trained HQ weights is encumbered by the non-commercial training data => legal review before commercial deployment."

@@ -62,5 +62,3 @@ def test_wired_state_has_priority_above_sidecar_required() -> None:
 
     assert STATE_PRIORITY.get("wired", -1) > STATE_PRIORITY.get("sidecar_required", -1)
     assert STATE_PRIORITY.get("wired", -1) > STATE_PRIORITY.get("opt_in_license_required", -1)
-
-

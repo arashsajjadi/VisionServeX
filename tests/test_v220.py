@@ -219,9 +219,19 @@ def test_fastsam_excluded_agpl():
 def test_mobilesam_efficientsam_expert_sidecar():
     from visionservex.model_zoo.manifest import SOURCE_MANIFEST as MODEL_SOURCES
 
-    for mid in ("mobilesam", "efficientsam", "hq-sam", "edgesam"):
+    # mobilesam/efficientsam are permissive Apache-2.0 expert sidecars.
+    for mid in ("mobilesam", "efficientsam"):
         assert mid in MODEL_SOURCES, f"Missing: {mid}"
         src = MODEL_SOURCES[mid]
         assert src.license == "Apache-2.0", f"{mid} unexpected license: {src.license}"
         assert src.recommended_action == "expert_sidecar"
         assert src.runnable_in_visionservex is False
+    # hq-sam: Apache-2.0 code/weights but HQSeg-44K training data is partly
+    # non-commercial -> license flagged for review (v3 commercial-safety audit).
+    hq = MODEL_SOURCES["hq-sam"]
+    assert hq.license.startswith("Apache-2.0")
+    assert hq.license_risk == "review"
+    # edgesam: NTU S-Lab License 1.0 is NON-COMMERCIAL — must NOT be Apache-2.0.
+    edge = MODEL_SOURCES["edgesam"]
+    assert "S-Lab" in edge.license and edge.license != "Apache-2.0"
+    assert edge.license_risk == "non_commercial"

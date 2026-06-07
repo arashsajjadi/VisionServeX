@@ -1,70 +1,54 @@
 {
   "schema": "pipeline_coverage_ledger.v1",
-  "note": "Composed text-to-mask pipelines from already-benchmarked commercial-safe core parts. A pipeline is NOT counted as one pretrained model.",
+  "note": "Composed text-to-mask pipelines; NOT counted as single models.",
   "pipelines": [
     {
       "pipeline_id": "grounding-dino-swin-b+sam2.1-hiera-large",
-      "kind": "text_to_mask (open-vocab detect -> promptable segment)",
+      "kind": "text_to_mask",
       "detector_model_id": "grounding-dino-swin-b",
       "detector_final_state": "benchmark_passed",
-      "detector_license": "Apache-2.0",
       "segmenter_model_id": "sam2.1-hiera-large",
       "segmenter_final_state": "benchmark_passed",
-      "segmenter_license": "Apache-2.0",
       "both_parts_benchmark_passed": true,
-      "both_parts_commercial_safe": true,
-      "pipeline_status": "ready_to_benchmark (parts benchmark_passed, composition not yet measured)",
+      "pipeline_status": "ready_to_benchmark",
       "is_single_model": false,
-      "exact_benchmark_command": "visionservex benchmark-text-to-mask --pipelines grounding-dino-swin-b+sam2.1-hiera-large --dataset coco:/home/arash/datasets/coco_val2017_400_vsx --prompt-source coco-all-80-categories --metrics box_ap50,mask_iou,mask_ap50,detector_latency_ms,segmenter_latency_ms",
-      "note": "Pipeline, NOT a single pretrained model \u2014 tracked separately (Phase 7). Detector+segmenter timed separately when benchmarked."
+      "exact_benchmark_command": "visionservex benchmark-text-to-mask --pipelines grounding-dino-swin-b+sam2.1-hiera-large --dataset coco:/home/arash/datasets/coco_val2017_400_vsx"
     },
     {
       "pipeline_id": "grounding-dino-swin-t+sam2.1-hiera-small",
-      "kind": "text_to_mask (open-vocab detect -> promptable segment)",
+      "kind": "text_to_mask",
       "detector_model_id": "grounding-dino-swin-t",
       "detector_final_state": "benchmark_passed",
-      "detector_license": "Apache-2.0",
       "segmenter_model_id": "sam2.1-hiera-small",
       "segmenter_final_state": "benchmark_passed",
-      "segmenter_license": "Apache-2.0",
       "both_parts_benchmark_passed": true,
-      "both_parts_commercial_safe": true,
-      "pipeline_status": "ready_to_benchmark (parts benchmark_passed, composition not yet measured)",
+      "pipeline_status": "ready_to_benchmark",
       "is_single_model": false,
-      "exact_benchmark_command": "visionservex benchmark-text-to-mask --pipelines grounding-dino-swin-t+sam2.1-hiera-small --dataset coco:/home/arash/datasets/coco_val2017_400_vsx --prompt-source coco-all-80-categories --metrics box_ap50,mask_iou,mask_ap50,detector_latency_ms,segmenter_latency_ms",
-      "note": "Pipeline, NOT a single pretrained model \u2014 tracked separately (Phase 7). Detector+segmenter timed separately when benchmarked."
+      "exact_benchmark_command": "visionservex benchmark-text-to-mask --pipelines grounding-dino-swin-t+sam2.1-hiera-small --dataset coco:/home/arash/datasets/coco_val2017_400_vsx"
     },
     {
       "pipeline_id": "grounding-dino-tiny+sam2-hiera-tiny",
-      "kind": "text_to_mask (open-vocab detect -> promptable segment)",
+      "kind": "text_to_mask",
       "detector_model_id": "grounding-dino-tiny",
       "detector_final_state": "benchmark_passed",
-      "detector_license": "Apache-2.0",
       "segmenter_model_id": "sam2-hiera-tiny",
       "segmenter_final_state": "benchmark_passed",
-      "segmenter_license": "Apache-2.0",
       "both_parts_benchmark_passed": true,
-      "both_parts_commercial_safe": true,
-      "pipeline_status": "ready_to_benchmark (parts benchmark_passed, composition not yet measured)",
+      "pipeline_status": "ready_to_benchmark",
       "is_single_model": false,
-      "exact_benchmark_command": "visionservex benchmark-text-to-mask --pipelines grounding-dino-tiny+sam2-hiera-tiny --dataset coco:/home/arash/datasets/coco_val2017_400_vsx --prompt-source coco-all-80-categories --metrics box_ap50,mask_iou,mask_ap50,detector_latency_ms,segmenter_latency_ms",
-      "note": "Pipeline, NOT a single pretrained model \u2014 tracked separately (Phase 7). Detector+segmenter timed separately when benchmarked."
+      "exact_benchmark_command": "visionservex benchmark-text-to-mask --pipelines grounding-dino-tiny+sam2-hiera-tiny --dataset coco:/home/arash/datasets/coco_val2017_400_vsx"
     },
     {
       "pipeline_id": "grounding-dino-original-swin-b+sam-vit-huge",
-      "kind": "text_to_mask (open-vocab detect -> promptable segment)",
+      "kind": "text_to_mask",
       "detector_model_id": "grounding-dino-original-swin-b",
       "detector_final_state": "benchmark_passed",
-      "detector_license": "",
       "segmenter_model_id": "sam-vit-huge",
       "segmenter_final_state": "benchmark_passed",
-      "segmenter_license": "Apache-2.0",
       "both_parts_benchmark_passed": true,
-      "both_parts_commercial_safe": false,
-      "pipeline_status": "ready_to_benchmark (parts benchmark_passed, composition not yet measured)",
+      "pipeline_status": "ready_to_benchmark",
       "is_single_model": false,
-      "exact_benchmark_command": "visionservex benchmark-text-to-mask --pipelines grounding-dino-original-swin-b+sam-vit-huge --dataset coco:/home/arash/datasets/coco_val2017_400_vsx --prompt-source coco-all-80-categories --metrics box_ap50,mask_iou,mask_ap50,detector_latency_ms,segmenter_latency_ms",
-      "note": "Pipeline, NOT a single pretrained model \u2014 tracked separately (Phase 7). Detector+segmenter timed separately when benchmarked."
+      "exact_benchmark_command": "visionservex benchmark-text-to-mask --pipelines grounding-dino-original-swin-b+sam-vit-huge --dataset coco:/home/arash/datasets/coco_val2017_400_vsx"
     }
   ]
 }
