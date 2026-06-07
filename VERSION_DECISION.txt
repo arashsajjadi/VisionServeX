@@ -1,0 +1,4 @@
+v2.59.0 V3 NOT RELEASED
+v3_ready=False
+blocking_gate_failures=V3-01,V3-02,V3-03,V3-08
+reason=blocking V3 gates fail: V3-01, V3-02, V3-03, V3-08

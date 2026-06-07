@@ -396,6 +396,7 @@ def generate_external_baselines_cmd(
 
     _RESTRICTED: frozenset[str] = frozenset(
         {
+            "edgesam",
             "fastsam-s",
             "fastsam-x",
             "yolo-world",
@@ -414,6 +415,12 @@ def generate_external_baselines_cmd(
     )
 
     _RESTRICTION_REASONS: dict[str, dict[str, str]] = {
+        "edgesam": {
+            "license_status": "S-Lab License 1.0 (non-commercial)",
+            "reason_excluded_from_core": "NTU S-Lab License 1.0 restricts use to non-commercial purposes (source AND binary); not Apache-2.0",
+            "allowed_use_in_this_project": "external_comparison_baseline_only_non_commercial",
+            "warning_text": "EdgeSAM weights are NON-COMMERCIAL (S-Lab License 1.0). Commercial use requires written permission from the authors.",
+        },
         "fastsam-s": {
             "license_status": "AGPL-3.0",
             "reason_excluded_from_core": "AGPL-3.0 weights; commercial use without opt-in prohibited",

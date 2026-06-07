@@ -1,0 +1,23 @@
+model_id,family,reason_class,license,action_taken,evidence
+edgesam,edgesam,non_commercial_software_license,S-Lab License 1.0 (non-commercial),moved core -> external_restricted_baselines; manifest corrected,github.com/chongzhou96/EdgeSAM LICENSE; wf_239c89dc-c14 adversarial verdict
+hq-sam,hq-sam,training_data_non_commercial_review,Apache-2.0 weights; HQSeg-44K NC training data,"core final_state -> legal_review_required, default_safe=False",ThinObject-5K CC-BY-NC + DIS5K NC ToU; wf adversarial verdict (medium conf)
+tinysam,sam-light,dataset_provenance_review,Apache-2.0 declared; SA-1B research-only provenance,NOT added to core (legal_review_required),arXiv 2312.13789 1% SA-1B distillation; wf adversarial verdict
+q-tinysam,sam-light,dataset_provenance_review,Apache-2.0 declared; SA-1B research-only provenance,NOT added to core (legal_review_required),arXiv 2312.13789 1% SA-1B distillation; wf adversarial verdict
+fastsam-s,,restricted_license_external_baseline,AGPL-3.0,external_restricted_baselines (not core),AGPL-3.0 weights; commercial use without opt-in prohibited
+fastsam-x,,restricted_license_external_baseline,AGPL-3.0,external_restricted_baselines (not core),AGPL-3.0 weights; commercial use without opt-in prohibited
+rfdetr-seg-2xlarge,,restricted_license_external_baseline,PML-1.0,external_restricted_baselines (not core),Roboflow Platform Model License 1.0; requires registered account
+rfdetr-seg-xlarge,,restricted_license_external_baseline,PML-1.0,external_restricted_baselines (not core),Roboflow Platform Model License 1.0; requires registered account
+totalsegmentator,,restricted_license_external_baseline,Custom-NonCommercial,external_restricted_baselines (not core),High-res weights are non-commercial only; commercial use requires contacting jakob.wasserthal@usb.ch
+yolo-world,,restricted_license_external_baseline,AGPL-3.0,external_restricted_baselines (not core),Ultralytics AGPL-3.0; not default-safe
+yolo11l-seg.pt,,restricted_license_external_baseline,AGPL-3.0,external_restricted_baselines (not core),Ultralytics AGPL-3.0 weights; not default-safe for commercial use
+yolo11x-seg.pt,,restricted_license_external_baseline,AGPL-3.0,external_restricted_baselines (not core),Ultralytics AGPL-3.0 weights; not default-safe for commercial use
+yolo11x.pt,,restricted_license_external_baseline,AGPL-3.0,external_restricted_baselines (not core),Ultralytics AGPL-3.0 weights; not default-safe for commercial use
+yolo26x-seg.pt,,restricted_license_external_baseline,AGPL-3.0,external_restricted_baselines (not core),Ultralytics AGPL-3.0 weights; not default-safe for commercial use
+yolo26x.pt,,restricted_license_external_baseline,AGPL-3.0,external_restricted_baselines (not core),Ultralytics AGPL-3.0 weights; not default-safe for commercial use
+yolov10b.pt,,restricted_license_external_baseline,AGPL-3.0,external_restricted_baselines (not core),Ultralytics AGPL-3.0 weights; not default-safe for commercial use
+yolov8x-seg.pt,,restricted_license_external_baseline,AGPL-3.0,external_restricted_baselines (not core),Ultralytics AGPL-3.0 weights; not default-safe for commercial use
+yolov8x.pt,,restricted_license_external_baseline,AGPL-3.0,external_restricted_baselines (not core),Ultralytics AGPL-3.0 weights; not default-safe for commercial use
+edgesam,,restricted_license_external_baseline,S-Lab License 1.0 (non-commercial),external_restricted_baselines (not core),NTU S-Lab License 1.0 restricts use to non-commercial purposes (source AND binary); not Apache-2.0. Manifest previously mislabeled it Apache-2.0 (corrected v3-prep).
+libreyolo-yolonas-l,libreyolo-yolonas,non_commercial_excluded,Deci-AI-non-commercial,"excluded_noncommercial_models (not core, not baseline)",Deci.AI proprietary non-commercial license — cannot be distributed as VisionServeX core.
+libreyolo-yolonas-m,libreyolo-yolonas,non_commercial_excluded,Deci-AI-non-commercial,"excluded_noncommercial_models (not core, not baseline)",Deci.AI proprietary non-commercial license — cannot be distributed as VisionServeX core.
+libreyolo-yolonas-s,libreyolo-yolonas,non_commercial_excluded,Deci-AI-non-commercial,"excluded_noncommercial_models (not core, not baseline)",Deci.AI proprietary non-commercial license — cannot be distributed as VisionServeX core.

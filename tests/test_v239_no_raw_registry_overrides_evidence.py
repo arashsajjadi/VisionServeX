@@ -48,8 +48,9 @@ def test_known_correction_used_when_no_evidence(tmp_path):
     )
     by_id = {r["model_id"]: r for r in payload["rows"]}
     assert by_id["rfdetr-seg-large"]["final_state"] == "benchmark_passed"
-    assert by_id["oneformer-convnext-large"]["final_state"] == "wrong_registry_entry"
-    assert by_id["deim-m"]["final_state"] == "upstream_deprecated"
+    # v2.46: oneformer-convnext-large and deim-m corrected to `wired` (Lane-A no-env wins).
+    assert by_id["oneformer-convnext-large"]["final_state"] == "wired"
+    assert by_id["deim-m"]["final_state"] == "wired"
 
 
 def test_evidence_higher_than_correction_when_actually_better(tmp_path):

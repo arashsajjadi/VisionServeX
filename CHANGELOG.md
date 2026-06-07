@@ -3,6 +3,51 @@
 ## [Unreleased]
 
 
+## [2.59.0] - 2026-06-06
+
+### V3-prep: commercial-safety audit + classic smart-annotation toolkit (V3 NOT released)
+
+A V3-readiness sprint. **v3.0.0 is NOT released** — 4 blocking gates fail
+(V3-01 Trusted Publishing unverified, V3-02 fresh-PyPI install of the new surface,
+V3-03 RUN_ALL post-install, V3-08 explicit code/weights split). Full status in
+`docs/v3_readiness.md` and `notebook/99_final_report/reports/v3_gate_matrix.csv`.
+
+#### Commercial-safety corrections (GATE V3-07)
+
+- **EdgeSAM removed from commercial-safe core.** It was recorded as `Apache-2.0`
+  / `default_safe=True` / `benchmark_passed`; its real license is the **NTU S-Lab
+  License 1.0 (non-commercial)**. Corrected in `manifest.py`, added to the
+  `_RESTRICTED` split, moved to `external_restricted_baselines.csv`.
+- **HQ-SAM marked `legal_review_required`** (`default_safe=False`): Apache-2.0
+  weights but HQSeg-44K fine-tuning data is partly non-commercial (ThinObject-5K
+  CC-BY-NC, DIS5K NC ToU).
+- Core ledger: 174 → 173 rows; benchmark_passed 114 → 112; +1 legal_review.
+
+#### New: classic smart-annotation toolkit (`visionservex[classic-ml]`)
+
+- `visionservex.smart_annotation` — 8 weight-free, CPU-only, fully-permissive
+  interactive refiners (grabcut, marker-watershed, random-walker, slic-graphcut,
+  intelligent-scissors, interactive-rf, slic-rf-smooth, edge-plus). No GPL
+  dependency (PyMaxflow deliberately avoided).
+- Real promptable benchmark on COCO val2017 GT (`v3_classic_smart_refine_benchmark`).
+- Separate `smart_tool_coverage_ledger.csv` (V3 gate V3-13) + 15 tests.
+
+#### Audit artifacts
+
+- `v3_target_model_coverage_matrix` (56 targets, families A–F),
+  `v3_model_rights_audit` (adversarially-verified code-vs-weights split),
+  `v3_excluded_or_quarantined_models`, `v3_bad_license_scan`, `v3_token_leak_scan`,
+  `v3_gate_matrix`, `v3_blockers_report`, `v3_sidecar_strategy`,
+  `pipeline_coverage_ledger`.
+
+#### Integrity
+
+- Restored deleted v248/v256 benchmark artifacts; re-pointed 19 NaN-evidence
+  `benchmark_passed` rows → 0 remain. Backfilled 21 NaN-license rows → 0 remain.
+- New docs: `commercial_safety.md`, `gated_models.md`, `smart_annotation.md`,
+  `v3_readiness.md`.
+
+
 ## [2.47.1] - 2026-05-20
 
 ### Fixed: blocker_category unclassified + covered_by_notebook ordering

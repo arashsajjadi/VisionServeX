@@ -1,0 +1,118 @@
+{
+  "benchmark": "v3_classic_smart_refine",
+  "dataset": "coco_val2017_400_vsx:promptable-derived-from-GT",
+  "dataset_kind": "real_images_real_gt_masks_prompts_derived_from_gt",
+  "instances_evaluated": 40,
+  "max_side": 256,
+  "device": "cpu",
+  "prompt_types": [
+    "box",
+    "point",
+    "polygon"
+  ],
+  "metrics": [
+    "mean_iou",
+    "boundary_iou",
+    "success_rate_at_iou_50",
+    "success_rate_at_iou_75",
+    "latency_ms"
+  ],
+  "results": [
+    {
+      "n": 40,
+      "mean_iou": 0.7741,
+      "boundary_iou": 0.796,
+      "success_rate_at_iou_50": 0.925,
+      "success_rate_at_iou_75": 0.75,
+      "latency_ms_mean": 133.254,
+      "latency_ms_p50": 126.792,
+      "cpu_only_ok": true,
+      "method": "classic-intelligent-scissors",
+      "errors": 0
+    },
+    {
+      "n": 40,
+      "mean_iou": 0.4232,
+      "boundary_iou": 0.3584,
+      "success_rate_at_iou_50": 0.35,
+      "success_rate_at_iou_75": 0.125,
+      "latency_ms_mean": 163.501,
+      "latency_ms_p50": 122.465,
+      "cpu_only_ok": true,
+      "method": "classic-grabcut",
+      "errors": 0
+    },
+    {
+      "n": 40,
+      "mean_iou": 0.3843,
+      "boundary_iou": 0.3605,
+      "success_rate_at_iou_50": 0.4,
+      "success_rate_at_iou_75": 0.075,
+      "latency_ms_mean": 1.284,
+      "latency_ms_p50": 1.255,
+      "cpu_only_ok": true,
+      "method": "classic-marker-watershed",
+      "errors": 0
+    },
+    {
+      "n": 40,
+      "mean_iou": 0.3671,
+      "boundary_iou": 0.3346,
+      "success_rate_at_iou_50": 0.375,
+      "success_rate_at_iou_75": 0.075,
+      "latency_ms_mean": 166.591,
+      "latency_ms_p50": 123.257,
+      "cpu_only_ok": true,
+      "method": "classic-edge-plus",
+      "errors": 0
+    },
+    {
+      "n": 40,
+      "mean_iou": 0.3333,
+      "boundary_iou": 0.2895,
+      "success_rate_at_iou_50": 0.2,
+      "success_rate_at_iou_75": 0.025,
+      "latency_ms_mean": 189.584,
+      "latency_ms_p50": 147.433,
+      "cpu_only_ok": true,
+      "method": "classic-slic-graphcut",
+      "errors": 0
+    },
+    {
+      "n": 40,
+      "mean_iou": 0.2699,
+      "boundary_iou": 0.2336,
+      "success_rate_at_iou_50": 0.225,
+      "success_rate_at_iou_75": 0.025,
+      "latency_ms_mean": 112.055,
+      "latency_ms_p50": 109.579,
+      "cpu_only_ok": true,
+      "method": "classic-random-walker",
+      "errors": 0
+    },
+    {
+      "n": 40,
+      "mean_iou": 0.135,
+      "boundary_iou": 0.1183,
+      "success_rate_at_iou_50": 0.025,
+      "success_rate_at_iou_75": 0.0,
+      "latency_ms_mean": 53.009,
+      "latency_ms_p50": 52.41,
+      "cpu_only_ok": true,
+      "method": "classic-slic-rf-smooth",
+      "errors": 0
+    },
+    {
+      "n": 40,
+      "mean_iou": 0.0999,
+      "boundary_iou": 0.0752,
+      "success_rate_at_iou_50": 0.0,
+      "success_rate_at_iou_75": 0.0,
+      "latency_ms_mean": 39.31,
+      "latency_ms_p50": 38.503,
+      "cpu_only_ok": true,
+      "method": "classic-interactive-rf",
+      "errors": 0
+    }
+  ]
+}

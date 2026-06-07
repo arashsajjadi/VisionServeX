@@ -1,0 +1,51 @@
+{
+  "schema": "v3_bad_license_scan.v1",
+  "scanned": "model_coverage_ledger.csv (commercial-safe core, post-correction)",
+  "core_rows": 173,
+  "bad_license_regex_hits_in_core": [
+    {
+      "model_id": "hq-sam",
+      "license_status": "Apache-2.0 (weights); HQSeg-44K training data partly non-commercial",
+      "final_state": "legal_review_required",
+      "default_safe": "False"
+    }
+  ],
+  "flagged_non_default_safe": [
+    {
+      "model_id": "dino-x-api",
+      "final_state": "external_api_only",
+      "license_status": "Custom"
+    },
+    {
+      "model_id": "grounding-dino-1.5",
+      "final_state": "auth_required",
+      "license_status": "Apache-2.0"
+    },
+    {
+      "model_id": "grounding-dino-1.5-pro",
+      "final_state": "external_api_only",
+      "license_status": "Custom"
+    },
+    {
+      "model_id": "grounding-dino-1.6",
+      "final_state": "auth_required",
+      "license_status": "Apache-2.0"
+    },
+    {
+      "model_id": "grounding-dino-1.6-pro",
+      "final_state": "external_api_only",
+      "license_status": "Custom"
+    },
+    {
+      "model_id": "hq-sam",
+      "final_state": "legal_review_required",
+      "license_status": "Apache-2.0 (weights); HQSeg-44K training data partly non-commercial"
+    },
+    {
+      "model_id": "sam3-base",
+      "final_state": "auth_required",
+      "license_status": "Apache-2.0"
+    }
+  ],
+  "verdict": "PASS \u2014 no AGPL/GPL/non-commercial WEIGHT sits in default-safe core. Remaining hits are gated external-API (Custom, default_safe=False) and hq-sam (legal_review_required, default_safe=False), all excluded from core_healthy."
+}

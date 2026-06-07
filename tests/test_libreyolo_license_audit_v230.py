@@ -73,13 +73,15 @@ def test_yolonas_is_blocked() -> None:
     assert yolonas_row.get("license_risk") in ("non_commercial", "non-commercial")
 
 
-def test_yolo9_is_gpl_opt_in() -> None:
+def test_yolo9_is_permissive_mit() -> None:
+    # v2.48: YOLOv9 relicensed GPL-3.0 -> MIT (MultimediaTechLab/YOLO HF model card).
+    # It is now a permissive, default-safe, auto-pullable LibreYOLO family.
     proc = _run(["libreyolo", "license-audit", "--format", "json"])
     p = _payload(proc)
     y9 = next((r for r in p.get("rows", []) if r["family"] == "yolo9"), None)
     assert y9 is not None
-    assert y9.get("auto_pull") is False
-    assert "GPL" in y9.get("weight_license", "")
+    assert y9.get("license_risk") in ("none", "low")
+    assert "GPL" not in y9.get("weight_license", "")
 
 
 def test_dfine_is_permissive_default_safe() -> None:

@@ -4,17 +4,19 @@
 from __future__ import annotations
 
 import csv
-import json
 from pathlib import Path
 
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CORE_CSV = REPO_ROOT / "notebook" / "99_final_report" / "reports" / "model_coverage_ledger.csv"
-EXT_CSV = REPO_ROOT / "notebook" / "99_final_report" / "reports" / "external_restricted_baselines.csv"
+EXT_CSV = (
+    REPO_ROOT / "notebook" / "99_final_report" / "reports" / "external_restricted_baselines.csv"
+)
 
 RESTRICTED = frozenset(
     {
+        "edgesam",  # v3-prep: NTU S-Lab License 1.0 (non-commercial); moved out of core
         "fastsam-s",
         "fastsam-x",
         "yolo-world",
@@ -53,6 +55,7 @@ def _read_ext() -> list[dict[str, str]]:
 
 def test_generate_external_baselines_command_exists() -> None:
     import typer.main
+
     from visionservex.cli.main import app
 
     group = typer.main.get_command(app)
@@ -73,9 +76,10 @@ def test_core_ledger_has_no_restricted_rows_when_split_applied() -> None:
     assert not overlap
 
 
-def test_ext_baselines_has_14_rows() -> None:
+def test_ext_baselines_has_expected_rows() -> None:
+    # v3-prep: 14 original restricted baselines + edgesam (S-Lab non-commercial) = 15.
     rows = _read_ext()
-    assert len(rows) == 14
+    assert len(rows) == len(RESTRICTED)
 
 
 def test_ext_baselines_contains_all_restricted() -> None:
@@ -106,7 +110,14 @@ def test_no_healthy_row_without_covered_by_notebook() -> None:
     rows = _read_core()
     if not rows or "covered_by_notebook" not in rows[0]:
         pytest.skip("covered_by_notebook column not yet in ledger")
-    HEALTHY = {"smoke_passed", "contract_passed", "benchmark_passed", "wired", "partial", "demo_passed_sidecar"}
+    HEALTHY = {
+        "smoke_passed",
+        "contract_passed",
+        "benchmark_passed",
+        "wired",
+        "partial",
+        "demo_passed_sidecar",
+    }
     bad = [
         r["model_id"]
         for r in rows
@@ -120,7 +131,9 @@ def test_no_row_missing_command_attempted() -> None:
     if not rows or "command_attempted" not in rows[0]:
         pytest.skip("command_attempted column not yet in ledger — run reconciler first")
     if not rows[0].get("command_attempted", "").strip():
-        pytest.skip("command_attempted is blank — ledger needs re-reconciliation with v2.47 reconciler")
+        pytest.skip(
+            "command_attempted is blank — ledger needs re-reconciliation with v2.47 reconciler"
+        )
     blank = [r["model_id"] for r in rows if not r.get("command_attempted", "").strip()]
     assert not blank, f"Rows with blank command_attempted: {blank}"
 
@@ -142,4 +155,8 @@ def test_grounding_dino_original_swin_t_is_wired() -> None:
         # v2.51: VisionModel('grounding-dino-original-*') → 'unknown model'.
         # Benchmark attempted; failed with VISIONMODEL_ENGINE_NOT_REGISTERED.
         # v2.56: models registered in registry and benchmarked as aliases of swin-t/b.
-        assert KNOWN_CORRECTIONS[mid]["final_state"] in {"wired", "benchmark_failed", "benchmark_passed"}
+        assert KNOWN_CORRECTIONS[mid]["final_state"] in {
+            "wired",
+            "benchmark_failed",
+            "benchmark_passed",
+        }

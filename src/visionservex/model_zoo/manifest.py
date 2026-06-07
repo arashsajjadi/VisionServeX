@@ -1083,8 +1083,8 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         family="hq-sam",
         task="foundation_segment",
         official_repo="https://github.com/SysCV/sam-hq",
-        license="Apache-2.0",
-        license_risk="none",
+        license="Apache-2.0 (code/weights); HQSeg-44K training data partly non-commercial",
+        license_risk="review",
         install_command="pip install segment-anything-hq  # check latest release",
         runnable_in_visionservex=False,
         access_status="open",
@@ -1094,15 +1094,20 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
             "Not yet wired in VisionServeX engine.",
         ],
         recommended_action="expert_sidecar",
-        notes="HQ-SAM is Apache-2.0. High-quality mask prediction.",
+        notes=(
+            "HQ-SAM (sam-hq) code+weights are declared Apache-2.0, BUT the HQSeg-44K "
+            "fine-tuning set bundles non-commercial data (ThinObject-5K CC-BY-NC; DIS5K "
+            "non-commercial Terms-of-Use). Whether that taints the Apache-2.0 weights is "
+            "legally unsettled -> legal_review_required before commercial-safe core use."
+        ),
     ),
     "edgesam": ModelSource(
         model_id="edgesam",
         family="edgesam",
         task="foundation_segment",
         official_repo="https://github.com/chongzhou96/EdgeSAM",
-        license="Apache-2.0",
-        license_risk="none",
+        license="S-Lab License 1.0",
+        license_risk="non_commercial",
         install_command="git clone https://github.com/chongzhou96/EdgeSAM.git && pip install -e .",
         runnable_in_visionservex=False,
         access_status="open",
@@ -1110,9 +1115,15 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         known_blockers=[
             "GitHub-only install; no HF Hub model.",
             "Targets edge/mobile devices; not prioritized for server deployment.",
+            "NTU S-Lab License 1.0 is NON-COMMERCIAL — excluded from commercial-safe core.",
         ],
-        recommended_action="expert_sidecar",
-        notes="EdgeSAM is Apache-2.0. Optimized for edge devices.",
+        recommended_action="external_restricted_baseline",
+        notes=(
+            "EdgeSAM is licensed under the NTU S-Lab License 1.0, which restricts "
+            "redistribution and use to NON-COMMERCIAL purposes (source AND binary). "
+            "It is NOT Apache-2.0. Commercial use requires written permission from the "
+            "authors. Kept only as an external restricted baseline; not default-safe core."
+        ),
     ),
 }
 

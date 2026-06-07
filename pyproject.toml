@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "visionservex"
-version = "2.58.0"
+version = "2.59.0"
 description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -131,6 +131,23 @@ video = [
 medical = [
     # Optional medical I/O — NIfTI volume parsing for TotalSegmentator/nnU-Net.
     "nibabel>=5.0",
+]
+classic-ml = [
+    # V3 classic (weight-free) smart-annotation tools. All permissive:
+    # OpenCV Apache-2.0; scikit-image / scikit-learn / scipy / numpy BSD-3.
+    # NO model weights and NO copyleft dependency (e.g. PyMaxflow GPL is avoided).
+    "opencv-python-headless>=4.8",
+    "scikit-image>=0.22",
+    "scikit-learn>=1.3",
+    "scipy>=1.10",
+    "numpy>=1.24",
+]
+promptable-extra = [
+    # Promptable-segmentation evaluation helpers (box/point-prompted refine +
+    # the classic toolkit). Pulls the classic-ml stack plus mask I/O.
+    "visionservex[classic-ml]",
+    "pycocotools>=2.0",
+    "pillow>=10.0",
 ]
 dev = [
     "pytest>=8.0",
