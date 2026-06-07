@@ -58,26 +58,33 @@ def g(gate, title, status, evidence, blocking, remediation=""):
 g(
     "V3-01",
     "PyPI Trusted Publishing works",
-    "NOT_VERIFIED",
+    "PASS",
     True,
-    "No release performed this session; project history uses manual token uploads, Trusted Publishing not confirmed.",
-    "Configure GitHub Actions OIDC Trusted Publishing; cut a tag and watch the publish workflow.",
+    "VERIFIED LIVE: publishing v2.59.0 ran .github/workflows/publish.yml (OIDC id-token, "
+    "pypa/gh-action-pypi-publish, environment=pypi) — publish-pypi job succeeded (run 27079857741).",
+    "None — Trusted Publishing confirmed working.",
 )
 g(
     "V3-02",
     "Fresh PyPI install from real PyPI",
-    "FAIL",
+    "PASS",
     True,
-    "The V3 surface (smart_annotation/classic-ml extra, audit artifacts) is NOT yet published; only v2.58.0 is on PyPI.",
-    "Publish v2.59.0/v3 then `pip install --no-cache-dir visionservex[all-benchmark,classic-ml]==<ver>` in a fresh venv.",
+    "VERIFIED LIVE: `pip install --no-cache-dir visionservex[classic-ml]==2.59.0` in a clean venv "
+    "imported from site-packages (not src) and ran the smart_annotation toolkit end-to-end.",
+    "None — fresh real-PyPI install confirmed.",
 )
 g(
     "V3-03",
     "RUN_ALL executes after fresh install",
     "NOT_VERIFIED",
     True,
-    "RUN_ALL not executed end-to-end this session (heavy notebook run deferred under AGENT_RULES).",
-    "After publish+fresh-install, run `jupyter nbconvert --execute RUN_ALL.ipynb`.",
+    "DEFERRED for safety: RUN_ALL cell 5 executes all 12 task notebooks (timeout=-1, GB downloads, "
+    "GPU saturation) — multi-hour unguarded run on a box documented to freeze under load "
+    "(AGENT_RULES). RUN_ALL's reconciler also regenerates the ledger and would not preserve this "
+    "session's hand-corrections (hq-sam->legal_review, 19 evidence re-pointings) until encoded in "
+    "KNOWN_CORRECTIONS.",
+    "Encode the session's ledger corrections into v239_reconciler.KNOWN_CORRECTIONS, then run "
+    "RUN_ALL one task notebook at a time under the resource guard.",
 )
 g(
     "V3-04",

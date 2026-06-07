@@ -1,15 +1,15 @@
 # VisionServeX — V3 Blockers Report
 
-**V3 NOT RELEASED.** Selected release: **v2.59.0** (next minor after v2.58.0).
+**V3 NOT RELEASED.** Released: **v2.59.0** (on PyPI via Trusted Publishing; v3.0.0 withheld).
 
-Decision derived strictly from `v3_gate_matrix.csv`: v3.0.0 ships only when every blocking gate is PASS*. Blocking failures: **V3-01, V3-02, V3-03, V3-08**.
+v3.0.0 ships only when every blocking gate is PASS*. Remaining blocking failures: **V3-03, V3-08** (down from 4 — V3-01 Trusted Publishing and V3-02 fresh-PyPI install were VERIFIED LIVE by the v2.59.0 release).
 
 ## V3 gate matrix
 
 | gate | status | blocking | title |
 |---|---|---|---|
-| V3-01 | NOT_VERIFIED | yes | PyPI Trusted Publishing works |
-| V3-02 | FAIL | yes | Fresh PyPI install from real PyPI |
+| V3-01 | PASS | yes | PyPI Trusted Publishing works |
+| V3-02 | PASS | yes | Fresh PyPI install from real PyPI |
 | V3-03 | NOT_VERIFIED | yes | RUN_ALL executes after fresh install |
 | V3-04 | PASS | yes | smoke_passed == 0 |
 | V3-05 | PASS | yes | benchmark_failed == 0 or justified |
@@ -26,19 +26,11 @@ Decision derived strictly from `v3_gate_matrix.csv`: v3.0.0 ships only when ever
 | V3-16 | PASS_WITH_CAVEAT | yes | package tests pass |
 | V3-17 | PASS | yes | final report lists remaining blockers + lawful next actions |
 
-## Blocking V3 gate failures — why and lawful next action
-
-### V3-01 — PyPI Trusted Publishing works (NOT_VERIFIED)
-- **Evidence:** True
-- **Next action:** Configure GitHub Actions OIDC Trusted Publishing; cut a tag and watch the publish workflow.
-
-### V3-02 — Fresh PyPI install from real PyPI (FAIL)
-- **Evidence:** True
-- **Next action:** Publish v2.59.0/v3 then `pip install --no-cache-dir visionservex[all-benchmark,classic-ml]==<ver>` in a fresh venv.
+## Remaining blocking gate failures — why and lawful next action
 
 ### V3-03 — RUN_ALL executes after fresh install (NOT_VERIFIED)
 - **Evidence:** True
-- **Next action:** After publish+fresh-install, run `jupyter nbconvert --execute RUN_ALL.ipynb`.
+- **Next action:** Encode the session's ledger corrections into v239_reconciler.KNOWN_CORRECTIONS, then run RUN_ALL one task notebook at a time under the resource guard.
 
 ### V3-08 — every core model has code_license and weights_license (PARTIAL)
 - **Evidence:** True
@@ -46,7 +38,7 @@ Decision derived strictly from `v3_gate_matrix.csv`: v3.0.0 ships only when ever
 
 ## Non-benchmark core rows (state + blocker + next action)
 
-61 of 173 core rows are not benchmark_passed. Breakdown:
+61 of 173 core rows are not benchmark_passed.
 
 | model_id | final_state | blocker_code | next action |
 |---|---|---|---|
@@ -116,23 +108,23 @@ Decision derived strictly from `v3_gate_matrix.csv`: v3.0.0 ships only when ever
 
 | family | models | effort | v3 relevance | next command |
 |---|---|---|---|---|
-| medsam2 | 1 | low-medium (single conda env: torc | medium | `visionservex sidecar create medsam2 --execute && visionserve` |
-| internimage | 5 | medium (OpenMMLab mmcv/mmdet + DCN | medium | `visionservex expert openmmlab create-env --execute && vision` |
-| oneformer | 1 | medium (NATTEN wheel/compat for in | low-medium | `pip install natten -f https://shi-labs.com/natten/wheels && ` |
-| rtmdet | 7 | medium-high (OpenMMLab + MMRotate  | low | `visionservex openmmlab create-env --with-mmrotate --execute ` |
-| maskdino | 3 | high (Detectron2 + MaskDINO build) | low | `visionservex maskdino create-env --execute && visionservex r` |
-| co-dino/codetr | 2 | high (Co-DETR OpenMMLab projects) | low | `visionservex expert codetr create-env --execute && visionser` |
-| seem | 2 | high (X-Decoder/SEEM env) | low | `visionservex sidecar create seem --execute && visionservex r` |
+| medsam2 | 1 | low-medium (single conda env: torc | medium | `visionservex sidecar create medsam2 --execute && visions` |
+| internimage | 5 | medium (OpenMMLab mmcv/mmdet + DCN | medium | `visionservex expert openmmlab create-env --execute && vi` |
+| oneformer | 1 | medium (NATTEN wheel/compat for in | low-medium | `pip install natten -f https://shi-labs.com/natten/wheels` |
+| rtmdet | 7 | medium-high (OpenMMLab + MMRotate  | low | `visionservex openmmlab create-env --with-mmrotate --exec` |
+| maskdino | 3 | high (Detectron2 + MaskDINO build) | low | `visionservex maskdino create-env --execute && visionserv` |
+| co-dino/codetr | 2 | high (Co-DETR OpenMMLab projects) | low | `visionservex expert codetr create-env --execute && visio` |
+| seem | 2 | high (X-Decoder/SEEM env) | low | `visionservex sidecar create seem --execute && visionserv` |
 
-## Commercial-safety corrections applied this session
+## Commercial-safety corrections applied (released in v2.59.0)
 
-- **EdgeSAM** — was in commercial-safe core as `Apache-2.0`/`benchmark_passed`/`default_safe=True`. Real license is **NTU S-Lab License 1.0 (non-commercial)**. Moved to `external_restricted_baselines.csv`; manifest + `_RESTRICTED` split corrected. **GATE V3-07 violation fixed.**
-- **HQ-SAM** — Apache-2.0 weights but HQSeg-44K training data partly non-commercial (ThinObject-5K CC-BY-NC, DIS5K NC ToU). Marked `legal_review_required`, `default_safe=False`.
-- **Evidence restore** — restored deleted v248 (dfine/rfdetr 400-img) + v256 (libreyolo-yolov9) benchmark artifacts and re-pointed 19 `benchmark_passed` rows whose evidence_artifact was NaN. **0 NaN-evidence rows remain.**
-- **License backfill** — filled 21 NaN-license core rows (grounding-dino-original-swin Apache-2.0; libreyolo-seg). **0 NaN-license core rows remain.**
+- **EdgeSAM** — NTU S-Lab License 1.0 (non-commercial); was in core as Apache-2.0/benchmark_passed/default_safe=True. Moved to external_restricted_baselines; manifest + _RESTRICTED corrected. **GATE V3-07 fixed.**
+- **HQ-SAM** — Apache-2.0 weights but HQSeg-44K training data partly non-commercial; marked legal_review_required/default_safe=False.
+- **Evidence restore** — restored deleted v248/v256 benchmark artifacts; re-pointed 19 NaN-evidence rows. **0 NaN-evidence rows.**
+- **License backfill** — 0 NaN-license core rows remain.
 
-## Residual truthfulness caveats (recommended for v2.60+/V3)
+## Residual truthfulness caveats
 
-- **V3-11 residual:** `rtdetrv4-{l,m,s,x}` and `siglip-base-patch16-224` carry `benchmark_passed` but their evidence points to a checkpoint-`pull.json` / contract-stderr, not a 400-image benchmark. Re-run or downgrade.
-- **V3-16 residual (pre-existing test-debt):** the v2.46 KNOWN_CORRECTIONS state changes (`oneformer-convnext-large`, `deim-m`, `deim-s` -> `wired`) were never propagated to ~5 test files that still assert `wrong_registry_entry`/`upstream_deprecated`; plus one clean-outputs artifact test. These predate V3-prep and fail on a clean HEAD checkout. Recommend a dedicated test-debt cleanup.
-- **V3-08 residual:** add explicit `code_license` + `weights_license` columns to the ledger for ALL core families (detection/embedding), extending `v3_model_rights_audit` beyond the 56 segmentation/grounded targets.
+- **V3-11 residual:** `rtdetrv4-{l,m,s,x}` + `siglip-base` benchmark_passed but evidence points to pull/contract, not a benchmark — re-run or downgrade.
+- **V3-16 residual (pre-existing test-debt):** v2.46 state corrections (oneformer-convnext-large/deim-m/deim-s -> wired) not propagated to ~5 test files; one clean-outputs test. Predate this session; fail on clean HEAD.
+- **V3-08:** add explicit code_license+weights_license columns to the ledger for ALL core families (extend rights audit past the 56 segmentation/grounded targets).
