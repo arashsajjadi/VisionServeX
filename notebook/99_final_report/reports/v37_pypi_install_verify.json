@@ -1,0 +1,8 @@
+{
+  "source": "pypi",
+  "version": "3.7.0",
+  "from_site_packages": true,
+  "publish_run": "27102436561",
+  "publish_conclusion": "success",
+  "github_release": "https://github.com/arashsajjadi/VisionServeX/releases/tag/v3.7.0"
+}

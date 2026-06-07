@@ -16,7 +16,9 @@ NO artifacts on disk) was discarded and regenerated from real runs.
 | Field | Value |
 |---|---|
 | selected_version | **3.7.0** |
-| release_published | see §9 (wheel built + twine-checked + committed + tagged; PyPI via OIDC on tag push) |
+| release_published | **YES** — PyPI publish workflow **run 27102436561 = success**; commit `13b9c36`; tag `v3.7.0`; GitHub release live; fresh `pip install visionservex==3.7.0` from PyPI verified (site-packages, CLI `VisionServeX 3.7.0`) |
+| PyPI_run_id | 27102436561 (publish-pypi, conclusion=success) |
+| github_release | https://github.com/arashsajjadi/VisionServeX/releases/tag/v3.7.0 |
 | post_v259_inventory_count | **105** items |
 | product_grade_count | **45** product_grade_pass (44 runtime benchmark_passed + grabcut tool_available) |
 | runtime_pass_not_product_grade | 0 (every runtime-verified row is product-grade or honestly state-flagged) |
@@ -150,10 +152,14 @@ ledgers prove staleness.
   `VisionServeX 3.7.0`, and API states verified from the installed package
   (ritm=checkpoint_required, rfdetr-seg-small=benchmark_passed, locate-anything-3b=excluded_restricted,
   dinov2-giant=benchmark_passed, sam-vit-huge=benchmark_passed).
-- **PENDING (irreversible, outward-facing — awaiting explicit go-ahead):** `git push origin main --tags`
-  triggers PyPI Trusted-Publishing (OIDC GitHub Action) for the public v3.7.0 release, plus the GitHub
-  release. Held back deliberately: a published PyPI version cannot be unpublished or its number reused.
-  `release_published` = NO (local release verified; public publish gated on confirmation).
+- **PUBLISHED (user-confirmed):** `git push origin main --tags` pushed `6b737bd..13b9c36` + tag `v3.7.0`;
+  the OIDC GitHub Action **publish-pypi (run 27102436561) completed = success** -> v3.7.0 is live on PyPI.
+  GitHub release created with the wheel attached.
+- **Fresh PyPI install verified** (`v37_pypi_install_verify.json`): a clean venv
+  `pip install visionservex==3.7.0` resolves from the public PyPI index; `visionservex.__file__` in
+  site-packages, `__version__==3.7.0`, CLI `VisionServeX 3.7.0`, and API states correct
+  (ritm=checkpoint_required, rfdetr-seg-small=benchmark_passed, locate-anything-3b=excluded_restricted).
+  `release_published` = **YES**.
 
 ## 10. Blocked items — exact next commands
 
