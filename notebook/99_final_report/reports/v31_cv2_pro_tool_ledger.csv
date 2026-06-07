@@ -1,0 +1,14 @@
+tool_id,available,latency_ms_mean,n_images,dependency_license,commercial_safe,final_state,install_extra
+opencv-connected-components-refine,base,0.36,10,OpenCV Apache-2.0,True,tool_benchmark_passed,base
+opencv-contour-snap,base,0.84,10,OpenCV Apache-2.0,True,tool_benchmark_passed,base
+opencv-distance-transform-markers,base,0.5,10,OpenCV Apache-2.0,True,tool_benchmark_passed,base
+opencv-dnn-onnx-runner,base,0.02,10,OpenCV Apache-2.0,True,tool_benchmark_passed,base
+opencv-grabcut-plus,base,324.53,10,OpenCV Apache-2.0,True,tool_benchmark_passed,base
+opencv-intelligent-scissors,base,64.13,10,OpenCV Apache-2.0,True,tool_benchmark_passed,base
+opencv-kmeans-color-segment,base,10.18,10,OpenCV Apache-2.0,True,tool_benchmark_passed,base
+opencv-mser-proposals,base,4.72,10,OpenCV Apache-2.0,True,tool_benchmark_passed,base
+opencv-selective-search-fast,cv2-pro extra,282.6,5,OpenCV Apache-2.0,True,tool_benchmark_passed,visionservex[cv2-pro]
+opencv-selective-search-quality,cv2-pro extra,932.6,5,OpenCV Apache-2.0,True,tool_benchmark_passed,visionservex[cv2-pro]
+opencv-video-fg-bg-knn,base,4.29,10,OpenCV Apache-2.0,True,tool_benchmark_passed,base
+opencv-video-fg-bg-mog2,base,1.32,10,OpenCV Apache-2.0,True,tool_benchmark_passed,base
+opencv-watershed-plus,base,2.06,10,OpenCV Apache-2.0,True,tool_benchmark_passed,base

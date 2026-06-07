@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "visionservex"
-version = "3.0.0"
+version = "3.1.0"
 description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -147,6 +147,19 @@ promptable-extra = [
     # the classic toolkit). Pulls the classic-ml stack plus mask I/O.
     "visionservex[classic-ml]",
     "pycocotools>=2.0",
+    "pillow>=10.0",
+]
+cv2-pro = [
+    # v3.1 CV2-Pro: region-proposal / selective-search tools need OpenCV contrib
+    # (ximgproc). MSER/grabcut/watershed/dnn/bg-subtractors run on base OpenCV.
+    "opencv-contrib-python-headless>=4.8",
+    "numpy>=1.24",
+]
+interactive-seg = [
+    # v3.1 interactive click segmentation (RITM/ClickSEG). Code permissive;
+    # checkpoints user-supplied (legacy torch env). Marker extra only.
+    "opencv-python-headless>=4.8",
+    "numpy>=1.24",
     "pillow>=10.0",
 ]
 dev = [

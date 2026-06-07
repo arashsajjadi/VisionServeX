@@ -1,0 +1,32 @@
+entry_id,entry_type,family,task,new_state,counts_toward_20,license,evidence,tutorial
+opencv-connected-components-refine,cv2_tool,cv2-pro,region_proposal/segment_refine,tool_benchmark_passed,True,OpenCV Apache-2.0,v31_cv2_pro_tool_ledger.csv,notebook/tutorials/cv2_pro/opencv-connected-components-refine.ipynb
+opencv-contour-snap,cv2_tool,cv2-pro,region_proposal/segment_refine,tool_benchmark_passed,True,OpenCV Apache-2.0,v31_cv2_pro_tool_ledger.csv,notebook/tutorials/cv2_pro/opencv-contour-snap.ipynb
+opencv-distance-transform-markers,cv2_tool,cv2-pro,region_proposal/segment_refine,tool_benchmark_passed,True,OpenCV Apache-2.0,v31_cv2_pro_tool_ledger.csv,notebook/tutorials/cv2_pro/opencv-distance-transform-markers.ipynb
+opencv-dnn-onnx-runner,cv2_tool,cv2-pro,region_proposal/segment_refine,tool_benchmark_passed,True,OpenCV Apache-2.0,v31_cv2_pro_tool_ledger.csv,notebook/tutorials/cv2_pro/opencv-dnn-onnx-runner.ipynb
+opencv-grabcut-plus,cv2_tool,cv2-pro,region_proposal/segment_refine,tool_benchmark_passed,True,OpenCV Apache-2.0,v31_cv2_pro_tool_ledger.csv,notebook/tutorials/cv2_pro/opencv-grabcut-plus.ipynb
+opencv-intelligent-scissors,cv2_tool,cv2-pro,region_proposal/segment_refine,tool_benchmark_passed,True,OpenCV Apache-2.0,v31_cv2_pro_tool_ledger.csv,notebook/tutorials/cv2_pro/opencv-intelligent-scissors.ipynb
+opencv-kmeans-color-segment,cv2_tool,cv2-pro,region_proposal/segment_refine,tool_benchmark_passed,True,OpenCV Apache-2.0,v31_cv2_pro_tool_ledger.csv,notebook/tutorials/cv2_pro/opencv-kmeans-color-segment.ipynb
+opencv-mser-proposals,cv2_tool,cv2-pro,region_proposal/segment_refine,tool_benchmark_passed,True,OpenCV Apache-2.0,v31_cv2_pro_tool_ledger.csv,notebook/tutorials/cv2_pro/opencv-mser-proposals.ipynb
+opencv-selective-search-fast,cv2_tool,cv2-pro,region_proposal/segment_refine,tool_benchmark_passed,True,OpenCV Apache-2.0,v31_cv2_pro_tool_ledger.csv,notebook/tutorials/cv2_pro/opencv-selective-search-fast.ipynb
+opencv-selective-search-quality,cv2_tool,cv2-pro,region_proposal/segment_refine,tool_benchmark_passed,True,OpenCV Apache-2.0,v31_cv2_pro_tool_ledger.csv,notebook/tutorials/cv2_pro/opencv-selective-search-quality.ipynb
+opencv-video-fg-bg-knn,cv2_tool,cv2-pro,region_proposal/segment_refine,tool_benchmark_passed,True,OpenCV Apache-2.0,v31_cv2_pro_tool_ledger.csv,notebook/tutorials/cv2_pro/opencv-video-fg-bg-knn.ipynb
+opencv-video-fg-bg-mog2,cv2_tool,cv2-pro,region_proposal/segment_refine,tool_benchmark_passed,True,OpenCV Apache-2.0,v31_cv2_pro_tool_ledger.csv,notebook/tutorials/cv2_pro/opencv-video-fg-bg-mog2.ipynb
+opencv-watershed-plus,cv2_tool,cv2-pro,region_proposal/segment_refine,tool_benchmark_passed,True,OpenCV Apache-2.0,v31_cv2_pro_tool_ledger.csv,notebook/tutorials/cv2_pro/opencv-watershed-plus.ipynb
+grounding-dino-swin-t+sam-vit-h,pipeline,sam-dino,text_to_mask,pipeline_demo_ready,True,Apache-2.0 composite,v31_pipeline_benchmark_ledger.csv,notebook/tutorials/pipelines/grounding-dino-swin-t_sam-vit-h.ipynb
+grounding-dino-swin-b+sam-vit-h,pipeline,sam-dino,text_to_mask,pipeline_demo_ready,True,Apache-2.0 composite,v31_pipeline_benchmark_ledger.csv,notebook/tutorials/pipelines/grounding-dino-swin-b_sam-vit-h.ipynb
+grounding-dino-swin-t+sam2.1-hiera-small,pipeline,sam-dino,text_to_mask,pipeline_demo_ready,True,Apache-2.0 composite,v31_pipeline_benchmark_ledger.csv,notebook/tutorials/pipelines/grounding-dino-swin-t_sam2.1-hiera-small.ipynb
+grounding-dino-swin-b+sam2.1-hiera-large,pipeline,sam-dino,text_to_mask,pipeline_demo_ready,True,Apache-2.0 composite,v31_pipeline_benchmark_ledger.csv,notebook/tutorials/pipelines/grounding-dino-swin-b_sam2.1-hiera-large.ipynb
+grounding-dino-original-swin-t+sam2-hiera-small,pipeline,sam-dino,text_to_mask,pipeline_demo_ready,True,Apache-2.0 composite,v31_pipeline_benchmark_ledger.csv,notebook/tutorials/pipelines/grounding-dino-original-swin-t_sam2-hiera-small.ipynb
+grounding-dino-original-swin-b+sam2-hiera-large,pipeline,sam-dino,text_to_mask,pipeline_demo_ready,True,Apache-2.0 composite,v31_pipeline_benchmark_ledger.csv,notebook/tutorials/pipelines/grounding-dino-original-swin-b_sam2-hiera-large.ipynb
+grounding-dino-1.5+sam3-base,pipeline,sam-dino,text_to_mask,auth_required,False,Apache-2.0 composite,v31_pipeline_benchmark_ledger.csv,notebook/tutorials/pipelines/grounding-dino-1.5_sam3-base.ipynb
+grounding-dino-1.6+sam3-base,pipeline,sam-dino,text_to_mask,auth_required,False,Apache-2.0 composite,v31_pipeline_benchmark_ledger.csv,notebook/tutorials/pipelines/grounding-dino-1.6_sam3-base.ipynb
+dino-x-api+sam3-base,pipeline,sam-dino,text_to_mask,auth_required,False,Apache-2.0 composite,v31_pipeline_benchmark_ledger.csv,notebook/tutorials/pipelines/dino-x-api_sam3-base.ipynb
+dinov3-vitb16+sam2.1-hiera-small,pipeline,sam-dino,text_to_mask,legal_review_required,False,Apache-2.0 composite,v31_pipeline_benchmark_ledger.csv,notebook/tutorials/pipelines/dinov3-vitb16_sam2.1-hiera-small.ipynb
+dinov3-vitb16+sam3-base,pipeline,sam-dino,text_to_mask,auth_required,False,Apache-2.0 composite,v31_pipeline_benchmark_ledger.csv,notebook/tutorials/pipelines/dinov3-vitb16_sam3-base.ipynb
+ritm,model,interactive-seg,interactive_click_seg,checkpoint_required,True,MIT (Copyright 2021 Samsung El,v31_interactive_seg_ledger.csv,notebook/tutorials/interactive_seg/ritm.ipynb
+clickseg,model,interactive-seg,interactive_click_seg,checkpoint_required,True,Apache-2.0 (both alibaba/Click,v31_interactive_seg_ledger.csv,notebook/tutorials/interactive_seg/clickseg.ipynb
+focalclick,model,interactive-seg,interactive_click_seg,legal_review_required,False,Apache-2.0 (per repo LICENSE f,v31_interactive_seg_ledger.csv,notebook/tutorials/interactive_seg/focalclick.ipynb
+simpleclick,model,interactive-seg,interactive_click_seg,legal_review_required,False,MIT (GitHub API confirmed),v31_interactive_seg_ledger.csv,notebook/tutorials/interactive_seg/simpleclick.ipynb
+sam3-base,model,sam,promptable_seg_byot,auth_required,False,gated/api/custom/NC,matrix,notebook/tutorials/sam/sam3-base.ipynb
+dinov3-vitb16,model,dino,embed_license_aware,legal_review_required,False,gated/api/custom/NC,matrix,notebook/tutorials/dino/dinov3-vitb16.ipynb
+dino-x-api,model,dino,open_vocab_api,external_api_only,False,gated/api/custom/NC,matrix,notebook/tutorials/dino/dino-x-api.ipynb

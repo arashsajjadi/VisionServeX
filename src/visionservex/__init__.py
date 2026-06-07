@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__version__ = "3.0.0"
+__version__ = "3.1.0"
 __author__ = "Arash Sajjadi"
 __email__ = "arash.sajjadi@usask.ca"
 __license__ = "Apache-2.0"
@@ -33,8 +33,10 @@ from visionservex.exceptions import (
     SidecarNotRunningError,
     VisionServeXError,
 )
+from visionservex.vsx import VSX, VSXError
 
 __all__ = [
+    "VSX",
     "AsyncClient",
     "ClassificationResult",
     "Client",
@@ -53,6 +55,7 @@ __all__ = [
     "PoseResult",
     "SegmentationResult",
     "SidecarNotRunningError",
+    "VSXError",
     "VisionModel",
     "VisionServeXError",
     "__version__",

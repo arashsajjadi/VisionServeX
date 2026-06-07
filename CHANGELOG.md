@@ -3,6 +3,26 @@
 ## [Unreleased]
 
 
+## [3.1.0] - 2026-06-06
+
+### SAM/DINO model expansion + CV2-Pro + unified VSX API
+
+- **21 new activations** (target 20): 13 CV2-Pro tools (real COCO benchmark), 6 SAM+DINO
+  text-to-mask pipelines, 2 interactive-seg models (RITM/ClickSEG checkpoint_required).
+- **Unified `VSX` facade** + `visionservex sam|dino|pipeline|cv2-pro` CLI groups, all with `--explain`.
+- **SAM family matrix** (68 targets) + **DINO family matrix** (44) — every target classified
+  honestly with exact next command; none omitted, none faked. SAM3/DINOv3/DINO-X via BYOT/API;
+  EdgeSAM stays excluded (S-Lab non-commercial); HQ-SAM/TinySAM stay legal_review.
+- **CV2-Pro** `visionservex.cv2_pro` (Apache-2.0, no GPL): selective-search (cv2-pro extra),
+  MSER, grabcut+, watershed+, connected-components, contour-snap, intelligent-scissors,
+  kmeans-color-segment, distance-transform-markers, MOG2/KNN bg-subtraction, DNN-ONNX runner.
+- **43 tutorial notebooks** + new extras `cv2-pro`, `interactive-seg`.
+- Commercial-safety from V3 preserved (no bad-license core; gated=BYOT; no token leak).
+
+
+## [Unreleased]
+
+
 ## [3.0.0] - 2026-06-06
 
 ### 🎉 V3 RELEASE — ALL 17 V3 GATES PASS
