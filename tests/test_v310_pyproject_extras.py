@@ -44,7 +44,8 @@ def test_version_310_in_pyproject():
     from visionservex import __version__
 
     text = _pyproject_text()
-    assert __version__.startswith("3.10."), f"Expected 3.10.x, got {__version__}"
+    major, minor, *_ = __version__.split(".")
+    assert major == "3" and int(minor) >= 10, f"Expected >=3.10.x, got {__version__}"
     assert f'version = "{__version__}"' in text, (
         f'pyproject.toml should contain version = "{__version__}"'
     )

@@ -979,6 +979,50 @@ _ROWS += [
     ),
 ]
 
+# ----- INSID3 — Training-Free In-Context Segmentation (DINOv3 backbone) ---- #
+# INSID3 code: Apache-2.0 (visinf/INSID3, CVPR 2026 Oral, arXiv 2603.28480)
+# Backbone weights: DINOv3 License (Meta custom).
+# Combined policy: byot_license_required — user must accept DINOv3 upstream license.
+# Attribution: "Built with DINOv3" required per DINOv3 license.
+_INSID3_CODE_LIC = "Apache-2.0 (INSID3 code) + DINOv3 License (Meta custom, backbone)"
+_INSID3_WEIGHT_LIC = _DINOV3_LIC  # backbone weights carry DINOv3 license
+_insid3 = {
+    "insid3-small": (
+        "facebook/dinov3-vits16-pretrain-lvd1689m",
+        "ViT-S/16 backbone ~21M",
+        ("insid3-dinov3-small",),
+    ),
+    "insid3-base": (
+        "facebook/dinov3-vitb16-pretrain-lvd1689m",
+        "ViT-B/16 backbone ~86M",
+        ("insid3-dinov3-base",),
+    ),
+    "insid3-large": (
+        "facebook/dinov3-vitl16-pretrain-lvd1689m",
+        "ViT-L/16 backbone ~300M LVD (default)",
+        ("insid3", "insid3-default", "insid3-dinov3-large"),
+    ),
+}
+for _mid, (_repo, _desc, _aliases) in _insid3.items():
+    _ROWS.append(
+        _byot(
+            _mid,
+            "insid3",
+            code=_INSID3_CODE_LIC,
+            weights=_INSID3_WEIGHT_LIC,
+            hf_repo=_repo,
+            upstream="https://github.com/visinf/INSID3",
+            aliases=_aliases,
+            notes=(
+                f"INSID3 training-free in-context segmentation; {_desc}. "
+                "INSID3 code: Apache-2.0 (visinf/INSID3, CVPR 2026 Oral, arXiv 2603.28480). "
+                "No INSID3-specific weights — uses frozen DINOv3 backbone only. "
+                "Backbone: DINOv3 License (Meta custom); commercial use permitted "
+                "with 'Built with DINOv3' attribution. BYOT only; no weights shipped."
+            ),
+        )
+    )
+
 # --------------------------------------------------------------------------- #
 # Index + public helpers
 # --------------------------------------------------------------------------- #

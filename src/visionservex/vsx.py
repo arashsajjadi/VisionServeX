@@ -406,6 +406,76 @@ class _Cv2Handle:
         return run_tool(self.tool_id, np.asarray(img)[..., ::-1], **params)  # PIL RGB -> BGR
 
 
+class _INSID3Handle(_Base):
+    """Handle for INSID3 training-free in-context segmentation (BYOT — DINOv3 backbone).
+
+    INSID3: Apache-2.0 code (visinf/INSID3, CVPR 2026 Oral, arXiv 2603.28480).
+    Backbone: frozen DINOv3 weights (Meta custom license — BYOT, user accepts upstream).
+    No INSID3-specific weights are shipped; user's HF token + DINOv3 acceptance required.
+    """
+
+    family = "insid3"
+
+    def explain(self) -> dict[str, Any]:
+        from visionservex.licensing.policy import get_policy, resolve_model_id
+
+        canonical = resolve_model_id(self.model_id)
+        pol = get_policy(canonical)
+        return {
+            "model_id": canonical,
+            "family": "insid3",
+            "task": "in_context_segmentation",
+            "state": "byot_license_required",
+            "license": pol.weights_license if pol else "DINOv3 License (Meta custom)",
+            "code_license": "Apache-2.0 (INSID3 code) + DINOv3 License (Meta custom, backbone)",
+            "attribution_required": "Built with DINOv3",
+            "default_safe": False,
+            "commercial_safe": False,
+            "install_extra": "visionservex[hf]",
+            "auth_required": True,
+            "byot": True,
+            "hf_repo": pol.hf_repo if pol else None,
+            "upstream": "https://github.com/visinf/INSID3",
+            "limitations": (
+                "DINOv3 backbone: Meta custom license, BYOT only. "
+                "Requires 'Built with DINOv3' attribution for commercial use. "
+                "No INSID3 weights shipped."
+            ),
+            "next_command": (
+                f"visionservex hf connect && "
+                f"visionservex insid3 run query.jpg ref.jpg ref_mask.png "
+                f"--model-id {canonical}"
+            ),
+            "warning": pol.warning_text if pol else None,
+        }
+
+    def status(self) -> str:
+        return self.explain()["state"]
+
+    def segment(
+        self,
+        query_image,
+        reference_image,
+        reference_mask,
+        *,
+        device: str = "cpu",
+        n_clusters: int = 6,
+        out_dir: str | None = None,
+    ) -> dict[str, Any]:
+        """Run INSID3 in-context segmentation. Returns structured result dict."""
+        from visionservex.insid3_runtime import insid3_segment
+
+        return insid3_segment(
+            query_image,
+            reference_image,
+            reference_mask,
+            model_id=self.model_id,
+            device=device,
+            n_clusters=n_clusters,
+            out_dir=out_dir,
+        )
+
+
 class _LocateAnythingHandle(_Base):
     """Handle for NVIDIA LocateAnything-3B family (non-commercial, BYOT only).
 
@@ -677,6 +747,15 @@ class VSX:
     @staticmethod
     def cv2(tool_id: str) -> _Cv2Handle:
         return _Cv2Handle(tool_id)
+
+    @staticmethod
+    def insid3(model_id: str = "insid3-large") -> _INSID3Handle:
+        """Return an INSID3 in-context segmentation handle (BYOT — DINOv3 backbone).
+
+        ``VSX.insid3().segment(query, ref_image, ref_mask)`` — training-free segmentation.
+        Requires HF token and DINOv3 upstream license acceptance.
+        """
+        return _INSID3Handle(model_id)
 
     @staticmethod
     def locateanything(model_id: str) -> _LocateAnythingHandle:

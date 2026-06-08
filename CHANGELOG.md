@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+## [3.11.0] - 2026-06-08
+
+### Added — INSID3 In-Context Segmentation (DINOv3 backbone)
+
+INSID3 is now a first-class BYOT capability in VisionServeX.
+
+Paper: arXiv 2603.28480 | Code: visinf/INSID3 (Apache-2.0) | CVPR 2026 Oral.
+Uses frozen DINOv3 backbone; DINOv3 License (Meta custom) applies.
+Attribution "Built with DINOv3" required for commercial use.
+
+- `src/visionservex/insid3_runtime.py` — core algorithm (DINOv3 features, debiasing, clustering).
+- `src/visionservex/cli/insid3_commands.py` — CLI: `visionservex insid3 status/doctor/run/correspond`.
+- `src/visionservex/licensing/policy.py` — 3 INSID3 rows (102 total): `insid3-small/base/large`.
+- `src/visionservex/vsx.py` — `VSX.insid3(model_id)` + `_INSID3Handle`.
+- `docs/insid3.md`, `docs/byot_models.md` update, README update, INSID3 tutorial notebook.
+- 8 new test files: `test_v311_insid3_policy/registry/cli/runtime_or_blocker/no_weights_tracked/notebooks/docs_sync/release_readiness`.
+
 ## [3.10.1] - 2026-06-08
 
 ### Changed

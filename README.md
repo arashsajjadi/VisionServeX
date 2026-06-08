@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-3.10.1-informational.svg" alt="v3.10.1">
+  <img src="https://img.shields.io/badge/version-3.11.0-informational.svg" alt="v3.11.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -94,6 +94,7 @@ VSX.dino("dinov2-base").embed("image.jpg")
 | DINOv3 BYOT embedding | dinov3-vits16 through dinov3-vit7b16 | `[dino]` + HF token | yes, BYOT |
 | DINOv3 depth head | CHMv2 DPT depth estimation (`transformers>=5.10`) | `[dino]` + HF token | yes, BYOT |
 | SAM2.1 ONNX encoder | image-encoder export + ONNX Runtime smoke | `[hf]` + onnx | yes, BYOT |
+| INSID3 segmentation | training-free in-context segmentation (DINOv3 backbone) | `[hf]` + HF token | yes, BYOT |
 | Medical segmentation | MedSAM (research only) | `[hf]` | no |
 | Anomaly detection | PatchCore, PaDiM (via anomalib) | `[anomaly]` | no |
 | Surveillance search | Index + text query (SigLIP2 + ByteTrack) | `[hf]` | no |
@@ -397,6 +398,7 @@ See [docs/openmmlab_expert_models.md](docs/openmmlab_expert_models.md).
 | [SAM3 mask benchmark](docs/sam3_mask_benchmark.md) | Real mask evidence (v3.10.0) |
 | [DINOv3 depth head](docs/dinov3_depth.md) | CHMv2 DPT depth estimation |
 | [SAM2.1 ONNX](docs/sam21_onnx.md) | Image-encoder export and ONNX Runtime |
+| [INSID3](docs/insid3.md) | Training-free in-context segmentation (CVPR 2026 Oral) |
 | [Local gateway](docs/local_gateway.md) | Gateway commands and Python client |
 | [Security](docs/security.md) | Threat model, modes, configuration |
 | [Privacy](docs/privacy.md) | Retention policy, encryption |

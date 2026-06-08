@@ -24,6 +24,11 @@ the upstream license yourself, and the weights download into your own HF cache.
   `dinov3-convnext-tiny/small/base/large` → `facebook/dinov3-*-pretrain-lvd1689m`
   (custom **DINOv3 License**: commercial use permitted with "Built with DINOv3"
   attribution + acceptable-use + no-compete-training conditions).
+- **INSID3** — `insid3-small`, `insid3-base`, `insid3-large` (alias: `insid3`)
+  Training-free in-context segmentation (CVPR 2026 Oral, arXiv 2603.28480).
+  INSID3 code is Apache-2.0 (visinf/INSID3); uses frozen DINOv3 backbone.
+  No INSID3-specific weights shipped. Backbone: DINOv3 License (Meta custom),
+  requires "Built with DINOv3" attribution. See [docs/insid3.md](insid3.md).
 
 > **Note:** SAM 3 / SAM 3.1 use a *custom* SAM License, not Apache-2.0 like SAM 1/2.
 > DINOv3 uses a *custom* DINOv3 License, not Apache-2.0 like DINOv2. Commercial use

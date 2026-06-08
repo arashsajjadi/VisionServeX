@@ -51,6 +51,7 @@ from visionservex.cli import (
     gateway_commands,
     gpu_commands,
     hf_commands,
+    insid3_commands,
     interactive_commands,
     libreyolo_commands,
     license_commands,
@@ -186,6 +187,7 @@ app.add_typer(readiness_commands.app, name="readiness")
 app.add_typer(locateanything_commands.app, name="locate-anything")
 app.add_typer(interactive_commands.app, name="interactive")
 app.add_typer(segment_instances_commands.app, name="segment-instances")
+app.add_typer(insid3_commands.app, name="insid3")
 app.add_typer(sam3_commands.app, name="sam3")
 app.add_typer(expert_commands.app, name="expert")
 app.add_typer(maskdino_commands.app, name="maskdino")
