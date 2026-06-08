@@ -143,7 +143,30 @@ def sam3_segment(
     img = _load_image(image)
     t0 = time.perf_counter()
     proc = Sam3Processor.from_pretrained(repo, token=token)
-    model = Sam3Model.from_pretrained(repo, token=token).to(device).eval()
+    # SAM3.1 uses a non-standard weight filename (sam3.1_multiplex.pt).
+    # Try direct HF id first; on OSError fall back to snapshot + local alias.
+    try:
+        model = Sam3Model.from_pretrained(repo, token=token).to(device).eval()
+    except OSError:
+        import shutil
+        from huggingface_hub import snapshot_download
+
+        local_snap = snapshot_download(repo, token=token)
+        pt_files = list(__import__("pathlib").Path(local_snap).glob("*.pt"))
+        if not pt_files:
+            raise
+        working = __import__("pathlib").Path(local_snap).parent / "_vsx_sam3_working"
+        working.mkdir(exist_ok=True)
+        for cfg in ("config.json", "processor_config.json", "tokenizer.json",
+                    "tokenizer_config.json", "special_tokens_map.json",
+                    "merges.txt", "vocab.json"):
+            src = __import__("pathlib").Path(local_snap) / cfg
+            if src.exists():
+                shutil.copy(src, working / cfg)
+        alias = working / "pytorch_model.bin"
+        if not alias.exists():
+            alias.symlink_to(pt_files[0])
+        model = Sam3Model.from_pretrained(str(working)).to(device).eval()
     load_ms = (time.perf_counter() - t0) * 1000.0
     inputs = proc(images=img, text=text, return_tensors="pt").to(device)
     t1 = time.perf_counter()

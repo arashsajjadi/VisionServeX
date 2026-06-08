@@ -2,14 +2,14 @@
 
 Generated from `visionservex.licensing.policy` (single source of truth). The CLI, Python API, tests, notebooks, and docs all read this same table.
 
-**Total models classified: 94**
+**Total models classified: 98**
 
 ## Summary by final policy
 
 | final_policy | count |
 |---|---|
 | `commercial_safe_core` | 39 |
-| `byot_license_required` | 23 |
+| `byot_license_required` | 27 |
 | `auth_required_license_pending` | 0 |
 | `external_api_only_terms_required` | 9 |
 | `noncommercial_restricted` | 7 |
@@ -17,7 +17,7 @@ Generated from `visionservex.licensing.policy` (single source of truth). The CLI
 | `legal_review_required` | 11 |
 | `excluded_from_core` | 0 |
 | `not_released_or_unverifiable` | 1 |
-| **total** | **94** |
+| **total** | **98** |
 
 ## Hard rules (enforced in code + tests)
 
@@ -85,7 +85,7 @@ Generated from `visionservex.licensing.policy` (single source of truth). The CLI
 | `rt-detrv4` | rt-detr | Apache-2.0 | Apache-2.0 | False | True | True | `visionservex model pull rt-detrv4` |
 | `rtmdet` | rtmdet | Apache-2.0 | Apache-2.0 | False | True | True | `visionservex model pull rtmdet` |
 
-### `byot_license_required` (23)
+### `byot_license_required` (27)
 
 | model_id | family | code license | weights license | gated | commercial_safe | production | next command |
 |---|---|---|---|---|---|---|---|
@@ -105,9 +105,13 @@ Generated from `visionservex.licensing.policy` (single source of truth). The CLI
 | `sam3.1-visual-prompt` | sam3.1 | SAM License (Meta custom, gated) | SAM License (Meta custom, gated) | True | False | False | `visionservex hf connect && visionservex model pull sam3.1-visual-prompt --accept-upstream-license` |
 | `sam3.1-real-time-tracking` | sam3.1 | SAM License (Meta custom, gated) | SAM License (Meta custom, gated) | True | False | False | `visionservex hf connect && visionservex model pull sam3.1-real-time-tracking --accept-upstream-license` |
 | `dinov3-vits16` | dinov3 | DINOv3 License (Meta custom, gated) | DINOv3 License (Meta custom, gated) | True | False | False | `visionservex hf connect && visionservex model pull dinov3-vits16 --accept-upstream-license` |
+| `dinov3-vits16plus` | dinov3 | DINOv3 License (Meta custom, gated) | DINOv3 License (Meta custom, gated) | True | False | False | `visionservex hf connect && visionservex model pull dinov3-vits16plus --accept-upstream-license` |
 | `dinov3-vitb16` | dinov3 | DINOv3 License (Meta custom, gated) | DINOv3 License (Meta custom, gated) | True | False | False | `visionservex hf connect && visionservex model pull dinov3-vitb16 --accept-upstream-license` |
 | `dinov3-vitl16` | dinov3 | DINOv3 License (Meta custom, gated) | DINOv3 License (Meta custom, gated) | True | False | False | `visionservex hf connect && visionservex model pull dinov3-vitl16 --accept-upstream-license` |
+| `dinov3-vitl16-sat` | dinov3 | DINOv3 License (Meta custom, gated) | DINOv3 License (Meta custom, gated) | True | False | False | `visionservex hf connect && visionservex model pull dinov3-vitl16-sat --accept-upstream-license` |
+| `dinov3-vith16plus` | dinov3 | DINOv3 License (Meta custom, gated) | DINOv3 License (Meta custom, gated) | True | False | False | `visionservex hf connect && visionservex model pull dinov3-vith16plus --accept-upstream-license` |
 | `dinov3-vit7b16` | dinov3 | DINOv3 License (Meta custom, gated) | DINOv3 License (Meta custom, gated) | True | False | False | `visionservex hf connect && visionservex model pull dinov3-vit7b16 --accept-upstream-license` |
+| `dinov3-vit7b16-sat` | dinov3 | DINOv3 License (Meta custom, gated) | DINOv3 License (Meta custom, gated) | True | False | False | `visionservex hf connect && visionservex model pull dinov3-vit7b16-sat --accept-upstream-license` |
 | `dinov3-convnext-tiny` | dinov3 | DINOv3 License (Meta custom, gated) | DINOv3 License (Meta custom, gated) | True | False | False | `visionservex hf connect && visionservex model pull dinov3-convnext-tiny --accept-upstream-license` |
 | `dinov3-convnext-small` | dinov3 | DINOv3 License (Meta custom, gated) | DINOv3 License (Meta custom, gated) | True | False | False | `visionservex hf connect && visionservex model pull dinov3-convnext-small --accept-upstream-license` |
 | `dinov3-convnext-base` | dinov3 | DINOv3 License (Meta custom, gated) | DINOv3 License (Meta custom, gated) | True | False | False | `visionservex hf connect && visionservex model pull dinov3-convnext-base --accept-upstream-license` |

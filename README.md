@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-3.8.1-informational.svg" alt="v3.8.1">
+  <img src="https://img.shields.io/badge/version-3.9.0-informational.svg" alt="v3.9.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -39,6 +39,47 @@ VisionServeX does not claim to beat Ultralytics globally. The `benchmark-competi
 - Log redaction removes tokens, base64, and API keys from all output.
 
 > ⚠️ **No end-to-end encryption claimed.** VisionServeX cannot provide E2E encryption in the cryptographic sense — the inference server must see plaintext image tensors to run models. We provide local-first processing, no-retention defaults, optional encryption-at-rest for job metadata, and auth for public mode. See [docs/privacy.md](docs/privacy.md).
+
+---
+
+## Real SAM3 + DINOv3 BYOT Activation (v3.9.0)
+
+v3.9.0 converts SAM3, SAM3.1, and all DINOv3 variants from `auth_required` to
+`benchmark_passed_byot` after the user accepted upstream licenses on Hugging Face.
+
+| Model | Params | Status | Device |
+|-------|--------|--------|--------|
+| dinov3-vits16 | 21M | benchmark_passed_byot | GPU |
+| dinov3-vitb16 | 86M | benchmark_passed_byot | GPU |
+| dinov3-vitl16 (LVD+SAT) | 300M | benchmark_passed_byot | GPU |
+| dinov3-vith16plus | 840M | benchmark_passed_byot | GPU |
+| dinov3-convnext-{tiny,small,base,large} | 29–198M | benchmark_passed_byot | GPU |
+| dinov3-vit7b16 (LVD+SAT) | 6.8B | benchmark_passed_byot | CPU fallback |
+| sam3-base | 840M | benchmark_passed_byot | GPU |
+| sam3.1-base | 840M | benchmark_passed_byot | GPU |
+
+```bash
+# DINOv3 embedding
+visionservex dino embed dinov3-vits16 image.jpg --out embedding.npy --explain
+
+# SAM3 segmentation
+visionservex sam run sam3-base image.jpg --text person --out out/ --explain
+visionservex sam run sam3.1-base image.jpg --text person --out out/ --explain
+```
+
+```python
+from visionservex import VSX
+
+VSX.dino("dinov3-vits16").embed("image.jpg")
+VSX.dino("dinov3-convnext-tiny").embed("image.jpg")
+VSX.sam("sam3-base").segment("image.jpg", text="person")
+VSX.sam("sam3.1-base").segment("image.jpg", text="person")
+```
+
+> **VisionServeX never redistributes gated model weights.** Users must use their
+> own Hugging Face token and accept upstream model licenses. Weights remain in
+> the user's HF cache — never in PyPI, GitHub, Docker, or any VisionServeX
+> release artifact.
 
 ---
 

@@ -1,0 +1,21 @@
+{
+  "model_id": "sam3-base",
+  "hf_repo": "facebook/sam3",
+  "prompt": [
+    "person",
+    "car"
+  ],
+  "num_masks": 0,
+  "scores": [],
+  "latency_ms": {
+    "load": 37318.3,
+    "infer_person": 622.4
+  },
+  "device": "cuda",
+  "params_millions": 840.38,
+  "package_version": "3.9.0",
+  "source_image": "tests/assets/smoke/coco_person_car.jpg",
+  "token_redacted": "hf_***FW",
+  "forward_pass": "OK",
+  "final_policy": "byot_license_required"
+}

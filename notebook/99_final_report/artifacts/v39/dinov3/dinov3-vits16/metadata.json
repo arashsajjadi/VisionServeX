@@ -1,0 +1,22 @@
+{
+  "model_id": "dinov3-vits16",
+  "hf_repo": "facebook/dinov3-vits16-pretrain-lvd1689m",
+  "final_policy": "byot_license_required",
+  "access_state": "access_granted",
+  "embedding_shape": [
+    1,
+    384
+  ],
+  "dtype": "float32",
+  "embedding_norm": 8.5106,
+  "latency_ms": {
+    "load": 3941.3,
+    "infer": 149.0
+  },
+  "device": "cuda",
+  "params_millions": 21.6,
+  "package_version": "3.9.0",
+  "source_image": "tests/assets/smoke/coco_person_car.jpg",
+  "token_redacted": "hf_***FW",
+  "cache_path_redacted": "[HF_CACHE]"
+}

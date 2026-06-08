@@ -1,0 +1,19 @@
+{
+  "model_id": "sam3.1-base",
+  "hf_repo": "facebook/sam3.1",
+  "prompt": [
+    "person",
+    "car"
+  ],
+  "latency_ms": {
+    "load": 2985.3
+  },
+  "device": "cuda",
+  "params_millions": 840.38,
+  "package_version": "3.9.0",
+  "forward_pass": "OK",
+  "source_image": "tests/assets/smoke/coco_person_car.jpg",
+  "token_redacted": "hf_***FW",
+  "final_policy": "byot_license_required",
+  "note": "weights_file: sam3.1_multiplex.pt (non-standard name, loaded via local alias)"
+}

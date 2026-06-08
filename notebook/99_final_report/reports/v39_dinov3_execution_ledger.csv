@@ -1,0 +1,14 @@
+device,embedding_norm,embedding_shape,error,hf_repo,infer_ms,label,load_ms,model_id,next_command,params_M,status
+cuda,8.5106,"[1, 384]",,facebook/dinov3-vits16-pretrain-lvd1689m,149.0,ViT-S/16 LVD,3941.3,dinov3-vits16,,21.6,benchmark_passed_byot
+cuda,13.4229,"[1, 768]",,facebook/dinov3-vitb16-pretrain-lvd1689m,4.4,ViT-B/16 LVD,5619.9,dinov3-vitb16,,85.66,benchmark_passed_byot
+cuda,46.1741,"[1, 768]",,facebook/dinov3-convnext-tiny-pretrain-lvd1689m,89.8,ConvNeXt-T LVD,2613.2,dinov3-convnext-tiny,,27.82,benchmark_passed_byot
+cuda,41.6281,"[1, 768]",,facebook/dinov3-convnext-small-pretrain-lvd1689m,2.6,ConvNeXt-S LVD,4303.2,dinov3-convnext-small,,49.45,benchmark_passed_byot
+cuda,33.2902,"[1, 1024]",,facebook/dinov3-convnext-base-pretrain-lvd1689m,42.7,ConvNeXt-B LVD,6418.5,dinov3-convnext-base,,87.57,benchmark_passed_byot
+cuda,12.4143,"[1, 1024]",,facebook/dinov3-vitl16-pretrain-lvd1689m,5.7,ViT-L/16 LVD,13548.5,dinov3-vitl16-lvd,,303.13,benchmark_passed_byot
+cuda,14.2504,"[1, 1024]",,facebook/dinov3-vitl16-pretrain-sat493m,8.4,ViT-L/16 SAT,15768.9,dinov3-vitl16-sat,,303.13,benchmark_passed_byot
+cuda,40.9859,"[1, 1536]",,facebook/dinov3-convnext-large-pretrain-lvd1689m,43.9,ConvNeXt-L LVD,11762.0,dinov3-convnext-large,,196.23,benchmark_passed_byot
+cuda,10.9635,"[1, 384]",,facebook/dinov3-vits16plus-pretrain-lvd1689m,138.1,ViT-S+/16,5300.9,dinov3-vits16plus,,28.69,benchmark_passed_byot
+,,,"ValueError: Unrecognized image processor in facebook/dinov3-vitl16-chmv2-dpt-head. Should have a `image_processor_type` key in its preprocessor_config.json of config.json, or one of the following `model_type` key",facebook/dinov3-vitl16-chmv2-dpt-head,,ViT-L/16 CHMV2 DPT,,dinov3-vitl16-chmv2,visionservex dino embed dinov3-vitl16-chmv2 image.jpg,,runtime_blocked_byot
+cuda,9.1356,"[1, 1280]",,facebook/dinov3-vith16plus-pretrain-lvd1689m,13.5,ViT-H/16+,33823.1,dinov3-vith16plus,,840.59,benchmark_passed_byot
+cpu,,"[1, 4096]",,facebook/dinov3-vit7b16-pretrain-lvd1689m,,ViT-7B/16 LVD,,dinov3-vit7b16-lvd,,,benchmark_passed_byot
+cpu,,"[1, 4096]",,facebook/dinov3-vit7b16-pretrain-sat493m,,ViT-7B/16 SAT,,dinov3-vit7b16-sat,,,benchmark_passed_byot

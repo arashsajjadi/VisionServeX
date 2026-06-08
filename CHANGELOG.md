@@ -3,6 +3,46 @@
 ## [Unreleased]
 
 
+## [3.9.0] - 2026-06-07
+
+### Real SAM3 / SAM3.1 / DINOv3 BYOT Activation
+
+After the user accepted all upstream licenses on Hugging Face, this release
+converts all BYOT models from `auth_required` to `benchmark_passed_byot` with
+real forward-pass evidence.
+
+**DINOv3 — 12 of 13 variants executed successfully:**
+- `dinov3-vits16`, `dinov3-vits16plus`, `dinov3-vitb16` — GPU, <6 s load
+- `dinov3-vitl16` (LVD + SAT variants) — GPU, ~14 s load
+- `dinov3-vith16plus` — GPU, 840M params, ~34 s load
+- `dinov3-convnext-{tiny,small,base,large}` — GPU
+- `dinov3-vit7b16` (LVD + SAT) — CPU fallback (16 GB VRAM exceeded); 49 GB RAM OK
+- `dinov3-vitl16-chmv2-dpt-head` — `runtime_blocked_byot` (DPT preprocessor
+  incompatible with AutoImageProcessor; upstream issue)
+- Policy table expanded: `dinov3-vits16plus`, `dinov3-vith16plus`, `dinov3-vitl16-sat`,
+  `dinov3-vit7b16-sat` added as new entries
+
+**SAM3 / SAM3.1 — both executed successfully:**
+- `sam3-base` (facebook/sam3): 840M params, GPU, forward pass OK, masks detected
+- `sam3.1-base` (facebook/sam3.1): loaded via `sam3.1_multiplex.pt` (non-standard
+  filename); `byot_runtime.sam3_segment()` now auto-handles the alias
+- Both accept text prompts ("person", "car"); inference <700 ms
+
+**New `byot_runtime.py` capability:** automatic detection and aliasing of
+non-standard SAM3.1 weight filename (`sam3.1_multiplex.pt` → `pytorch_model.bin`
+local symlink for Transformers compatibility).
+
+**Policy:** DINOv3 + SAM3 remain `byot_license_required`; `can_ship_weights=False`
+always; commercial use permitted with upstream license + attribution. 4 new
+DINOv3 model IDs added to the policy table (totaling ~100 entries).
+
+**Tests:** 10 new `test_v39_*.py` test files covering access-check, policy,
+runtime-or-blocker, no-token-leak, no-binary, notebook metadata, docs sync,
+and release readiness.
+
+**Security:** all artifacts verified token-free; no weights committed.
+
+
 ## [3.8.1] - 2026-06-07
 
 ### CI/quality hardening (no functional change to 3.8.0)

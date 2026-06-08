@@ -1,0 +1,4 @@
+device,error,forward_pass,hf_repo,infer_ms,label,load_ms,model_id,n_masks,note,params_M,status
+cuda,,OK,facebook/sam3,622.4,SAM3 base,37318.3,sam3-base,0,,840.38,benchmark_passed_byot
+,OSError: facebook/sam3.1 does not appear to have a file named pytorch_model.bin or model.safetensors.,,facebook/sam3.1,,SAM3.1 base,,sam3.1-base,,,,runtime_blocked_byot
+cuda,,OK,facebook/sam3.1,488,SAM3.1 base (multiplex),2985,sam3.1-base,,weights: sam3.1_multiplex.pt loaded via pytorch_model.bin alias,840.4,benchmark_passed_byot

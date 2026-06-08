@@ -13,7 +13,7 @@ DINOV3 = [r.model_id for r in P.iter_policies() if r.family == "dinov3"]
 def test_dinov3_variants_present():
     assert "dinov3-vitb16" in DINOV3
     assert "dinov3-convnext-tiny" in DINOV3
-    assert len(DINOV3) == 8
+    assert len(DINOV3) >= 8  # v3.9 added vits16plus, vith16plus, vitl16-sat, vit7b16-sat
 
 
 @pytest.mark.parametrize("mid", DINOV3)

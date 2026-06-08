@@ -645,11 +645,18 @@ for _mid in (
 _DINOV3_LIC = "DINOv3 License (Meta custom, gated)"
 _dinov3 = {
     "dinov3-vits16": ("facebook/dinov3-vits16-pretrain-lvd1689m", "ViT-S/16 ~21M"),
+    "dinov3-vits16plus": ("facebook/dinov3-vits16plus-pretrain-lvd1689m", "ViT-S+/16 ~29M"),
     "dinov3-vitb16": ("facebook/dinov3-vitb16-pretrain-lvd1689m", "ViT-B/16 ~86M"),
-    "dinov3-vitl16": ("facebook/dinov3-vitl16-pretrain-lvd1689m", "ViT-L/16 ~300M"),
+    "dinov3-vitl16": ("facebook/dinov3-vitl16-pretrain-lvd1689m", "ViT-L/16 ~300M LVD"),
+    "dinov3-vitl16-sat": ("facebook/dinov3-vitl16-pretrain-sat493m", "ViT-L/16 ~300M SAT"),
+    "dinov3-vith16plus": ("facebook/dinov3-vith16plus-pretrain-lvd1689m", "ViT-H+/16 ~840M"),
     "dinov3-vit7b16": (
         "facebook/dinov3-vit7b16-pretrain-lvd1689m",
-        "ViT-7B/16 ~6.8B (large footprint)",
+        "ViT-7B/16 ~6.8B LVD (large footprint; CPU only on <24GB VRAM machines)",
+    ),
+    "dinov3-vit7b16-sat": (
+        "facebook/dinov3-vit7b16-pretrain-sat493m",
+        "ViT-7B/16 ~6.8B SAT (large footprint; CPU only on <24GB VRAM machines)",
     ),
     "dinov3-convnext-tiny": (
         "facebook/dinov3-convnext-tiny-pretrain-lvd1689m",
