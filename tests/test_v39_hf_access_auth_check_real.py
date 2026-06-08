@@ -11,7 +11,6 @@ import os
 
 import pytest
 
-
 LIVE = os.getenv("VISIONSERVEX_RUN_GATED_HF") == "1"
 
 DINOV3_REPOS = [

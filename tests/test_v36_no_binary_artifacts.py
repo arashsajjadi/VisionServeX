@@ -49,9 +49,7 @@ def test_dist_wheel_exists_for_v360() -> None:
     if not wheels:
         import pytest
 
-        pytest.skip(
-            f"dist/ has no v{ver} wheel yet (pre-build); run `python -m build --wheel`."
-        )
+        pytest.skip(f"dist/ has no v{ver} wheel yet (pre-build); run `python -m build --wheel`.")
 
 
 def test_version_string_is_360() -> None:

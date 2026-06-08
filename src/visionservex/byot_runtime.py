@@ -149,6 +149,7 @@ def sam3_segment(
         model = Sam3Model.from_pretrained(repo, token=token).to(device).eval()
     except OSError:
         import shutil
+
         from huggingface_hub import snapshot_download
 
         local_snap = snapshot_download(repo, token=token)
@@ -157,9 +158,15 @@ def sam3_segment(
             raise
         working = __import__("pathlib").Path(local_snap).parent / "_vsx_sam3_working"
         working.mkdir(exist_ok=True)
-        for cfg in ("config.json", "processor_config.json", "tokenizer.json",
-                    "tokenizer_config.json", "special_tokens_map.json",
-                    "merges.txt", "vocab.json"):
+        for cfg in (
+            "config.json",
+            "processor_config.json",
+            "tokenizer.json",
+            "tokenizer_config.json",
+            "special_tokens_map.json",
+            "merges.txt",
+            "vocab.json",
+        ):
             src = __import__("pathlib").Path(local_snap) / cfg
             if src.exists():
                 shutil.copy(src, working / cfg)

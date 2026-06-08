@@ -23,8 +23,13 @@ def test_hf_auth_source_has_no_hardcoded_token():
     src = Path("src/visionservex/hf_auth.py").read_text()
     # Exclude known function/variable names that happen to start with hf_
     tokens = _TOKEN_RE.findall(src)
-    names = {"hf_get_token", "hf_redact_token", "hf_model_access_status",
-              "hf_require_user_accepted_license", "hf_hub_download"}
+    names = {
+        "hf_get_token",
+        "hf_redact_token",
+        "hf_model_access_status",
+        "hf_require_user_accepted_license",
+        "hf_hub_download",
+    }
     real = [t for t in tokens if t not in names]
     assert not real, f"Token-shaped strings in hf_auth.py: {real}"
 

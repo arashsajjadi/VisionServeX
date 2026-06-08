@@ -36,7 +36,11 @@ def test_sam3_segment_blocked_without_token(monkeypatch):
     monkeypatch.setattr(hf_auth, "_detect", lambda: (None, None))
     result = byot_runtime.sam3_segment("sam3-base", "x.jpg", text="person")
     assert result["status"] == "blocked"
-    assert result["state"] in ("auth_required", "auth_required_license_pending", "dependency_required")
+    assert result["state"] in (
+        "auth_required",
+        "auth_required_license_pending",
+        "dependency_required",
+    )
 
 
 @pytest.mark.skipif(not LIVE, reason="Set VISIONSERVEX_RUN_GATED_HF=1 for live SAM3 tests")
@@ -44,6 +48,7 @@ def test_sam3_base_live_segmentation():
     pytest.importorskip("torch")
     pytest.importorskip("transformers")
     from PIL import Image
+
     from visionservex import byot_runtime
 
     img = Image.new("RGB", (640, 480), (100, 150, 200))
@@ -58,6 +63,7 @@ def test_sam31_base_live_segmentation():
     pytest.importorskip("torch")
     pytest.importorskip("transformers")
     from PIL import Image
+
     from visionservex import byot_runtime
 
     img = Image.new("RGB", (640, 480), (100, 150, 200))

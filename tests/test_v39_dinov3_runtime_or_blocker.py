@@ -29,7 +29,11 @@ def test_dinov3_embed_returns_blocked_without_token(monkeypatch):
     monkeypatch.setattr(hf_auth, "_detect", lambda: (None, None))
     result = byot_runtime.dinov3_embed("dinov3-vits16", "x.jpg")
     assert result["status"] == "blocked"
-    assert result["state"] in ("auth_required", "auth_required_license_pending", "dependency_required")
+    assert result["state"] in (
+        "auth_required",
+        "auth_required_license_pending",
+        "dependency_required",
+    )
 
 
 def test_dinov3_unknown_model_returns_blocked():
@@ -45,6 +49,7 @@ def test_dinov3_vits16_live_embedding():
     pytest.importorskip("torch")
     pytest.importorskip("transformers")
     from PIL import Image
+
     from visionservex import byot_runtime
 
     img = Image.new("RGB", (224, 224), (128, 64, 32))
@@ -61,6 +66,7 @@ def test_dinov3_convnext_tiny_live_embedding():
     pytest.importorskip("torch")
     pytest.importorskip("transformers")
     from PIL import Image
+
     from visionservex import byot_runtime
 
     img = Image.new("RGB", (224, 224), (200, 100, 50))
@@ -74,6 +80,7 @@ def test_dinov3_vitl16_heavy_or_resource_blocked():
     pytest.importorskip("torch")
     pytest.importorskip("transformers")
     from PIL import Image
+
     from visionservex import byot_runtime
 
     img = Image.new("RGB", (224, 224))

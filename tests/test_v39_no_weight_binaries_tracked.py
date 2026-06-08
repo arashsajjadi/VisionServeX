@@ -6,7 +6,6 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-
 BINARY_EXTENSIONS = {".onnx", ".pt", ".pth", ".ckpt", ".safetensors", ".bin", ".engine", ".trt"}
 
 
@@ -18,10 +17,7 @@ def test_no_weight_binaries_in_src_tree():
 
 
 def test_no_weight_binaries_tracked_in_git():
-    result = subprocess.run(
-        ["git", "ls-files"],
-        capture_output=True, text=True, check=True
-    )
+    result = subprocess.run(["git", "ls-files"], capture_output=True, text=True, check=True)
     tracked = result.stdout.splitlines()
     bad = [f for f in tracked if any(f.endswith(ext) for ext in BINARY_EXTENSIONS)]
     # Exclude test fixture files that are intentionally committed
@@ -31,8 +27,7 @@ def test_no_weight_binaries_tracked_in_git():
 
 def test_hf_cache_not_staged():
     result = subprocess.run(
-        ["git", "diff", "--cached", "--name-only"],
-        capture_output=True, text=True, check=True
+        ["git", "diff", "--cached", "--name-only"], capture_output=True, text=True, check=True
     )
     staged = result.stdout.splitlines()
     bad = [f for f in staged if ".cache/huggingface" in f or "/models--" in f]

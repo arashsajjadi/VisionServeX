@@ -5,8 +5,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 
 def test_readme_mentions_v390():
     readme = Path("README.md").read_text()
