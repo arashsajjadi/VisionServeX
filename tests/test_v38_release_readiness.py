@@ -34,20 +34,27 @@ def test_five_mandatory_warning_texts_present():
     w = P.WARNING_TEXTS
     assert w["byot"].startswith("This model is gated or uses a custom upstream license")
     assert w["noncommercial"].startswith("WARNING: This model is non-commercial/restricted")
-    assert w["enterprise"].startswith("WARNING: This model requires an enterprise/commercial license")
+    assert w["enterprise"].startswith(
+        "WARNING: This model requires an enterprise/commercial license"
+    )
     assert w["api"].startswith("External API model. Your data may leave the local environment")
     assert w["legal_review"].startswith("License/provenance is unclear")
 
 
 def test_all_nine_buckets_defined():
     assert len(P.FINAL_POLICIES) == 9
-    counts = {fp: 0 for fp in P.FINAL_POLICIES}
+    counts = dict.fromkeys(P.FINAL_POLICIES, 0)
     for r in P.iter_policies():
         counts[r.final_policy] += 1
     # the policy must populate at least the production-relevant buckets
-    for fp in ("commercial_safe_core", "byot_license_required",
-               "external_api_only_terms_required", "noncommercial_restricted",
-               "enterprise_license_required", "legal_review_required"):
+    for fp in (
+        "commercial_safe_core",
+        "byot_license_required",
+        "external_api_only_terms_required",
+        "noncommercial_restricted",
+        "enterprise_license_required",
+        "legal_review_required",
+    ):
         assert counts[fp] > 0
 
 

@@ -164,8 +164,9 @@ class _SAMHandle(_Base):
 
             res = sam3_segment(self.model_id, image, text=text, **kw)
             if isinstance(res, dict) and res.get("status") == "blocked":
-                raise VSXError(res["reason"], state=res["state"],
-                               next_command=res.get("next_command", ""))
+                raise VSXError(
+                    res["reason"], state=res["state"], next_command=res.get("next_command", "")
+                )
             return res
         info = self.explain()
         if info["state"] != "benchmark_passed":
@@ -286,8 +287,9 @@ class _DINOHandle(_Base):
 
             res = dinov3_embed(self.model_id, image, **kw)
             if isinstance(res, dict) and res.get("status") == "blocked":
-                raise VSXError(res["reason"], state=res["state"],
-                               next_command=res.get("next_command", ""))
+                raise VSXError(
+                    res["reason"], state=res["state"], next_command=res.get("next_command", "")
+                )
             return res
         info = self.explain()
         if info["task"] != "embed" or info["state"] != "benchmark_passed":
@@ -480,13 +482,19 @@ class _InteractiveHandle(_Base):
 
     def explain(self) -> dict[str, Any]:
         from visionservex.interactive_runtime import explain as _ex
+
         return _ex(self.model_id)
 
     def __call__(self, image, positive_points=None, negative_points=None, **kw):
         from visionservex.interactive_runtime import run_interactive
-        res = run_interactive(self.model_id, _load_image(image),
-                              positive_points=positive_points,
-                              negative_points=negative_points, **kw)
+
+        res = run_interactive(
+            self.model_id,
+            _load_image(image),
+            positive_points=positive_points,
+            negative_points=negative_points,
+            **kw,
+        )
         if isinstance(res, dict) and res.get("status") == "blocked":
             raise VSXError(res["reason"], state=res["state"], next_command=res["next_command"])
         return res
@@ -503,10 +511,12 @@ class _RFDetrSegHandle(_Base):
 
     def explain(self) -> dict[str, Any]:
         from visionservex.rfdetr_seg_runtime import explain as _ex
+
         return _ex(self.model_id)
 
     def segment_instances(self, image, threshold: float = 0.3, **kw):
         from visionservex.rfdetr_seg_runtime import segment_instances
+
         return segment_instances(self.model_id, _load_image(image), threshold=threshold, **kw)
 
 
@@ -581,8 +591,13 @@ class _ModelHandle(_Base):
 
         return H.hf_model_access_status(self.model_id)
 
-    def pull(self, *, accept_upstream_license: bool = False,
-             research_only: bool = False, accept_noncommercial: bool = False):
+    def pull(
+        self,
+        *,
+        accept_upstream_license: bool = False,
+        research_only: bool = False,
+        accept_noncommercial: bool = False,
+    ):
         """Lawful BYOT download into the user's HF cache. Never ships weights.
 
         Raises :class:`VSXError` with the exact next step when the license policy
@@ -594,9 +609,11 @@ class _ModelHandle(_Base):
         pol = P.get_policy(self.model_id)
         canonical = P.resolve_model_id(self.model_id)
         if pol is None:
-            raise VSXError(f"{self.model_id}: not in license policy",
-                           state="unknown_model",
-                           next_command=f"visionservex model license {self.model_id}")
+            raise VSXError(
+                f"{self.model_id}: not in license policy",
+                state="unknown_model",
+                next_command=f"visionservex model license {self.model_id}",
+            )
         if pol.final_policy == "byot_license_required" and not accept_upstream_license:
             raise VSXError(
                 f"{canonical} is gated/BYOT — pass accept_upstream_license=True after "
@@ -606,14 +623,16 @@ class _ModelHandle(_Base):
             )
         try:
             H.hf_require_user_accepted_license(
-                canonical, research_only=research_only,
-                accept_noncommercial=accept_noncommercial)
+                canonical, research_only=research_only, accept_noncommercial=accept_noncommercial
+            )
         except H.HFLicenseError as exc:
             raise VSXError(str(exc), state=exc.state, next_command=exc.next_command) from exc
         if not pol.hf_repo:
-            raise VSXError(f"{canonical}: no Hugging Face repo to pull (sidecar/manual).",
-                           state="manual_download_required",
-                           next_command=pol.exact_next_command)
+            raise VSXError(
+                f"{canonical}: no Hugging Face repo to pull (sidecar/manual).",
+                state="manual_download_required",
+                next_command=pol.exact_next_command,
+            )
         from huggingface_hub import snapshot_download
 
         return snapshot_download(repo_id=pol.hf_repo, token=H.hf_get_token())
@@ -689,6 +708,7 @@ class VSX:
         Routes RF-DETR-Seg model IDs to the rfdetr engine; raises for non-instance-seg models.
         """
         from visionservex.rfdetr_seg_runtime import segment_instances, variants
+
         mid = self.model_id
         if mid not in variants():
             raise VSXError(
@@ -698,4 +718,3 @@ class VSX:
                 next_command="visionservex segment-instances image.jpg --model rfdetr-seg-small --out out/",
             )
         return segment_instances(mid, _load_image(image), threshold=threshold, **kw)
-

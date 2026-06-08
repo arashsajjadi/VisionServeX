@@ -62,8 +62,10 @@ def main() -> None:
     lines: list[str] = []
     lines.append("# VisionServeX v3.8 — License Policy Matrix Report")
     lines.append("")
-    lines.append("Generated from `visionservex.licensing.policy` (single source of truth). "
-                 "The CLI, Python API, tests, notebooks, and docs all read this same table.")
+    lines.append(
+        "Generated from `visionservex.licensing.policy` (single source of truth). "
+        "The CLI, Python API, tests, notebooks, and docs all read this same table."
+    )
     lines.append("")
     lines.append(f"**Total models classified: {len(rows)}**")
     lines.append("")
@@ -96,7 +98,9 @@ def main() -> None:
             continue
         lines.append(f"### `{fp}` ({len(bucket)})")
         lines.append("")
-        lines.append("| model_id | family | code license | weights license | gated | commercial_safe | production | next command |")
+        lines.append(
+            "| model_id | family | code license | weights license | gated | commercial_safe | production | next command |"
+        )
         lines.append("|---|---|---|---|---|---|---|---|")
         for r in bucket:
             lines.append(

@@ -6,7 +6,7 @@ from __future__ import annotations
 from visionservex import hf_auth as H
 
 
-def test_acceptance_instructions_for_gated(monkeypatch):
+def test_acceptance_instructions_for_gated():
     info = H.hf_acceptance_instructions("sam3-base")
     assert info["known"] is True
     assert info["hf_repo"] == "facebook/sam3"
@@ -24,12 +24,14 @@ def test_access_status_no_token_is_auth_required(monkeypatch):
 
 
 def test_access_status_gated_not_accepted(monkeypatch):
+    import pytest
+
+    huggingface_hub = pytest.importorskip("huggingface_hub")
+    from huggingface_hub.utils import GatedRepoError
+
     monkeypatch.setattr(H, "hf_get_token", lambda redact=False: "hf_fake")
     monkeypatch.setattr(H, "hf_is_logged_in", lambda: True)
     monkeypatch.setattr(H, "hf_token_source", lambda: "cli_cache")
-
-    import huggingface_hub
-    from huggingface_hub.utils import GatedRepoError
 
     class _Api:
         def __init__(self, *a, **k):
@@ -46,11 +48,13 @@ def test_access_status_gated_not_accepted(monkeypatch):
 
 
 def test_access_status_granted(monkeypatch):
+    import pytest
+
+    huggingface_hub = pytest.importorskip("huggingface_hub")
+
     monkeypatch.setattr(H, "hf_get_token", lambda redact=False: "hf_fake")
     monkeypatch.setattr(H, "hf_is_logged_in", lambda: True)
     monkeypatch.setattr(H, "hf_token_source", lambda: "cli_cache")
-
-    import huggingface_hub
 
     class _Api:
         def __init__(self, *a, **k):

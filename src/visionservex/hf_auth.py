@@ -51,8 +51,7 @@ class HFAuthError(RuntimeError):
 class HFLicenseError(RuntimeError):
     """The user has not satisfied the upstream/local license policy for a model."""
 
-    def __init__(self, message: str, *, state: str, next_command: str = "",
-                 model_id: str = ""):
+    def __init__(self, message: str, *, state: str, next_command: str = "", model_id: str = ""):
         super().__init__(message)
         self.state = state
         self.next_command = next_command
@@ -79,7 +78,8 @@ def _read_token_file(path: str) -> str | None:
     try:
         if not os.path.isfile(path):
             return None
-        val = open(path, encoding="utf-8", errors="ignore").read().strip()
+        with open(path, encoding="utf-8", errors="ignore") as fh:
+            val = fh.read().strip()
     except OSError:
         return None
     return val if (val.startswith("hf_") and len(val) >= 20) else None
@@ -181,8 +181,7 @@ def hf_whoami(redact: bool = True) -> dict:
     returned payload regardless of its value.
     """
     tok, source = _detect()
-    info = HFWhoAmI(logged_in=bool(tok), source=source,
-                    token_redacted=hf_redact_token(tok))
+    info = HFWhoAmI(logged_in=bool(tok), source=source, token_redacted=hf_redact_token(tok))
     if not tok:
         return info.to_dict()
     try:
@@ -234,7 +233,9 @@ def hf_validate_token(required_scopes: list[str] | None = None) -> dict:
                     granted.update(scope_block.get("permissions", []) or [])
                 granted.update(fg.get("global", []) or [])
             out["granted_scopes"] = sorted(granted)
-            out["missing_scopes"] = sorted(set(required_scopes) - granted) if granted else list(required_scopes)
+            out["missing_scopes"] = (
+                sorted(set(required_scopes) - granted) if granted else list(required_scopes)
+            )
     except Exception as exc:
         out["error"] = f"{type(exc).__name__}: {exc}"
     return out
@@ -256,9 +257,8 @@ def hf_logout_local() -> dict:
     env_present = [v for v in _ENV_VARS if os.environ.get(v)]
     if env_present:
         result["note"] = (
-            (result["note"] + " " if result["note"] else "")
-            + f"Env var(s) still set: {', '.join(env_present)} (unset them yourself)."
-        )
+            result["note"] + " " if result["note"] else ""
+        ) + f"Env var(s) still set: {', '.join(env_present)} (unset them yourself)."
     return result
 
 
@@ -411,8 +411,7 @@ def hf_download_allowed_by_policy(model_id: str) -> dict:
     if pol.final_policy == "commercial_safe_core":
         return {**base, "allowed": True, "reason": "commercial_safe_core"}
     if pol.final_policy == "byot_license_required":
-        return {**base, "allowed": False,
-                "reason": "byot_requires_user_token_and_accepted_license"}
+        return {**base, "allowed": False, "reason": "byot_requires_user_token_and_accepted_license"}
     if pol.final_policy == "external_api_only_terms_required":
         return {**base, "allowed": False, "reason": "external_api_no_local_weights"}
     if pol.final_policy == "noncommercial_restricted":
@@ -424,8 +423,9 @@ def hf_download_allowed_by_policy(model_id: str) -> dict:
     return {**base, "allowed": False, "reason": pol.final_policy}
 
 
-def hf_require_user_accepted_license(model_id: str, *, research_only: bool = False,
-                                     accept_noncommercial: bool = False) -> dict:
+def hf_require_user_accepted_license(
+    model_id: str, *, research_only: bool = False, accept_noncommercial: bool = False
+) -> dict:
     """Enforce the license policy before a run/pull. Raises :class:`HFLicenseError`
     when the user has not satisfied the upstream/local terms.
 
@@ -440,7 +440,8 @@ def hf_require_user_accepted_license(model_id: str, *, research_only: bool = Fal
     if pol is None:
         raise HFLicenseError(
             f"Unknown model '{model_id}' — not in the license policy.",
-            state="unknown_model", model_id=canonical,
+            state="unknown_model",
+            model_id=canonical,
             next_command=f"visionservex model license {model_id}",
         )
     fp = pol.final_policy
@@ -450,7 +451,8 @@ def hf_require_user_accepted_license(model_id: str, *, research_only: bool = Fal
         if not hf_is_logged_in():
             raise HFLicenseError(
                 f"{canonical}: a Hugging Face token is required (BYOT). {pol.warning_text}",
-                state="auth_required", model_id=canonical,
+                state="auth_required",
+                model_id=canonical,
                 next_command="visionservex hf connect",
             )
         access = hf_model_access_status(canonical)
@@ -459,18 +461,28 @@ def hf_require_user_accepted_license(model_id: str, *, research_only: bool = Fal
                 f"{canonical}: you must accept the upstream license first. {pol.warning_text}",
                 state=access.get("state", "auth_required_license_pending"),
                 model_id=canonical,
-                next_command=access.get("next_command",
-                                        f"accept at {pol.upstream_url}"),
+                next_command=access.get("next_command", f"accept at {pol.upstream_url}"),
             )
-        return {"model_id": canonical, "allowed": True, "final_policy": fp,
-                "warning": pol.warning_text, "access": "granted"}
+        return {
+            "model_id": canonical,
+            "allowed": True,
+            "final_policy": fp,
+            "warning": pol.warning_text,
+            "access": "granted",
+        }
     if fp == "noncommercial_restricted":
         if research_only and accept_noncommercial:
-            return {"model_id": canonical, "allowed": True, "final_policy": fp,
-                    "mode": "research_only", "warning": pol.warning_text}
+            return {
+                "model_id": canonical,
+                "allowed": True,
+                "final_policy": fp,
+                "mode": "research_only",
+                "warning": pol.warning_text,
+            }
         raise HFLicenseError(
             f"{canonical}: {pol.warning_text}",
-            state="noncommercial_restricted", model_id=canonical,
+            state="noncommercial_restricted",
+            model_id=canonical,
             next_command=(
                 f"visionservex model pull {canonical} --research-only "
                 f"--accept-noncommercial   # research use only; never production"
@@ -479,7 +491,9 @@ def hf_require_user_accepted_license(model_id: str, *, research_only: bool = Fal
     # enterprise / legal_review / external_api / not_released -> hard refuse
     raise HFLicenseError(
         f"{canonical}: {pol.warning_text}",
-        state=fp, model_id=canonical, next_command=pol.exact_next_command,
+        state=fp,
+        model_id=canonical,
+        next_command=pol.exact_next_command,
     )
 
 

@@ -33,10 +33,20 @@ def test_hf_status_json_no_token(monkeypatch):
 
 def test_hf_status_json_with_token_redacted(monkeypatch):
     monkeypatch.setattr(H, "_detect", lambda: (FAKE, "cli_cache"))
-    monkeypatch.setattr(H, "hf_whoami", lambda redact=True: {
-        "logged_in": True, "name": "tester", "type": "user",
-        "token_display_name": "tok", "token_role": "read", "orgs": [],
-        "token_redacted": H.hf_redact_token(FAKE), "error": None})
+    monkeypatch.setattr(
+        H,
+        "hf_whoami",
+        lambda redact=True: {
+            "logged_in": True,
+            "name": "tester",
+            "type": "user",
+            "token_display_name": "tok",
+            "token_role": "read",
+            "orgs": [],
+            "token_redacted": H.hf_redact_token(FAKE),
+            "error": None,
+        },
+    )
     res = runner.invoke(app, ["hf", "status", "--json"])
     assert res.exit_code == 0
     assert FAKE not in res.output

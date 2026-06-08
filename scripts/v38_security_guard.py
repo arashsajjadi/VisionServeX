@@ -84,8 +84,7 @@ def main() -> int:
         failures.append(f"token-shaped string in shippable file(s): {token_hits}")
 
     # 2. weight binaries tracked
-    bin_hits = [f for f in tracked
-                if f.endswith(WEIGHT_EXT) or f.startswith("artifacts/")]
+    bin_hits = [f for f in tracked if f.endswith(WEIGHT_EXT) or f.startswith("artifacts/")]
     findings["weight_binaries_tracked"] = bin_hits
     if bin_hits:
         failures.append(f"weight binaries tracked: {bin_hits}")
@@ -93,24 +92,29 @@ def main() -> int:
     # 3. policy invariants
     from visionservex.licensing import policy as P
 
-    bad_default = [r.model_id for r in P.iter_policies()
-                   if r.default_safe and r.final_policy != "commercial_safe_core"]
-    agpl_default = [r.model_id for r in P.iter_policies()
-                    if r.default_safe and "AGPL" in r.weights_license]
+    bad_default = [
+        r.model_id
+        for r in P.iter_policies()
+        if r.default_safe and r.final_policy != "commercial_safe_core"
+    ]
+    agpl_default = [
+        r.model_id for r in P.iter_policies() if r.default_safe and "AGPL" in r.weights_license
+    ]
     findings["noncore_default_safe"] = bad_default
     findings["agpl_default_safe"] = agpl_default
     if bad_default:
         failures.append(f"non-core model is default_safe: {bad_default}")
     if agpl_default:
         failures.append(f"AGPL model is default_safe: {agpl_default}")
-    findings["any_can_ship_weights"] = [r.model_id for r in P.iter_policies()
-                                        if r.can_ship_weights]
+    findings["any_can_ship_weights"] = [r.model_id for r in P.iter_policies() if r.can_ship_weights]
     if findings["any_can_ship_weights"]:
         failures.append("a policy row has can_ship_weights=True")
 
     # 4. no HF token in GitHub Actions
     wf_hits = []
-    for wf in Path(".github/workflows").glob("*.y*ml") if Path(".github/workflows").exists() else []:
+    for wf in (
+        Path(".github/workflows").glob("*.y*ml") if Path(".github/workflows").exists() else []
+    ):
         text = wf.read_text(encoding="utf-8", errors="ignore")
         if TOKEN_RE.search(text) or "HF_TOKEN" in text or "HUGGINGFACE_HUB_TOKEN" in text:
             wf_hits.append(wf.name)
@@ -129,9 +133,17 @@ def main() -> int:
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(json.dumps(result, indent=2), encoding="utf-8")
 
-    print(json.dumps({"ok": result["ok"], "failures": failures,
-                      "token_hits": len(token_hits),
-                      "weight_binaries": len(bin_hits)}, indent=2))
+    print(
+        json.dumps(
+            {
+                "ok": result["ok"],
+                "failures": failures,
+                "token_hits": len(token_hits),
+                "weight_binaries": len(bin_hits),
+            },
+            indent=2,
+        )
+    )
     if failures:
         print("SECURITY GUARD: FAIL")
         return 1

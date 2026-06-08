@@ -11,8 +11,14 @@ CORE = [r.model_id for r in P.iter_policies() if r.final_policy == "commercial_s
 
 
 def test_core_has_expected_members():
-    for m in ("sam-vit-base", "sam2.1-hiera-large", "dinov2-base",
-              "florence-2-base", "clip-vit-base-patch32", "rfdetr-seg-small"):
+    for m in (
+        "sam-vit-base",
+        "sam2.1-hiera-large",
+        "dinov2-base",
+        "florence-2-base",
+        "clip-vit-base-patch32",
+        "rfdetr-seg-small",
+    ):
         assert m in CORE
 
 

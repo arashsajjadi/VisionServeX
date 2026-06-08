@@ -31,7 +31,9 @@ def _print_json(payload: dict) -> None:
 
 
 @app.command("status")
-def status_cmd(json_: bool = typer.Option(False, "--json", help="Machine-readable output.")) -> None:
+def status_cmd(
+    json_: bool = typer.Option(False, "--json", help="Machine-readable output."),
+) -> None:
     """Show whether a Hugging Face login exists (never shows the token)."""
     source = H.hf_token_source()
     logged_in = H.hf_is_logged_in()
@@ -43,14 +45,16 @@ def status_cmd(json_: bool = typer.Option(False, "--json", help="Machine-readabl
     }
     if logged_in:
         who = H.hf_whoami()
-        payload.update({
-            "name": who.get("name"),
-            "type": who.get("type"),
-            "token_display_name": who.get("token_display_name"),
-            "token_role": who.get("token_role"),
-            "orgs": who.get("orgs"),
-            "whoami_error": who.get("error"),
-        })
+        payload.update(
+            {
+                "name": who.get("name"),
+                "type": who.get("type"),
+                "token_display_name": who.get("token_display_name"),
+                "token_role": who.get("token_role"),
+                "orgs": who.get("orgs"),
+                "whoami_error": who.get("error"),
+            }
+        )
     if json_:
         _print_json(payload)
         return
@@ -118,7 +122,8 @@ def connect_cmd(
             return
     elif token_file:
         try:
-            token = open(token_file, encoding="utf-8", errors="ignore").read().strip()
+            with open(token_file, encoding="utf-8", errors="ignore") as fh:
+                token = fh.read().strip()
         except OSError as exc:
             _fail(json_, f"cannot read token file: {exc}", code="TOKEN_FILE_UNREADABLE")
             return
@@ -189,15 +194,14 @@ def logout_cmd(json_: bool = typer.Option(False, "--json")) -> None:
 
 @app.command("check-model")
 def check_model_cmd(
-    model: str = typer.Argument(..., help="A VisionServeX model id OR a Hub repo (e.g. facebook/sam3)."),
+    model: str = typer.Argument(
+        ..., help="A VisionServeX model id OR a Hub repo (e.g. facebook/sam3)."
+    ),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
     """Check whether your token grants access to a (gated) model — no download."""
     # Direct Hub repo id (contains a slash) -> raw access probe.
-    if "/" in model:
-        payload = _probe_repo(model)
-    else:
-        payload = H.hf_model_access_status(model)
+    payload = _probe_repo(model) if "/" in model else H.hf_model_access_status(model)
     if json_:
         _print_json(payload)
         return
@@ -224,7 +228,8 @@ def check_model_cmd(
 def _probe_repo(repo: str) -> dict:
     """Raw metadata-only access probe for an arbitrary Hub repo id."""
     out: dict[str, object] = {
-        "model_id": repo, "hf_repo": repo,
+        "model_id": repo,
+        "hf_repo": repo,
         "token_present": H.hf_is_logged_in(),
         "token_source": H.hf_token_source(),
     }

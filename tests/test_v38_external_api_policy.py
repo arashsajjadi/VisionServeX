@@ -7,8 +7,9 @@ import pytest
 
 from visionservex.licensing import policy as P
 
-API = [r.model_id for r in P.iter_policies()
-       if r.final_policy == "external_api_only_terms_required"]
+API = [
+    r.model_id for r in P.iter_policies() if r.final_policy == "external_api_only_terms_required"
+]
 
 
 def test_api_models_present():

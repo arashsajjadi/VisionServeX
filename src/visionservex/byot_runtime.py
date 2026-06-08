@@ -39,15 +39,23 @@ def _preflight(model_id: str, family_prefixes: tuple[str, ...]) -> dict[str, Any
     canonical = _P.resolve_model_id(model_id)
     pol = _P.get_policy(canonical)
     if pol is None or not any(canonical.startswith(p) for p in family_prefixes):
-        return {"status": "blocked", "state": "unknown_model",
-                "reason": f"{model_id} is not a BYOT model handled here",
-                "next_command": f"visionservex model license {model_id}"}
+        return {
+            "status": "blocked",
+            "state": "unknown_model",
+            "reason": f"{model_id} is not a BYOT model handled here",
+            "next_command": f"visionservex model license {model_id}",
+        }
     try:
         _H.hf_require_user_accepted_license(canonical)
     except _H.HFLicenseError as exc:
-        return {"status": "blocked", "state": exc.state, "model_id": canonical,
-                "reason": str(exc), "next_command": exc.next_command,
-                "warning": pol.warning_text}
+        return {
+            "status": "blocked",
+            "state": exc.state,
+            "model_id": canonical,
+            "reason": str(exc),
+            "next_command": exc.next_command,
+            "warning": pol.warning_text,
+        }
     return None
 
 
@@ -63,9 +71,12 @@ def dinov3_embed(model_id: str, image, *, device: str = "cpu") -> dict[str, Any]
         import torch
         from transformers import AutoImageProcessor, AutoModel
     except ImportError:
-        return {"status": "blocked", "state": "dependency_required",
-                "reason": "transformers/torch not installed",
-                "next_command": "pip install 'visionservex[hf]'"}
+        return {
+            "status": "blocked",
+            "state": "dependency_required",
+            "reason": "transformers/torch not installed",
+            "next_command": "pip install 'visionservex[hf]'",
+        }
     token = _H.hf_get_token()
     img = _load_image(image)
     t0 = time.perf_counter()
@@ -101,8 +112,9 @@ def dinov3_embed(model_id: str, image, *, device: str = "cpu") -> dict[str, Any]
     }
 
 
-def sam3_segment(model_id: str, image, *, text: str | None = None,
-                 device: str = "cpu") -> dict[str, Any]:
+def sam3_segment(
+    model_id: str, image, *, text: str | None = None, device: str = "cpu"
+) -> dict[str, Any]:
     """Run SAM 3 / SAM 3.1 concept/text-prompt instance segmentation (BYOT)."""
     blocked = _preflight(model_id, ("sam3",))
     if blocked:
@@ -111,16 +123,22 @@ def sam3_segment(model_id: str, image, *, text: str | None = None,
     pol = _P.get_policy(canonical)
     repo = pol.hf_repo
     if not text:
-        return {"status": "blocked", "state": "prompt_required",
-                "reason": "SAM 3 requires a text/concept prompt (e.g. text='person')",
-                "next_command": f"VSX.sam('{canonical}').segment(image, text='person')"}
+        return {
+            "status": "blocked",
+            "state": "prompt_required",
+            "reason": "SAM 3 requires a text/concept prompt (e.g. text='person')",
+            "next_command": f"VSX.sam('{canonical}').segment(image, text='person')",
+        }
     try:
         import torch
         from transformers import Sam3Model, Sam3Processor
     except ImportError:
-        return {"status": "blocked", "state": "dependency_required",
-                "reason": "transformers Sam3 classes not available",
-                "next_command": "pip install -U 'visionservex[hf]'  # needs transformers>=5.3"}
+        return {
+            "status": "blocked",
+            "state": "dependency_required",
+            "reason": "transformers Sam3 classes not available",
+            "next_command": "pip install -U 'visionservex[hf]'  # needs transformers>=5.3",
+        }
     token = _H.hf_get_token()
     img = _load_image(image)
     t0 = time.perf_counter()
@@ -138,12 +156,10 @@ def sam3_segment(model_id: str, image, *, text: str | None = None,
     try:
         target = [(img.height, img.width)]
         results = None
-        for fn in ("post_process_instance_segmentation",
-                   "post_process_grounded_object_detection"):
+        for fn in ("post_process_instance_segmentation", "post_process_grounded_object_detection"):
             if hasattr(proc, fn):
                 try:
-                    results = getattr(proc, fn)(outputs, target_sizes=target,
-                                                threshold=0.4)
+                    results = getattr(proc, fn)(outputs, target_sizes=target, threshold=0.4)
                     break
                 except TypeError:
                     results = getattr(proc, fn)(outputs)
@@ -153,18 +169,26 @@ def sam3_segment(model_id: str, image, *, text: str | None = None,
             for key in ("masks", "segmentation", "boxes"):
                 val = r0.get(key) if isinstance(r0, dict) else None
                 if val is not None:
-                    n_masks = int(len(val))
+                    n_masks = len(val)
                     break
             sc = r0.get("scores") if isinstance(r0, dict) else None
             if sc is not None:
                 scores = [round(float(s), 4) for s in list(sc)[:10]]
-    except Exception as exc:  # noqa: BLE001 — report, don't fake
-        return {"status": "ok", "state": "benchmark_passed_byot", "model_id": canonical,
-                "hf_repo": repo, "task": "concept_segmentation", "text": text,
-                "license": pol.weights_license, "device": device,
-                "load_ms": round(load_ms, 1), "infer_ms": round(infer_ms, 1),
-                "postprocess_note": f"forward pass OK; post-process API mismatch: {type(exc).__name__}",
-                "warning": pol.warning_text}
+    except Exception as exc:
+        return {
+            "status": "ok",
+            "state": "benchmark_passed_byot",
+            "model_id": canonical,
+            "hf_repo": repo,
+            "task": "concept_segmentation",
+            "text": text,
+            "license": pol.weights_license,
+            "device": device,
+            "load_ms": round(load_ms, 1),
+            "infer_ms": round(infer_ms, 1),
+            "postprocess_note": f"forward pass OK; post-process API mismatch: {type(exc).__name__}",
+            "warning": pol.warning_text,
+        }
     n_params = sum(p.numel() for p in model.parameters())
     return {
         "status": "ok",

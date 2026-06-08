@@ -25,19 +25,22 @@ def test_redact_empty_and_short():
 
 
 def test_whoami_payload_never_contains_raw_token(monkeypatch):
+    import pytest
+
+    huggingface_hub = pytest.importorskip("huggingface_hub")
     monkeypatch.setattr(H, "_detect", lambda: (FAKE, "env:HF_TOKEN"))
 
-    # stub the network whoami
     class _Api:
         def __init__(self, *a, **k):
             pass
 
         def whoami(self):
-            return {"name": "tester", "type": "user",
-                    "auth": {"accessToken": {"displayName": "t", "role": "read"}},
-                    "orgs": []}
-
-    import huggingface_hub
+            return {
+                "name": "tester",
+                "type": "user",
+                "auth": {"accessToken": {"displayName": "t", "role": "read"}},
+                "orgs": [],
+            }
 
     monkeypatch.setattr(huggingface_hub, "HfApi", _Api)
     payload = H.hf_whoami()
@@ -48,6 +51,9 @@ def test_whoami_payload_never_contains_raw_token(monkeypatch):
 
 
 def test_validate_payload_never_contains_raw_token(monkeypatch):
+    import pytest
+
+    huggingface_hub = pytest.importorskip("huggingface_hub")
     monkeypatch.setattr(H, "_detect", lambda: (FAKE, "cli_cache"))
 
     class _Api:
@@ -56,8 +62,6 @@ def test_validate_payload_never_contains_raw_token(monkeypatch):
 
         def whoami(self):
             return {"name": "tester", "type": "user", "auth": {"accessToken": {}}}
-
-    import huggingface_hub
 
     monkeypatch.setattr(huggingface_hub, "HfApi", _Api)
     out = H.hf_validate_token()

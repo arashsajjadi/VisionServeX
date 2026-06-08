@@ -43,13 +43,23 @@ def main() -> int:
             if case.find("failure") is not None:
                 status = "failed"
                 failed += 1
-                failed_rows.append({"file": fname, "test": name,
-                                    "message": (case.find("failure").get("message", "") or "")[:300]})
+                failed_rows.append(
+                    {
+                        "file": fname,
+                        "test": name,
+                        "message": (case.find("failure").get("message", "") or "")[:300],
+                    }
+                )
             elif case.find("error") is not None:
                 status = "error"
                 errors += 1
-                failed_rows.append({"file": fname, "test": name,
-                                    "message": (case.find("error").get("message", "") or "")[:300]})
+                failed_rows.append(
+                    {
+                        "file": fname,
+                        "test": name,
+                        "message": (case.find("error").get("message", "") or "")[:300],
+                    }
+                )
             elif case.find("skipped") is not None:
                 status = "skipped"
                 skipped += 1
@@ -59,12 +69,18 @@ def main() -> int:
             per_file[key] += 1
             if status in ("failed", "error"):
                 per_file_fail[key] += 1
-            matrix_rows.append({"file": key, "test": name, "status": status,
-                                "time_s": case.get("time", "")})
+            matrix_rows.append(
+                {"file": key, "test": name, "status": status, "time_s": case.get("time", "")}
+            )
 
-    summary = {"total": total, "passed": passed, "failed": failed,
-               "errors": errors, "skipped": skipped,
-               "pass_rate": round(passed / max(total - skipped, 1), 4)}
+    summary = {
+        "total": total,
+        "passed": passed,
+        "failed": failed,
+        "errors": errors,
+        "skipped": skipped,
+        "pass_rate": round(passed / max(total - skipped, 1), 4),
+    }
     (REPORTS / f"{prefix}_summary.json").write_text(json.dumps(summary, indent=2))
     with (REPORTS / f"{prefix}_failed_tests.csv").open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["file", "test", "message"])

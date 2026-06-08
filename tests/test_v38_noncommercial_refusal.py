@@ -35,7 +35,8 @@ def test_require_license_refuses_noncommercial_by_default():
 
 def test_require_license_allows_research_only():
     out = H.hf_require_user_accepted_license(
-        "edge-sam", research_only=True, accept_noncommercial=True)
+        "edge-sam", research_only=True, accept_noncommercial=True
+    )
     assert out["allowed"] is True
     assert out["mode"] == "research_only"
 

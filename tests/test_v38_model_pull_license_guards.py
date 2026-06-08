@@ -48,7 +48,8 @@ def test_model_license_command_outputs_policy():
 
 
 def test_hf_token_env_must_be_set():
-    res = runner.invoke(app, ["model", "pull", "sam3-base",
-                              "--hf-token-env", "DEFINITELY_NOT_SET_VAR", "--json"])
+    res = runner.invoke(
+        app, ["model", "pull", "sam3-base", "--hf-token-env", "DEFINITELY_NOT_SET_VAR", "--json"]
+    )
     assert res.exit_code != 0
     assert "NO_TOKEN_IN_ENV" in res.output
