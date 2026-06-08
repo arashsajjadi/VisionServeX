@@ -3,6 +3,83 @@
 ## [Unreleased]
 
 
+## [3.10.0] - 2026-06-08
+
+### Production Hardening Sprint
+
+Bug fixes, real mask benchmarks, new depth model support, SAM2.1 ONNX export,
+upgraded transformers requirements, 13 new test files.
+
+**Phase 1 — Bug Audit:**
+- `BUG_A2` (P1): rfdetr_seg_runtime bare `import rfdetr` now wrapped in
+  try/except with `pip install 'visionservex[rfdetr]'` hint.
+- `BUG_D1` (P2): README version badge updated v3.9.0 → v3.9.1 → v3.10.0.
+- Policy invariant audit: all 99 rows `can_ship_weights=False` ✓; no gated
+  model in `default_safe=True`; no AGPL in `default_safe=True` ✓.
+
+**Phase 2 — SAM3/SAM3.1 Real Mask Benchmark:**
+- `byot_runtime.sam3_segment`: upgraded from smoke/forward-pass to real mask
+  pixels by using `threshold=0.0` (SAM3 logits are mostly negative; any
+  positive threshold silently drops all instances).
+- Sorts top-5 by score, reports `mask_area_px` and state:
+  - `sam3`: 62,423 px mask area on coco_person_car.jpg
+  - `sam3.1-base-plus`: 306,808 px mask area on coco_person_car.jpg
+- State upgraded: `benchmark_passed_byot` → `benchmark_passed_byot_mask`
+
+**Phase 3 — DINOv3 CHMv2 DPT Depth Head Fixed:**
+- Root cause: `CHMv2ImageProcessorFast` / `CHMv2ForDepthEstimation` only
+  added to transformers stable in v5.10.0 (was in 5.3.0.dev0 only).
+- Fix: upgraded `[dino]` extra requirement to `transformers>=5.10`.
+- `byot_runtime.dinov3_depth()` added for `dinov3-vitl16-chmv2-dpt-head`;
+  returns structured depth map; version-gates at <5.10 with clear error.
+- Policy: added `dinov3-vitl16-chmv2-dpt-head` as 99th policy row
+  (DINOv3 family; `byot_license_required`; ~337M params).
+- Inference: load ~750ms, infer ~1.9s, `depth_nonzero=307200` pixels.
+
+**Phase 4 — SAM2.1 ONNX Export:**
+- `torch.onnx.export` wraps `model.get_image_embeddings()` in a Module shim.
+- Export: 14.9s, 1.2 MB, opset 17.
+- ORT CPU inference: 1.3s; outputs `image_embeddings (1, 32, 256, 256)` +
+  2 multi-scale feature maps.
+- State upgraded: `SAM2_ONNX_EXPORTER_NOT_AVAILABLE` → `benchmark_passed_byot_onnx`
+
+**Phase 5 — Sidecar Triage:**
+- MaskDINO: sidecar_required (detectron2 build required). Policy correct.
+- Co-DINO: sidecar_required (mmdet/openmmlab). Policy correct.
+- RT-DETRv4: WORKING. `benchmark_passed`. `rtdetrv4 doctor` → OK.
+- RTMDet: sidecar_required (mmdet). Policy correct.
+- OneFormer: legal_review_required. Not a sidecar install issue.
+- InternImage: legal_review_required + DCNv3 CUDA ext build required.
+- MedSAM2: noncommercial_restricted. Policy correct.
+
+**Phase 6 — Global Model Count:**
+- Policy table: 99 rows (was 98 before CHMv2 addition).
+- Model manifest: 170 entries; 95 runnable in VisionServeX.
+- can_ship_weights=False for all 99 policy rows ✓.
+
+**Dependencies:**
+- `[hf]` extra: `transformers>=5.0` (SAM3Model added in 5.x).
+- `[dino]` extra: `transformers>=5.10` (CHMv2ForDepthEstimation added in 5.10).
+- Florence-2 extra retains `<5.0` upper bound.
+
+**Tests (Phase 9): 13 new test_v310_*.py files covering:**
+- Policy 99 rows + invariants
+- SAM3 mask benchmark evidence
+- DINOv3 CHMv2 DPT depth evidence
+- SAM2.1 ONNX evidence + ORT verification
+- byot_runtime public API
+- rfdetr ImportError hint (BUG_A2)
+- transformers version guards
+- README/docs sync
+- Release readiness (version=3.10.0)
+- No token leak
+- Manifest count (170 entries, 95 runnable)
+- Sidecar triage policy correctness
+- pyproject.toml extras versions
+- HF auth_check usage
+- No binary artifacts tracked
+
+
 ## [3.9.1] - 2026-06-08
 
 ### CI / Test Hardening (patch)
