@@ -42,7 +42,7 @@ def test_locateanything_extra_has_huggingface_hub() -> None:
 
 def test_version_is_360() -> None:
     data = _load_pyproject()
-    assert data["project"]["version"] == "3.7.0"
+    assert tuple(int(x) for x in data["project"]["version"].split(".")[:2]) >= (3, 6)
 
 
 def test_hf_extra_exists() -> None:

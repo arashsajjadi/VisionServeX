@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-3.3.0-informational.svg" alt="v3.3.0">
+  <img src="https://img.shields.io/badge/version-3.8.0-informational.svg" alt="v3.8.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -39,6 +39,71 @@ VisionServeX does not claim to beat Ultralytics globally. The `benchmark-competi
 - Log redaction removes tokens, base64, and API keys from all output.
 
 > ⚠️ **No end-to-end encryption claimed.** VisionServeX cannot provide E2E encryption in the cryptographic sense — the inference server must see plaintext image tensors to run models. We provide local-first processing, no-retention defaults, optional encryption-at-rest for job metadata, and auth for public mode. See [docs/privacy.md](docs/privacy.md).
+
+---
+
+## Hugging Face BYOT & model license policy (v3.8)
+
+```bash
+pip install visionservex
+```
+
+VisionServeX classifies **every** model into one of nine license-policy buckets
+(see [docs/model_license_policy.md](docs/model_license_policy.md)) and enforces
+them in the CLI and the Python API. The full, always-current table is generated to
+`notebook/99_final_report/reports/v38_license_policy_matrix.csv`.
+
+> **VisionServeX does not redistribute gated or restricted model weights. Users
+> must use their own Hugging Face token and accept the upstream licenses
+> themselves.** VisionServeX never bundles any weights into the wheel, the repo,
+> or a Docker image.
+
+### Connect your own Hugging Face account (BYOT)
+
+```bash
+huggingface-cli login                     # or:
+visionservex hf connect --token-env HF_TOKEN
+visionservex hf status                     # login state — the token is always redacted
+visionservex hf whoami
+visionservex hf check-model facebook/sam3  # gated-access check, no download
+```
+
+### Use a gated / BYOT model (e.g. SAM 3, DINOv3)
+
+Accept the upstream license on the model page first, then:
+
+```bash
+visionservex model license sam3-base                      # see the policy + warning
+visionservex model pull sam3-base --accept-upstream-license
+visionservex model doctor sam3-base                       # exact blockers + fixes
+```
+
+```python
+from visionservex import VSX
+VSX.hf.status()
+VSX.model("sam3-base").license()
+VSX.model("sam3-base").pull(accept_upstream_license=True)
+VSX.sam("sam3-base").segment("image.jpg", text="person")   # BYOT, once accepted
+VSX.dino("dinov3-vitb16").embed("image.jpg")               # BYOT DINOv3 embedding
+```
+
+### License warning system & policy buckets
+
+| bucket | examples | runnable by default? |
+|---|---|---|
+| **commercial-safe core** (39) | SAM v1/2/2.1, DINOv2, Florence-2, CLIP, OWL-ViT/OWLv2, open GroundingDINO, RF-DETR-Seg core, depth-anything-small | ✅ yes |
+| **BYOT / license-required** (23) | SAM 3 / SAM 3.1, DINOv3 | 🔑 your token + accept upstream license |
+| **external API only** (9) | GroundingDINO 1.5/1.6 Pro, DINO-X suite | 🌐 your provider key; data leaves the box |
+| **non-commercial / restricted** (7) | EdgeSAM, LocateAnything, DAM, MedSAM2, depth-anything-v2-large, SimpleClick, FocalClick | ⛔ research-only |
+| **enterprise / AGPL** (4) | FastSAM, Ultralytics YOLO-seg | ⛔ enterprise license |
+| **legal review** (11) | HQ-SAM family, TinySAM/Q-TinySAM, OneFormer, InternImage, RF-DETR-Seg XL/2XL | ⛔ pending review |
+
+Every restricted model prints a verbatim warning and the exact lawful next step.
+See [docs/byot_models.md](docs/byot_models.md),
+[docs/restricted_models.md](docs/restricted_models.md),
+[docs/commercial_safe_core.md](docs/commercial_safe_core.md),
+[docs/huggingface_connection.md](docs/huggingface_connection.md), and
+[docs/anastig_saas_policy.md](docs/anastig_saas_policy.md).
 
 ---
 

@@ -11,13 +11,14 @@ R = ROOT / "notebook" / "99_final_report" / "reports"
 
 def test_version_is_370():
     import visionservex
-    assert visionservex.__version__ == "3.7.0"
+    # forward-compatible: must not regress below the v3.7 baseline
+    assert tuple(int(x) for x in visionservex.__version__.split(".")[:2]) >= (3, 7)
 
 
 def test_pyproject_version_370():
     import tomllib
     data = tomllib.loads((ROOT / "pyproject.toml").read_text())
-    assert data["project"]["version"] == "3.7.0"
+    assert tuple(int(x) for x in data["project"]["version"].split(".")[:2]) >= (3, 7)
 
 
 def test_required_ledgers_exist():

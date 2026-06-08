@@ -54,7 +54,8 @@ def test_dist_wheel_exists_for_v360() -> None:
 def test_version_string_is_360() -> None:
     import visionservex
 
-    assert visionservex.__version__ == "3.7.0"
+    # forward-compatible: version must not regress below the v3.6 baseline
+    assert tuple(int(x) for x in visionservex.__version__.split(".")[:2]) >= (3, 6)
 
 
 def test_pyproject_toml_version_is_360() -> None:
@@ -65,4 +66,4 @@ def test_pyproject_toml_version_is_360() -> None:
     if not p.exists():
         return
     data = tomllib.loads(p.read_text())
-    assert data["project"]["version"] == "3.7.0"
+    assert tuple(int(x) for x in data["project"]["version"].split(".")[:2]) >= (3, 6)

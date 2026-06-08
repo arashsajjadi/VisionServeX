@@ -157,7 +157,16 @@ class _SAMHandle(_Base):
             "tutorial": f"notebook/tutorials/sam_family/{m}.ipynb",
         }
 
-    def segment(self, image, box=None, points=None, labels=None, **kw):
+    def segment(self, image, box=None, points=None, labels=None, text=None, **kw):
+        # SAM 3 / 3.1 are gated concept/text-prompt models (BYOT runtime).
+        if self.model_id.startswith("sam3"):
+            from visionservex.byot_runtime import sam3_segment
+
+            res = sam3_segment(self.model_id, image, text=text, **kw)
+            if isinstance(res, dict) and res.get("status") == "blocked":
+                raise VSXError(res["reason"], state=res["state"],
+                               next_command=res.get("next_command", ""))
+            return res
         info = self.explain()
         if info["state"] != "benchmark_passed":
             raise VSXError(
@@ -271,6 +280,15 @@ class _DINOHandle(_Base):
         }
 
     def embed(self, image, **kw):
+        # DINOv3 is a gated custom-license model (BYOT runtime).
+        if self.model_id.startswith("dinov3"):
+            from visionservex.byot_runtime import dinov3_embed
+
+            res = dinov3_embed(self.model_id, image, **kw)
+            if isinstance(res, dict) and res.get("status") == "blocked":
+                raise VSXError(res["reason"], state=res["state"],
+                               next_command=res.get("next_command", ""))
+            return res
         info = self.explain()
         if info["task"] != "embed" or info["state"] != "benchmark_passed":
             raise VSXError(
@@ -492,8 +510,120 @@ class _RFDetrSegHandle(_Base):
         return segment_instances(self.model_id, _load_image(image), threshold=threshold, **kw)
 
 
+class _HFNamespace:
+    """``VSX.hf`` — Hugging Face connection (BYOT). All secrets redacted."""
+
+    def status(self) -> dict[str, Any]:
+        from visionservex import hf_auth as H
+
+        out = {
+            "logged_in": H.hf_is_logged_in(),
+            "token_source": H.hf_token_source(),
+            "token_redacted": H.hf_get_token(redact=True),
+        }
+        if out["logged_in"]:
+            out.update(H.hf_whoami())
+        return out
+
+    def whoami(self, redact: bool = True) -> dict[str, Any]:
+        from visionservex import hf_auth as H
+
+        return H.hf_whoami(redact=redact)
+
+    def is_logged_in(self) -> bool:
+        from visionservex import hf_auth as H
+
+        return H.hf_is_logged_in()
+
+    def check_model(self, model_id: str) -> dict[str, Any]:
+        from visionservex import hf_auth as H
+
+        return H.hf_model_access_status(model_id)
+
+    def logout(self) -> dict[str, Any]:
+        from visionservex import hf_auth as H
+
+        return H.hf_logout_local()
+
+
+class _ModelHandle(_Base):
+    """``VSX.model(model_id)`` — license/policy + lawful BYOT pull for any model."""
+
+    family = "model"
+
+    def license(self) -> dict[str, Any]:
+        from visionservex.licensing import policy as P
+
+        pol = P.get_policy(self.model_id)
+        if pol is None:
+            return {"model_id": self.model_id, "final_policy": "not_in_policy_table"}
+        return pol.as_row()
+
+    def explain(self) -> dict[str, Any]:
+        from visionservex import hf_auth as H
+        from visionservex.licensing import policy as P
+
+        pol = P.get_policy(self.model_id)
+        out: dict[str, Any] = {"model_id": P.resolve_model_id(self.model_id)}
+        if pol is not None:
+            out["policy"] = pol.as_row()
+            out["access"] = H.hf_model_access_status(self.model_id)
+            out["state"] = out["access"].get("state")
+        else:
+            out["state"] = "not_in_policy_table"
+        return out
+
+    def status(self) -> str:
+        return self.explain().get("state", "unknown")
+
+    def access(self) -> dict[str, Any]:
+        from visionservex import hf_auth as H
+
+        return H.hf_model_access_status(self.model_id)
+
+    def pull(self, *, accept_upstream_license: bool = False,
+             research_only: bool = False, accept_noncommercial: bool = False):
+        """Lawful BYOT download into the user's HF cache. Never ships weights.
+
+        Raises :class:`VSXError` with the exact next step when the license policy
+        is not satisfied (gated without acceptance, non-commercial, enterprise…).
+        """
+        from visionservex import hf_auth as H
+        from visionservex.licensing import policy as P
+
+        pol = P.get_policy(self.model_id)
+        canonical = P.resolve_model_id(self.model_id)
+        if pol is None:
+            raise VSXError(f"{self.model_id}: not in license policy",
+                           state="unknown_model",
+                           next_command=f"visionservex model license {self.model_id}")
+        if pol.final_policy == "byot_license_required" and not accept_upstream_license:
+            raise VSXError(
+                f"{canonical} is gated/BYOT — pass accept_upstream_license=True after "
+                f"accepting the upstream license. {pol.warning_text}",
+                state="byot_license_required",
+                next_command=f"accept at {pol.upstream_url}; then .pull(accept_upstream_license=True)",
+            )
+        try:
+            H.hf_require_user_accepted_license(
+                canonical, research_only=research_only,
+                accept_noncommercial=accept_noncommercial)
+        except H.HFLicenseError as exc:
+            raise VSXError(str(exc), state=exc.state, next_command=exc.next_command) from exc
+        if not pol.hf_repo:
+            raise VSXError(f"{canonical}: no Hugging Face repo to pull (sidecar/manual).",
+                           state="manual_download_required",
+                           next_command=pol.exact_next_command)
+        from huggingface_hub import snapshot_download
+
+        return snapshot_download(repo_id=pol.hf_repo, token=H.hf_get_token())
+
+
 class VSX:
     """Top-level facade. ``VSX(model_id)`` for prediction; classmethods for families."""
+
+    #: ``VSX.hf`` — Hugging Face connection namespace (status/whoami/check_model).
+    hf = _HFNamespace()
 
     def __init__(self, model_id: str | None = None):
         self.model_id = model_id
@@ -507,6 +637,11 @@ class VSX:
         if self._model is None:
             raise ValueError("VSX was constructed without a model_id; pass one: VSX('dfine-x')")
         return self._model.predict(_load_image(image), **kw)
+
+    @staticmethod
+    def model(model_id: str) -> _ModelHandle:
+        """License/policy + lawful BYOT pull handle for any model id."""
+        return _ModelHandle(model_id)
 
     @staticmethod
     def sam(model_id: str) -> _SAMHandle:

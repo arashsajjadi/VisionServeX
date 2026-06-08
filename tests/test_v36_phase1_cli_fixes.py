@@ -75,6 +75,6 @@ def test_checkpoint_paths_all_use_expanduser() -> None:
 def test_version_is_360() -> None:
     import visionservex
 
-    assert visionservex.__version__ == "3.7.0", (
-        f"Expected 3.7.0, got {visionservex.__version__!r}"
+    assert tuple(int(x) for x in visionservex.__version__.split(".")[:2]) >= (3, 6), (
+        f"Expected >= 3.6, got {visionservex.__version__!r}"
     )

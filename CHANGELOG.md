@@ -3,6 +3,46 @@
 ## [Unreleased]
 
 
+## [3.8.0] - 2026-06-07
+
+### Hugging Face BYOT + license-safe model activation + production hardening
+
+- **License policy as code:** new `visionservex.licensing.policy` — the single
+  source of truth classifying **94 models** into nine `final_policy` buckets
+  (commercial_safe_core 39, byot_license_required 23, external_api_only 9,
+  noncommercial_restricted 7, enterprise_license_required 4, legal_review 11,
+  not_released 1). The matrix CSV/JSON/report are generated from it
+  (`scripts/v38_generate_license_matrix.py` →
+  `notebook/99_final_report/reports/v38_license_policy_matrix.*`). Code license,
+  weights license, and dataset/pretraining risk are tracked separately.
+- **Hugging Face connection layer (BYOT):** new `visionservex.hf_auth` with the
+  full user-facing API (`hf_token_source`, `hf_is_logged_in`, `hf_whoami`,
+  `hf_get_token`, `hf_validate_token`, `hf_redact_token`, `hf_logout_local`,
+  `hf_model_access_status`, `hf_acceptance_instructions`,
+  `hf_download_allowed_by_policy`, `hf_require_user_accepted_license`). The token
+  is never printed, logged, committed, or shipped — only the first 3 / last 2
+  chars are ever shown. Gated access is checked with `HfApi.auth_check` (real
+  download authorization), not `model_info` (which is only listing-visible).
+- **New CLI:** `visionservex hf {status,whoami,connect,logout,check-model}` and
+  `visionservex model {license,status --explain,doctor}`; `visionservex model pull`
+  now enforces the license policy (gated → `--accept-upstream-license`;
+  non-commercial → `--research-only --accept-noncommercial`; enterprise / legal /
+  API → refused with the exact next step).
+- **Python facade:** `VSX.hf` (status/whoami/check_model/logout) and
+  `VSX.model(id).license()/.access()/.pull()`. BYOT runtime `byot_runtime`
+  (`dinov3_embed`, `sam3_segment`, transformers 5.3 `Sam3Model`/`AutoModel`)
+  wired into `VSX.sam("sam3-*").segment(text=...)` and `VSX.dino("dinov3-*").embed()`.
+- **Docs:** `docs/huggingface_connection.md`, `model_license_policy.md`,
+  `byot_models.md`, `restricted_models.md`, `commercial_safe_core.md`,
+  `anastig_saas_policy.md`; README HF BYOT section with the non-redistribution
+  statement.
+- **Tests:** 16 `tests/test_v38_*` files (no token required; gated live tests are
+  opt-in via `VISIONSERVEX_RUN_GATED_HF=1`; no test prints `hf_` or downloads
+  large weights).
+- VisionServeX does **not** redistribute gated or restricted weights; users bring
+  their own token and accept upstream licenses themselves.
+
+
 ## [3.3.0] - 2026-06-07
 
 ### Full truth audit — measured pass/fail/blocked %, 0 failing tests, evidence 100%

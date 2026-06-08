@@ -71,11 +71,17 @@ def test_vsx_facades_explain_contract():
     sam = VSX.sam("sam2.1-hiera-small").explain()
     assert {"model_id", "family", "task", "state", "license", "next_command"} <= set(sam)
     assert sam["state"] == "benchmark_passed"
-    # gated SAM3 -> structured error, no token, exact next command
+    # gated SAM3 -> structured error with the exact lawful next command.
+    # v3.8: segment() now performs a REAL access check, so the precise state is
+    # auth_required (no token) or auth_required_license_pending (token present but
+    # the upstream license not yet accepted). The next command always routes the
+    # user to connect a token / accept the license.
     with pytest.raises(VSXError) as ei:
         VSX.sam("sam3-base").segment("x.jpg", box=[0, 0, 10, 10])
-    assert ei.value.state == "auth_required"
-    assert "HF_TOKEN" in ei.value.next_command
+    assert ei.value.state in ("auth_required", "auth_required_license_pending")
+    nxt = ei.value.next_command.lower()
+    assert ("hf connect" in nxt) or ("hf_token" in nxt) or ("huggingface" in nxt) \
+        or ("accept" in nxt)
     # DINO
     d = VSX.dino("dinov2-base").explain()
     assert d["state"] == "benchmark_passed" and d["task"] == "embed"

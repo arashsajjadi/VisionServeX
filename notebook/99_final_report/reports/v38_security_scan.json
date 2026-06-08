@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "failures": [],
+  "findings": {
+    "real_token_present_locally": true,
+    "real_token_hits": [],
+    "token_pattern_hits_nontest": [],
+    "weight_binaries_tracked": [],
+    "noncore_default_safe": [],
+    "agpl_default_safe": [],
+    "any_can_ship_weights": [],
+    "github_actions_hf_token_refs": [],
+    "readme_nonredistribution_statement": true
+  }
+}

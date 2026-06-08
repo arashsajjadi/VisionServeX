@@ -50,6 +50,7 @@ from visionservex.cli import (
     florence2_commands,
     gateway_commands,
     gpu_commands,
+    hf_commands,
     libreyolo_commands,
     license_commands,
     license_registry_commands,
@@ -159,6 +160,7 @@ app.add_typer(capabilities_commands.app, name="capabilities")
 app.add_typer(model_card_commands.app, name="model-card")
 app.add_typer(replacement_map_commands.app, name="replacement-map")
 app.add_typer(model_lifecycle_commands.app, name="model")
+app.add_typer(hf_commands.app, name="hf")
 app.add_typer(training_commands.training_app, name="training")
 app.add_typer(training_commands.export_app, name="export-cmd")
 app.add_typer(training_commands.video_app, name="video")
