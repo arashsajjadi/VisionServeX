@@ -12,18 +12,14 @@ INSID3_NB_DIR = ROOT / "notebook" / "tutorials" / "v311_insid3_in_context_segmen
 
 
 def test_insid3_notebook_directory_exists():
-    assert INSID3_NB_DIR.exists(), (
-        f"Tutorial notebook directory missing: {INSID3_NB_DIR}"
-    )
+    assert INSID3_NB_DIR.exists(), f"Tutorial notebook directory missing: {INSID3_NB_DIR}"
 
 
 def test_insid3_notebooks_present():
     if not INSID3_NB_DIR.exists():
         pytest.skip("Notebook directory not yet created")
     notebooks = list(INSID3_NB_DIR.glob("*.ipynb"))
-    assert len(notebooks) >= 1, (
-        f"At least 1 INSID3 tutorial notebook required in {INSID3_NB_DIR}"
-    )
+    assert len(notebooks) >= 1, f"At least 1 INSID3 tutorial notebook required in {INSID3_NB_DIR}"
 
 
 def test_insid3_notebook_no_token_literals():
@@ -35,9 +31,7 @@ def test_insid3_notebook_no_token_literals():
     for nb_path in INSID3_NB_DIR.glob("*.ipynb"):
         nb_text = nb_path.read_text()
         matches = token_pattern.findall(nb_text)
-        assert not matches, (
-            f"HF token literal found in notebook {nb_path.name}: {matches}"
-        )
+        assert not matches, f"HF token literal found in notebook {nb_path.name}: {matches}"
 
 
 def test_insid3_notebook_no_hardcoded_paths():

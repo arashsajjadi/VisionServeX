@@ -34,9 +34,7 @@ def test_no_weight_binaries_tracked():
 
 def test_no_hf_cache_dirs_tracked():
     tracked = _git_tracked_files()
-    hf_cache_entries = [
-        f for f in tracked if ".cache/huggingface" in f or "hub/models--" in f
-    ]
+    hf_cache_entries = [f for f in tracked if ".cache/huggingface" in f or "hub/models--" in f]
     assert not hf_cache_entries, f"HF cache entries tracked in git: {hf_cache_entries}"
 
 
@@ -48,8 +46,7 @@ def test_insid3_runtime_has_no_hardcoded_weights():
     bad_patterns = ["wget ", "curl http", "torch.hub.load", "download_url(", "urlretrieve("]
     for pat in bad_patterns:
         assert pat not in text, (
-            f"insid3_runtime.py contains suspicious pattern {pat!r} — "
-            "no weights should be bundled"
+            f"insid3_runtime.py contains suspicious pattern {pat!r} — no weights should be bundled"
         )
 
 
