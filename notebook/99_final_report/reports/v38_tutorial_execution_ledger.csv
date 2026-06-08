@@ -1,0 +1,7 @@
+notebook,status,detail,artifact,version
+01_install,ok,version verified from site-packages,v38_tutorial_artifacts/01_install.json,3.8.0
+02_connect,ok,source=cli_cache,v38_tutorial_artifacts/02_connect.json,3.8.0
+03_matrix,ok,policy buckets enumerated,v38_tutorial_artifacts/03_matrix.json,3.8.0
+09_rfdetr_seg,ok,commercial_safe_core,v38_tutorial_artifacts/09_rfdetr_seg.json,3.8.0
+10_pipeline,ok,pipeline_demo_ready,v38_tutorial_artifacts/10_pipeline.json,3.8.0
+11_restricted,ok,all restricted models refused for production,v38_tutorial_artifacts/11_restricted.json,3.8.0

@@ -1,0 +1,42 @@
+file,test,message
+tests/test_v31_model_expansion,test_vsx_facades_explain_contract,"AssertionError: assert 'auth_require...cense_pending' == 'auth_required'
+  
+  - auth_required
+  + auth_required_license_pending"
+tests/test_v36_no_binary_artifacts,test_version_string_is_360,"AssertionError: assert '3.8.0' == '3.7.0'
+  
+  - 3.7.0
+  ?   ^
+  + 3.8.0
+  ?   ^"
+tests/test_v36_no_binary_artifacts,test_pyproject_toml_version_is_360,"AssertionError: assert '3.8.0' == '3.7.0'
+  
+  - 3.7.0
+  ?   ^
+  + 3.8.0
+  ?   ^"
+tests/test_v36_phase1_cli_fixes,test_version_is_360,"AssertionError: Expected 3.7.0, got '3.8.0'
+assert '3.8.0' == '3.7.0'
+  
+  - 3.7.0
+  ?   ^
+  + 3.8.0
+  ?   ^"
+tests/test_v36_pyproject_extras,test_version_is_360,"AssertionError: assert '3.8.0' == '3.7.0'
+  
+  - 3.7.0
+  ?   ^
+  + 3.8.0
+  ?   ^"
+tests/test_v37_release_readiness,test_version_is_370,"AssertionError: assert '3.8.0' == '3.7.0'
+  
+  - 3.7.0
+  ?   ^
+  + 3.8.0
+  ?   ^"
+tests/test_v37_release_readiness,test_pyproject_version_370,"AssertionError: assert '3.8.0' == '3.7.0'
+  
+  - 3.7.0
+  ?   ^
+  + 3.8.0
+  ?   ^"

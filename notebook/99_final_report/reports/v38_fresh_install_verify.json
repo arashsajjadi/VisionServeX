@@ -1,7 +1,17 @@
 {
   "version": "3.8.0",
   "metadata": "3.8.0",
-  "file": "/home/arash/.cache/vsx38_verify/lib/python3.13/site-packages/visionservex/__init__.py",
+  "file": "/home/arash/.cache/vsx38_pypi/lib/python3.13/site-packages/visionservex/__init__.py",
   "site_packages": true,
-  "source": "local wheel (pre-release verify)"
+  "source": "public PyPI (pip install --no-cache-dir visionservex==3.8.0)",
+  "pypi_run_id": "27108889264",
+  "github_release": "https://github.com/arashsajjadi/VisionServeX/releases/tag/v3.8.0",
+  "notebooks_executed_from_pypi": [
+    "01",
+    "02",
+    "03",
+    "09",
+    "10",
+    "11"
+  ]
 }

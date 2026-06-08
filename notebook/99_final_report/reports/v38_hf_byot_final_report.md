@@ -25,12 +25,17 @@ code path (transformers 5.3 Sam3Model / AutoModel) runs real inference.
 RELEASE
 ================================================================================
 selected_version:      3.8.0   (minor: new user-facing HF/BYOT features + CLIs)
-release_published:     <PENDING USER GO — irreversible OIDC PyPI publish on push>
-pypi_run_id:           <pending>
-github_release_url:    <pending>
-pypi_url:              https://pypi.org/project/visionservex/3.8.0/  (after publish)
-wheel_built:           <see Phase 9 — built + twine check + local fresh-install verify>
-fresh_install_proof:   <post-release: /tmp/vsx38_verify venv, asserts site-packages>
+release_published:     YES — published to PyPI via GitHub Actions OIDC Trusted Publishing
+pypi_run_id:           27108889264  (Publish to PyPI — build ✓ / publish-pypi ✓ in 24s)
+commit:                f1aa2ef   tag: v3.8.0
+github_release_url:    https://github.com/arashsajjadi/VisionServeX/releases/tag/v3.8.0
+pypi_url:              https://pypi.org/project/visionservex/3.8.0/   (latest)
+wheel_built:           visionservex-3.8.0-py3-none-any.whl (774 KB, no weights) + sdist; twine check PASSED
+fresh_install_proof:   /home/arash/.cache/vsx38_pypi venv -> pip install --no-cache-dir
+                       visionservex==3.8.0 from PUBLIC PyPI; __version__=3.8.0, metadata=3.8.0,
+                       imports from site-packages. CLI: visionservex --version=3.8.0,
+                       hf status (token redacted hf_***FW), model license sam3-base/dinov3-vitb16
+                       =byot, locateanything-3b=noncommercial_restricted. (v38_fresh_install_verify.json)
 
 ================================================================================
 HUGGING FACE AUTH STATUS (token always redacted)
@@ -126,7 +131,9 @@ NOTEBOOKS  (notebook/tutorials/v38_hf_byot_and_license_safe_models/)
   04 pull_commercial_safe_sam_and_dino       10 groundingdino_sam_text_to_mask_pipeline
   05 sam3_byot_status_and_optional_run       11 restricted_models_warnings_*
   06 dinov3_byot_status_and_optional_embed   12 end_to_end_anastig_policy_demo
-notebooks_executed_from_pypi: <post-release: 01,02,03,09,10,11 (+ gated 05/06 only if access)>
+notebooks_executed_from_pypi: 01,02,03,09,10,11 — ALL OK, executed via nbconvert against the
+  PyPI-installed package (v38_tutorial_execution_ledger.csv). No token leaked into outputs.
+  Gated 05/06 remain auth_required until the user accepts the upstream licenses.
 
 ================================================================================
 README / DOCS SYNC CHECKLIST
