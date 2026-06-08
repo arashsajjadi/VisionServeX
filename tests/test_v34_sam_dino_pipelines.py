@@ -54,6 +54,8 @@ def test_pipeline_handle_has_explain():
 
 def test_grounding_dino_sam_demo_runs():
     """Run grounding-dino-swin-t to detect, then sam-vit-b to segment — no exceptions."""
+    pytest.importorskip("torch")
+    pytest.importorskip("transformers")
     if not _IMG.exists():
         pytest.skip("test image not found")
     from PIL import Image

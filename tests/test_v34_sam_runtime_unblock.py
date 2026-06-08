@@ -103,6 +103,8 @@ def test_sam_export_onnx_help():
 
 
 def test_sam_vit_b_runnable_via_vision_model():
+    pytest.importorskip("torch")
+    pytest.importorskip("transformers")
     if not _IMG.exists():
         pytest.skip(f"Test image not found: {_IMG}")
     from PIL import Image as PILImage
