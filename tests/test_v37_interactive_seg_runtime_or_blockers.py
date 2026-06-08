@@ -43,6 +43,7 @@ def test_deep_model_without_checkpoint_raises_structured():
 
 
 def test_classic_grabcut_actually_runs():
+    pytest.importorskip("cv2", reason="opencv-python not installed")
     import numpy as np
     from PIL import Image
 
