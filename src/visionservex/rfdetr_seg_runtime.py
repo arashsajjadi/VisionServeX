@@ -67,7 +67,13 @@ def segment_instances(
     """Run RF-DETR instance segmentation. Returns boxes/masks/classes/scores."""
     if model_id not in _VARIANTS:
         raise ValueError(f"unknown RF-DETR-Seg variant {model_id!r}; known: {sorted(_VARIANTS)}")
-    import rfdetr
+    try:
+        import rfdetr
+    except ImportError as exc:
+        raise ImportError(
+            f"rfdetr package not installed. Install with: pip install 'visionservex[rfdetr]'\n"
+            f"Original error: {exc}"
+        ) from exc
 
     cls = getattr(rfdetr, _VARIANTS[model_id])
     model = cls(device=device)
