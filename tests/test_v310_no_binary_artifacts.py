@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v3.10.0: No binary weight artifacts tracked in git."""
+
 from __future__ import annotations
 
 import subprocess
@@ -10,8 +11,16 @@ import pytest
 ROOT = Path(__file__).parent.parent
 
 _BAD_EXTENSIONS = (
-    ".pt", ".pth", ".ckpt", ".safetensors", ".bin",
-    ".onnx", ".engine", ".trt", ".pkl", ".npz",
+    ".pt",
+    ".pth",
+    ".ckpt",
+    ".safetensors",
+    ".bin",
+    ".onnx",
+    ".engine",
+    ".trt",
+    ".pkl",
+    ".npz",
 )
 
 
@@ -27,11 +36,7 @@ def test_no_binary_weights_in_git_tree():
     except (subprocess.TimeoutExpired, FileNotFoundError):
         pytest.skip("git ls-files unavailable")
 
-    bad = [
-        f
-        for f in result.stdout.splitlines()
-        if any(f.endswith(ext) for ext in _BAD_EXTENSIONS)
-    ]
+    bad = [f for f in result.stdout.splitlines() if any(f.endswith(ext) for ext in _BAD_EXTENSIONS)]
     assert not bad, f"Binary weight files tracked in git: {bad}"
 
 

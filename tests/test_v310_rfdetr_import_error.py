@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v3.10.0: rfdetr_seg_runtime BUG_A2 fix — actionable ImportError."""
+
 from __future__ import annotations
 
 import sys

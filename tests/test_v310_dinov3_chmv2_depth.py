@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v3.10.0: DINOv3 CHMv2 DPT depth head — policy + runtime tests."""
+
 from __future__ import annotations
 
 import json
@@ -49,7 +50,10 @@ def test_dinov3_depth_version_gate():
     # if transformers < 5.10 the function returns a blocked dict
     if Version(transformers.__version__) < Version("5.10.0"):
         from visionservex.byot_runtime import dinov3_depth
-        result = dinov3_depth("dinov3-vitl16-chmv2-dpt-head", "tests/assets/smoke/coco_person_car.jpg")
+
+        result = dinov3_depth(
+            "dinov3-vitl16-chmv2-dpt-head", "tests/assets/smoke/coco_person_car.jpg"
+        )
         assert result["state"] == "runtime_blocked_byot"
     else:
         # >= 5.10: version gate should pass (actual inference not required here)

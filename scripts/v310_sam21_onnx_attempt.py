@@ -28,9 +28,11 @@ RESULT = {
 
 try:
     import transformers
+
     RESULT["transformers_version"] = transformers.__version__
 
     import onnx
+
     RESULT["onnx_version"] = onnx.__version__
 
     import torch
@@ -59,9 +61,11 @@ try:
 
     print("Loading SAM2.1...")
     proc = Sam2Processor.from_pretrained("facebook/sam2.1-hiera-base-plus", token=token)
-    model = Sam2Model.from_pretrained("facebook/sam2.1-hiera-base-plus", token=token).to("cpu").eval()
+    model = (
+        Sam2Model.from_pretrained("facebook/sam2.1-hiera-base-plus", token=token).to("cpu").eval()
+    )
     n_params = sum(p.numel() for p in model.parameters())
-    print(f"  Loaded: {n_params/1e6:.1f}M params")
+    print(f"  Loaded: {n_params / 1e6:.1f}M params")
 
     inputs = proc(images=img, return_tensors="pt")
     pixel_values = inputs["pixel_values"]
@@ -78,10 +82,12 @@ try:
     print("Attempting ONNX export via image-embeddings shim...")
     t0 = time.perf_counter()
     try:
+
         class _EmbedShim(torch.nn.Module):
             def __init__(self, m):
                 super().__init__()
                 self._m = m
+
             def forward(self, pixel_values):
                 return self._m.get_image_embeddings(pixel_values=pixel_values)
 
@@ -99,34 +105,40 @@ try:
 
         onnx_model = onnx.load(str(onnx_path))
         onnx.checker.check_model(onnx_model)
-        RESULT.update({
-            "onnx_export_success": True,
-            "onnx_file": str(onnx_path),
-            "export_ms": round(export_ms, 1),
-            "onnx_size_mb": round(onnx_path.stat().st_size / 1e6, 2),
-            "next_action": "Test with onnxruntime for latency benchmark",
-        })
+        RESULT.update(
+            {
+                "onnx_export_success": True,
+                "onnx_file": str(onnx_path),
+                "export_ms": round(export_ms, 1),
+                "onnx_size_mb": round(onnx_path.stat().st_size / 1e6, 2),
+                "next_action": "Test with onnxruntime for latency benchmark",
+            }
+        )
         print(f"  ONNX export SUCCESS: {onnx_path}")
 
     except Exception as e:
-        RESULT.update({
-            "onnx_export_success": False,
-            "blocker_code": "SAM2_ONNX_EXPORT_FAILED",
-            "blocker_detail": f"{type(e).__name__}: {str(e)[:600]}",
-            "next_action": (
-                "Install facebookresearch/sam2 in isolated venv "
-                "(`pip install git+https://github.com/facebookresearch/sam2`) "
-                "then run: python3 -m sam2.onnx_exporter --checkpoint sam2.1_hiera_b+.pt "
-                "--config configs/sam2.1/sam2.1_hiera_b+.yaml --output sam21_b+.onnx"
-            ),
-        })
+        RESULT.update(
+            {
+                "onnx_export_success": False,
+                "blocker_code": "SAM2_ONNX_EXPORT_FAILED",
+                "blocker_detail": f"{type(e).__name__}: {str(e)[:600]}",
+                "next_action": (
+                    "Install facebookresearch/sam2 in isolated venv "
+                    "(`pip install git+https://github.com/facebookresearch/sam2`) "
+                    "then run: python3 -m sam2.onnx_exporter --checkpoint sam2.1_hiera_b+.pt "
+                    "--config configs/sam2.1/sam2.1_hiera_b+.yaml --output sam21_b+.onnx"
+                ),
+            }
+        )
         print(f"  ONNX export FAILED: {type(e).__name__}: {str(e)[:200]}")
 
 except Exception as e:
-    RESULT.update({
-        "blocker_code": "SETUP_ERROR",
-        "blocker_detail": str(e)[:500],
-    })
+    RESULT.update(
+        {
+            "blocker_code": "SETUP_ERROR",
+            "blocker_detail": str(e)[:500],
+        }
+    )
 
 (OUT / "sam21_onnx_attempt.json").write_text(json.dumps(RESULT, indent=2))
 print(f"\nResult: {json.dumps(RESULT, indent=2)}")

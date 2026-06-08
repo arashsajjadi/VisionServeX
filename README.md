@@ -4,7 +4,7 @@
 <h1 align="center">VisionServeX</h1>
 
 <p align="center">
-  <strong>Accuracy-aware computer vision model gateway — honest, local-first, and privacy-respecting.</strong><br>
+  <strong>License-aware local computer-vision gateway — curated models, honest blockers, no fake claims.</strong><br>
   Serve modern CV models on your machine. Local-only by default. No data retained.
 </p>
 
@@ -22,738 +22,235 @@
 
 ## What is VisionServeX?
 
-VisionServeX is an open-source, permissive-license-aware Python framework for running modern computer vision models locally and exposing them through a stable HTTP API. It works as a **local model gateway**: start it once, call any supported model through one clean API.
+VisionServeX is an open-source Python framework for running modern computer vision models locally
+and exposing them through a stable HTTP API. It works as a **local model gateway**: start it once,
+call any supported model through one clean API, on your own hardware, with no data leaving your
+machine.
 
-> **v3.3 truth audit (measured, not claimed):** 173 core model rows → **111 PASS (64.16%)**, 44 blocked (gated/checkpoint/sidecar/legal), 16 excluded (restricted licenses), **0 FAIL**; default-safe pass 70.7%; **evidence completeness 100%**; pipelines 4/4 and tools 21/21 pass; **0 bad-license default-safe rows, 0 token leaks**. Tests: **1613 passed / 0 failed / 60 skipped**. Every number is computed from the canonical ledgers — see [docs/reports.md](docs/reports.md) and [docs/testing.md](docs/testing.md).
-
-**Accuracy-aware and scientifically usable:**  
-Every model carries an explicit accuracy taxonomy label: `demo_fast`, `production_recommended`, `accuracy_grade`, `experimental_sota`, `expert_sidecar`, `external_api`, or `unavailable_with_reason`. The recommender, benchmark tools, and registry are aligned to these labels so you always know what tier you are running. Real AP50/mAP50:95 is computed when you provide an annotated dataset.
-
-**Honesty policy:**  
-VisionServeX does not claim to beat Ultralytics globally. The `benchmark-competitiveness` tool is designed to reveal the honest truth. If YOLO wins, it will say so.
-
-**Privacy-first design:**
-- Binds to `127.0.0.1` by default — nothing leaves your machine.
-- Images are decoded in memory for inference and never written to disk by default.
-- No data is retained between requests by default.
-- Log redaction removes tokens, base64, and API keys from all output.
-
-> ⚠️ **No end-to-end encryption claimed.** VisionServeX cannot provide E2E encryption in the cryptographic sense — the inference server must see plaintext image tensors to run models. We provide local-first processing, no-retention defaults, optional encryption-at-rest for job metadata, and auth for public mode. See [docs/privacy.md](docs/privacy.md).
+Every model in the registry carries an explicit license classification, an honest availability
+status, and a clear commercial posture. Blockers are documented — not hidden.
 
 ---
 
-## Real SAM3 + DINOv3 BYOT Activation (v3.9.0)
+## Why VisionServeX?
 
-v3.9.0 converts SAM3, SAM3.1, and all DINOv3 variants from `auth_required` to
-`benchmark_passed_byot` after the user accepted upstream licenses on Hugging Face.
+- **Local-first inference** — binds to `127.0.0.1` by default; images never leave your machine
+- **License-aware registry** — every model is classified: commercial-safe core, BYOT gated, non-commercial, or external-API-only
+- **Stable Python + CLI + HTTP API** — one interface across detection, segmentation, embedding, depth, classification, and open-vocabulary tasks
+- **Commercial-safe core** — SAM v1/2/2.1, DINOv2, RF-DETR, Florence-2, CLIP, OWLv2, Grounding DINO, and more; all Apache-2.0 or MIT, no token required
+- **BYOT support for gated models** — SAM3/SAM3.1, DINOv3; your token, your cache, your accepted license
+- **No bundled gated weights** — VisionServeX never puts gated model weights into PyPI, GitHub, Docker, or any release artifact
+- **Honest blockers** — unavailable models explain exactly why and what to do next
 
-| Model | Params | Status | Device |
-|-------|--------|--------|--------|
-| dinov3-vits16 | 21M | benchmark_passed_byot | GPU |
-| dinov3-vitb16 | 86M | benchmark_passed_byot | GPU |
-| dinov3-vitl16 (LVD+SAT) | 300M | benchmark_passed_byot | GPU |
-| dinov3-vith16plus | 840M | benchmark_passed_byot | GPU |
-| dinov3-convnext-{tiny,small,base,large} | 29–198M | benchmark_passed_byot | GPU |
-| dinov3-vit7b16 (LVD+SAT) | 6.8B | benchmark_passed_byot | CPU fallback |
-| sam3-base | 840M | benchmark_passed_byot | GPU |
-| sam3.1-base | 840M | benchmark_passed_byot | GPU |
+---
+
+## Quickstart
 
 ```bash
-# DINOv3 embedding
-visionservex dino embed dinov3-vits16 image.jpg --out embedding.npy --explain
+pip install 'visionservex[hf,rfdetr]'
 
-# SAM3 segmentation
-visionservex sam run sam3-base image.jpg --text person --out out/ --explain
-visionservex sam run sam3.1-base image.jpg --text person --out out/ --explain
+visionservex --version
+visionservex getting-started        # personalized guide
+
+# Detection (RF-DETR, no token needed)
+visionservex detect rfdetr-small image.jpg
+
+# Segmentation (SAM2.1, no token needed)
+visionservex sam-family smoke-test sam2.1-hiera-small image.jpg
+
+# HTTP gateway
+visionservex serve                  # http://127.0.0.1:8080
+curl -F "image=@image.jpg" -F "model_id=rfdetr-small" http://127.0.0.1:8080/detect | jq
 ```
 
 ```python
-from visionservex import VSX
+from visionservex import VisionModel, VSX
 
-VSX.dino("dinov3-vits16").embed("image.jpg")
-VSX.dino("dinov3-convnext-tiny").embed("image.jpg")
-VSX.sam("sam3-base").segment("image.jpg", text="person")
-VSX.sam("sam3.1-base").segment("image.jpg", text="person")
+# Direct inference (no server)
+result = VisionModel("rfdetr-small").predict("image.jpg")
+result.to_json()
+
+# SAM2 segmentation
+VSX.sam("sam2.1-hiera-small").segment("image.jpg", box=[10, 20, 200, 220])
+
+# DINOv2 embedding (Apache-2.0, no token)
+VSX.dino("dinov2-base").embed("image.jpg")
 ```
-
-> **VisionServeX never redistributes gated model weights.** Users must use their
-> own Hugging Face token and accept upstream model licenses. Weights remain in
-> the user's HF cache — never in PyPI, GitHub, Docker, or any VisionServeX
-> release artifact.
 
 ---
 
-## Hugging Face BYOT & model license policy (v3.8)
+## What works today
+
+| Capability | Runnable models | Install | Token needed? |
+|---|---|---|---|
+| Object detection | D-FINE (n/s/m/l/x), RF-DETR (nano/small/medium/large) | `[hf]`, `[rfdetr]` | no |
+| Instance segmentation | RF-DETR-Seg (nano/small/medium) | `[rfdetr]` | no |
+| Promptable segmentation | SAM v1, SAM 2, SAM 2.1 | `[hf]` | no |
+| SAM3/SAM3.1 BYOT masks | real mask artifacts (62 K–307 K px verified) | `[hf]` + HF token | yes, BYOT |
+| Open-vocabulary detection | Grounding DINO (tiny, swin-b), OWL-ViT, OWLv2 | `[hf]` | no |
+| Multi-task VLM | Florence-2 (base, large) | `[hf]` + isolated env | no |
+| Classification | SwinV2, ConvNeXtV2, MaxViT | `[hf]` | no |
+| Dense embedding | DINOv2 (s/b/l/g), CLIP, SigLIP2 | `[hf]` | no |
+| DINOv3 BYOT embedding | dinov3-vits16 through dinov3-vit7b16 | `[dino]` + HF token | yes, BYOT |
+| DINOv3 depth head | CHMv2 DPT depth estimation (`transformers>=5.10`) | `[dino]` + HF token | yes, BYOT |
+| SAM2.1 ONNX encoder | image-encoder export + ONNX Runtime smoke | `[hf]` + onnx | yes, BYOT |
+| Medical segmentation | MedSAM (research only) | `[hf]` | no |
+| Anomaly detection | PatchCore, PaDiM (via anomalib) | `[anomaly]` | no |
+| Surveillance search | Index + text query (SigLIP2 + ByteTrack) | `[hf]` | no |
+| HTTP API server | Full REST gateway | `[server]` | no |
+
+---
+
+## Hugging Face BYOT for gated models
+
+SAM3, SAM3.1, and DINOv3 are gated on Hugging Face. VisionServeX provides a clean BYOT path:
+you supply your own token, accept the upstream license once, and the weights stay in your local
+HF cache.
 
 ```bash
-pip install visionservex
-```
-
-VisionServeX classifies **every** model into one of nine license-policy buckets
-(see [docs/model_license_policy.md](docs/model_license_policy.md)) and enforces
-them in the CLI and the Python API. The full, always-current table is generated to
-`notebook/99_final_report/reports/v38_license_policy_matrix.csv`.
-
-> **VisionServeX does not redistribute gated or restricted model weights. Users
-> must use their own Hugging Face token and accept the upstream licenses
-> themselves.** VisionServeX never bundles any weights into the wheel, the repo,
-> or a Docker image.
-
-### Connect your own Hugging Face account (BYOT)
-
-```bash
-huggingface-cli login                     # or:
+# Step 1 — connect your token
+huggingface-cli login                        # or:
 visionservex hf connect --token-env HF_TOKEN
-visionservex hf status                     # login state — the token is always redacted
-visionservex hf whoami
-visionservex hf check-model facebook/sam3  # gated-access check, no download
-```
 
-### Use a gated / BYOT model (e.g. SAM 3, DINOv3)
+# Step 2 — check status (no download)
+visionservex hf status
+visionservex hf check-model facebook/sam3
 
-Accept the upstream license on the model page first, then:
-
-```bash
-visionservex model license sam3-base                      # see the policy + warning
+# Step 3 — accept the upstream license on the model page, then pull
 visionservex model pull sam3-base --accept-upstream-license
-visionservex model doctor sam3-base                       # exact blockers + fixes
+visionservex model doctor sam3-base
 ```
 
 ```python
 from visionservex import VSX
+
 VSX.hf.status()
-VSX.model("sam3-base").license()
 VSX.model("sam3-base").pull(accept_upstream_license=True)
-VSX.sam("sam3-base").segment("image.jpg", text="person")   # BYOT, once accepted
-VSX.dino("dinov3-vitb16").embed("image.jpg")               # BYOT DINOv3 embedding
+VSX.sam("sam3-base").segment("image.jpg", text="person")   # BYOT inference
+VSX.dino("dinov3-vitb16").embed("image.jpg")               # BYOT embedding
 ```
 
-### License warning system & policy buckets
+### SAM3/SAM3.1 real mask results (v3.10.0)
 
-| bucket | examples | runnable by default? |
+Real mask artifacts are produced after accepting the upstream license. Both models have been
+benchmarked locally and produce confirmed non-zero masks:
+
+| Model | Mask area (px) | State |
 |---|---|---|
-| **commercial-safe core** (39) | SAM v1/2/2.1, DINOv2, Florence-2, CLIP, OWL-ViT/OWLv2, open GroundingDINO, RF-DETR-Seg core, depth-anything-small | ✅ yes |
-| **BYOT / license-required** (23) | SAM 3 / SAM 3.1, DINOv3 | 🔑 your token + accept upstream license |
-| **external API only** (9) | GroundingDINO 1.5/1.6 Pro, DINO-X suite | 🌐 your provider key; data leaves the box |
-| **non-commercial / restricted** (7) | EdgeSAM, LocateAnything, DAM, MedSAM2, depth-anything-v2-large, SimpleClick, FocalClick | ⛔ research-only |
-| **enterprise / AGPL** (4) | FastSAM, Ultralytics YOLO-seg | ⛔ enterprise license |
-| **legal review** (11) | HQ-SAM family, TinySAM/Q-TinySAM, OneFormer, InternImage, RF-DETR-Seg XL/2XL | ⛔ pending review |
+| SAM3 (`facebook/sam3`) | 62,423 | `benchmark_passed_byot_mask` |
+| SAM3.1 Base-Plus (`facebook/sam3.1`) | 306,808 | `benchmark_passed_byot_mask` |
 
-Every restricted model prints a verbatim warning and the exact lawful next step.
-See [docs/byot_models.md](docs/byot_models.md),
-[docs/restricted_models.md](docs/restricted_models.md),
-[docs/commercial_safe_core.md](docs/commercial_safe_core.md),
-[docs/huggingface_connection.md](docs/huggingface_connection.md), and
-[docs/anastig_saas_policy.md](docs/anastig_saas_policy.md).
+> **VisionServeX does not redistribute gated model weights.** Weights remain in your HF cache.
+> They are never included in PyPI, GitHub, Docker, or any VisionServeX release artifact.
 
 ---
 
-## Quickstart (CPU, 5 minutes)
+## License and commercial posture
 
-```bash
-pip install 'visionservex[server,hf,rfdetr]'
+| Model group | Runs locally? | Token required? | Commercial-safe by default? | Can VisionServeX ship weights? | Default behavior |
+|---|---|---|---|---|---|
+| **Commercial-safe core** | yes | no | yes (Apache-2.0 / MIT) | download-on-demand, no bundling | enabled |
+| **BYOT gated** | yes, after access | yes (HF token) | depends on upstream license you accepted | no | disabled until you accept |
+| **External API only** | no local weights | provider key | depends on provider terms | no | connector only |
+| **Research / non-commercial** | local maybe | maybe | no | no | disabled |
+| **Legal review** | maybe | maybe | no until reviewed | no | disabled |
 
-visionservex getting-started      # personalized guide
-visionservex pull dfine-s-o365-coco   # accuracy-grade detection, CPU-capable
-visionservex serve                     # http://127.0.0.1:8080
-```
+**Commercial-safe core** (39 models) includes: SAM v1/2/2.1, DINOv2, RF-DETR family, Grounding
+DINO (open variants), Florence-2, CLIP, OWLv2, SigLIP2, SwinV2, ConvNeXtV2, depth-anything-small,
+and more. No token needed; weights download from official upstream sources on demand.
 
-```bash
-curl -F "image=@image.jpg" -F "model_id=dfine-s-o365-coco" \
-     http://127.0.0.1:8080/detect | jq
-```
+**BYOT models** (SAM3, SAM3.1, DINOv3) are not automatically commercial-safe. Commercial use
+depends on the upstream license *you* accepted. VisionServeX provides the infrastructure; the
+license decision is yours.
 
-For a quick demo (smallest model):
-```bash
-visionservex pull rfdetr-nano          # demo_fast, CPU-capable
-visionservex predict rfdetr-nano image.jpg
-```
-
----
-
-## Ultralytics-Like Workflow
-
-Same mental model — different backends, all permissive-license.
-
-```python
-from visionservex import VisionModel
-
-model = VisionModel("dfine-x-o365-coco")
-model.pull()                          # download checkpoint
-model.info()                          # show registry metadata
-results = model.predict("image.jpg", conf=0.25)
-results.save("outputs/")             # save annotated image
-results.plot()                        # returns PIL Image
-results.to_json()                     # JSON string
-results.to_csv()                      # CSV string
-results.debug()                       # detailed debug string
-
-# Check what operations are supported
-model.supports("val")                 # {"supported": True, ...}
-model.supports("train")               # {"supported": False, "reason": "..."}
-model.training_info()                 # per-family training capabilities
-model.export_info()                   # per-family export capabilities
-model.val(dataset="yolo:/data/coco128", max_images=100)  # AP50/mAP50:95
-```
-
-> **Note:** Not all operations exist for all models. Use `model.supports("operation")`
-> and `visionservex model-card show MODEL` to check capabilities.
-> Unlike Ultralytics, VisionServeX does not depend on Ultralytics as a package.
-
-```bash
-# CLI task aliases
-visionservex detect dfine-x-o365-coco image.jpg --conf 0.25 --device cuda
-visionservex segment rfdetr-seg-medium image.jpg --save-image out.jpg
-visionservex classify swinv2-base image.jpg --top-k 5
-visionservex open-vocab grounding-dino-swin-b image.jpg --prompt "car,person"
-visionservex val dfine-x-o365-coco --dataset yolo:/path/to/coco128 --max-images 128
-
-# Model lifecycle
-visionservex model pull dfine-x-o365-coco --dry-run
-visionservex model info dfine-x-o365-coco
-visionservex model checkpoint-info dfine-x-o365-coco
-visionservex training capabilities --model rfdetr-large
-visionservex export-cmd capabilities --model dfine-x-o365-coco
-```
-
----
-
-## Output Normalization
-
-The built-in normalizer handles all common detection serialization formats:
-
-```python
-from visionservex import normalize_detections, parse_api_response
-
-# Accepts all these formats:
-dets = normalize_detections([
-    {"xyxy": [10, 20, 100, 200], "score": 0.9, "label": "cat"},
-    {"box": {"x1": 10, "y1": 20, "x2": 100, "y2": 200}, "confidence": 0.8, "category": "dog"},
-    {"bbox": [10, 20, 90, 180], "bbox_format": "xywh", "conf": 0.7, "class_id": 0},
-])
-
-# Parse VisionServeX HTTP API responses directly:
-import requests
-resp = requests.get("http://127.0.0.1:8080/detect", ...)
-dets = parse_api_response(resp.json())
-```
-
-Never silently drops all predictions — emits `AllPredictionsDroppedWarning` if normalization fails.
-
----
-
-## Python Client
-
-```python
-from visionservex import Client, VisionModel
-
-# Direct inference (local, no server needed)
-result = VisionModel("dfine-s-o365-coco").predict("image.jpg")   # accuracy_grade
-result = VisionModel("rfdetr-nano").predict("image.jpg")          # demo_fast
-
-# Via local gateway
-client = Client("http://127.0.0.1:8080")
-result = client.detect("dfine-s-o365-coco", "image.jpg")
-result = client.grounded_segment("grounded-sam2", "image.jpg", prompt="car, person")
-result = client.classify("swinv2-tiny", "image.jpg")
-```
-
----
-
-## Model Taxonomy
-
-Every model in the registry now carries an explicit `model_category` label.
-
-| Category | Meaning | Examples |
-|----------|---------|---------|
-| `demo_fast` | Quick demo, small, not for accuracy benchmarks | `dfine-n`, `rfdetr-nano`, `rfdetr-seg-nano`, `grounding-dino-tiny` |
-| `production_recommended` | Solid accuracy, ready for real use | `rfdetr-small`, `rfdetr-seg-small`, `swinv2-tiny`, `sam-vit-base` |
-| `accuracy_grade` | Tracked for AP benchmarks; explicitly wired | `dfine-s-o365-coco`, `dfine-m/l/x-o365-coco`, `rfdetr-medium/large`, `grounding-dino-swin-b` |
-| `experimental_sota` | Claims SOTA but not fully verified in this build | `deim-s/m`, `deimv2-s/m`, `rtdetrv4-s/m/l/x`, `maskdino-r50-coco` |
-| `expert_sidecar` | Requires expert setup (OpenMMLab, custom ops) | `rtmpose-*`, `internimage-*`, `co-dino-*` |
-| `external_api` | API-gated upstream; not self-hostable | `grounding-dino-1.5/1.6` |
-| `unavailable_with_reason` | Blocked; honest reason documented | `rfdetr-seg-large/xlarge/2xlarge` |
-| `utility` | Mock / built-in / test helpers | `mock-detect`, `mock-classify`, … |
-
-**Key rule:** `demo_fast` models are not used to claim competitiveness with YOLO. Use `accuracy_grade` variants for AP benchmarks.
+Detailed counts and bucket breakdowns: [docs/global_model_count.md](docs/global_model_count.md)
 
 ---
 
 ## Model Families
 
-Full detail: [docs/model_zoo_matrix.md](docs/model_zoo_matrix.md) | [docs/model_zoo_gap_report.md](docs/model_zoo_gap_report.md)
+| Family | Best model | Status | Install |
+|---|---|---|---|
+| D-FINE | `dfine-s-o365-coco` | runnable | `[hf]` |
+| RF-DETR | `rfdetr-large` | runnable | `[rfdetr]` |
+| RF-DETR-Seg | `rfdetr-seg-medium` | runnable | `[rfdetr]` |
+| SAM v1 | `sam-vit-base` | runnable | `[hf]` |
+| SAM 2 / 2.1 | `sam2.1-hiera-large` | runnable | `[hf]` |
+| SAM 3 / 3.1 | `sam3-base`, `sam3.1-base-plus` | BYOT (gated) | `[hf]` + token |
+| Florence-2 | `florence-2-large` | runnable (isolated env) | `[hf]` |
+| OWLv2 | `owlv2-large-patch14` | runnable | `[hf]` |
+| Grounding DINO | `grounding-dino-swin-b` | runnable | `[hf]` |
+| SwinV2 | `swinv2-base` | runnable | `[hf]` |
+| DINOv2 | `dinov2-large` | runnable | `[hf]` |
+| DINOv3 | `dinov3-vitb16` | BYOT (gated) | `[dino]` + token |
+| DINOv3 CHMv2 depth | `dinov3-vitl16-chmv2-dpt-head` | BYOT, `transformers>=5.10` | `[dino]` + token |
+| CLIP / SigLIP2 | `clip-vit-large-patch14` | runnable | `[hf]` |
+| MedSAM | `medsam` | runnable (research) | `[hf]` |
+| PatchCore | `anomalib-patchcore` | optional_extra | `[anomaly]` |
+| RTMPose | `rtmpose-m` | expert_sidecar | OpenMMLab conda |
+| ByteTrack / OC-SORT | `bytetrack` | optional, pip install | `pip install bytetracker` |
+| MaskDINO | `maskdino-swinl-coco` | expert_sidecar | Detectron2 sidecar |
 
-Release readiness telemetry (functional/operational/certainty per family)
-lives in [docs/release_readiness/latest.md](docs/release_readiness/latest.md);
-run `visionservex readiness verdict --json` to re-check it locally.
+Models marked **expert_sidecar** require an isolated environment (OpenMMLab, Detectron2). Use
+`visionservex openmmlab create-env` for the exact conda recipe.
 
-| Family | Best Model | Status | Install | Example |
-|--------|-----------|--------|---------|---------|
-| D-FINE | `dfine-s-o365-coco` | runnable | `[hf]` | `visionservex detect dfine-s-o365-coco image.jpg` |
-| RF-DETR | `rfdetr-large` | runnable | `[rfdetr]` | `visionservex detect rfdetr-large image.jpg` |
-| RF-DETR-Seg | `rfdetr-seg-medium` | runnable | `[rfdetr]` | `visionservex segment rfdetr-seg-medium image.jpg` |
-| SAM v1 | `sam-vit-base` | runnable | `[hf]` | `visionservex sam-family smoke-test sam-vit-base img.jpg` |
-| SAM 2 | `sam2-hiera-tiny` | runnable | `[hf]` | `visionservex sam-family smoke-test sam2-hiera-tiny img.jpg` |
-| SAM 2.1 | `sam2.1-hiera-large` | runnable | `[hf]` | `visionservex sam-family smoke-test sam2.1-hiera-large img.jpg` |
-| Florence-2 | `florence-2-large` | runnable | `[hf]` | `visionservex florence2 predict florence-2-large img.jpg --task '<OD>'` |
-| OWLv2 | `owlv2-large-patch14` | runnable | `[hf]` | `visionservex open-vocab owlv2-large-patch14 img.jpg --prompt "cat"` |
-| OWL-ViT | `owlvit-large-patch14` | runnable | `[hf]` | `visionservex open-vocab owlvit-large-patch14 img.jpg --prompt "dog"` |
-| Grounding DINO | `grounding-dino-swin-b` | runnable | `[hf]` | `visionservex open-vocab grounding-dino-swin-b img.jpg --prompt "car"` |
-| SwinV2 | `swinv2-base` | runnable | `[hf]` | `visionservex classify swinv2-base image.jpg --top-k 5` |
-| ConvNeXtV2 | `convnextv2-large` | runnable | `[hf]` | `visionservex classify convnextv2-large image.jpg` |
-| DINOv2 | `dinov2-large` | runnable | `[hf]` | `visionservex feature embed dinov2-large image.jpg` |
-| CLIP | `clip-vit-large-patch14` | runnable | `[hf]` | `visionservex feature embed clip-vit-large-patch14 image.jpg` |
-| SigLIP2 | `siglip2-base-patch16-224` | runnable | `[hf]` | `visionservex feature embed siglip2-base-patch16-224 image.jpg` |
-| MedSAM | `medsam` | runnable | `[hf]` | `visionservex medical segment medsam ct.png --box 10,20,100,200 --out /tmp` |
-| PatchCore | `anomalib-patchcore` | optional_extra | `[anomaly]` | `visionservex anomaly train patchcore --data /data/normal --out /tmp` |
-| RTMDet-R | `rtmdet-r2-s` | expert_sidecar | OpenMMLab | `visionservex aerial detect aerial.jpg --model rtmdet-r2-s` |
-| ByteTrack | `bytetrack` | real_smoke_verified | `pip install bytetracker` | `visionservex video-search tracker-smoke --tracker bytetrack` |
-| OC-SORT | `ocsort` | real_smoke_verified | `pip install ocsort` | `visionservex video-search tracker-smoke --tracker ocsort` |
-| RTMPose-m | `rtmpose-m` | real_smoke_verified | conda Python 3.10 sidecar | `bash scripts/run_openmmlab_rtmpose_smoke.sh` |
-| RTMDet-tiny | `rtmdet-tiny-coco` | real_smoke_verified | conda Python 3.10 sidecar | `visionservex openmmlab smoke-test rtmdet-tiny-coco --device cpu` |
-| Torchreid / OSNet | `osnet` | optional_extra | `pip install torchreid` | `visionservex video-search reid-smoke --reid osnet --image crop.jpg` |
-| MaskDINO | `maskdino-swinl-coco` | expert_sidecar | Detectron2 sidecar | `visionservex maskdino create-env` |
-| DEIMv2 | `deimv2-s/m/l/x` | unavailable | — | Blocked: native loader / no HF Transformers support |
-| FastSAM | `fastsam-s/x` | do_not_add | — | AGPL-3.0 license; use SAM v1/2 instead |
-| DeepSORT | — | do_not_add | — | GPL-3.0; not routed through permissive core |
-| RF-DETR Plus/XL/2XL | — | non_core_license_optional | `pip install rfdetr[plus]` | PML 1.0 license — manual install only |
-| SAM 3 / SAM 3.1 | `sam3.1` | external_api / gated | HF auth | `visionservex sam-family login-help sam3.1` |
-
-### Status Legend
-
-| Status | Meaning |
-|--------|---------|
-| `runnable` | Works now with the listed install command |
-| `real_smoke_verified` | Runnable + smoke-tested on real hardware |
-| `optional_extra` | Needs an extra pip package; clean install path exists |
-| `expert_sidecar` | Needs isolated env (OpenMMLab, Detectron2, etc.) |
-| `external_api` | API-gated; not self-hostable |
-| `gated` | License/auth required; not auto-pulled |
-| `non_core_license_optional` | Permissive core excludes it; manual opt-in only |
-| `do_not_add` | Excluded (GPL/AGPL or non-commercial) |
-| `unavailable_with_reason` | Blocked by a known technical/source issue |
-
-See [docs/license_risk_table.md](docs/license_risk_table.md) for the
-authoritative license-tier map.
-
-### What works today (runnable models)
-
-**Detection:** D-FINE (n/s/m/l/x), RF-DETR (nano/small/medium/large), Grounding DINO (tiny, swin-b)
-
-**Segmentation:** RF-DETR-Seg (nano/small/medium), SAM v1 (vit-base), SAM 2 (hiera-tiny/small/base-plus/large), SAM 2.1 (tiny/small/base-plus/large), MedSAM
-
-**Classification:** SwinV2 (tiny/small/base/large), ConvNeXtV2 (tiny/base/large), MaxViT (tiny)
-
-**Open-vocab / VLM:** Florence-2 (base, large), OWLv2 (base, large), OWL-ViT (base, large), Grounding DINO (tiny, swin-b)
-
-**Embedding:** DINOv2 (small/base/large/giant), CLIP (base, large), SigLIP (base), SigLIP2 (base)
-
-**Experimental SOTA (not runnable yet):**
-
-| Family | Models | Blocker |
-|--------|--------|---------|
-| DEIMv2 | `deimv2-s/m/l/x` | No HF Transformers support; custom loader required |
-| RT-DETRv4 | `rtdetrv4-s` | No official checkpoint URLs |
-| MaskDINO | `maskdino-swinl-coco` | Detectron2 environment required |
+Models marked **BYOT (gated)** require accepting the upstream license on Hugging Face.
 
 ---
 
-## Competitiveness Benchmark
-
-```bash
-# Synthetic mode (latency + detection health, no ground truth needed)
-visionservex benchmark benchmark-competitiveness \
-  --models dfine-s-o365-coco,rfdetr-small \
-  --max-images 20 --device auto
-
-# Real AP mode (AP50/mAP50:95 with YOLO-format annotated dataset)
-visionservex benchmark benchmark-competitiveness \
-  --models dfine-s-o365-coco,rfdetr-small,ultralytics:yolo11n \
-  --dataset yolo:/path/to/coco128 \
-  --max-images 100 \
-  --out reports/ap_benchmark
-
-# COCO JSON format
-visionservex benchmark benchmark-competitiveness \
-  --models dfine-s-o365-coco,rfdetr-small \
-  --dataset coco-json:/data/coco/images:/data/coco/annotations/instances_val2017.json \
-  --max-images 500
-```
-
-**Real AP/mAP** is computed with COCO-style 101-point interpolated PR curves when `--dataset` is provided. Results are exported as JSON + CSV. The tool is honest — if YOLO wins, it will say so.
-
-**Note:** Accuracy-grade models are separate from demo models. Do not judge VisionServeX by `dfine-n` or `rfdetr-nano` — use `dfine-s-o365-coco` or `rfdetr-small` for AP comparison.
-
-Detection, segmentation, classification, pose, OBB, and open-vocabulary tasks need different metrics.
-
-**Task-specific benchmark commands:**
-
-```bash
-# Classification benchmark (top-k accuracy, per-class, latency)
-visionservex benchmark-classification \
-  --dataset folder:/path/to/dataset \
-  --models convnextv2-tiny,swinv2-base,maxvit-tiny-tf-224 \
-  --top-k 5 --max-images 100 --out /tmp/cls_bench.json
-
-# Anomaly detection benchmark (PatchCore; requires [anomaly])
-visionservex benchmark-anomaly \
-  --dataset mvtec:/path/to/mvtec_like \
-  --model patchcore --max-images 50 --out /tmp/anom_bench.json
-
-# Surveillance-search retrieval benchmark (MAP@k, cosine similarity)
-visionservex benchmark-surveillance-search \
-  --index /path/to/index \
-  --queries /path/to/queries.json \
-  --top-k 5 --out /tmp/surv_bench.json
-```
-
-If `anomalib` is not installed, `benchmark-anomaly` returns `ANOMALIB_REQUIRED` with the exact install command rather than crashing.
-
----
-
-## Capabilities Report
-
-```bash
-# What can VisionServeX do on this machine right now?
-visionservex capabilities report
-visionservex capabilities report --format markdown --out docs/capabilities.md
-visionservex capabilities report --json
-```
-
-Covers: devices, installed extras, model counts by task/category, runnable models, unavailable blockers, goal-based recommendations, security status, and known limitations.
-
----
-
-## Model Cards
-
-```bash
-# Structured per-model documentation
-visionservex model-card show dfine-s-o365-coco
-visionservex model-card show dfine-s-o365-coco --format markdown
-visionservex model-card list --task detect
-visionservex model-card export --out docs/model_cards.md
-```
-
-Every card includes: recommended_for, not_recommended_for, competes_with, hardware requirements, official benchmark note, and VisionServeX benchmark status.
-
----
-
-## Replacement Map
-
-```bash
-# Which VisionServeX models replace each Ultralytics/YOLO task?
-visionservex replacement-map map --task detect
-visionservex replacement-map map --task segment
-visionservex replacement-map map --task classify
-visionservex replacement-map map --task pose
-visionservex replacement-map map --format markdown
-```
-
-Honest and task-specific. Does not claim "better" unless AP evidence exists.
-
----
-
-## Debug Output
-
-Before declaring a checkpoint weak, run the postprocessing audit:
-
-```bash
-visionservex debug-output dfine-s-o365-coco image.jpg
-visionservex debug-output dfine-s-o365-coco image.jpg --threshold 0.01 --json
-```
-
-Reports: score histogram, label histogram, first 10 boxes, invalid boxes, unmapped labels, preprocessing notes.
-
----
-
-## Model Recommender
-
-```bash
-# By goal (v1.2.0)
-visionservex recommend --task detect --goal accuracy
-visionservex recommend --task detect --goal fastest_demo
-visionservex recommend --goal best_segmentation
-visionservex recommend --goal best_open_vocab
-
-# By task and hardware
-visionservex recommend --task detect --device cpu
-visionservex recommend --task detect --device cuda --vram 8
-```
-
-For `--goal accuracy --task detect`, the recommender surfaces `dfine-s/m-o365-coco` and `rfdetr-small/medium`, not nano variants.
-
----
-
-## Classification, Embedding & Open-Vocabulary Detection
-
-```bash
-# Classification (SwinV2 — real-smoke verified from local cache)
-visionservex classify swinv2-tiny image.jpg --top-k 5
-
-# Embeddings (DINOv2 — real-smoke verified; SigLIP2 — self-similarity verified)
-visionservex embed dinov2-base image.jpg --out /tmp/dinov2.npy
-visionservex similarity siglip2-base-patch16-224 a.jpg b.jpg
-
-# Florence-2 (requires isolated env — REAL SMOKE PASSED: transformers==4.46.3 + einops + timm)
-visionservex florence2 create-env --name vsx-florence --python 3.11  # generates validated recipe
-visionservex florence2 doctor        # check compatibility
-visionservex florence2 smoke-test florence-2-base image.jpg --task caption
-```
-
-Florence-2 real smoke result: `"a red truck with a light on top of it"` (street.jpg, transformers==4.46.3, CPU).
-
-## Open-Vocabulary Detection & Multi-Task VLM
+## Python API
 
 ```python
-# OWLv2 — zero-shot detection with free-form text queries
-from visionservex import VisionModel
-model = VisionModel("owlv2-base-patch16")
-result = model.predict("image.jpg", prompt="person, red shirt, car")
+from visionservex import VisionModel, VSX, Client
+
+# Direct inference (no server needed)
+result = VisionModel("dfine-s-o365-coco").predict("image.jpg")
 result.to_json()
+result.save("outputs/")
+result.plot()                          # PIL Image
 
-# Florence-2 — captioning, detection, OCR, phrase grounding (one model, many tasks)
-model = VisionModel("florence-2-base")
-model.predict("image.jpg", task="caption")
-model.predict("image.jpg", task="object_detection")
-model.predict("image.jpg", task="phrase_grounding", prompt="person wearing red shirt")
-model.predict("image.jpg", task="ocr")
+# Context manager with GPU cleanup
+with VisionModel("rfdetr-large", device="cuda") as model:
+    result = model.predict("image.jpg")
+
+# HTTP client
+client = Client("http://127.0.0.1:8080")
+result = client.detect("rfdetr-small", "image.jpg")
+result = client.grounded_segment("grounded-sam2", "image.jpg", prompt="car, person")
 ```
 
-```bash
-visionservex model pull owlv2-base-patch16
-visionservex open-vocab owlv2-base-patch16 image.jpg --prompt "person, car"
+Output normalization handles all common detection serialization formats:
 
-visionservex model pull florence-2-base
-visionservex predict florence-2-base image.jpg --task caption
+```python
+from visionservex import normalize_detections
+
+dets = normalize_detections([
+    {"xyxy": [10, 20, 100, 200], "score": 0.9, "label": "cat"},
+    {"box": {"x1": 10, "y1": 20, "x2": 100, "y2": 200}, "confidence": 0.8, "category": "dog"},
+])
 ```
-
-## Surveillance Video-Search (local-only)
-
-Index a folder of frames (or a video file) with a detector + tracker + embedder, then search by free-form text. **Appearance-based retrieval only — no face recognition, no biometric identity.**
-
-```bash
-# Check tracker and ReID backend availability
-visionservex video-search trackers          # lists simple-iou (built-in), bytetrack, bot-sort, ocsort
-visionservex video-search reid-models       # lists cosine-siglip2 (built-in), osnet, fastreid
-visionservex video-search doctor --tracker bytetrack  # BYTETRACK_REQUIRED + exact install
-visionservex video-search doctor --reid osnet         # TORCHREID_REQUIRED + exact install
-
-visionservex video-search index ./frames/ \
-  --detector owlv2-base-patch16 \
-  --embedder siglip2-base-patch16-224 \
-  --prompt "person" \
-  --sample-fps 1 \
-  --out indexes/camera01
-
-visionservex video-search query indexes/camera01 \
-  --text "person wearing a red shirt" \
-  --top-k 20 \
-  --out reports/red_shirt.html
-
-visionservex video-search inspect indexes/camera01
-visionservex video-search cleanup indexes/camera01 --yes
-```
-
-## Industrial Anomaly Detection
-
-```bash
-pip install 'visionservex[anomaly]'        # pulls anomalib
-visionservex anomaly list
-visionservex anomaly doctor
-visionservex anomaly train patchcore --data normal_images/ --out runs/patchcore --dry-run
-visionservex anomaly predict runs/patchcore test.jpg
-```
-
-PatchCore / PaDiM / FastFlow / EfficientAD / WinCLIP / DRAEM / Reverse-Distillation supported; missing dep returns `ANOMALIB_REQUIRED` with the exact install command and a fallback tip: use `--model mock-anomaly` to benchmark dataset statistics without anomalib.
-
-## Medical Imaging (research only)
-
-```bash
-visionservex medical list
-visionservex medical validate totalsegmentator
-visionservex medical recommend --goal ct-segmentation
-
-# MedSAM — real mask output (produces mask_000.png + medsam_metadata.json)
-visionservex medical segment medsam image.png --box 10,20,200,200 --out output/
-```
-
-No diagnostic claims. Optional extras: `pip install 'visionservex[medical]'` for nibabel/NIfTI I/O.
-
-MedSAM produces binary mask PNGs with IoU scores via SAM HF engine (`wanglab/medsam-vit-base`). Returns `CHECKPOINT_REQUIRED` if model not cached.
-
-## Agriculture and Aerial Domain Commands
-
-```bash
-# Agriculture
-visionservex agriculture recommend --goal weed-detection
-visionservex agriculture prompt-detect field.jpg --prompt "weed" --detector owlv2-base-patch16
-visionservex agriculture export-training-template --model rfdetr-small --out data_template/
-
-# Aerial / drone
-visionservex aerial recommend --goal oriented-detection
-visionservex aerial dataset validate-dota --path /path/to/DOTA
-visionservex aerial dataset validate-visdrone --path /path/to/VisDrone
-```
-
-OBB models (RTMDet-R/R2 via MMRotate) report **rotated IoU mAP50**, not axis-aligned AP. Do not compare them using box detection metrics.
 
 ---
 
-## Gated Models & Expert Sidecars
+## HTTP Gateway
 
 ```bash
-# SAM3 / SAM3.1 — gated, auth-aware status check
-visionservex sam3 status --model sam3.1-base-plus
-visionservex sam3 login-help
+pip install 'visionservex[server,hf,rfdetr]'
+visionservex serve                     # http://127.0.0.1:8080
 
-# Heavy frameworks (OpenMMLab, Detectron2, MaskDINO, Co-DETR) — conda env recipe
-visionservex expert list
-visionservex openmmlab create-env --name visionservex-openmmlab --python 3.10  # conda recipe
-visionservex openmmlab install-help    # native/conda/docker install options
-visionservex openmmlab doctor          # check which packages are installed
-visionservex openmmlab validate rtmpose-s  # OPENMMLAB_REQUIRED if deps missing
+# Detect
+curl -F "image=@image.jpg" -F "model_id=rfdetr-small" http://127.0.0.1:8080/detect | jq
+
+# Segment
+curl -F "image=@image.jpg" -F "model_id=sam2.1-hiera-small" \
+     -F 'box=[10,20,200,220]' http://127.0.0.1:8080/segment | jq
 ```
 
-VisionServeX never auto-installs expert frameworks. `openmmlab create-env` generates the exact conda recipe; `openmmlab validate` returns structured errors with exact checkpoint/config expectations.
-
----
-
-## Resource Safety & Developer Commands
-
-VisionServeX includes a resource guard that prevents RAM/VRAM/disk exhaustion during testing and development. **Production CLI commands (`predict`, `embed`, `similarity`) are unaffected** — the guard only runs when you explicitly invoke a `dev` subcommand or pytest.
-
-```bash
-# Show current resources (RAM, VRAM, CPU, disk, processes)
-visionservex dev resources
-
-# Classify the active GPU into a canonical profile (cpu_only / t4_colab /
-# l4_colab / a100_colab / h100_colab / desktop_16gb_fast / desktop_24gb_fast /
-# desktop_32gb_plus / unknown_cuda). Recognises consumer RTX cards by name,
-# so an RTX 5080 is desktop_16gb_fast, not t4_colab.
-visionservex dev gpu-profile --format json --out /tmp/gpu_profile.json
-
-# Make a tiny synthetic MP4 for annotate-video smoke tests
-visionservex dev make-synthetic-video --out /tmp/vsx_synthetic.mp4 --frames 30
-
-# Run quick tests (no real model, no GPU, no download) — < 60 s
-visionservex dev test quick
-
-# Targeted test on a single file
-visionservex dev test targeted tests/test_my_feature.py
-
-# Real model smoke tests (opt-in, uses smallest models, resource-checked)
-visionservex dev test real-smoke
-
-# GPU smoke tests (opt-in, VRAM-checked first)
-visionservex dev test gpu-smoke --allow-gpu
-
-# Benchmark smoke (process-isolated, max 3 images)
-visionservex dev test benchmark-smoke
-
-# Kill stray pytest processes (repo-scoped only)
-visionservex dev kill-tests
-
-# Clean test artifacts
-visionservex dev clean-temp
-visionservex dev clean-reports
-
-# Model health: which models can run, checkpoint status, smoke results
-visionservex models health --runnable-only
-```
-
-A pytest lockfile at `/tmp/visionservex_pytest.lock` prevents concurrent test runs. Default budgets: 8 GB free RAM, 2 GB free VRAM, 10 GB free disk. See [AGENT_RULES.md](AGENT_RULES.md) and [docs/agent_safety.md](docs/agent_safety.md).
-
-### Detection benchmark — clean candidates and persistent GPU runs
-
-Before running a benchmark, ask the package which models are eligible. The `benchmark candidates` command is the single source of truth (mocks, aliases, sidecars, unwired stubs, and experimental_sota are excluded by default):
-
-```bash
-visionservex benchmark candidates \
-  --task detection --scope clean \
-  --format json --out /tmp/vsx_candidates.json
-```
-
-Then run a persistent-load benchmark with GPU enforcement and optional GPU utilization sampling. `--require-gpu` makes a CPU fallback a hard failure (`code=GPU_REQUIRED_NOT_USED`); `--sample-gpu` records utilization and VRAM peak via `nvidia-smi`:
-
-```bash
-visionservex benchmark-detection \
-  --models dfine-s-o365-coco,rfdetr-small \
-  --dataset yolo:/path/to/coco128 \
-  --max-images 100 \
-  --device cuda --require-gpu --sample-gpu \
-  --out /tmp/vsx_bench.json --format json --isolate-process
-```
-
-Each per-model JSON row reports `load_count` (must be 1), the full timing breakdown (`preprocess / inference / postprocess / evaluation / total_latency p50 / p95`), `images_per_second`, raw / normalized prediction counts, class-aware **and class-agnostic** AP, and the optional `gpu_utilization` block.
-
-### Benchmark report hygiene
-
-`benchmark report-clean` splits a raw benchmark JSON into a publishable leaderboard and an audit-grade excluded-rows file with explicit reasons (`MOCK_MODEL`, `ALIAS_DUPLICATE`, `DIAGNOSTIC_ONLY`, `NOT_DETECTION_TASK`, `EXPECTED_BLOCKER`, `MISSING_METRICS`, `NAN_METRICS`, `NOT_FULL_EVALUATION`, …):
-
-```bash
-visionservex benchmark report-clean \
-  --input /tmp/vsx_bench.json \
-  --out /tmp/vsx_clean.json \
-  --leaderboard /tmp/vsx_leaderboard.csv \
-  --excluded /tmp/vsx_excluded.csv \
-  --format json
-```
-
-Aliases such as `dfine-s`, `dfine-s-coco`, and `dfine-s-o365-coco` are collapsed to a single canonical row (`canonical_model_id` + `is_alias` + `alias_of` metadata).
-
-### Diagnosing low AP — `debug-output`
-
-If a model reports near-zero class-aware AP but reasonable class-agnostic AP, that's a label-mapping bug, not model quality. The `debug-output` command surfaces it:
-
-```bash
-visionservex debug-output rfdetr-small image.jpg \
-  --threshold 0.001 --device cuda \
-  --format json --out /tmp/rfdetr_debug.json --draw /tmp/rfdetr_debug.jpg
-```
-
-For RF-DETR-family IDs the JSON includes `coco_class_mapping_table`, `official_category_id_detected`, and `contiguous_class_id_detected`. For D-FINE-family IDs the JSON includes `top_k_after_nms` and `whether_fixed_count_is_expected`.
-
-### Notebook-safe smoke commands (no repo-local scripts required)
-
-```bash
-visionservex anomaly doctor --format json --out /tmp/anomaly_doctor.json
-visionservex anomaly smoke --model patchcore --format json --out /tmp/anomaly_smoke.json
-visionservex video-search smoke --format json --out /tmp/video_search_smoke.json
-visionservex annotate video --model mock-detect --video in.mp4 --task detect \
-  --out out.mp4 --result-json /tmp/annotate_result.json --json --max-frames 10
-```
-
-Each command emits a structured payload with `status` ∈ {`ok`, `expected_blocker`, `failed`} and a canonical `code` so notebooks can classify results without parsing free-form stderr.
-
----
-
-## Security and Privacy
-
-```bash
-visionservex security audit --json
-visionservex security mode cloudflare_private --apply
-visionservex gateway token
-visionservex security test-redaction
-visionservex privacy inspect-cache
-visionservex privacy cleanup --dry-run
-```
-
-**Security modes:**
-| Mode | Binding | Auth | Notes |
-|------|---------|------|-------|
-| `local_private` | 127.0.0.1 | Optional | Default, safest |
-| `lan_private` | LAN | Required | TLS recommended |
-| `cloudflare_private` | 127.0.0.1 + tunnel | Required | Cloudflare Access recommended |
-| `production_multi_user` | 127.0.0.1 + proxy | Required | Encrypted job store, audit logs |
-
----
-
-## Safe Cloudflare Tunnel
+Public mode (Cloudflare Tunnel):
 
 ```bash
 export VISIONSERVEX_AUTH__ENABLED=true
 export VISIONSERVEX_AUTH__API_KEY=$(visionservex gateway token 2>&1 | grep "API key:" | awk '{print $NF}')
-
 visionservex tunnel config --domain api.yourdomain.com --out tunnel.yaml
 visionservex serve &
 visionservex tunnel run tunnel.yaml --i-understand-this-is-public
@@ -761,143 +258,99 @@ visionservex tunnel run tunnel.yaml --i-understand-this-is-public
 
 ---
 
-## Feature Intelligence (DINOv2)
+## CLI Reference (selected)
 
 ```bash
-# Single-image embedding
+# Model lifecycle
+visionservex detect dfine-s-o365-coco image.jpg --conf 0.25
+visionservex segment rfdetr-seg-medium image.jpg
+visionservex classify swinv2-base image.jpg --top-k 5
+visionservex open-vocab grounding-dino-swin-b image.jpg --prompt "car,person"
 visionservex embed dinov2-base image.jpg --out embedding.npy
+visionservex similarity siglip2-base-patch16-224 a.jpg b.jpg
 
-# Folder embedding
-visionservex embed dinov2-base folder/ --out embeddings_dir/
+# Model info
+visionservex model pull rfdetr-small
+visionservex model info rfdetr-small
+visionservex model license sam3-base
+visionservex model doctor sam3-base
+visionservex model-card show dfine-s-o365-coco
 
-# Pairwise similarity
-visionservex similarity dinov2-base a.jpg b.jpg
+# Capabilities and health
+visionservex capabilities report
+visionservex models health --runnable-only
+visionservex recommend --task detect --goal accuracy
 
-# Build search index + query
+# HF BYOT
+visionservex hf status
+visionservex hf whoami
+visionservex hf check-model facebook/sam3
+
+# Benchmark (requires annotated dataset)
+visionservex benchmark benchmark-competitiveness \
+  --models dfine-s-o365-coco,rfdetr-small \
+  --max-images 20 --device auto
+
+# Debug
+visionservex debug-output rfdetr-small image.jpg --threshold 0.01
+visionservex dev resources
+visionservex dev test quick
+```
+
+---
+
+## Feature Intelligence
+
+```bash
+# Build a similarity index
+visionservex embed dinov2-base folder/ --out embeddings/
 visionservex index dinov2-base folder/ --out indexes/dinov2_base
 visionservex search dinov2-base query.jpg --index indexes/dinov2_base --top-k 10
-
-# Deduplication
 visionservex deduplicate dinov2-base folder/ --threshold 0.98 --out dups.csv
 
-# Dataset intelligence
-visionservex dataset-report dinov2-base folder/ --out report.md
-visionservex active-select dinov2-base folder/ --budget 100 --out selected.csv
-visionservex domain-shift dinov2-base train/ test/
-
-# kNN benchmark (with labels.csv)
-visionservex benchmark-embeddings --model dinov2-base --dataset folder:test_set/
-```
-
-Powered by `facebook/dinov2-{small,base,large,giant}` and `google/siglip2-base-patch16-224`. L2-normalized embeddings. **Do not** mix with detection AP — embeddings serve retrieval, deduplication, dataset audits, active learning.
-
----
-
-## Specialized Model Zoo
-
-```bash
-# Source-grounded manifest (every model cites its upstream)
-visionservex model-zoo sources
-visionservex model-zoo show dinov2-base
-visionservex model-zoo verify-links
-visionservex model-zoo export --format markdown --out docs/model_zoo_manifest.md
-
-# Domain recommendations
-visionservex domain-zoo list
-visionservex domain-zoo yolo26-competitors
-visionservex domain-zoo sam-family
-visionservex domain-zoo feature-intelligence
-visionservex domain-zoo surveillance
-visionservex domain-zoo medical
-visionservex domain-zoo industrial
-
-# Goal-driven recipe
-visionservex domain-zoo recommend --domain surveillance --goal "red shirt person search"
-```
-
-Every model entry carries `recommended_action`: `add_now`, `expert_sidecar`, `external_api`, `non_core_license_optional`, `audit_only`, or `do_not_add` (e.g. YOLO-World — GPL/AGPL).
-
----
-
-## VRAM Lifecycle Safety
-
-VisionServeX manages GPU memory to prevent stepwise VRAM accumulation during repeated model loads.
-
-```python
-# Context manager — GPU cleanup on exit
-with VisionModel("dfine-x-o365-coco", device="cuda") as model:
-    result = model.predict("image.jpg")
-# GPU memory flushed automatically after context exit
-
-# Explicit cleanup
-model = VisionModel("rfdetr-large", device="cuda")
-result = model.predict("image.jpg")
-model.unload()  # full cleanup: engine.unload + GC + CUDA empty_cache + ipc_collect
-
-# One-shot predict with immediate unload
-result = model.predict("image.jpg", unload_after=True)
-```
-
-```bash
-# VRAM diagnostics
-visionservex gpu explain-memory      # allocated vs reserved breakdown
-visionservex gpu cleanup-cache       # flush CUDA allocator cache
-visionservex gpu memory-test dfine-s-o365-coco --runs 5   # check VRAM growth
-visionservex gpu memory-test-suite --models dfine-s-o365-coco,rfdetr-small
-
-# Process-isolated benchmark (full CUDA context released after each model)
-visionservex benchmark benchmark-competitiveness \
-  --models dfine-x-o365-coco,rfdetr-large \
-  --dataset yolo:/path/to/coco128 \
-  --isolate-process \
-  --out reports/ap_benchmark
+# Surveillance search (index + text query)
+visionservex video-search index ./frames/ \
+  --detector owlv2-base-patch16 --embedder siglip2-base-patch16-224 \
+  --prompt "person" --out indexes/camera01
+visionservex video-search query indexes/camera01 --text "red shirt" --top-k 20
 ```
 
 ---
 
-## Segmentation Evaluation
+## Privacy and Security
+
+- Binds to `127.0.0.1` by default — nothing leaves your machine
+- Images decoded in memory; never written to disk by default
+- Log redaction removes tokens and API keys from all output
+- No data retained between requests by default
+
+> VisionServeX cannot provide E2E encryption — the inference server must see
+> plaintext image tensors. It provides local-first processing, no-retention
+> defaults, and auth for public mode. See [docs/privacy.md](docs/privacy.md).
 
 ```bash
-# Latency-only (no ground truth needed)
-visionservex benchmark benchmark-segmentation \
-  --models rfdetr-seg-medium --max-images 20
-
-# Real mask AP with COCO JSON annotations
-visionservex benchmark benchmark-segmentation \
-  --models rfdetr-seg-medium \
-  --dataset coco-json:/data/coco/images:/data/coco/annotations/instances_val2017.json \
-  --max-images 200 --out reports/seg_ap
+visionservex security audit --json
+visionservex privacy inspect-cache
+visionservex privacy cleanup --dry-run
 ```
-
-**Note:** Mask AP uses binary mask IoU — NOT the same as detection box AP50. Do not mix these metrics.
 
 ---
 
-## GPU Safety
+## Resource Safety
+
+VisionServeX includes a resource guard (RAM / VRAM / disk) that prevents exhaustion during
+testing and development. Production CLI commands are unaffected.
 
 ```bash
+visionservex dev resources
+visionservex dev gpu-profile --format json
 visionservex gpu guard-status
-visionservex gpu processes
 visionservex gpu cleanup --dry-run
-visionservex gpu cleanup --yes
+visionservex dev kill-tests          # kill stray pytest processes
 ```
 
-See [docs/gpu_safety.md](docs/gpu_safety.md) and [docs/parallel_safety.md](docs/parallel_safety.md).
-
----
-
-## Temporary Colab GPU Worker (optional)
-
-Run VisionServeX on a Google Colab GPU as a short-lived remote worker. Good for demos and benchmarks, **not** for production — Colab sessions can disconnect at any time.
-
-```bash
-# Inside a Colab notebook:
-!pip install -U 'visionservex[server,hf,rfdetr]'
-!visionservex colab doctor
-!visionservex gateway start --profile colab-gpu-worker
-```
-
-A copy-paste notebook lives at [`examples/colab/VisionServeX_Colab_GPU_Worker.ipynb`](examples/colab/VisionServeX_Colab_GPU_Worker.ipynb). Full guide: [docs/colab_gpu_worker.md](docs/colab_gpu_worker.md).
+Default budgets: 8 GB free RAM, 2 GB free VRAM, 10 GB free disk.
+See [docs/agent_safety.md](docs/agent_safety.md) and [AGENT_RULES.md](AGENT_RULES.md).
 
 ---
 
@@ -906,43 +359,29 @@ A copy-paste notebook lives at [`examples/colab/VisionServeX_Colab_GPU_Worker.ip
 ```bash
 pip install visionservex                        # base (no heavy deps)
 pip install 'visionservex[server]'              # + HTTP API server
-pip install 'visionservex[hf]'                  # + HF Transformers (D-FINE, GD, SwinV2, SAM, SAM2, OneFormer)
+pip install 'visionservex[hf]'                  # + HF Transformers (D-FINE, SAM, GD, SwinV2, …)
 pip install 'visionservex[rfdetr]'              # + RF-DETR and RF-DETR-Seg
+pip install 'visionservex[dino]'                # + DINOv3 depth head (transformers>=5.10)
 pip install 'visionservex[server,hf,rfdetr]'    # full recommended
 ```
 
-OpenMMLab (RTMPose, RTMDet-R, Co-DINO, InternImage): Docker sidecar or `pip install openmim && mim install mmengine mmcv mmpose`. See [docs/openmmlab_expert_models.md](docs/openmmlab_expert_models.md).
+OpenMMLab (RTMPose, RTMDet-R, Co-DINO): Docker sidecar or
+`pip install openmim && mim install mmengine mmcv mmpose`.
+See [docs/openmmlab_expert_models.md](docs/openmmlab_expert_models.md).
 
 ---
 
 ## Known Limitations
 
-- **D-FINE COCO-only variants** (`dfine-s-coco` etc.): Point to HF repos that may not exist yet. Use `dfine-s-o365-coco` (Objects365+COCO) for guaranteed availability.
-- **DEIM / RT-DETRv4**: Registered as `experimental_sota` but not wired. Blockers documented per-model in the registry.
-- **AP50/mAP benchmark**: The `benchmark-competitiveness` tool reports latency and detection health only. Full AP evaluation requires ground-truth COCO annotations not bundled with VisionServeX.
-- **benchmark-anomaly**: Functional — `--model mock-anomaly` computes pixel-stats proxy scores without anomalib. PatchCore training requires `pip install 'visionservex[anomaly]'`; version-dispatch adapter handles anomalib 1.x/2.x API differences.
-- **Florence-2**: Real smoke **PASSED** in isolated env (transformers==4.46.3 + einops + timm). Use `visionservex florence2 create-env` for the exact validated recipe. The current environment (transformers 5.x) is incompatible.
-- **MedSAM**: `medical segment medsam image.png --box 10,20,100,200 --out /tmp/out` now produces `mask_000.png` + `medsam_metadata.json` (real SAM HF engine). No longer delegates.
-- **ByteTrack**: `video-search index --tracker bytetrack` is now a real selectable option. Returns `BYTETRACK_REQUIRED` if package missing, uses `_ByteTrackAdapter` if installed.
-- **SAM2.1**: Registry wired (`facebook/sam2.1-hiera-*`); inference requires `[hf]` and a GPU. MobileSAM/EfficientSAM/HQ-SAM/EdgeSAM: Apache-2.0 expert sidecars. FastSAM: excluded (AGPL-3.0).
-- **OpenMMLab** (RTMPose, RTMDet-R/R2, Co-DINO, InternImage): Use `visionservex openmmlab create-env` for the conda recipe. Returns `OPENMMLAB_REQUIRED` if deps missing; `CHECKPOINT_REQUIRED` if checkpoint missing.
-- **TensorRT**: ONNX export works for SwinV2. TensorRT engine build requires `trtexec`.
+- **SAM3/SAM3.1**: Gated on Hugging Face; requires accepting the upstream license. BYOT only.
+- **DINOv3 CHMv2 depth head**: Requires `transformers>=5.10`; may conflict with Florence-2 (<5.0) — install in a separate env.
+- **Florence-2**: Requires isolated env (`transformers==4.46.3 + einops + timm`). Use `visionservex florence2 create-env` for the validated recipe.
+- **DEIMv2**: Registered but not wired — no HF Transformers support yet; custom loader required.
+- **MedSAM**: Research only; non-commercial restricted.
+- **SAM2.1 ONNX**: Image-encoder export works via Module shim. Full interactive decoder ONNX not yet verified.
+- **OpenMMLab** (RTMPose, RTMDet-R/R2, Co-DINO, InternImage): Expert sidecar; use `visionservex openmmlab create-env`.
 - **Apple MPS**: Implemented but not maintainer-verified.
-
-**GPU:** CUDA verified on RTX 5080 for 6+ model families. Run `visionservex gpu smoke-test` on your hardware.  
-**MPS (Apple Silicon):** Implemented, not maintainer-verified. See [docs/gpu_validation.md](docs/gpu_validation.md).  
-**VRAM safety:** Desktop GPU guard reserves 3 GB for GUI/system. GPU tests run serially by default. See [docs/gpu_safety.md](docs/gpu_safety.md).
-
----
-
-## Syntax Contract
-
-All documented CLI/Python/API examples are covered and verified. No example is allowed to silently fail or return a raw traceback.
-
-```bash
-visionservex syntax audit             # verify examples, failing must be 0
-visionservex validation run release   # run full CI test suite
-```
+- **GPU**: CUDA verified on RTX 5080 for 6+ model families. Run `visionservex gpu smoke-test`.
 
 ---
 
@@ -951,25 +390,35 @@ visionservex validation run release   # run full CI test suite
 | | |
 |-|-|
 | [Beginner quickstart](docs/beginner_quickstart.md) | 5-minute guide |
+| [Global model count](docs/global_model_count.md) | Policy rows, manifest entries, runnable count |
+| [BYOT models](docs/byot_models.md) | SAM3, SAM3.1, DINOv3 — gated model usage |
+| [Commercial-safe core](docs/commercial_safe_core.md) | Apache-2.0/MIT models enabled by default |
+| [Model license policy](docs/model_license_policy.md) | Full policy bucket reference |
+| [SAM3 mask benchmark](docs/sam3_mask_benchmark.md) | Real mask evidence (v3.10.0) |
+| [DINOv3 depth head](docs/dinov3_depth.md) | CHMv2 DPT depth estimation |
+| [SAM2.1 ONNX](docs/sam21_onnx.md) | Image-encoder export and ONNX Runtime |
 | [Local gateway](docs/local_gateway.md) | Gateway commands and Python client |
 | [Security](docs/security.md) | Threat model, modes, configuration |
-| [Privacy](docs/privacy.md) | No E2E claim, retention policy, encryption |
-| [Model zoo](docs/model_zoo.md) | All 87 models with current status and taxonomy |
-| [Model cards](docs/model_cards.md) | Structured per-model cards with honest benchmark notes |
-| [Replacement map](docs/replacement_map.md) | Ultralytics/YOLO → VisionServeX replacement guide |
-| [Benchmark competitiveness](docs/benchmark_competitiveness.md) | AP/mAP evaluation guide |
-| [Evaluation metrics](docs/evaluation_metrics.md) | AP50, mAP50:95, and metric definitions |
-| [Model downloads](docs/model_downloads.md) | Download system, auto-pull |
-| [GPU safety](docs/gpu_safety.md) | VRAM guard, cleanup, emergency recovery |
-| [Parallel safety](docs/parallel_safety.md) | Model concurrency policies, benchmarks |
-| [Colab GPU worker](docs/colab_gpu_worker.md) | Run VisionServeX on a Colab GPU for demos |
-| [OpenMMLab expert](docs/openmmlab_expert_models.md) | RTMPose, RTMDet-R, Co-DINO, InternImage |
-| [Cloudflare Tunnel](docs/cloudflare_tunnel.md) | Public mode safely |
-| [GPU validation](docs/gpu_validation.md) | CPU/CUDA/MPS status |
-| [TensorRT](docs/tensorrt.md) | ONNX export and TensorRT roadmap |
-| [Benchmarks](docs/benchmarks.md) | Latency numbers |
+| [Privacy](docs/privacy.md) | Retention policy, encryption |
+| [Model zoo](docs/model_zoo.md) | Full model list with status |
+| [Benchmark competitiveness](docs/benchmark_competitiveness.md) | AP/mAP evaluation |
+| [GPU safety](docs/gpu_safety.md) | VRAM guard, cleanup |
+| [OpenMMLab expert](docs/openmmlab_expert_models.md) | RTMPose, RTMDet-R, Co-DINO |
+| [Colab GPU worker](docs/colab_gpu_worker.md) | Temporary GPU demo worker |
 | [Troubleshooting](docs/troubleshooting.md) | Common errors |
-| [About](docs/about.md) | Author, citation |
+| [Reports and audits](docs/reports.md) | Detailed evidence, ledgers |
+
+---
+
+## Reports and Audits
+
+Detailed audit evidence — policy matrices, benchmark ledgers, test run reports,
+execution logs — lives in `docs/reports.md` and
+`notebook/99_final_report/reports/`. It is internal audit data, not public
+marketing. The counts there (policy rows, manifest entries, test passes) are
+measurement evidence, not product-health scores.
+
+See [docs/reports.md](docs/reports.md) and [docs/global_model_count.md](docs/global_model_count.md).
 
 ---
 
@@ -977,7 +426,8 @@ visionservex validation run release   # run full CI test suite
 
 Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
-> Each integrated model retains its own upstream license. Review model, checkpoint, and dataset licenses before commercial use. See [docs/model_licenses.md](docs/model_licenses.md).
+> Each integrated model retains its own upstream license. Review model, checkpoint, and
+> dataset licenses before commercial use. See [docs/model_licenses.md](docs/model_licenses.md).
 
 ---
 
@@ -986,7 +436,7 @@ Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 ```bibtex
 @software{sajjadi2026visionservex,
   author = {Arash Sajjadi},
-  title  = {{VisionServeX: A permissive-license-aware framework for local CV model serving}},
+  title  = {{VisionServeX: A license-aware framework for local CV model serving}},
   year   = {2026},
   url    = {https://github.com/arashsajjadi/VisionServeX},
   note   = {Developed under the supervision of Prof. Mark Eramian, University of Saskatchewan.}

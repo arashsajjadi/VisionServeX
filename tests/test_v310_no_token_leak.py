@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v3.10.0: No HF token leak in tracked files or outputs."""
+
 from __future__ import annotations
 
 import re
@@ -24,7 +25,12 @@ def _get_tracked_text_files():
             timeout=30,
         )
         files = result.stdout.splitlines()
-        return [ROOT / f for f in files if (ROOT / f).suffix in (".py", ".md", ".toml", ".yml", ".yaml", ".json", ".txt", ".cfg", ".ini")]
+        return [
+            ROOT / f
+            for f in files
+            if (ROOT / f).suffix
+            in (".py", ".md", ".toml", ".yml", ".yaml", ".json", ".txt", ".cfg", ".ini")
+        ]
     except Exception:
         return []
 
@@ -46,7 +52,7 @@ def test_byot_runtime_no_token_logging():
     """byot_runtime must not print/log full HF tokens."""
     source = (ROOT / "src/visionservex/byot_runtime.py").read_text()
     assert "print(token" not in source
-    assert 'log(token' not in source
+    assert "log(token" not in source
 
 
 def test_hf_auth_redacts_token():

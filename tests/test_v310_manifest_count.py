@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v3.10.0: global model manifest count — 170 entries, 95 runnable."""
+
 from __future__ import annotations
 
 
@@ -15,9 +16,7 @@ def test_manifest_runnable_count():
 
     models = list_all_models()
     runnable = [
-        mid
-        for mid in models
-        if (getattr(get_model_source(mid), "runnable_in_visionservex", False))
+        mid for mid in models if (getattr(get_model_source(mid), "runnable_in_visionservex", False))
     ]
     assert len(runnable) >= 90, f"Expected >=90 runnable, got {len(runnable)}"
 
@@ -43,4 +42,6 @@ def test_manifest_no_duplicate_model_ids():
     from visionservex.model_zoo.manifest import list_all_models
 
     models = list_all_models()
-    assert len(models) == len(set(models)), f"Duplicate model IDs in manifest: {[m for m in models if models.count(m) > 1]}"
+    assert len(models) == len(set(models)), (
+        f"Duplicate model IDs in manifest: {[m for m in models if models.count(m) > 1]}"
+    )

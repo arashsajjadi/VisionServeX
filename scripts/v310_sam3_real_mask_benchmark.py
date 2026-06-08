@@ -33,12 +33,14 @@ def _get_token():
     """Token detection order per security rules."""
     try:
         from huggingface_hub import get_token
+
         t = get_token()
         if t:
             return t
     except Exception:
         pass
     import os
+
     for k in ("HF_TOKEN", "HUGGINGFACE_HUB_TOKEN"):
         v = os.environ.get(k, "")
         if v:
@@ -63,7 +65,9 @@ def run_benchmark(model_id: str, repo: str, token: str | None, img: Image.Image)
         model = Sam3Model.from_pretrained(repo, token=token).to(DEVICE).eval()
     except OSError:
         import shutil
+
         from huggingface_hub import snapshot_download
+
         snap = snapshot_download(repo, token=token)
         snap_path = Path(snap)
         pt_files = list(snap_path.glob("*.pt"))
@@ -71,8 +75,15 @@ def run_benchmark(model_id: str, repo: str, token: str | None, img: Image.Image)
             raise
         working = snap_path.parent / "_vsx_sam3_working"
         working.mkdir(exist_ok=True)
-        for cfg in ("config.json", "processor_config.json", "tokenizer.json",
-                    "tokenizer_config.json", "special_tokens_map.json", "merges.txt", "vocab.json"):
+        for cfg in (
+            "config.json",
+            "processor_config.json",
+            "tokenizer.json",
+            "tokenizer_config.json",
+            "special_tokens_map.json",
+            "merges.txt",
+            "vocab.json",
+        ):
             src = snap_path / cfg
             if src.exists():
                 shutil.copy(src, working / cfg)
@@ -95,8 +106,11 @@ def run_benchmark(model_id: str, repo: str, token: str | None, img: Image.Image)
     postproc_method = None
     # Use threshold=0.0 to get all proposals; SAM3 logits are mostly negative so
     # a positive threshold filters everything out. We rank by score afterward.
-    for fn in ("post_process_instance_segmentation", "post_process_grounded_object_detection",
-               "post_process_semantic_segmentation"):
+    for fn in (
+        "post_process_instance_segmentation",
+        "post_process_grounded_object_detection",
+        "post_process_semantic_segmentation",
+    ):
         if hasattr(proc, fn):
             try:
                 results = getattr(proc, fn)(outputs, target_sizes=target_sizes, threshold=0.0)
@@ -158,7 +172,7 @@ def run_benchmark(model_id: str, repo: str, token: str | None, img: Image.Image)
         overlay_arr = np.array(overlay)
         if mask_np.ndim == 3:
             for i in range(min(n_masks, 5)):
-                m = (mask_np[i] > 0)
+                m = mask_np[i] > 0
                 overlay_arr[m, 0] = min(overlay_arr[m, 0].mean() + 80, 255)
                 overlay_arr[m, 3] = 180
         else:
@@ -194,7 +208,9 @@ def run_benchmark(model_id: str, repo: str, token: str | None, img: Image.Image)
         "mask_area_gt0": mask_area > 0,
         "n_boxes": len(boxes_list),
         "params_millions": round(n_params / 1e6, 2),
-        "benchmark_state": "benchmark_passed_byot_mask" if mask_area > 0 else "benchmark_passed_byot_smoke",
+        "benchmark_state": "benchmark_passed_byot_mask"
+        if mask_area > 0
+        else "benchmark_passed_byot_smoke",
         "transformers_version": __import__("transformers").__version__,
     }
     (out_dir / "metadata.json").write_text(json.dumps(metadata, indent=2))
@@ -224,7 +240,9 @@ def main():
             results.append(meta)
         except Exception as e:
             print(f"  FAILED {model_id}: {e}")
-            import traceback; traceback.print_exc()
+            import traceback
+
+            traceback.print_exc()
             results.append({"model_id": model_id, "error": str(e), "benchmark_state": "error"})
 
     summary_path = OUT / "sam3_benchmark_summary.json"

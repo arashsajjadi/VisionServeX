@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v3.10.0: Release readiness gates."""
+
 from __future__ import annotations
 
 import subprocess

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v3.10.0: byot_runtime public API — all three functions exported."""
+
 from __future__ import annotations
 
 import pytest
@@ -60,5 +61,6 @@ def test_byot_runtime_no_token_in_output():
     result = dinov3_embed("nonexistent-model", "tests/assets/smoke/coco_person_car.jpg")
     result_str = str(result)
     import re
+
     token_pattern = re.compile(r"hf_[A-Za-z]{10,}")
     assert not token_pattern.search(result_str), "HF token leaked into result dict"

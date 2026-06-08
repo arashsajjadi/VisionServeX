@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v3.10.0: pyproject.toml extra versions — hf>=5.0, dino>=5.10."""
+
 from __future__ import annotations
 
 from pathlib import Path

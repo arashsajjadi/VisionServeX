@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v3.10.0: SAM3 real mask benchmark upgrade — mask_area > 0 state."""
+
 from __future__ import annotations
 
 import json

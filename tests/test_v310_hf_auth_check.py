@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v3.10.0: HF auth_check uses HfApi.auth_check (not model_info)."""
+
 from __future__ import annotations
 
 import pytest
@@ -9,15 +10,13 @@ def test_hf_auth_module_uses_auth_check():
     """Verify hf_auth.py calls auth_check, not model_info."""
     from pathlib import Path
 
-    hf_auth_path = (
-        Path(__file__).parent.parent / "src/visionservex/hf_auth.py"
-    )
+    hf_auth_path = Path(__file__).parent.parent / "src/visionservex/hf_auth.py"
     if not hf_auth_path.exists():
         pytest.skip("hf_auth.py not found")
     source = hf_auth_path.read_text()
     assert "auth_check" in source, "hf_auth.py must use HfApi.auth_check()"
-    assert "model_info" not in source or source.count("model_info") == 0 or (
-        "auth_check" in source
+    assert (
+        "model_info" not in source or source.count("model_info") == 0 or ("auth_check" in source)
     ), "hf_auth.py should prefer auth_check over model_info"
 
 
@@ -47,6 +46,7 @@ def test_hf_get_token_not_printed():
     output = captured.getvalue()
     # Token must not appear in output
     import re
+
     assert not re.search(r"hf_[A-Za-z0-9]{10,}", output), (
         f"HF token may have been printed to stdout: {output[:100]}"
     )

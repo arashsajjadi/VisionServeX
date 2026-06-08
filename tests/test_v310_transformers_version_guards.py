@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v3.10.0: transformers version guards for SAM3 and CHMv2."""
+
 from __future__ import annotations
 
 import pytest
@@ -30,10 +31,7 @@ def test_hf_extra_requires_transformers_5():
     import importlib.resources
 
     try:
-        content = (
-            importlib.resources.files("visionservex").parent.parent
-            / "pyproject.toml"
-        )
+        content = importlib.resources.files("visionservex").parent.parent / "pyproject.toml"
         text = content.read_text()
     except Exception:
         pytest.skip("Cannot read pyproject.toml from this context")
@@ -49,10 +47,7 @@ def test_dino_extra_requires_transformers_510():
     import importlib.resources
 
     try:
-        content = (
-            importlib.resources.files("visionservex").parent.parent
-            / "pyproject.toml"
-        )
+        content = importlib.resources.files("visionservex").parent.parent / "pyproject.toml"
         text = content.read_text()
     except Exception:
         pytest.skip("Cannot read pyproject.toml from this context")

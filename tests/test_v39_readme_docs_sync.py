@@ -8,7 +8,10 @@ from pathlib import Path
 
 def test_readme_mentions_v390():
     readme = Path("README.md").read_text()
-    assert "3.9.0" in readme or "v3.9" in readme, "README missing v3.9.0 version marker"
+    # Accept v3.9 or any later minor version (README tracks current release, not history)
+    assert "3.9.0" in readme or "v3.9" in readme or "3.10" in readme or "v3.10" in readme, (
+        "README missing recent version marker (v3.9 or later)"
+    )
 
 
 def test_readme_contains_nonredistribution_statement():

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v3.10.0: policy table has 99 rows; all invariants hold."""
+
 from __future__ import annotations
 
 
@@ -58,8 +59,6 @@ def test_no_agpl_default_safe():
 
 def test_api_only_models_not_local():
     bad = [
-        r
-        for r in _rows()
-        if r.final_policy == "external_api_only_terms_required" and r.is_local
+        r for r in _rows() if r.final_policy == "external_api_only_terms_required" and r.is_local
     ]
     assert not bad, f"API-only models marked is_local=True: {[r.model_id for r in bad]}"

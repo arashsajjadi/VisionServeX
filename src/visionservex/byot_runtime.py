@@ -282,8 +282,7 @@ def dinov3_depth(model_id: str, image, *, device: str = "cpu") -> dict[str, Any]
             "status": "blocked",
             "state": "runtime_blocked_byot",
             "reason": (
-                f"CHMv2ForDepthEstimation requires transformers>=5.10; "
-                f"installed: {_tf.__version__}"
+                f"CHMv2ForDepthEstimation requires transformers>=5.10; installed: {_tf.__version__}"
             ),
             "next_command": "pip install 'transformers>=5.10'",
         }

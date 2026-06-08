@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v3.10.0: README/CHANGELOG sync with version 3.10.0."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -20,9 +21,7 @@ def test_readme_badge_matches_version():
 
 def test_changelog_has_v310_entry():
     changelog = (ROOT / "CHANGELOG.md").read_text()
-    assert "[3.10.0]" in changelog or "## [3.10" in changelog, (
-        "CHANGELOG.md missing v3.10.0 entry"
-    )
+    assert "[3.10.0]" in changelog or "## [3.10" in changelog, "CHANGELOG.md missing v3.10.0 entry"
 
 
 def test_version_consistent_across_files():
