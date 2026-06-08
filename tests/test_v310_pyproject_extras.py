@@ -41,5 +41,10 @@ def test_rfdetr_extra_present():
 
 
 def test_version_310_in_pyproject():
+    from visionservex import __version__
+
     text = _pyproject_text()
-    assert 'version = "3.10.0"' in text
+    assert __version__.startswith("3.10."), f"Expected 3.10.x, got {__version__}"
+    assert f'version = "{__version__}"' in text, (
+        f'pyproject.toml should contain version = "{__version__}"'
+    )

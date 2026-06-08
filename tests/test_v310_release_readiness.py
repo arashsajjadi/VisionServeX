@@ -14,7 +14,7 @@ ROOT = Path(__file__).parent.parent
 def test_version_is_310():
     from visionservex import __version__
 
-    assert __version__ == "3.10.0", f"Expected 3.10.0, got {__version__}"
+    assert __version__.startswith("3.10."), f"Expected 3.10.x, got {__version__}"
 
 
 def test_version_importable():
@@ -33,7 +33,7 @@ def test_cli_entrypoint_responds():
             text=True,
             timeout=30,
         )
-        assert "3.10.0" in result.stdout or "3.10.0" in result.stderr
+        assert "3.10." in result.stdout or "3.10." in result.stderr
     except subprocess.TimeoutExpired:
         pytest.skip("CLI timed out")
     except FileNotFoundError:
@@ -41,8 +41,12 @@ def test_cli_entrypoint_responds():
 
 
 def test_pyproject_version_matches():
+    from visionservex import __version__
+
     pyproject = (ROOT / "pyproject.toml").read_text()
-    assert 'version = "3.10.0"' in pyproject
+    assert f'version = "{__version__}"' in pyproject, (
+        f'pyproject.toml should contain version = "{__version__}"'
+    )
 
 
 def test_changelog_310_entry():
