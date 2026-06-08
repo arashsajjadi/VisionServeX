@@ -5,6 +5,7 @@ Verifies that existing models (SAM, DINOv2, Grounding DINO) are not broken
 by v3.4 additions. Each test uses the real inference path when the test image
 is available, and falls back to a VSX status-only check otherwise.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -25,12 +26,13 @@ def test_existing_sam_models_still_pass() -> None:
 
     # State must remain benchmark_passed regardless of env
     info = _SAMHandle("sam-vit-b").explain()
-    assert info["state"] == "benchmark_passed", (
-        f"sam-vit-b regressed: state={info['state']!r}"
-    )
+    assert info["state"] == "benchmark_passed", f"sam-vit-b regressed: state={info['state']!r}"
 
     if not _IMG.exists():
         pytest.skip("test image not found; skipping live inference check")
+
+    pytest.importorskip("torch")
+    pytest.importorskip("transformers")
 
     import PIL.Image
 
@@ -52,12 +54,13 @@ def test_existing_dinov2_still_passes() -> None:
     from visionservex.vsx import _DINOHandle
 
     info = _DINOHandle("dinov2-base").explain()
-    assert info["state"] == "benchmark_passed", (
-        f"dinov2-base regressed: state={info['state']!r}"
-    )
+    assert info["state"] == "benchmark_passed", f"dinov2-base regressed: state={info['state']!r}"
 
     if not _IMG.exists():
         pytest.skip("test image not found; skipping live inference check")
+
+    pytest.importorskip("torch")
+    pytest.importorskip("transformers")
 
     import PIL.Image
 
@@ -91,6 +94,9 @@ def test_existing_grounding_dino_still_passes() -> None:
     if not _IMG.exists():
         pytest.skip("test image not found; skipping live inference check")
 
+    pytest.importorskip("torch")
+    pytest.importorskip("transformers")
+
     import PIL.Image
 
     from visionservex import VisionModel
@@ -100,9 +106,7 @@ def test_existing_grounding_dino_still_passes() -> None:
     result = model.predict(img, prompts=["person"])
     assert result is not None, "VisionModel('grounding-dino-swin-t').predict returned None"
     has_detections = (
-        hasattr(result, "boxes")
-        or hasattr(result, "detections")
-        or hasattr(result, "predictions")
+        hasattr(result, "boxes") or hasattr(result, "detections") or hasattr(result, "predictions")
     )
     assert has_detections, (
         f"grounding-dino-swin-t result {type(result)} has no boxes/detections attribute"

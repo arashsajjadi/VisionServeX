@@ -18,7 +18,7 @@ def _artifact(name: str) -> Path:
 
 
 def test_medsam2_state_is_sidecar_required() -> None:
-    from visionservex.vsx import VSX, _SAM_FACTS
+    from visionservex.vsx import _SAM_FACTS, VSX
 
     assert "medsam2" in _SAM_FACTS["_sidecar"]
     h = VSX.sam("medsam2")
@@ -27,7 +27,7 @@ def test_medsam2_state_is_sidecar_required() -> None:
 
 def test_medsam_state_is_benchmark_passed() -> None:
     """MedSAM (not MedSAM2) via HF is benchmark_passed — executed in v3.5."""
-    from visionservex.vsx import VSX, _SAM_FACTS
+    from visionservex.vsx import _SAM_FACTS, VSX
 
     assert "medsam" in _SAM_FACTS["_runnable"]
     h = VSX.sam("medsam")
@@ -38,7 +38,10 @@ def test_maskdino_sidecar_attempt_artifact_exists() -> None:
     art = _artifact("v35/maskdino_sidecar_attempt.json")
     assert art.exists(), f"MaskDINO sidecar attempt artifact missing: {art}"
     data = json.loads(art.read_text())
-    assert data.get("status") in {"expected_blocker", "sidecar_required", "attempt"} or "sidecar" in str(data).lower()
+    assert (
+        data.get("status") in {"expected_blocker", "sidecar_required", "attempt"}
+        or "sidecar" in str(data).lower()
+    )
 
 
 def test_rtdetrv4_attempt_artifact_exists() -> None:
@@ -47,13 +50,26 @@ def test_rtdetrv4_attempt_artifact_exists() -> None:
 
 
 def test_locateanything_sidecar_matrix_exists() -> None:
-    p = Path(__file__).parent.parent / "notebook" / "99_final_report" / "reports" / "v36_sidecar_checkpoint_matrix.csv"
+    p = (
+        Path(__file__).parent.parent
+        / "notebook"
+        / "99_final_report"
+        / "reports"
+        / "v36_sidecar_checkpoint_matrix.csv"
+    )
     assert p.exists(), f"Sidecar checkpoint matrix missing: {p}"
 
 
 def test_locateanything_sidecar_in_matrix() -> None:
     import csv
-    p = Path(__file__).parent.parent / "notebook" / "99_final_report" / "reports" / "v36_sidecar_checkpoint_matrix.csv"
+
+    p = (
+        Path(__file__).parent.parent
+        / "notebook"
+        / "99_final_report"
+        / "reports"
+        / "v36_sidecar_checkpoint_matrix.csv"
+    )
     if not p.exists():
         return
     rows = list(csv.DictReader(p.open()))
@@ -65,7 +81,14 @@ def test_locateanything_sidecar_in_matrix() -> None:
 
 def test_three_or_more_sidecar_checkpoint_entries() -> None:
     import csv
-    p = Path(__file__).parent.parent / "notebook" / "99_final_report" / "reports" / "v36_sidecar_checkpoint_matrix.csv"
+
+    p = (
+        Path(__file__).parent.parent
+        / "notebook"
+        / "99_final_report"
+        / "reports"
+        / "v36_sidecar_checkpoint_matrix.csv"
+    )
     if not p.exists():
         return
     rows = list(csv.DictReader(p.open()))

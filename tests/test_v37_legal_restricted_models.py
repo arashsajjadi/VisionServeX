@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2026 Arash Sajjadi
 """v3.7: restricted/non-commercial models must never enter the commercial-safe core."""
+
 from __future__ import annotations
 
 import csv
@@ -9,8 +10,15 @@ from pathlib import Path
 R = Path(__file__).parent.parent / "notebook" / "99_final_report" / "reports"
 
 # These must all be commercial_safe == False everywhere they appear.
-RESTRICTED = ["edgesam", "fastsam-s", "fastsam-x", "yolov8-seg", "yolo11-seg",
-              "locateanything-3b", "locate-anything-3b"]
+RESTRICTED = [
+    "edgesam",
+    "fastsam-s",
+    "fastsam-x",
+    "yolov8-seg",
+    "yolo11-seg",
+    "locateanything-3b",
+    "locate-anything-3b",
+]
 
 
 def _inv():
@@ -40,6 +48,7 @@ def test_ultralytics_agpl_excluded():
 
 def test_locateanything_vsx_excluded():
     from visionservex.vsx import VSX
+
     h = VSX.locateanything("locate-anything-3b")
     info = h.explain()
     assert info["state"] == "excluded_restricted"

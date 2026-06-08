@@ -63,7 +63,7 @@ def test_cli_export_onnx_help_lists_all_four_eligible(tmp_path: Path) -> None:
     """CLI export-onnx help must mention the 4 eligible model IDs."""
     res = _run(["sam", "export-onnx", "--help"])
     assert res.returncode == 0
-    combined = res.stdout + res.stderr
+    res.stdout + res.stderr
     # At minimum, the help should not 404
     assert "Usage:" not in res.stderr or res.returncode == 0
 

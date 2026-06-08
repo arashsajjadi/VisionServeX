@@ -27,7 +27,11 @@ def _run(args: list[str], timeout: int = 30) -> subprocess.CompletedProcess:
 def test_locate_anything_help_does_not_crash() -> None:
     res = _run(["locate-anything", "--help"])
     assert res.returncode == 0
-    assert "locate-anything" in res.stdout.lower() or "locateanything" in res.stdout.lower() or "LocateAnything" in res.stdout
+    assert (
+        "locate-anything" in res.stdout.lower()
+        or "locateanything" in res.stdout.lower()
+        or "LocateAnything" in res.stdout
+    )
 
 
 def test_locate_anything_list_returns_ten_models(tmp_path: Path) -> None:
@@ -83,11 +87,14 @@ def test_locate_anything_run_without_flag_returns_blocker(tmp_path: Path) -> Non
     _PIL.new("RGB", (64, 64)).save(img)
     res = _run(
         [
-            "locate-anything", "run",
+            "locate-anything",
+            "run",
             "locate-anything-3b",
             str(img),
-            "--text", "cat",
-            "--out", str(out),
+            "--text",
+            "cat",
+            "--out",
+            str(out),
         ]
     )
     assert res.returncode == 0, (res.stdout, res.stderr)
@@ -106,11 +113,14 @@ def test_locate_anything_run_warning_printed_to_stderr(tmp_path: Path) -> None:
     _PIL.new("RGB", (64, 64)).save(img)
     res = _run(
         [
-            "locate-anything", "run",
+            "locate-anything",
+            "run",
             "locate-anything-3b",
             str(img),
-            "--text", "dog",
-            "--out", str(out),
+            "--text",
+            "dog",
+            "--out",
+            str(out),
         ]
     )
     assert "WARNING" in res.stderr or "NVIDIA" in res.stderr
@@ -125,12 +135,15 @@ def test_locate_anything_run_with_flag_attempts_sidecar(tmp_path: Path) -> None:
     _PIL.new("RGB", (64, 64)).save(img)
     res = _run(
         [
-            "locate-anything", "run",
+            "locate-anything",
+            "run",
             "locate-anything-3b",
             str(img),
-            "--text", "cat",
+            "--text",
+            "cat",
             "--accept-noncommercial",
-            "--out", str(out),
+            "--out",
+            str(out),
         ]
     )
     assert res.returncode == 0

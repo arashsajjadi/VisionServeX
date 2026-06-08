@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import json
 import sys
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -58,12 +57,11 @@ _MODEL_IDS = [
 ]
 
 _SIDECAR_INSTALL = (
-    "git clone https://github.com/NVlabs/Eagle.git eagle && "
-    "cd eagle/Embodied && pip install -e ."
+    "git clone https://github.com/NVlabs/Eagle.git eagle && cd eagle/Embodied && pip install -e ."
 )
 
 
-def _emit(payload: dict, *, out: Optional[str], fmt: str) -> None:
+def _emit(payload: dict, *, out: str | None, fmt: str) -> None:
     if out:
         from pathlib import Path
 
@@ -77,7 +75,7 @@ def _emit(payload: dict, *, out: Optional[str], fmt: str) -> None:
 @app.command("list")
 def cmd_list(
     fmt: str = typer.Option("table", "--format", help="Output format: table or json."),
-    out: Optional[str] = typer.Option(None, "--out", help="Write JSON to file."),
+    out: str | None = typer.Option(None, "--out", help="Write JSON to file."),
 ) -> None:
     """List all LocateAnything-3B model IDs with license status."""
     rows = [
@@ -109,7 +107,7 @@ def cmd_list(
 def cmd_status(
     model_id: str = typer.Argument(..., help="LocateAnything-3B model ID."),
     fmt: str = typer.Option("json", "--format", help="Output format: json."),
-    out: Optional[str] = typer.Option(None, "--out", help="Write JSON to file."),
+    out: str | None = typer.Option(None, "--out", help="Write JSON to file."),
 ) -> None:
     """Return structured status for a given LocateAnything-3B model ID."""
     from visionservex.vsx import VSX
@@ -122,7 +120,7 @@ def cmd_status(
 @app.command("explain")
 def cmd_explain(
     model_id: str = typer.Argument(..., help="LocateAnything-3B model ID."),
-    out: Optional[str] = typer.Option(None, "--out", help="Write JSON to file."),
+    out: str | None = typer.Option(None, "--out", help="Write JSON to file."),
 ) -> None:
     """Print the full explain() dict for a LocateAnything-3B model ID."""
     from visionservex.vsx import VSX
@@ -157,7 +155,7 @@ def cmd_run(
             "See: visionservex locate-anything install"
         ),
     ),
-    out: Optional[str] = typer.Option(None, "--out", help="Write result JSON to file."),
+    out: str | None = typer.Option(None, "--out", help="Write result JSON to file."),
     fmt: str = typer.Option("json", "--format", help="Output format."),
 ) -> None:
     """Run LocateAnything-3B grounded detection.
@@ -185,9 +183,7 @@ def cmd_run(
     from visionservex.vsx import VSX
 
     try:
-        result = VSX.locateanything(model_id).locate(
-            image, text=text, accept_noncommercial=True
-        )
+        result = VSX.locateanything(model_id).locate(image, text=text, accept_noncommercial=True)
         payload = {
             "status": "ok",
             "model_id": model_id,

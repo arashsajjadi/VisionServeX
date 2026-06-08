@@ -78,8 +78,9 @@ def test_nvidia_warning_text_verbatim() -> None:
 
 
 def test_runtime_module_rejects_unknown_model() -> None:
-    from visionservex.locate_anything_runtime import run_locate_anything
     from PIL import Image
+
+    from visionservex.locate_anything_runtime import run_locate_anything
 
     img = Image.new("RGB", (32, 32))
     with pytest.raises((RuntimeError, ValueError)):
@@ -88,10 +89,11 @@ def test_runtime_module_rejects_unknown_model() -> None:
 
 def test_runtime_module_raises_when_sidecar_missing() -> None:
     """run_locate_anything must raise RuntimeError when the Eagle sidecar is not installed."""
-    from visionservex.locate_anything_runtime import run_locate_anything, _check_sidecar
     from PIL import Image
 
-    img = Image.new("RGB", (32, 32))
+    from visionservex.locate_anything_runtime import _check_sidecar
+
+    Image.new("RGB", (32, 32))
     try:
         _check_sidecar()
         # If sidecar IS installed, this test is vacuously passed

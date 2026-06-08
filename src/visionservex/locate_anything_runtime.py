@@ -19,8 +19,7 @@ from typing import Any
 
 _SIDECAR_MODULE = "eagle.Embodied"
 _SIDECAR_INSTALL = (
-    "git clone https://github.com/NVlabs/Eagle.git eagle && "
-    "cd eagle/Embodied && pip install -e ."
+    "git clone https://github.com/NVlabs/Eagle.git eagle && cd eagle/Embodied && pip install -e ."
 )
 
 # Model IDs → HuggingFace repo IDs (user must have local cache or HF access; BYOT).
@@ -45,8 +44,7 @@ def _check_sidecar() -> None:
         importlib.import_module("eagle")
     except ImportError as exc:
         raise RuntimeError(
-            f"LocateAnything-3B sidecar not installed. "
-            f"Install with: {_SIDECAR_INSTALL}"
+            f"LocateAnything-3B sidecar not installed. Install with: {_SIDECAR_INSTALL}"
         ) from exc
 
 
@@ -68,11 +66,14 @@ def run_locate_anything(
     hf_id = _MODEL_HF_IDS.get(model_id)
     if hf_id is None:
         raise ValueError(
-            f"Unknown LocateAnything model ID: {model_id!r}. "
-            f"Known IDs: {sorted(_MODEL_HF_IDS)}"
+            f"Unknown LocateAnything model ID: {model_id!r}. Known IDs: {sorted(_MODEL_HF_IDS)}"
         )
 
-    resolved_cache = Path(cache_dir).expanduser() if cache_dir else Path.home() / ".cache" / "visionservex" / "locate_anything"
+    resolved_cache = (
+        Path(cache_dir).expanduser()
+        if cache_dir
+        else Path.home() / ".cache" / "visionservex" / "locate_anything"
+    )
 
     from eagle.Embodied.locate_anything import LocateAnythingModel  # type: ignore[import]
 

@@ -178,7 +178,14 @@ def build_current_run_leaderboards(nb_root: Path | str, ledger_csv: Path | str) 
         # union of all metric columns across rows
         cols = ["model_id", "status", "family", "metric_name", "evidence_source"]
         metric_cols = sorted({k for r in rows for k in r if k not in cols})
-        fieldnames = ["model_id", "status", "family", *metric_cols, "metric_name", "evidence_source"]
+        fieldnames = [
+            "model_id",
+            "status",
+            "family",
+            *metric_cols,
+            "metric_name",
+            "evidence_source",
+        ]
         with out_path.open("w", newline="") as f:
             w = csv.DictWriter(f, fieldnames=fieldnames)
             w.writeheader()

@@ -62,12 +62,15 @@ def test_vsx_locateanything_factory_exists() -> None:
     assert hasattr(h, "locate")
 
 
-@pytest.mark.parametrize("model_id,factory,family", [
-    ("sam-vit-base", "sam", "sam"),
-    ("dinov2-base", "dino", "dino"),
-    ("grounding-dino-swin-t+sam2-hiera-small", "pipeline", "pipeline"),
-    ("locate-anything-3b", "locateanything", "locate_anything"),
-])
+@pytest.mark.parametrize(
+    "model_id,factory,family",
+    [
+        ("sam-vit-base", "sam", "sam"),
+        ("dinov2-base", "dino", "dino"),
+        ("grounding-dino-swin-t+sam2-hiera-small", "pipeline", "pipeline"),
+        ("locate-anything-3b", "locateanything", "locate_anything"),
+    ],
+)
 def test_explain_returns_family_key(model_id, factory, family) -> None:
     from visionservex.vsx import VSX
 
@@ -78,11 +81,14 @@ def test_explain_returns_family_key(model_id, factory, family) -> None:
     assert family_key in info or "model_id" in info
 
 
-@pytest.mark.parametrize("model_id,factory", [
-    ("sam-vit-base", "sam"),
-    ("dinov2-base", "dino"),
-    ("locate-anything-3b", "locateanything"),
-])
+@pytest.mark.parametrize(
+    "model_id,factory",
+    [
+        ("sam-vit-base", "sam"),
+        ("dinov2-base", "dino"),
+        ("locate-anything-3b", "locateanything"),
+    ],
+)
 def test_status_returns_string(model_id, factory) -> None:
     from visionservex.vsx import VSX
 
@@ -93,7 +99,7 @@ def test_status_returns_string(model_id, factory) -> None:
 
 
 def test_all_sam_runnable_ids_return_benchmark_passed() -> None:
-    from visionservex.vsx import VSX, _SAM_FACTS
+    from visionservex.vsx import _SAM_FACTS, VSX
 
     for mid in _SAM_FACTS["_runnable"].split():
         h = VSX.sam(mid)
@@ -103,7 +109,7 @@ def test_all_sam_runnable_ids_return_benchmark_passed() -> None:
 
 
 def test_all_dino_runnable_embed_ids_return_benchmark_passed() -> None:
-    from visionservex.vsx import VSX, _DINO_FACTS
+    from visionservex.vsx import _DINO_FACTS, VSX
 
     for mid in _DINO_FACTS["_runnable_embed"].split():
         h = VSX.dino(mid)
@@ -113,7 +119,7 @@ def test_all_dino_runnable_embed_ids_return_benchmark_passed() -> None:
 
 
 def test_all_dino_runnable_detect_ids_return_benchmark_passed() -> None:
-    from visionservex.vsx import VSX, _DINO_FACTS
+    from visionservex.vsx import _DINO_FACTS, VSX
 
     for mid in _DINO_FACTS["_runnable_detect"].split():
         h = VSX.dino(mid)

@@ -14,7 +14,13 @@ from pathlib import Path
 
 
 def _load_ledger() -> list[dict]:
-    p = Path(__file__).parent.parent / "notebook" / "99_final_report" / "reports" / "v36_new_model_execution_ledger.csv"
+    p = (
+        Path(__file__).parent.parent
+        / "notebook"
+        / "99_final_report"
+        / "reports"
+        / "v36_new_model_execution_ledger.csv"
+    )
     if not p.exists():
         return []
     with p.open() as f:
@@ -22,7 +28,13 @@ def _load_ledger() -> list[dict]:
 
 
 def test_ledger_file_exists() -> None:
-    p = Path(__file__).parent.parent / "notebook" / "99_final_report" / "reports" / "v36_new_model_execution_ledger.csv"
+    p = (
+        Path(__file__).parent.parent
+        / "notebook"
+        / "99_final_report"
+        / "reports"
+        / "v36_new_model_execution_ledger.csv"
+    )
     assert p.exists(), f"v36 execution ledger missing: {p}"
 
 
@@ -71,7 +83,8 @@ def test_sam_or_onnx_rows_exist() -> None:
     """At least 2 SAM/ONNX execution rows must be present."""
     rows = _load_ledger()
     sam_onnx = [
-        r for r in rows
+        r
+        for r in rows
         if r.get("is_new_v36", "").startswith("YES")
         and ("sam" in r["model_id"].lower() or "onnx" in r.get("execution_type", "").lower())
     ]
@@ -82,8 +95,16 @@ def test_at_least_two_new_model_families() -> None:
     """v3.6 must introduce at least 2 new model families (clip, owlvit, depth, etc.)."""
     rows = _load_ledger()
     new_families = set()
-    existing_families = {"sam", "sam2", "sam2.1", "mobilesam", "efficientsam", "medsam",
-                         "dinov2", "grounding-dino"}
+    existing_families = {
+        "sam",
+        "sam2",
+        "sam2.1",
+        "mobilesam",
+        "efficientsam",
+        "medsam",
+        "dinov2",
+        "grounding-dino",
+    }
     for r in rows:
         if r.get("is_new_v36", "").startswith("YES"):
             mid = r["model_id"]

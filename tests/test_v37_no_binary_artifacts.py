@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2026 Arash Sajjadi
 """v3.7: no binary model artifacts tracked in git."""
+
 from __future__ import annotations
 
 import subprocess

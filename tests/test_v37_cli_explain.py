@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2026 Arash Sajjadi
 """v3.7: CLI commands expose --explain / status with required fields."""
+
 from __future__ import annotations
 
 import json
@@ -25,7 +26,9 @@ def test_cli_loads():
     assert r.returncode == 0
 
 
-@pytest.mark.parametrize("group", ["interactive", "segment-instances", "locate-anything", "sam", "dino"])
+@pytest.mark.parametrize(
+    "group", ["interactive", "segment-instances", "locate-anything", "sam", "dino"]
+)
 def test_subcommand_help(group):
     r = _run([group, "--help"])
     assert r.returncode == 0, (group, r.stderr[:200])

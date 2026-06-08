@@ -128,10 +128,7 @@ def test_build_reid_extractor_missing_torchreid():
         assert payload["code"] == "REID_CHECKPOINT_REQUIRED"
     else:
         assert payload["code"] in {"TORCHREID_REQUIRED", "REID_UNAVAILABLE"}
-        assert (
-            "torchreid" in payload["install"].lower()
-            or "deep-person-reid" in payload["install"]
-        )
+        assert "torchreid" in payload["install"].lower() or "deep-person-reid" in payload["install"]
 
 
 @pytest.mark.fast

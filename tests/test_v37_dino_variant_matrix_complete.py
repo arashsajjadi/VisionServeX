@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2026 Arash Sajjadi
 """v3.7: every DINO variant must be decided."""
+
 from __future__ import annotations
 
 import csv
@@ -9,19 +10,48 @@ from pathlib import Path
 R = Path(__file__).parent.parent / "notebook" / "99_final_report" / "reports"
 M = R / "v37_dino_variant_matrix.csv"
 
-VALID = {"benchmark_passed", "auth_required", "external_api_only", "checkpoint_required",
-         "legal_review_required", "not_released"}
+VALID = {
+    "benchmark_passed",
+    "auth_required",
+    "external_api_only",
+    "checkpoint_required",
+    "legal_review_required",
+    "not_released",
+}
 
 REQUIRED = [
-    "dinov2-vits14", "dinov2-vitb14", "dinov2-vitl14", "dinov2-vitg14",
-    "dinov2-small", "dinov2-base", "dinov2-large", "dinov2-giant", "dino-vits8",
-    "dinov3-vits16", "dinov3-vitb16", "dinov3-vitl16", "dinov3-vit7b16",
-    "dinov3-convnext-tiny", "dinov3-convnext-small", "dinov3-convnext-base", "dinov3-convnext-large",
-    "grounding-dino-tiny", "grounding-dino-swin-t", "grounding-dino-swin-b",
-    "grounding-dino-original-swin-t", "grounding-dino-original-swin-b",
-    "grounding-dino-1.5", "grounding-dino-1.6", "grounding-dino-1.5-pro", "grounding-dino-1.6-pro",
-    "dino-x-api", "dino-x-detection", "dino-x-segmentation", "dino-x-phrase-grounding",
-    "dino-x-counting", "dino-x-region-captioning",
+    "dinov2-vits14",
+    "dinov2-vitb14",
+    "dinov2-vitl14",
+    "dinov2-vitg14",
+    "dinov2-small",
+    "dinov2-base",
+    "dinov2-large",
+    "dinov2-giant",
+    "dino-vits8",
+    "dinov3-vits16",
+    "dinov3-vitb16",
+    "dinov3-vitl16",
+    "dinov3-vit7b16",
+    "dinov3-convnext-tiny",
+    "dinov3-convnext-small",
+    "dinov3-convnext-base",
+    "dinov3-convnext-large",
+    "grounding-dino-tiny",
+    "grounding-dino-swin-t",
+    "grounding-dino-swin-b",
+    "grounding-dino-original-swin-t",
+    "grounding-dino-original-swin-b",
+    "grounding-dino-1.5",
+    "grounding-dino-1.6",
+    "grounding-dino-1.5-pro",
+    "grounding-dino-1.6-pro",
+    "dino-x-api",
+    "dino-x-detection",
+    "dino-x-segmentation",
+    "dino-x-phrase-grounding",
+    "dino-x-counting",
+    "dino-x-region-captioning",
 ]
 
 

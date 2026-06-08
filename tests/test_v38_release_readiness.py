@@ -9,17 +9,22 @@ from pathlib import Path
 import visionservex
 from visionservex.licensing import policy as P
 
-EXPECTED_VERSION = "3.8.0"
+MIN_VERSION = (3, 8)
+
+
+def _ver_tuple(v: str) -> tuple[int, int]:
+    return tuple(int(x) for x in v.split(".")[:2])
 
 
 def test_package_version_bumped():
-    assert visionservex.__version__ == EXPECTED_VERSION
+    # forward-compatible: must not regress below the v3.8 baseline
+    assert _ver_tuple(visionservex.__version__) >= MIN_VERSION
 
 
 def test_pyproject_version_matches():
     text = Path("pyproject.toml").read_text()
     m = re.search(r'^version\s*=\s*"([^"]+)"', text, re.M)
-    assert m and m.group(1) == EXPECTED_VERSION
+    assert m and _ver_tuple(m.group(1)) >= MIN_VERSION
 
 
 def test_license_matrix_artifact_exists():

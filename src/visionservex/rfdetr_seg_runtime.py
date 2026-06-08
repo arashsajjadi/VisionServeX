@@ -9,6 +9,7 @@ detection-only RF-DETR-XL/2XL). All six seg variants are commercial-safe.
 
 Runs on CPU via ``device="cpu"`` so it stays within resource-safety limits.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -29,36 +30,54 @@ def variants() -> list[str]:
 
 def explain(model_id: str) -> dict[str, Any]:
     if model_id not in _VARIANTS:
-        return {"model_id": model_id, "family": "rf-detr", "state": "unknown",
-                "next_command": "visionservex segment-instances --help"}
+        return {
+            "model_id": model_id,
+            "family": "rf-detr",
+            "state": "unknown",
+            "next_command": "visionservex segment-instances --help",
+        }
     return {
-        "model_id": model_id, "family": "rf-detr", "task": "instance_segmentation",
-        "state": "benchmark_passed", "license": "Apache-2.0", "commercial_safe": True,
-        "default_safe": True, "install_extra": "visionservex[rfdetr]",
-        "backbone": "DINOv2 (Apache-2.0)", "weights": "auto-downloaded (Apache-2.0 seg checkpoint)",
-        "output_schema": {"boxes": "xyxy", "masks": "list[HxW bool]", "class_ids": "list[int]",
-                          "scores": "list[float]"},
-        "limitations": ("XL/2XL are heavier; the SEG XL/2XL are Apache-2.0 and do NOT "
-                        "require rfdetr_plus (unlike detection XL/2XL = PML-1.0)."),
+        "model_id": model_id,
+        "family": "rf-detr",
+        "task": "instance_segmentation",
+        "state": "benchmark_passed",
+        "license": "Apache-2.0",
+        "commercial_safe": True,
+        "default_safe": True,
+        "install_extra": "visionservex[rfdetr]",
+        "backbone": "DINOv2 (Apache-2.0)",
+        "weights": "auto-downloaded (Apache-2.0 seg checkpoint)",
+        "output_schema": {
+            "boxes": "xyxy",
+            "masks": "list[HxW bool]",
+            "class_ids": "list[int]",
+            "scores": "list[float]",
+        },
+        "limitations": (
+            "XL/2XL are heavier; the SEG XL/2XL are Apache-2.0 and do NOT "
+            "require rfdetr_plus (unlike detection XL/2XL = PML-1.0)."
+        ),
         "next_command": f"visionservex segment-instances image.jpg --model {model_id} --out out/",
     }
 
 
-def segment_instances(model_id: str, image, threshold: float = 0.3,
-                      device: str = "cpu", **kw) -> dict[str, Any]:
+def segment_instances(
+    model_id: str, image, threshold: float = 0.3, device: str = "cpu", **kw
+) -> dict[str, Any]:
     """Run RF-DETR instance segmentation. Returns boxes/masks/classes/scores."""
     if model_id not in _VARIANTS:
         raise ValueError(f"unknown RF-DETR-Seg variant {model_id!r}; known: {sorted(_VARIANTS)}")
-    import numpy as np
     import rfdetr
 
     cls = getattr(rfdetr, _VARIANTS[model_id])
     model = cls(device=device)
     det = model.predict(image, threshold=threshold)
-    n = int(len(det.xyxy)) if getattr(det, "xyxy", None) is not None else 0
+    n = len(det.xyxy) if getattr(det, "xyxy", None) is not None else 0
     masks = getattr(det, "mask", None)
     return {
-        "model_id": model_id, "engine": "rfdetr", "task": "instance_segmentation",
+        "model_id": model_id,
+        "engine": "rfdetr",
+        "task": "instance_segmentation",
         "n_instances": n,
         "boxes": det.xyxy.tolist() if n else [],
         "scores": det.confidence.tolist() if getattr(det, "confidence", None) is not None else [],

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """v3.4 SAM runtime unblock tests — 7 tests covering CLI and VisionModel SAM paths."""
+
 from __future__ import annotations
 
 import json
@@ -18,8 +19,10 @@ _runner = CliRunner()
 # 1. sam_commands.app is importable and non-None
 # ---------------------------------------------------------------------------
 
+
 def test_sam_cli_app_importable():
     from visionservex.cli.sam_commands import app
+
     assert app is not None
 
 
@@ -27,8 +30,10 @@ def test_sam_cli_app_importable():
 # 2. sam status sam-vit-b --json returns model_id and onnx_eligible fields
 # ---------------------------------------------------------------------------
 
+
 def test_sam_status_sam_vit_b_json():
     from visionservex.cli.sam_commands import app
+
     result = _runner.invoke(app, ["status", "sam-vit-b", "--json"])
     assert result.exit_code == 0, f"Unexpected exit code: {result.exit_code}\n{result.output}"
     data = json.loads(result.output)
@@ -40,8 +45,10 @@ def test_sam_status_sam_vit_b_json():
 # 3. sam status sam3-base --json has auth_required=True and GATED/AUTH code
 # ---------------------------------------------------------------------------
 
+
 def test_sam_status_sam3_returns_auth_required():
     from visionservex.cli.sam_commands import app
+
     result = _runner.invoke(app, ["status", "sam3-base", "--json"])
     assert result.exit_code == 0, f"Unexpected exit code: {result.exit_code}\n{result.output}"
     data = json.loads(result.output)
@@ -56,8 +63,10 @@ def test_sam_status_sam3_returns_auth_required():
 # 4. sam list --json returns at least one sam-family model
 # ---------------------------------------------------------------------------
 
+
 def test_sam_list_includes_expected_families():
     from visionservex.cli.sam_commands import app
+
     result = _runner.invoke(app, ["list", "--json"])
     assert result.exit_code == 0, f"Unexpected exit code: {result.exit_code}\n{result.output}"
     data = json.loads(result.output)
@@ -75,6 +84,7 @@ def test_sam_list_includes_expected_families():
 # 5. visionservex sam export-onnx --help exits 0
 # ---------------------------------------------------------------------------
 
+
 def test_sam_export_onnx_help():
     result = subprocess.run(
         [sys.executable, "-m", "visionservex", "sam", "export-onnx", "--help"],
@@ -91,11 +101,14 @@ def test_sam_export_onnx_help():
 # 6. VisionModel("sam-vit-b") predict returns SegmentationResult with segments
 # ---------------------------------------------------------------------------
 
+
 def test_sam_vit_b_runnable_via_vision_model():
     if not _IMG.exists():
         pytest.skip(f"Test image not found: {_IMG}")
     from PIL import Image as PILImage
+
     from visionservex import VisionModel
+
     img = PILImage.open(_IMG).convert("RGB")
     model = VisionModel("sam-vit-base")
     result = model.predict(img, boxes=[[10, 20, 200, 220]])
@@ -109,19 +122,17 @@ def test_sam_vit_b_runnable_via_vision_model():
 # 7. sam3-base must NOT return status=ok (never fake success for gated model)
 # ---------------------------------------------------------------------------
 
+
 def test_sam3_never_returns_fake_success():
     from visionservex.cli.sam_commands import app
+
     result = _runner.invoke(app, ["status", "sam3-base", "--json"])
     assert result.exit_code == 0
     data = json.loads(result.output)
     # Must not report that the model is runnable or ok
-    assert data.get("runnable") is not True, (
-        "sam3-base must not report runnable=True — it is gated"
-    )
+    assert data.get("runnable") is not True, "sam3-base must not report runnable=True — it is gated"
     status = (data.get("status") or "").lower()
-    assert status != "ok", (
-        f"sam3-base must never return status='ok', got: {status!r}"
-    )
+    assert status != "ok", f"sam3-base must never return status='ok', got: {status!r}"
     auth_required = data.get("auth_required")
     assert auth_required is True, (
         f"sam3-base must always have auth_required=True, got: {auth_required!r}"

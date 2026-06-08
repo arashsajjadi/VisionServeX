@@ -11,7 +11,10 @@ structured ValueError with code=GATED_HF_AUTH_REQUIRED for gated models.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import numpy as np
 
 # ---------------------------------------------------------------------------
 # Shared helpers
@@ -62,8 +65,7 @@ class _GatedError(ValueError):
 
     def __init__(self, model_id: str, fix: str):
         super().__init__(
-            f"[GATED_HF_AUTH_REQUIRED] {model_id} is a gated Hugging Face model. "
-            f"Fix: {fix}"
+            f"[GATED_HF_AUTH_REQUIRED] {model_id} is a gated Hugging Face model. Fix: {fix}"
         )
         self.model_id = model_id
         self.fix = fix
@@ -183,10 +185,10 @@ class SAMHandle:
 
     def status(self) -> dict:
         """Return auth/checkpoint/onnx status for this model."""
-        from visionservex.onnx_export import onnx_eligible
-
         import os
         from pathlib import Path
+
+        from visionservex.onnx_export import onnx_eligible
 
         state = self._state()
         ckpt_map = {
@@ -257,21 +259,20 @@ class DINOHandle:
                 f"https://huggingface.co/{self.model_id}",
             )
         if state != "benchmark_passed":
-            raise ValueError(
-                f"{self.model_id} state={state!r} — cannot run inference directly."
-            )
+            raise ValueError(f"{self.model_id} state={state!r} — cannot run inference directly.")
         if required_task and self._task() != required_task:
             raise ValueError(
                 f"{self.model_id} task={self._task()!r} but {required_task!r} was requested."
             )
 
-    def embed(self, image) -> "np.ndarray":  # type: ignore[name-defined]
+    def embed(self, image) -> np.ndarray:  # type: ignore[name-defined]
         """Extract a feature embedding from *image*.
 
         Returns a numpy array of shape ``[D]``.
         """
         self._assert_runnable(required_task="embed")
         import numpy as np
+
         from visionservex.core.model import VisionModel
 
         with VisionModel(self.model_id) as model:
@@ -331,9 +332,7 @@ class PipelineHandle:
     def __init__(self, pipeline_id: str) -> None:
         self.pipeline_id = pipeline_id
         if "+" not in pipeline_id:
-            raise ValueError(
-                f"pipeline_id must be '<detector>+<segmenter>', got {pipeline_id!r}"
-            )
+            raise ValueError(f"pipeline_id must be '<detector>+<segmenter>', got {pipeline_id!r}")
         self.detector_id, self.segmenter_id = pipeline_id.split("+", 1)
         self._det = DINOHandle(self.detector_id)
         self._seg = SAMHandle(self.segmenter_id)

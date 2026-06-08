@@ -26,7 +26,6 @@ import importlib
 import json
 import os
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -234,6 +233,7 @@ _ALL_MODELS: dict[str, dict] = {
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _redact_key(key: str) -> str:
     """Show first 3 + *** + last 2 chars; never log the full key."""
     if not key:
@@ -262,7 +262,9 @@ def _fix_for(meta: dict) -> str:
         env = meta.get("env_var", "API_KEY")
         return f"export {env}=<your-key> && visionservex dino api {meta.get('model_id', '')} image.jpg --text '...'"
     if meta.get("auth_required"):
-        return "export HF_TOKEN=<token> && request access at https://huggingface.co/" + meta.get("hf_repo", "")
+        return "export HF_TOKEN=<token> && request access at https://huggingface.co/" + meta.get(
+            "hf_repo", ""
+        )
     return ""
 
 
@@ -305,7 +307,9 @@ def _print_card(card: dict, *, explain: bool = False) -> None:
     runnable = card.get("runnable", False)
     status_color = "green" if runnable else "yellow"
     status_label = "runnable" if runnable else "blocked"
-    console.print(f"[bold]{mid}[/bold]  [{status_color}]{status_label}[/{status_color}]  family={family}")
+    console.print(
+        f"[bold]{mid}[/bold]  [{status_color}]{status_label}[/{status_color}]  family={family}"
+    )
     if explain:
         console.print(f"  license    : {card.get('license', '?')}")
         console.print(f"  task       : {card.get('task', '?')}")
@@ -345,6 +349,7 @@ def _probe(mod: str) -> bool:
 # ---------------------------------------------------------------------------
 # Commands
 # ---------------------------------------------------------------------------
+
 
 @app.command("list")
 def list_cmd(
@@ -402,7 +407,7 @@ def embed_cmd(
             "code": "WRONG_TASK",
             "model_id": model_id,
             "message": f"{model_id!r} is not a DINOv2 embedding model. "
-                       f"Use dinov2-small/base/large/giant for embed.",
+            f"Use dinov2-small/base/large/giant for embed.",
         }
         _emit(payload, json_out=True)
         raise typer.Exit(2)
@@ -443,19 +448,16 @@ def embed_cmd(
 
     try:
         import numpy as np
+        import torch  # type: ignore
         from PIL import Image as _PIL
         from transformers import AutoImageProcessor, AutoModel  # type: ignore
-        import torch  # type: ignore
 
         hf_repo = meta["hf_repo"]
         processor = AutoImageProcessor.from_pretrained(hf_repo)
         model = AutoModel.from_pretrained(hf_repo)
         model.eval()
 
-        if device == "auto":
-            dev = "cuda" if torch.cuda.is_available() else "cpu"
-        else:
-            dev = device
+        dev = ("cuda" if torch.cuda.is_available() else "cpu") if device == "auto" else device
         model = model.to(dev)
 
         img = _PIL.open(image_path).convert("RGB")
@@ -528,50 +530,71 @@ def knn_cmd(
 
     query_path = Path(query_image)
     if not query_path.exists():
-        _emit({"status": "error", "code": "INPUT_NOT_FOUND", "image": query_image,
-               "message": f"Query image not found: {query_image}"}, json_out=True)
+        _emit(
+            {
+                "status": "error",
+                "code": "INPUT_NOT_FOUND",
+                "image": query_image,
+                "message": f"Query image not found: {query_image}",
+            },
+            json_out=True,
+        )
         raise typer.Exit(2)
 
     if not gallery_dir.exists() or not gallery_dir.is_dir():
-        _emit({"status": "error", "code": "GALLERY_NOT_FOUND", "gallery_dir": str(gallery_dir),
-               "message": f"Gallery directory not found: {gallery_dir}"}, json_out=True)
+        _emit(
+            {
+                "status": "error",
+                "code": "GALLERY_NOT_FOUND",
+                "gallery_dir": str(gallery_dir),
+                "message": f"Gallery directory not found: {gallery_dir}",
+            },
+            json_out=True,
+        )
         raise typer.Exit(2)
 
     if not _probe("torch") or not _probe("transformers"):
-        _emit({"status": "blocked", "code": "DEPS_MISSING",
-               "message": "torch + transformers required. pip install 'visionservex[foundation]'"},
-              json_out=True)
+        _emit(
+            {
+                "status": "blocked",
+                "code": "DEPS_MISSING",
+                "message": "torch + transformers required. pip install 'visionservex[foundation]'",
+            },
+            json_out=True,
+        )
         raise typer.Exit(3)
 
     _img_exts = {".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff", ".tif"}
     gallery_paths = [
-        p for p in gallery_dir.iterdir()
-        if p.is_file() and p.suffix.lower() in _img_exts
+        p for p in gallery_dir.iterdir() if p.is_file() and p.suffix.lower() in _img_exts
     ]
     if not gallery_paths:
-        _emit({"status": "error", "code": "GALLERY_EMPTY",
-               "gallery_dir": str(gallery_dir),
-               "message": "No images found in gallery directory."}, json_out=True)
+        _emit(
+            {
+                "status": "error",
+                "code": "GALLERY_EMPTY",
+                "gallery_dir": str(gallery_dir),
+                "message": "No images found in gallery directory.",
+            },
+            json_out=True,
+        )
         raise typer.Exit(2)
 
     try:
         import numpy as np
+        import torch  # type: ignore
         from PIL import Image as _PIL
         from transformers import AutoImageProcessor, AutoModel  # type: ignore
-        import torch  # type: ignore
 
         hf_repo = meta["hf_repo"]
         processor = AutoImageProcessor.from_pretrained(hf_repo)
         model_obj = AutoModel.from_pretrained(hf_repo)
         model_obj.eval()
 
-        if device == "auto":
-            dev = "cuda" if torch.cuda.is_available() else "cpu"
-        else:
-            dev = device
+        dev = ("cuda" if torch.cuda.is_available() else "cpu") if device == "auto" else device
         model_obj = model_obj.to(dev)
 
-        def _embed(img_path: Path) -> "np.ndarray":
+        def _embed(img_path: Path) -> np.ndarray:
             img = _PIL.open(img_path).convert("RGB")
             inputs = processor(images=img, return_tensors="pt")
             inputs = {k: v.to(dev) for k, v in inputs.items()}
@@ -591,8 +614,14 @@ def knn_cmd(
                 pass  # skip unreadable images silently
 
         if not gallery_embs:
-            _emit({"status": "error", "code": "GALLERY_EMBED_FAILED",
-                   "message": "Could not embed any gallery image."}, json_out=True)
+            _emit(
+                {
+                    "status": "error",
+                    "code": "GALLERY_EMBED_FAILED",
+                    "message": "Could not embed any gallery image.",
+                },
+                json_out=True,
+            )
             raise typer.Exit(1)
 
         gallery_matrix = np.stack(gallery_embs, axis=0)  # (N, D)
@@ -601,9 +630,7 @@ def knn_cmd(
         g_norms = gallery_matrix / (np.linalg.norm(gallery_matrix, axis=1, keepdims=True) + 1e-8)
         sims = (g_norms @ q_norm).tolist()
 
-        ranked = sorted(
-            enumerate(sims), key=lambda x: x[1], reverse=True
-        )[:top_k]
+        ranked = sorted(enumerate(sims), key=lambda x: x[1], reverse=True)[:top_k]
 
         results = [
             {
@@ -645,7 +672,7 @@ def detect_cmd(
     model_id: str = typer.Argument(..., help="GroundingDINO model ID."),
     image: str = typer.Argument(..., help="Path to input image."),
     text: str = typer.Option(..., "--text", help="Text prompt, e.g. 'cat . dog'."),
-    out: Optional[Path] = typer.Option(None, "--out", help="Save detection JSON to this path."),
+    out: Path | None = typer.Option(None, "--out", help="Save detection JSON to this path."),
     threshold: float = typer.Option(0.3, "--threshold", help="Detection score threshold."),
     device: str = typer.Option("auto", "--device"),
     json_: bool = typer.Option(False, "--json"),
@@ -689,33 +716,49 @@ def detect_cmd(
 
     image_path = Path(image)
     if not image_path.exists():
-        _emit({"status": "error", "code": "INPUT_NOT_FOUND", "image": image,
-               "message": f"Image not found: {image}"}, json_out=True)
+        _emit(
+            {
+                "status": "error",
+                "code": "INPUT_NOT_FOUND",
+                "image": image,
+                "message": f"Image not found: {image}",
+            },
+            json_out=True,
+        )
         raise typer.Exit(2)
 
     if not _probe("torch"):
-        _emit({"status": "blocked", "code": "TORCH_REQUIRED",
-               "message": "PyTorch required. pip install torch",
-               "fix": "pip install torch torchvision"}, json_out=True)
+        _emit(
+            {
+                "status": "blocked",
+                "code": "TORCH_REQUIRED",
+                "message": "PyTorch required. pip install torch",
+                "fix": "pip install torch torchvision",
+            },
+            json_out=True,
+        )
         raise typer.Exit(3)
 
     if not _probe("transformers"):
-        _emit({"status": "blocked", "code": "TRANSFORMERS_REQUIRED",
-               "message": "HuggingFace transformers required.",
-               "fix": "pip install 'visionservex[open-vocab]'"}, json_out=True)
+        _emit(
+            {
+                "status": "blocked",
+                "code": "TRANSFORMERS_REQUIRED",
+                "message": "HuggingFace transformers required.",
+                "fix": "pip install 'visionservex[open-vocab]'",
+            },
+            json_out=True,
+        )
         raise typer.Exit(3)
 
     try:
-        from PIL import Image as _PIL
-        from transformers import AutoProcessor, AutoModelForZeroShotObjectDetection  # type: ignore
         import torch  # type: ignore
+        from PIL import Image as _PIL
+        from transformers import AutoModelForZeroShotObjectDetection, AutoProcessor  # type: ignore
 
         hf_repo = meta["hf_repo"]
 
-        if device == "auto":
-            dev = "cuda" if torch.cuda.is_available() else "cpu"
-        else:
-            dev = device
+        dev = ("cuda" if torch.cuda.is_available() else "cpu") if device == "auto" else device
 
         processor = AutoProcessor.from_pretrained(hf_repo)
         model_obj = AutoModelForZeroShotObjectDetection.from_pretrained(hf_repo)
@@ -742,12 +785,15 @@ def detect_cmd(
                 result["boxes"].tolist(),
                 result["scores"].tolist(),
                 result["labels"],
+                strict=False,
             ):
-                detections.append({
-                    "box_xyxy": [round(c, 2) for c in box],
-                    "score": round(float(score), 4),
-                    "label": label,
-                })
+                detections.append(
+                    {
+                        "box_xyxy": [round(c, 2) for c in box],
+                        "score": round(float(score), 4),
+                        "label": label,
+                    }
+                )
 
         payload = {
             "status": "ok",
@@ -785,10 +831,12 @@ def detect_cmd(
 
 @app.command("api")
 def api_cmd(
-    model_id: str = typer.Argument(..., help="API-only model ID (e.g. dino-x-api, grounding-dino-1.5)."),
+    model_id: str = typer.Argument(
+        ..., help="API-only model ID (e.g. dino-x-api, grounding-dino-1.5)."
+    ),
     image: str = typer.Argument(..., help="Path to input image."),
     text: str = typer.Option(..., "--text", help="Text prompt."),
-    api_key: Optional[str] = typer.Option(
+    api_key: str | None = typer.Option(
         None,
         "--api-key",
         envvar="DEEPDATASPACE_API_KEY",
@@ -839,8 +887,7 @@ def api_cmd(
                 f"visionservex dino api {model_id} {image} --text '{text}'"
             ),
             "message": (
-                f"{model_id!r} is an API-only model. "
-                f"Set ${env_var} to call the external endpoint."
+                f"{model_id!r} is an API-only model. Set ${env_var} to call the external endpoint."
             ),
         }
         _emit(payload, json_out=json_, explain=explain)

@@ -141,7 +141,7 @@ def run_sam_onnx_cpu(onnx_path: str | Path) -> dict[str, Any]:
 def list_onnx_eligible_models() -> list[dict[str, Any]]:
     """Return status for every SAM ONNX export target (v3.4)."""
     results = []
-    for model_id, (reg_key, ckpt, safe) in _SAM_ONNX_ELIGIBLE.items():
+    for model_id, (_reg_key, ckpt, safe) in _SAM_ONNX_ELIGIBLE.items():
         ckpt_path = Path(ckpt).expanduser()
         exists = ckpt_path.exists()
         results.append(

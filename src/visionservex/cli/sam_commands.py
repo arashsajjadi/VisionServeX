@@ -20,13 +20,16 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
-app = typer.Typer(name="sam", help="SAM-family commands (list/status/run/export-onnx/video).", no_args_is_help=True)
+app = typer.Typer(
+    name="sam",
+    help="SAM-family commands (list/status/run/export-onnx/video).",
+    no_args_is_help=True,
+)
 console = Console()
 
 # SAM families covered by this CLI module.
@@ -79,6 +82,7 @@ def _checkpoint_exists(model_id: str) -> bool:
 def _sam_entries_from_manifest():
     """Return all SOURCE_MANIFEST entries whose family is in _SAM_FAMILIES."""
     from visionservex.model_zoo import SOURCE_MANIFEST
+
     return [e for e in SOURCE_MANIFEST.values() if e.family in _SAM_FAMILIES]
 
 
@@ -90,7 +94,9 @@ def _sam_entries_from_manifest():
 @app.command("list")
 def list_cmd(
     json_: bool = typer.Option(False, "--json", help="Machine-readable JSON output."),
-    explain: bool = typer.Option(False, "--explain", help="Print a one-paragraph explanation before the results."),
+    explain: bool = typer.Option(
+        False, "--explain", help="Print a one-paragraph explanation before the results."
+    ),
 ) -> None:
     """List SAM models from SOURCE_MANIFEST with their runnable status."""
     if explain:
@@ -108,15 +114,17 @@ def list_cmd(
     if json_:
         rows = []
         for e in entries:
-            rows.append({
-                "model_id": e.model_id,
-                "family": e.family,
-                "runnable": e.runnable_in_visionservex,
-                "license": e.license,
-                "onnx_eligible": e.model_id in _ONNX_ELIGIBLE,
-                "status": "runnable" if e.runnable_in_visionservex else "not_runnable",
-                "install_command": e.install_command,
-            })
+            rows.append(
+                {
+                    "model_id": e.model_id,
+                    "family": e.family,
+                    "runnable": e.runnable_in_visionservex,
+                    "license": e.license,
+                    "onnx_eligible": e.model_id in _ONNX_ELIGIBLE,
+                    "status": "runnable" if e.runnable_in_visionservex else "not_runnable",
+                    "install_command": e.install_command,
+                }
+            )
         print(json.dumps(rows, indent=2))
         return
 
@@ -127,7 +135,9 @@ def list_cmd(
     table.add_column("License", no_wrap=True)
     table.add_column("ONNX", no_wrap=True)
     for e in entries:
-        run_label = "[green]runnable[/green]" if e.runnable_in_visionservex else "[dim]not_runnable[/dim]"
+        run_label = (
+            "[green]runnable[/green]" if e.runnable_in_visionservex else "[dim]not_runnable[/dim]"
+        )
         onnx_label = "[cyan]yes[/cyan]" if e.model_id in _ONNX_ELIGIBLE else "-"
         table.add_row(e.model_id, e.family, run_label, e.license, onnx_label)
     console.print(table)
@@ -140,7 +150,9 @@ def list_cmd(
 
 @app.command("status")
 def status_cmd(
-    model_id: str = typer.Argument(..., help="SAM model ID (e.g. sam-vit-b, sam2-hiera-tiny, sam3-base)."),
+    model_id: str = typer.Argument(
+        ..., help="SAM model ID (e.g. sam-vit-b, sam2-hiera-tiny, sam3-base)."
+    ),
     json_: bool = typer.Option(False, "--json", help="Machine-readable JSON output."),
     explain: bool = typer.Option(False, "--explain", help="Print a one-paragraph explanation."),
 ) -> None:
@@ -245,7 +257,9 @@ def _print_status_table(payload: dict) -> None:
     table.add_row("license", payload["license"])
     table.add_row("runnable", "yes" if payload["runnable"] else "no")
     table.add_row("auth_required", "yes" if payload["auth_required"] else "no")
-    table.add_row("blocker", f"[yellow]{payload['blocker']}[/yellow]" if payload["blocker"] else "—")
+    table.add_row(
+        "blocker", f"[yellow]{payload['blocker']}[/yellow]" if payload["blocker"] else "—"
+    )
     table.add_row("fix", payload["fix"] or "—")
     console.print(table)
 
@@ -259,8 +273,8 @@ def _print_status_table(payload: dict) -> None:
 def run_cmd(
     model_id: str = typer.Argument(..., help="SAM model ID to run."),
     image: Path = typer.Argument(..., help="Input image path."),
-    box: Optional[str] = typer.Option(None, "--box", help="Box prompt as x1,y1,x2,y2."),
-    out: Optional[Path] = typer.Option(None, "--out", help="Path to write result JSON."),
+    box: str | None = typer.Option(None, "--box", help="Box prompt as x1,y1,x2,y2."),
+    out: Path | None = typer.Option(None, "--out", help="Path to write result JSON."),
     json_: bool = typer.Option(False, "--json", help="Machine-readable JSON output."),
     explain: bool = typer.Option(False, "--explain", help="Print a one-paragraph explanation."),
 ) -> None:
@@ -334,6 +348,7 @@ def run_cmd(
 
     try:
         from PIL import Image as PILImage
+
         from visionservex import VisionModel
 
         pil_image = PILImage.open(image).convert("RGB")
@@ -421,7 +436,9 @@ def export_onnx_cmd(
         if json_:
             print(json.dumps(result, indent=2))
         else:
-            console.print(f"[green]ONNX export OK[/green]: {result['onnx_path']} ({result['size_mb']} MB)")
+            console.print(
+                f"[green]ONNX export OK[/green]: {result['onnx_path']} ({result['size_mb']} MB)"
+            )
     except FileNotFoundError as exc:
         err = {
             "code": "CHECKPOINT_MISSING",
@@ -459,8 +476,8 @@ def export_onnx_cmd(
 def video_cmd(
     model_id: str = typer.Argument(..., help="SAM2/2.1 model ID for video tracking."),
     frame_dir: Path = typer.Argument(..., help="Directory containing video frames (PNG/JPEG)."),
-    out: Optional[Path] = typer.Option(None, "--out", help="Path to write tracking result JSON."),
-    box: Optional[str] = typer.Option(None, "--box", help="Box prompt for frame 0 as x1,y1,x2,y2."),
+    out: Path | None = typer.Option(None, "--out", help="Path to write tracking result JSON."),
+    box: str | None = typer.Option(None, "--box", help="Box prompt for frame 0 as x1,y1,x2,y2."),
     json_: bool = typer.Option(False, "--json", help="Machine-readable JSON output."),
     explain: bool = typer.Option(False, "--explain", help="Print a one-paragraph explanation."),
 ) -> None:
@@ -497,6 +514,7 @@ def video_cmd(
     # Must be a SAM2 / SAM2.1 family model.
     sam2_families = {"sam2", "sam2.1"}
     from visionservex.model_zoo import get_model_source
+
     src = get_model_source(model_id)
     if src is not None and src.family not in sam2_families:
         err = {
@@ -554,9 +572,7 @@ def video_cmd(
 
     # Collect frames from the directory.
     extensions = {".png", ".jpg", ".jpeg", ".bmp", ".webp"}
-    frame_paths = sorted(
-        p for p in frame_dir.iterdir() if p.suffix.lower() in extensions
-    )
+    frame_paths = sorted(p for p in frame_dir.iterdir() if p.suffix.lower() in extensions)
     if not frame_paths:
         err = {
             "code": "NO_FRAMES_FOUND",
@@ -599,6 +615,7 @@ def video_cmd(
 
     try:
         from PIL import Image as PILImage
+
         from visionservex.sam2_runtime import track_video
 
         frames = [PILImage.open(p).convert("RGB") for p in frame_paths]

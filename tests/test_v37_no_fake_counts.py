@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Arash Sajjadi
 """v3.7: anti-fabrication — every benchmark_passed execution has a real on-disk
 artifact and a measured latency. No matrix-only / helper / docs row is counted."""
+
 from __future__ import annotations
 
 import json
@@ -12,7 +13,11 @@ R = ROOT / "notebook" / "99_final_report" / "reports"
 
 
 def _exec():
-    return [json.loads(l) for l in (R / "v37_raw_results.jsonl").read_text().splitlines() if l.strip()]
+    return [
+        json.loads(ln)
+        for ln in (R / "v37_raw_results.jsonl").read_text().splitlines()
+        if ln.strip()
+    ]
 
 
 def test_execution_ledger_exists():
@@ -29,9 +34,19 @@ def test_every_ok_execution_has_real_artifact_or_metric():
             p = ROOT / art
             assert p.exists(), f"{r['task']}: claimed artifact does not exist: {art}"
         # must have at least one real measured quantity
-        has_metric = any(r.get(k) is not None for k in
-                         ("mask_area", "embed_dim", "n_boxes", "n_instances", "frames_tracked",
-                          "onnx_bytes", "depth_shape", "latency_ms"))
+        has_metric = any(
+            r.get(k) is not None
+            for k in (
+                "mask_area",
+                "embed_dim",
+                "n_boxes",
+                "n_instances",
+                "frames_tracked",
+                "onnx_bytes",
+                "depth_shape",
+                "latency_ms",
+            )
+        )
         assert has_metric, f"{r['task']}: no measured metric — possible fabrication"
 
 
@@ -50,7 +65,13 @@ def test_distinct_model_ids_at_least_20():
     ok = [r for r in _exec() if r["status"] == "ok"]
     ids = set()
     for r in ok:
-        ids.add(r.get("model_id") or r.get("hf_id") or r.get("variant") or r.get("pipeline_id") or r["task"])
+        ids.add(
+            r.get("model_id")
+            or r.get("hf_id")
+            or r.get("variant")
+            or r.get("pipeline_id")
+            or r["task"]
+        )
     assert len(ids) >= 20, f"need >=20 distinct ids, got {len(ids)}"
 
 

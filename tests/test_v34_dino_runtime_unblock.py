@@ -117,6 +117,8 @@ def test_dino_status_dino_x_api_required() -> None:
 def test_dinov2_embed_returns_array() -> None:
     if not _IMG.exists():
         pytest.skip("test image not found")
+    pytest.importorskip("torch")
+    pytest.importorskip("transformers")
     import PIL.Image
 
     from visionservex import VisionModel
@@ -128,8 +130,7 @@ def test_dinov2_embed_returns_array() -> None:
     # EmbeddingResult must carry an embedding attribute or embedding_dim
     has_embedding = hasattr(result, "embedding") or hasattr(result, "embedding_dim")
     assert has_embedding, (
-        f"result {type(result)} has no embedding attribute; "
-        "expected EmbeddingResult or similar"
+        f"result {type(result)} has no embedding attribute; expected EmbeddingResult or similar"
     )
 
 
@@ -141,6 +142,8 @@ def test_dinov2_embed_returns_array() -> None:
 def test_grounding_dino_detects_text() -> None:
     if not _IMG.exists():
         pytest.skip("test image not found")
+    pytest.importorskip("torch")
+    pytest.importorskip("transformers")
     import PIL.Image
 
     from visionservex import VisionModel
@@ -151,9 +154,7 @@ def test_grounding_dino_detects_text() -> None:
     assert result is not None
     # Should return a result with boxes or detections
     has_detections = (
-        hasattr(result, "boxes")
-        or hasattr(result, "detections")
-        or hasattr(result, "predictions")
+        hasattr(result, "boxes") or hasattr(result, "detections") or hasattr(result, "predictions")
     )
     assert has_detections, (
         f"result {type(result)} has no boxes/detections attribute; "

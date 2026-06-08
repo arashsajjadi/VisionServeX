@@ -26,7 +26,9 @@ def _csv(name):
 def test_activation_kpi_at_least_20():
     rows = _csv("v31_model_activation_ledger.csv")
     counting = [r for r in rows if str(r.get("counts_toward_20", "")).lower() == "true"]
-    assert len(counting) >= 20, f"only {len(counting)} counting activations: {[r['entry_id'] for r in counting]}"
+    assert len(counting) >= 20, (
+        f"only {len(counting)} counting activations: {[r['entry_id'] for r in counting]}"
+    )
 
 
 def test_no_fake_benchmark_in_activations():
@@ -60,7 +62,11 @@ def test_pipelines_present_and_classified():
     assert len(rows) == 11
     for r in rows:
         assert r["pipeline_state"] in {
-            "pipeline_demo_ready", "auth_required", "legal_review_required", "external_api_only", "blocked_on_part",
+            "pipeline_demo_ready",
+            "auth_required",
+            "legal_review_required",
+            "external_api_only",
+            "blocked_on_part",
         }
 
 
@@ -78,17 +84,29 @@ def test_vsx_facades_explain_contract():
     # user to connect a token / accept the license.
     with pytest.raises(VSXError) as ei:
         VSX.sam("sam3-base").segment("x.jpg", box=[0, 0, 10, 10])
-    assert ei.value.state in ("auth_required", "auth_required_license_pending")
+    # auth_required/auth_required_license_pending: no token or license not yet accepted;
+    # prompt_required: token+license OK but SAM3 needs a text concept prompt.
+    assert ei.value.state in ("auth_required", "auth_required_license_pending", "prompt_required")
     nxt = ei.value.next_command.lower()
-    assert ("hf connect" in nxt) or ("hf_token" in nxt) or ("huggingface" in nxt) \
+    # next_command routes toward resolution: HF connect/accept for auth states,
+    # or a segment() call hint for prompt_required.
+    assert (
+        ("hf connect" in nxt)
+        or ("hf_token" in nxt)
+        or ("huggingface" in nxt)
         or ("accept" in nxt)
+        or ("segment" in nxt)
+        or ("text=" in nxt)
+    )
     # DINO
     d = VSX.dino("dinov2-base").explain()
     assert d["state"] == "benchmark_passed" and d["task"] == "embed"
     assert VSX.dino("dino-x-api").explain()["state"] == "external_api_only"
     # pipeline inherits gated state
     assert VSX.pipeline("grounding-dino-1.6+sam3-base").status() == "auth_required"
-    assert VSX.pipeline("grounding-dino-swin-t+sam2.1-hiera-small").status() == "pipeline_demo_ready"
+    assert (
+        VSX.pipeline("grounding-dino-swin-t+sam2.1-hiera-small").status() == "pipeline_demo_ready"
+    )
 
 
 def test_edgesam_not_regressed():
@@ -135,8 +153,12 @@ def test_no_bad_license_in_default_safe_core():
     import re
 
     for r in rows:
-        if str(r.get("default_safe", "")) == "True" and re.search(bad, r.get("license_status", ""), re.I):
-            raise AssertionError(f"bad license in default-safe core: {r['model_id']} {r['license_status']}")
+        if str(r.get("default_safe", "")) == "True" and re.search(
+            bad, r.get("license_status", ""), re.I
+        ):
+            raise AssertionError(
+                f"bad license in default-safe core: {r['model_id']} {r['license_status']}"
+            )
 
 
 def test_gated_models_not_default_safe():

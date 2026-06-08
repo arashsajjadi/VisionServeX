@@ -19,6 +19,7 @@ For commercial-safe, zero-dependency interactive refinement that runs TODAY,
 ``classic`` routes to the weight-free CPU refiners in ``smart_annotation``
 (GrabCut / watershed / random-walker — OpenCV/scikit-image, no GPL).
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -34,8 +35,10 @@ _FACTS: dict[str, dict[str, Any]] = {
         "training_data": "SBD (CC-BY-SA) + COCO+LVIS (CC-BY-4.0). No NC backbone.",
         "checkpoint": "~/.cache/visionservex/ritm/coco_lvis_h18_itermask.pth",
         "source": "https://github.com/SamsungLabs/ritm_interactive_segmentation",
-        "install": ("git clone https://github.com/SamsungLabs/ritm_interactive_segmentation && "
-                    "cd ritm_interactive_segmentation && pip install -r requirements.txt"),
+        "install": (
+            "git clone https://github.com/SamsungLabs/ritm_interactive_segmentation && "
+            "cd ritm_interactive_segmentation && pip install -r requirements.txt"
+        ),
     },
     "clickseg": {
         "state": "legal_review_required",
@@ -80,9 +83,13 @@ def facts(model_id: str) -> dict[str, Any]:
 def explain(model_id: str) -> dict[str, Any]:
     if model_id in _CLASSIC:
         return {
-            "model_id": model_id, "family": "interactive", "task": "interactive_segmentation",
-            "state": "tool_available", "license": "OpenCV/scikit-image (Apache-2.0/BSD)",
-            "commercial_safe": True, "default_safe": True,
+            "model_id": model_id,
+            "family": "interactive",
+            "task": "interactive_segmentation",
+            "state": "tool_available",
+            "license": "OpenCV/scikit-image (Apache-2.0/BSD)",
+            "commercial_safe": True,
+            "default_safe": True,
             "install_extra": "visionservex[interactive-seg]",
             "prompt_types": ["positive_points", "negative_points"],
             "output_schema": {"mask": "HxW uint8", "polygon": "optional"},
@@ -91,27 +98,42 @@ def explain(model_id: str) -> dict[str, Any]:
         }
     f = _FACTS.get(model_id)
     if not f:
-        return {"model_id": model_id, "family": "interactive", "state": "unknown",
-                "next_command": f"visionservex interactive list"}
+        return {
+            "model_id": model_id,
+            "family": "interactive",
+            "state": "unknown",
+            "next_command": "visionservex interactive list",
+        }
     return {
-        "model_id": model_id, "family": "interactive", "task": "interactive_segmentation",
-        "state": f["state"], "product_grade_status": f["product_grade"],
-        "license": f["license"], "commercial_safe": f["commercial_safe"],
+        "model_id": model_id,
+        "family": "interactive",
+        "task": "interactive_segmentation",
+        "state": f["state"],
+        "product_grade_status": f["product_grade"],
+        "license": f["license"],
+        "commercial_safe": f["commercial_safe"],
         "default_safe": f["commercial_safe"] and f["state"] not in ("legal_review_required",),
         "install_extra": "visionservex[interactive-seg]",
         "prompt_types": ["positive_points", "negative_points"],
-        "checkpoint_path": f["checkpoint"], "source": f["source"],
+        "checkpoint_path": f["checkpoint"],
+        "source": f["source"],
         "training_data_note": f["training_data"],
         "output_schema": {"mask": "HxW uint8", "polygon": "optional", "noc": "optional"},
-        "limitations": ("BYOT weights — not pip-installable with bundled checkpoints. "
-                        "Legal-review variants must not ship commercially as-is."),
-        "next_command": (f"# install: {f['install']}\n"
-                         f"visionservex interactive run {model_id} image.jpg "
-                         f"--positive-points pos.json --negative-points neg.json --out out/"),
+        "limitations": (
+            "BYOT weights — not pip-installable with bundled checkpoints. "
+            "Legal-review variants must not ship commercially as-is."
+        ),
+        "next_command": (
+            f"# install: {f['install']}\n"
+            f"visionservex interactive run {model_id} image.jpg "
+            f"--positive-points pos.json --negative-points neg.json --out out/"
+        ),
     }
 
 
-def run_interactive(model_id: str, image, positive_points=None, negative_points=None, **kw) -> dict[str, Any]:
+def run_interactive(
+    model_id: str, image, positive_points=None, negative_points=None, **kw
+) -> dict[str, Any]:
     """Run click-based interactive segmentation.
 
     Classic refiners run immediately (CPU, weight-free). Named deep models
@@ -119,23 +141,29 @@ def run_interactive(model_id: str, image, positive_points=None, negative_points=
     a structured blocker carries the exact install/download command. Legal-review
     models additionally surface their non-commercial restriction.
     """
-    import numpy as np
 
     if model_id in _CLASSIC:
         return _run_classic(model_id, image, positive_points, negative_points, **kw)
 
     f = _FACTS.get(model_id)
     if not f:
-        raise ValueError(f"unknown interactive model: {model_id!r}; "
-                         f"known: {sorted(_FACTS)} or classic: {sorted(_CLASSIC)}")
+        raise ValueError(
+            f"unknown interactive model: {model_id!r}; "
+            f"known: {sorted(_FACTS)} or classic: {sorted(_CLASSIC)}"
+        )
     ckpt = Path(f["checkpoint"]).expanduser()
     if not ckpt.exists():
         return {
-            "model_id": model_id, "status": "blocked",
+            "model_id": model_id,
+            "status": "blocked",
             "blocker_code": "INTERACTIVE_CHECKPOINT_REQUIRED",
-            "state": f["state"], "commercial_safe": f["commercial_safe"],
-            "reason": (f"{model_id} weights not found at {ckpt}. BYOT: " + f["install"]
-                       + (" — NOTE: " + f["training_data"] if not f["commercial_safe"] else "")),
+            "state": f["state"],
+            "commercial_safe": f["commercial_safe"],
+            "reason": (
+                f"{model_id} weights not found at {ckpt}. BYOT: "
+                + f["install"]
+                + (" — NOTE: " + f["training_data"] if not f["commercial_safe"] else "")
+            ),
             "next_command": f["install"],
         }
     # Checkpoint present — attempt to load via the user-cloned sidecar package.
@@ -148,17 +176,20 @@ def run_interactive(model_id: str, image, positive_points=None, negative_points=
 
 def _run_classic(model_id, image, positive_points, negative_points, **kw):
     import numpy as np
+
     try:
         import cv2
     except ImportError as e:
-        raise RuntimeError("classic interactive refiner needs opencv: pip install 'visionservex[interactive-seg]'") from e
+        raise RuntimeError(
+            "classic interactive refiner needs opencv: pip install 'visionservex[interactive-seg]'"
+        ) from e
     img = np.asarray(image)[..., ::-1] if hasattr(image, "size") else np.asarray(image)
     h, w = img.shape[:2]
     # Build a foreground/background seed mask from clicks for GrabCut.
     mask = np.full((h, w), cv2.GC_PR_BGD, np.uint8)
-    for (x, y) in (positive_points or []):
+    for x, y in positive_points or []:
         cv2.circle(mask, (int(x), int(y)), max(3, w // 80), int(cv2.GC_FGD), -1)
-    for (x, y) in (negative_points or []):
+    for x, y in negative_points or []:
         cv2.circle(mask, (int(x), int(y)), max(3, w // 80), int(cv2.GC_BGD), -1)
     if not (positive_points):
         # default seed: central rectangle
@@ -166,5 +197,11 @@ def _run_classic(model_id, image, positive_points, negative_points, **kw):
     bgd, fgd = np.zeros((1, 65), np.float64), np.zeros((1, 65), np.float64)
     cv2.grabCut(np.ascontiguousarray(img), mask, None, bgd, fgd, 3, cv2.GC_INIT_WITH_MASK)
     out = np.where((mask == cv2.GC_FGD) | (mask == cv2.GC_PR_FGD), 1, 0).astype("uint8")
-    return {"model_id": model_id, "status": "ok", "backend": "opencv-grabcut",
-            "mask_shape": [h, w], "mask_area": int(out.sum()), "mask": out}
+    return {
+        "model_id": model_id,
+        "status": "ok",
+        "backend": "opencv-grabcut",
+        "mask_shape": [h, w],
+        "mask_area": int(out.sum()),
+        "mask": out,
+    }

@@ -6,14 +6,15 @@ a gated, excluded, or sidecar-only model is runnable.  The library must
 raise an exception or return a non-"ok" / non-"benchmark_passed" status for
 all models listed here.
 """
+
 from __future__ import annotations
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # a. test_sam3_base_not_runnable
 # ---------------------------------------------------------------------------
+
 
 def test_sam3_base_not_runnable():
     """VisionModel('sam3-base') raises an exception or VSX.sam returns expected_blocker.
@@ -37,6 +38,7 @@ def test_sam3_base_not_runnable():
 # b. test_dinov3_not_runnable
 # ---------------------------------------------------------------------------
 
+
 def test_dinov3_not_runnable():
     """VisionModel('dinov3-vitb16') raises or is excluded from the registry.
 
@@ -46,9 +48,11 @@ def test_dinov3_not_runnable():
     """
     try:
         from visionservex import VisionModel
+
         VisionModel("dinov3-vitb16")
         # If it did not raise, it must at least not be benchmark_passed via VSX.
         from visionservex.vsx import VSX, VSXError
+
         info = VSX.dino("dinov3-vitb16").explain()
         assert info["state"] != "benchmark_passed", (
             f"dinov3-vitb16 must not be benchmark_passed, got {info['state']!r}"
@@ -63,6 +67,7 @@ def test_dinov3_not_runnable():
 # ---------------------------------------------------------------------------
 # c. test_grounding_dino_1_5_requires_api
 # ---------------------------------------------------------------------------
+
 
 def test_grounding_dino_1_5_requires_api():
     """VisionModel('grounding-dino-1.5') raises or returns auth_required.
@@ -85,6 +90,7 @@ def test_grounding_dino_1_5_requires_api():
 # d. test_onnx_non_eligible_raises
 # ---------------------------------------------------------------------------
 
+
 def test_onnx_non_eligible_raises(tmp_path):
     """export_sam_decoder_onnx('edgesam', ...) raises ValueError.
 
@@ -101,6 +107,7 @@ def test_onnx_non_eligible_raises(tmp_path):
 # e. test_sam3_pipeline_blocked
 # ---------------------------------------------------------------------------
 
+
 def test_sam3_pipeline_blocked():
     """VSX.pipeline('grounding-dino-1.5+sam3-base').explain() shows auth_required.
 
@@ -114,14 +121,13 @@ def test_sam3_pipeline_blocked():
     assert info["state"] not in ("ok", "benchmark_passed", "pipeline_demo_ready"), (
         f"Expected blocked pipeline, got state={info['state']!r}"
     )
-    assert info["state"] == "auth_required", (
-        f"Expected auth_required, got {info['state']!r}"
-    )
+    assert info["state"] == "auth_required", f"Expected auth_required, got {info['state']!r}"
 
 
 # ---------------------------------------------------------------------------
 # f. test_sidecar_models_not_benchmark_passed
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize("mid", ["maskdino-r50-coco", "co-dino-inst-vit-l-coco"])
 def test_sidecar_models_not_benchmark_passed(mid):
@@ -142,5 +148,5 @@ def test_sidecar_models_not_benchmark_passed(mid):
     )
 
     # predict must raise — never silently succeed.
-    with pytest.raises(Exception):
+    with pytest.raises(Exception):  # noqa: B017 — must raise *something*, type irrelevant
         model.predict("dummy.jpg")

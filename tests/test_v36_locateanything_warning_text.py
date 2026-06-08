@@ -9,12 +9,11 @@ These tests assert the exact required phrases appear at every surface.
 
 from __future__ import annotations
 
-import json
+import contextlib
 import shutil
 import subprocess
 import sys
 from pathlib import Path
-
 
 _REQUIRED_PHRASES = [
     "WARNING",
@@ -58,10 +57,8 @@ def test_python_locate_without_flag_warning_to_stderr(capsys) -> None:
     from visionservex.vsx import VSX, VSXError
 
     img = Image.new("RGB", (32, 32))
-    try:
+    with contextlib.suppress(VSXError):
         VSX.locateanything("locate-anything-3b").locate(img, text="cat", accept_noncommercial=False)
-    except VSXError:
-        pass
     captured = capsys.readouterr()
     assert "WARNING" in captured.err, (
         "NVIDIA warning must be printed to stderr even when accept_noncommercial=False"
@@ -75,10 +72,8 @@ def test_python_locate_with_flag_warning_to_stderr(capsys) -> None:
     from visionservex.vsx import VSX
 
     img = Image.new("RGB", (32, 32))
-    try:
+    with contextlib.suppress(Exception):
         VSX.locateanything("locate-anything-3b").locate(img, text="cat", accept_noncommercial=True)
-    except Exception:
-        pass
     captured = capsys.readouterr()
     assert "WARNING" in captured.err, (
         "NVIDIA warning must be printed to stderr even when accept_noncommercial=True"
@@ -91,7 +86,18 @@ def test_cli_run_without_flag_warning_in_stderr(tmp_path: Path) -> None:
     img = tmp_path / "img.jpg"
     out = tmp_path / "out.json"
     _PIL.new("RGB", (32, 32)).save(img)
-    res = _run(["locate-anything", "run", "locate-anything-3b", str(img), "--text", "cat", "--out", str(out)])
+    res = _run(
+        [
+            "locate-anything",
+            "run",
+            "locate-anything-3b",
+            str(img),
+            "--text",
+            "cat",
+            "--out",
+            str(out),
+        ]
+    )
     assert "WARNING" in res.stderr or "NVIDIA" in res.stderr
 
 

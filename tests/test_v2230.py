@@ -103,7 +103,8 @@ def test_rtdetrv4_pull_emits_gdown_command(tmp_path: Path) -> None:
         (Path.home() / ".cache/visionservex/rtdetrv4").glob("rtdetrv4_*.pth")
     )
     assert d["code"] in (
-        {"OK", "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP"} if cached
+        {"OK", "CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP"}
+        if cached
         else {"CHECKPOINT_DOWNLOAD_REQUIRES_MANUAL_STEP"}
     )
     assert "gdown" in d["gdown_command"]

@@ -14,7 +14,13 @@ from pathlib import Path
 
 
 def _load_matrix() -> list[dict]:
-    p = Path(__file__).parent.parent / "notebook" / "99_final_report" / "reports" / "v36_stability_matrix.csv"
+    p = (
+        Path(__file__).parent.parent
+        / "notebook"
+        / "99_final_report"
+        / "reports"
+        / "v36_stability_matrix.csv"
+    )
     if not p.exists():
         return []
     with p.open() as f:
@@ -22,7 +28,13 @@ def _load_matrix() -> list[dict]:
 
 
 def test_matrix_file_exists() -> None:
-    p = Path(__file__).parent.parent / "notebook" / "99_final_report" / "reports" / "v36_stability_matrix.csv"
+    p = (
+        Path(__file__).parent.parent
+        / "notebook"
+        / "99_final_report"
+        / "reports"
+        / "v36_stability_matrix.csv"
+    )
     assert p.exists(), f"v36_stability_matrix.csv missing: {p}"
 
 

@@ -31,9 +31,21 @@ def test_explain_returns_required_keys() -> None:
 
     info = VSX.locateanything("locate-anything-3b").explain()
     required = {
-        "model_id", "family", "task", "state", "license", "default_safe",
-        "commercial_safe", "install_extra", "auth_required", "byot",
-        "warning", "sidecar_install", "limitations", "next_command", "tutorial",
+        "model_id",
+        "family",
+        "task",
+        "state",
+        "license",
+        "default_safe",
+        "commercial_safe",
+        "install_extra",
+        "auth_required",
+        "byot",
+        "warning",
+        "sidecar_install",
+        "limitations",
+        "next_command",
+        "tutorial",
     }
     for k in required:
         assert k in info, f"Missing key in explain(): {k!r}"
@@ -83,10 +95,10 @@ def test_locate_with_accept_noncommercial_attempts_sidecar(capsys) -> None:
 
     h = VSX.locateanything("locate-anything-3b")
     img = Image.new("RGB", (64, 64))
-    try:
+    import contextlib
+
+    with contextlib.suppress(Exception):  # RuntimeError from missing sidecar is expected
         h.locate(img, text="cat", accept_noncommercial=True)
-    except Exception:
-        pass  # RuntimeError from missing sidecar is expected
     captured = capsys.readouterr()
     # Warning must always be printed to stderr
     assert "WARNING" in captured.err or "NVIDIA" in captured.err

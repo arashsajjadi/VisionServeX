@@ -3,6 +3,23 @@
 ## [Unreleased]
 
 
+## [3.8.1] - 2026-06-07
+
+### CI/quality hardening (no functional change to 3.8.0)
+
+- **ruff: whole repo is now check-clean + format-clean** (was ~118 pre-existing
+  errors / 70 unformatted files across non-v3.8 code). Includes a real latent-bug
+  fix: `F821` undefined `np` in `_v34_handles.py` (TYPE_CHECKING import for the
+  return annotation).
+- **Tests robust without optional extras:** `test_v34_*` real-model tests now
+  `importorskip("torch"/"transformers")` (they were failing in the `.[dev,server]`
+  CI quick-test job); the v3.8 HF unit tests `importorskip("huggingface_hub")`.
+  This greens the CI quick-test + lint jobs.
+- Version-pin tests converted to forward-compatible minimum-version checks so they
+  no longer go stale every release.
+- Functionally identical to 3.8.0 (same HF BYOT + license policy surface).
+
+
 ## [3.8.0] - 2026-06-07
 
 ### Hugging Face BYOT + license-safe model activation + production hardening

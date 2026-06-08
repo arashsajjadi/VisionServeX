@@ -45,15 +45,21 @@ def test_blocker_table_has_escalation_and_next_command():
         assert r["exact_next_command"].strip(), f"{r['model_id']} no next command"
         assert "->" in r["escalation_ladder"]
         assert r["final_state"] in {
-            "sidecar_required", "checkpoint_required", "not_released",
-            "legal_review_required", "external_api_only", "auth_required",
+            "sidecar_required",
+            "checkpoint_required",
+            "not_released",
+            "legal_review_required",
+            "external_api_only",
+            "auth_required",
         }
 
 
 def test_byot_no_token_leak_and_no_mirroring():
     rows = _csv("v32_byot_execution_ledger.csv")
     for r in rows:
-        assert r["weights_mirrored"] in ("False", "false"), f"{r['model_id']} mirrors gated weights!"
+        assert r["weights_mirrored"] in ("False", "false"), (
+            f"{r['model_id']} mirrors gated weights!"
+        )
         assert r["token_logged"] in ("False", "false"), f"{r['model_id']} logs token!"
         # without a token, BYOT models stay auth_required (never benchmark_passed)
         if r["token_present"] in ("False", "false"):
@@ -85,4 +91,6 @@ def test_no_bad_license_in_core_still_holds():
 
     for r in rows:
         if str(r.get("default_safe", "")) == "True":
-            assert not re.search("AGPL|GPL|S-Lab|non-commercial|NonCommercial", r.get("license_status", ""), re.I), r["model_id"]
+            assert not re.search(
+                "AGPL|GPL|S-Lab|non-commercial|NonCommercial", r.get("license_status", ""), re.I
+            ), r["model_id"]

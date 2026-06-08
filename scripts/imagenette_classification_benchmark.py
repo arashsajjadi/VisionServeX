@@ -224,7 +224,7 @@ def main():
     val_set = _prepare_val_set(IMAGES_PER_CLASS)
     models_to_run = MODELS_ARG or DEFAULT_MODELS
     print(f"Imagenette classification benchmark: {len(models_to_run)} models")
-    print(f"Val set: {len(val_set)} images ({IMAGES_PER_CLASS} per class × 10 classes)")
+    print(f"Val set: {len(val_set)} images ({IMAGES_PER_CLASS} per class x 10 classes)")
     print(f"Dataset: {IMAGENETTE_VAL}")
 
     results = []

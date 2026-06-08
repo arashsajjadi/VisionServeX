@@ -5,6 +5,7 @@ Verifies that sidecar-required models (MaskDINO, Co-DINO) carry the correct
 status in the manifest and model matrix, and that rtdetrv4-s is correctly
 flagged as checkpoint_required rather than accidentally promoted.
 """
+
 from __future__ import annotations
 
 import csv
@@ -13,9 +14,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-_MATRIX_CSV = (
-    ROOT / "notebook" / "99_final_report" / "reports" / "v33_model_pass_fail_matrix.csv"
-)
+_MATRIX_CSV = ROOT / "notebook" / "99_final_report" / "reports" / "v33_model_pass_fail_matrix.csv"
 
 _SIDECAR_ACTIONS = {"sidecar_required", "expert_sidecar"}
 
@@ -82,8 +81,7 @@ def test_rtdetrv4_checkpoint_required() -> None:
     """rtdetrv4-s must be reported as checkpoint_required in the model matrix."""
     rows = {r["model_id"]: r for r in _matrix_rows()}
     assert "rtdetrv4-s" in rows, (
-        "rtdetrv4-s not found in model matrix CSV; "
-        "re-run the notebook to regenerate the report"
+        "rtdetrv4-s not found in model matrix CSV; re-run the notebook to regenerate the report"
     )
     final_state = rows["rtdetrv4-s"]["final_state"]
     assert final_state == "checkpoint_required", (

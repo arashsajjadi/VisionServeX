@@ -5,6 +5,7 @@ Each test is tagged pytest.mark.sam_onnx. Tests that require a local
 checkpoint use pytest.skip() when the checkpoint is absent so CI stays
 green without heavy model files.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -44,15 +45,11 @@ def test_list_onnx_eligible_models_returns_expected_ids():
 def test_export_sam_vit_b_when_checkpoint_exists(tmp_path):
     """Export sam-vit-b decoder to ONNX; skip when checkpoint is absent."""
     if not _SAM_VIT_B_CKPT.exists():
-        pytest.skip(
-            "sam-vit-b checkpoint not cached; run: visionservex pull sam-vit-b"
-        )
+        pytest.skip("sam-vit-b checkpoint not cached; run: visionservex pull sam-vit-b")
     out = tmp_path / "sam_vit_b.onnx"
     result = export_sam_decoder_onnx("sam-vit-b", str(out))
     assert out.exists(), "ONNX file was not created"
-    assert out.stat().st_size > 1_000_000, (
-        f"ONNX file too small: {out.stat().st_size} bytes"
-    )
+    assert out.stat().st_size > 1_000_000, f"ONNX file too small: {out.stat().st_size} bytes"
     assert result["size_mb"] > 1.0
 
 
@@ -89,9 +86,7 @@ def test_export_non_eligible_raises_value_error(tmp_path):
 def test_mobilesam_export_and_runtime(tmp_path):
     """Export mobilesam to ONNX and run CPU inference; skip if checkpoint absent."""
     if not _MOBILESAM_CKPT.exists():
-        pytest.skip(
-            "mobilesam checkpoint not cached; run: visionservex pull mobilesam"
-        )
+        pytest.skip("mobilesam checkpoint not cached; run: visionservex pull mobilesam")
     out = tmp_path / "mobilesam.onnx"
     result = export_sam_decoder_onnx("mobilesam", str(out))
     assert out.exists(), "ONNX file was not created"

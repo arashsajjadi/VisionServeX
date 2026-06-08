@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Arash Sajjadi
 """v3.7: tutorial notebooks exist, are valid, and assert site-packages imports
 (never import local src). Execution-from-wheel is recorded in the ledger."""
+
 from __future__ import annotations
 
 import json
@@ -31,13 +32,12 @@ def test_all_notebooks_valid_json():
 
 def test_notebooks_assert_site_packages_and_no_src():
     for nb in _notebooks():
-        src = "\n".join(
-            "".join(c.get("source", [])) for c in json.loads(nb.read_text())["cells"]
-        )
+        src = "\n".join("".join(c.get("source", [])) for c in json.loads(nb.read_text())["cells"])
         assert "site-packages" in src, f"{nb.name}: must assert site-packages import"
         # must not import from a local ./src path
-        assert "sys.path.insert(0, 'src')" not in src and "from src." not in src, \
+        assert "sys.path.insert(0, 'src')" not in src and "from src." not in src, (
             f"{nb.name}: imports local src"
+        )
 
 
 def test_notebooks_print_license_status():

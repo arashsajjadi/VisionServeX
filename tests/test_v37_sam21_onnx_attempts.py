@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2026 Arash Sajjadi
 """v3.7: SAM2.1 ONNX export attempt is honestly documented with exact next action."""
+
 from __future__ import annotations
 
 import json
@@ -33,8 +34,16 @@ def test_model_loads_in_attempt():
 
 def test_all_four_onnx_variants_in_matrix():
     import csv
+
     rows = {r["variant_id"]: r for r in csv.DictReader((R / "v37_sam_variant_matrix.csv").open())}
-    for v in ["sam2.1-onnx-tiny", "sam2.1-onnx-small", "sam2.1-onnx-base-plus", "sam2.1-onnx-large"]:
+    for v in [
+        "sam2.1-onnx-tiny",
+        "sam2.1-onnx-small",
+        "sam2.1-onnx-base-plus",
+        "sam2.1-onnx-large",
+    ]:
         assert v in rows
         assert rows[v]["final_state"] == "blocked_documented"
-        assert "sam2" in rows[v]["exact_command"].lower() or "onnx" in rows[v]["exact_command"].lower()
+        assert (
+            "sam2" in rows[v]["exact_command"].lower() or "onnx" in rows[v]["exact_command"].lower()
+        )

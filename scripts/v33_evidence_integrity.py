@@ -22,8 +22,13 @@ R = ROOT / "notebook" / "99_final_report" / "reports"
 NB = ROOT / "notebook"
 EVIDENCE_BASES = [NB, R, NB / "99_final_report", ROOT]
 
-PASS_STATES = {"benchmark_passed", "micro_benchmark_passed", "demo_passed_sidecar",
-               "pipeline_benchmark_passed", "tool_benchmark_passed"}
+PASS_STATES = {
+    "benchmark_passed",
+    "micro_benchmark_passed",
+    "demo_passed_sidecar",
+    "pipeline_benchmark_passed",
+    "tool_benchmark_passed",
+}
 
 # task -> substrings any of which a legitimate metric column name may contain
 TASK_METRIC_HINTS = {
@@ -41,9 +46,31 @@ TASK_METRIC_HINTS = {
     "reid": ["map", "rank", "cmc", "acc"],
     "track": ["mota", "idf1", "hota"],
 }
-GENERIC_METRIC_TOKENS = ["map", "iou", "acc", "ap", "knn", "recall", "top", "dice",
-                         "score", "latency", "auroc", "pck", "oks", "f1", "pq",
-                         "mota", "idf1", "rank", "mae", "rmse", "cmc", "hota", "mar"]
+GENERIC_METRIC_TOKENS = [
+    "map",
+    "iou",
+    "acc",
+    "ap",
+    "knn",
+    "recall",
+    "top",
+    "dice",
+    "score",
+    "latency",
+    "auroc",
+    "pck",
+    "oks",
+    "f1",
+    "pq",
+    "mota",
+    "idf1",
+    "rank",
+    "mae",
+    "rmse",
+    "cmc",
+    "hota",
+    "mar",
+]
 
 
 def is_nanish(v) -> bool:
@@ -89,8 +116,15 @@ def inspect_file(path: Path, mid: str, task: str) -> dict:
     try:
         txt = path.read_text(errors="ignore")
     except Exception:
-        return {"model_found": False, "numeric_metric_found": False, "metric_value": "",
-                    "metric_col": "", "nan_metric": True, "task_ok": False, "note": "unreadable"}
+        return {
+            "model_found": False,
+            "numeric_metric_found": False,
+            "metric_value": "",
+            "metric_col": "",
+            "nan_metric": True,
+            "task_ok": False,
+            "note": "unreadable",
+        }
     found = (mid in txt) or (bid in txt)
     metric_col, metric_val, numeric_found, nan_metric, task_ok = "", "", False, True, False
     hints = TASK_METRIC_HINTS.get(task, GENERIC_METRIC_TOKENS)
@@ -99,8 +133,11 @@ def inspect_file(path: Path, mid: str, task: str) -> dict:
             rows = list(csv.DictReader(path.open()))
         except Exception:
             rows = []
-        cand = [r for r in rows if r.get("model_id", "") in (mid, bid)
-                or base_id(r.get("model_id", "")) == bid]
+        cand = [
+            r
+            for r in rows
+            if r.get("model_id", "") in (mid, bid) or base_id(r.get("model_id", "")) == bid
+        ]
         target = cand[0] if cand else None
         if target:
             for col, val in target.items():
@@ -123,8 +160,15 @@ def inspect_file(path: Path, mid: str, task: str) -> dict:
             task_ok = numeric_found
             nan_metric = not numeric_found
             metric_col = "json"
-    return {"model_found": found, "numeric_metric_found": numeric_found, "metric_value": metric_val,
-                "metric_col": metric_col, "nan_metric": nan_metric, "task_ok": task_ok, "note": ""}
+    return {
+        "model_found": found,
+        "numeric_metric_found": numeric_found,
+        "metric_value": metric_val,
+        "metric_col": metric_col,
+        "nan_metric": nan_metric,
+        "task_ok": task_ok,
+        "note": "",
+    }
 
 
 DEMO_STATES = {"demo_passed_sidecar", "micro_benchmark_passed"}
@@ -163,29 +207,64 @@ for m in pass_rows:
         if p is None:
             p = family_search(m["model_id"], fam)
         if p is None:
-            report.append({"model_id": m["model_id"], "task": m["task"], "final_state": m["final_state"],
-                           "evidence_artifact": art, "file_exists": False, "model_found_in_file": False,
-                           "numeric_metric_found": False, "metric_col": "demo-log", "metric_value": "",
-                           "nan_metric": True, "task_metric_appropriate": False, "verdict": "MISSING_FILE"})
+            report.append(
+                {
+                    "model_id": m["model_id"],
+                    "task": m["task"],
+                    "final_state": m["final_state"],
+                    "evidence_artifact": art,
+                    "file_exists": False,
+                    "model_found_in_file": False,
+                    "numeric_metric_found": False,
+                    "metric_col": "demo-log",
+                    "metric_value": "",
+                    "nan_metric": True,
+                    "task_metric_appropriate": False,
+                    "verdict": "MISSING_FILE",
+                }
+            )
             continue
         txt = ""
         with contextlib.suppress(Exception):
             txt = p.read_text(errors="ignore").lower()
-        ref = any(n and n.lower() in txt for n in
-                  (m["model_id"], base_id(m["model_id"]), fam, fam.split("-")[0]))
-        report.append({"model_id": m["model_id"], "task": m["task"], "final_state": m["final_state"],
-                       "evidence_artifact": str(p.relative_to(ROOT)) if ROOT in p.parents else str(p),
-                       "file_exists": True, "model_found_in_file": ref,
-                       "numeric_metric_found": ref, "metric_col": "demo-log/sidecar",
-                       "metric_value": "demo", "nan_metric": False, "task_metric_appropriate": ref,
-                       "verdict": "OK_DEMO" if ref else "DEMO_LOG_UNREFERENCED"})
+        ref = any(
+            n and n.lower() in txt
+            for n in (m["model_id"], base_id(m["model_id"]), fam, fam.split("-")[0])
+        )
+        report.append(
+            {
+                "model_id": m["model_id"],
+                "task": m["task"],
+                "final_state": m["final_state"],
+                "evidence_artifact": str(p.relative_to(ROOT)) if ROOT in p.parents else str(p),
+                "file_exists": True,
+                "model_found_in_file": ref,
+                "numeric_metric_found": ref,
+                "metric_col": "demo-log/sidecar",
+                "metric_value": "demo",
+                "nan_metric": False,
+                "task_metric_appropriate": ref,
+                "verdict": "OK_DEMO" if ref else "DEMO_LOG_UNREFERENCED",
+            }
+        )
         continue
     if p is None:
-        report.append({"model_id": m["model_id"], "task": m["task"], "final_state": m["final_state"],
-                       "evidence_artifact": art, "file_exists": False, "model_found_in_file": False,
-                       "numeric_metric_found": False, "metric_col": "", "metric_value": "",
-                       "nan_metric": True, "task_metric_appropriate": False,
-                       "verdict": "MISSING_FILE"})
+        report.append(
+            {
+                "model_id": m["model_id"],
+                "task": m["task"],
+                "final_state": m["final_state"],
+                "evidence_artifact": art,
+                "file_exists": False,
+                "model_found_in_file": False,
+                "numeric_metric_found": False,
+                "metric_col": "",
+                "metric_value": "",
+                "nan_metric": True,
+                "task_metric_appropriate": False,
+                "verdict": "MISSING_FILE",
+            }
+        )
         continue
     insp = inspect_file(p, m["model_id"], m["task"])
     verdict = "OK"
@@ -195,13 +274,22 @@ for m in pass_rows:
         verdict = "NO_NUMERIC_METRIC"
     elif not insp["task_ok"]:
         verdict = "METRIC_TYPE_MISMATCH"
-    report.append({"model_id": m["model_id"], "task": m["task"], "final_state": m["final_state"],
-                   "evidence_artifact": str(p.relative_to(ROOT)) if ROOT in p.parents else str(p),
-                   "file_exists": True, "model_found_in_file": insp["model_found"],
-                   "numeric_metric_found": insp["numeric_metric_found"],
-                   "metric_col": insp["metric_col"], "metric_value": insp["metric_value"],
-                   "nan_metric": insp["nan_metric"], "task_metric_appropriate": insp["task_ok"],
-                   "verdict": verdict})
+    report.append(
+        {
+            "model_id": m["model_id"],
+            "task": m["task"],
+            "final_state": m["final_state"],
+            "evidence_artifact": str(p.relative_to(ROOT)) if ROOT in p.parents else str(p),
+            "file_exists": True,
+            "model_found_in_file": insp["model_found"],
+            "numeric_metric_found": insp["numeric_metric_found"],
+            "metric_col": insp["metric_col"],
+            "metric_value": insp["metric_value"],
+            "nan_metric": insp["nan_metric"],
+            "task_metric_appropriate": insp["task_ok"],
+            "verdict": verdict,
+        }
+    )
 
 with (R / "v33_evidence_integrity_report.csv").open("w", newline="") as f:
     w = csv.DictWriter(f, fieldnames=list(report[0].keys()))
@@ -214,31 +302,39 @@ OK_VERDICTS = {"OK", "OK_DEMO"}
 ok = sum(verd.get(k, 0) for k in OK_VERDICTS)
 problems = [r for r in report if r["verdict"] not in OK_VERDICTS]
 
-md = ["# v3.3 Evidence Integrity Audit\n",
-      f"PASS rows audited: {n}",
-      f"- OK (benchmark rows: model present + non-NaN task-appropriate metric): {verd.get('OK',0)}",
-      f"- OK_DEMO (demo_passed_sidecar / micro_benchmark: real sidecar/demo log references the model): {verd.get('OK_DEMO',0)}",
-      f"- TOTAL OK: {ok} ({round(100*ok/n,2)}%)",
-      f"- MISSING_FILE: {verd.get('MISSING_FILE',0)}",
-      f"- MODEL_NOT_IN_FILE: {verd.get('MODEL_NOT_IN_FILE',0)}",
-      f"- NO_NUMERIC_METRIC: {verd.get('NO_NUMERIC_METRIC',0)}",
-      f"- METRIC_TYPE_MISMATCH: {verd.get('METRIC_TYPE_MISMATCH',0)}",
-      f"- DEMO_LOG_UNREFERENCED: {verd.get('DEMO_LOG_UNREFERENCED',0)}",
-      ""]
+md = [
+    "# v3.3 Evidence Integrity Audit\n",
+    f"PASS rows audited: {n}",
+    f"- OK (benchmark rows: model present + non-NaN task-appropriate metric): {verd.get('OK', 0)}",
+    f"- OK_DEMO (demo_passed_sidecar / micro_benchmark: real sidecar/demo log references the model): {verd.get('OK_DEMO', 0)}",
+    f"- TOTAL OK: {ok} ({round(100 * ok / n, 2)}%)",
+    f"- MISSING_FILE: {verd.get('MISSING_FILE', 0)}",
+    f"- MODEL_NOT_IN_FILE: {verd.get('MODEL_NOT_IN_FILE', 0)}",
+    f"- NO_NUMERIC_METRIC: {verd.get('NO_NUMERIC_METRIC', 0)}",
+    f"- METRIC_TYPE_MISMATCH: {verd.get('METRIC_TYPE_MISMATCH', 0)}",
+    f"- DEMO_LOG_UNREFERENCED: {verd.get('DEMO_LOG_UNREFERENCED', 0)}",
+    "",
+]
 if problems:
     md.append("## Rows needing review")
     md.append("| model_id | task | verdict | evidence | metric_col=value |")
     md.append("|---|---|---|---|---|")
     for r in problems[:60]:
-        md.append(f"| {r['model_id']} | {r['task']} | {r['verdict']} | {r['evidence_artifact']} | {r['metric_col']}={r['metric_value']} |")
+        md.append(
+            f"| {r['model_id']} | {r['task']} | {r['verdict']} | {r['evidence_artifact']} | {r['metric_col']}={r['metric_value']} |"
+        )
 else:
-    md.append("All PASS rows have a real, on-disk, task-appropriate, non-NaN metric. No placeholders.")
+    md.append(
+        "All PASS rows have a real, on-disk, task-appropriate, non-NaN metric. No placeholders."
+    )
 (R / "v33_evidence_integrity_report.md").write_text("\n".join(md))
 
-print(f"audited {n} PASS rows: OK={ok} ({round(100*ok/n,2)}%)")
+print(f"audited {n} PASS rows: OK={ok} ({round(100 * ok / n, 2)}%)")
 for k, v in verd.most_common():
     print(f"  {k}: {v}")
 if problems:
     print("PROBLEM ROWS:")
     for r in problems[:40]:
-        print(f"  {r['verdict']:20s} {r['model_id']:30s} task={r['task']:18s} {r['metric_col']}={r['metric_value']}")
+        print(
+            f"  {r['verdict']:20s} {r['model_id']:30s} task={r['task']:18s} {r['metric_col']}={r['metric_value']}"
+        )

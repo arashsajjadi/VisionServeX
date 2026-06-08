@@ -258,6 +258,6 @@ def test_deimv2_and_rtdetrv4_have_blockers():
         e = SOURCE_MANIFEST[k]
         if not e.runnable_in_visionservex:
             assert e.known_blockers, f"{k} (non-runnable) must document known_blockers"
-    assert any(
-        SOURCE_MANIFEST[k].runnable_in_visionservex for k in deimv2_entries
-    ), "expected at least one runnable DEIMv2 variant after the v2.48 wiring"
+    assert any(SOURCE_MANIFEST[k].runnable_in_visionservex for k in deimv2_entries), (
+        "expected at least one runnable DEIMv2 variant after the v2.48 wiring"
+    )

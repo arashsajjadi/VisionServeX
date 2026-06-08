@@ -44,6 +44,7 @@ def test_check_sidecar_raises_runtime_error_if_eagle_absent() -> None:
     """_check_sidecar raises RuntimeError with the install command when eagle is missing."""
     try:
         import eagle  # type: ignore[import]  # noqa: F401
+
         pytest.skip("eagle sidecar is installed — sidecar-absent test not applicable")
     except ImportError:
         pass
@@ -76,8 +77,6 @@ def test_model_hf_ids_base_model_maps_correctly() -> None:
 def test_default_cache_dir_uses_visionservex_namespace(tmp_path) -> None:
     """When cache_dir is None, the runtime uses ~/.cache/visionservex/locate_anything."""
     from pathlib import Path
-
-    from visionservex.locate_anything_runtime import _MODEL_HF_IDS
 
     expected_suffix = Path(".cache") / "visionservex" / "locate_anything"
     resolved = Path.home() / ".cache" / "visionservex" / "locate_anything"

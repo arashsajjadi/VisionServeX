@@ -14,7 +14,9 @@ from pathlib import Path
 def _report_path() -> Path:
     return (
         Path(__file__).parent.parent
-        / "notebook" / "99_final_report" / "reports"
+        / "notebook"
+        / "99_final_report"
+        / "reports"
         / "v36_model_addition_final_report.md"
     )
 
@@ -30,8 +32,7 @@ def test_final_report_starts_with_required_header() -> None:
         return
     content = p.read_text()
     assert content.startswith("VISION SERVE X V3.6"), (
-        f"Final report must start with 'VISION SERVE X V3.6', "
-        f"got: {content[:80]!r}"
+        f"Final report must start with 'VISION SERVE X V3.6', got: {content[:80]!r}"
     )
 
 

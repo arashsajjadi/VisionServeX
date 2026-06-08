@@ -60,15 +60,17 @@ def main():
                 status = "skipped"
                 sk = tc.find("skipped")
                 msg = sk.get("message", "") if sk is not None else ""
-            cases.append({
-                "file": tc.get("file", ""),
-                "classname": tc.get("classname", ""),
-                "name": tc.get("name", ""),
-                "time": float(tc.get("time", "0") or 0),
-                "status": status,
-                "message": msg.replace("\n", " ").strip()[:600],
-                "layer": layer_of(tc.get("classname", ""), tc.get("name", "")),
-            })
+            cases.append(
+                {
+                    "file": tc.get("file", ""),
+                    "classname": tc.get("classname", ""),
+                    "name": tc.get("name", ""),
+                    "time": float(tc.get("time", "0") or 0),
+                    "status": status,
+                    "message": msg.replace("\n", " ").strip()[:600],
+                    "layer": layer_of(tc.get("classname", ""), tc.get("name", "")),
+                }
+            )
 
     total = len(cases)
     by_status = Counter(c["status"] for c in cases)
@@ -76,8 +78,14 @@ def main():
 
     # pre-existing heuristic: known dev-box-only failures documented in gate matrix V3-16
     PREEXIST_PATTERNS = [
-        r"test_v200", r"test_v260", r"torchreid", r"deimv2", r"test_v243",
-        r"ANOMALIB_REQUIRED", r"TORCHREID_REQUIRED", r"rtdetrv4.*gdown",
+        r"test_v200",
+        r"test_v260",
+        r"torchreid",
+        r"deimv2",
+        r"test_v243",
+        r"ANOMALIB_REQUIRED",
+        r"TORCHREID_REQUIRED",
+        r"rtdetrv4.*gdown",
     ]
     for c in failed:
         blob = f"{c['file']} {c['classname']} {c['name']} {c['message']}"
@@ -91,8 +99,10 @@ def main():
         "skipped": by_status.get("skipped", 0),
         "pass_pct_of_run": round(100 * by_status.get("passed", 0) / total, 2) if total else 0,
         "pass_pct_of_nonskipped": round(
-            100 * by_status.get("passed", 0) / (total - by_status.get("skipped", 0)), 2)
-        if (total - by_status.get("skipped", 0)) else 0,
+            100 * by_status.get("passed", 0) / (total - by_status.get("skipped", 0)), 2
+        )
+        if (total - by_status.get("skipped", 0))
+        else 0,
         "failed_by_layer": dict(Counter(c["layer"] for c in failed)),
         "failed_preexisting_guess": sum(1 for c in failed if c.get("preexisting_guess")),
         "failed_new_guess": sum(1 for c in failed if not c.get("preexisting_guess")),
@@ -100,14 +110,28 @@ def main():
     (R / "v33_pytest_summary.json").write_text(json.dumps(summary, indent=2))
 
     # failed tests csv
-    fcols = ["file", "classname", "name", "layer", "status", "preexisting_guess",
-             "message", "fix_attempted", "final_state"]
+    fcols = [
+        "file",
+        "classname",
+        "name",
+        "layer",
+        "status",
+        "preexisting_guess",
+        "message",
+        "fix_attempted",
+        "final_state",
+    ]
     with (R / "v33_failed_tests.csv").open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fcols)
         w.writeheader()
         for c in failed:
-            w.writerow({**{k: c.get(k, "") for k in fcols},
-                        "fix_attempted": "", "final_state": "pending_triage"})
+            w.writerow(
+                {
+                    **{k: c.get(k, "") for k in fcols},
+                    "fix_attempted": "",
+                    "final_state": "pending_triage",
+                }
+            )
 
     md = [
         "# v3.3 pytest summary",
@@ -126,18 +150,26 @@ def main():
         md.append("|---|---|---|---|---|")
         for c in failed:
             mid = c["message"][:120].replace("|", "/")
-            md.append(f"| {c['file']} | {c['name']} | {c['layer']} | {c.get('preexisting_guess')} | {mid} |")
+            md.append(
+                f"| {c['file']} | {c['name']} | {c['layer']} | {c.get('preexisting_guess')} | {mid} |"
+            )
     else:
         md.append("All non-skipped tests passed. 0 failures, 0 errors.")
     (R / "v33_pytest_summary.md").write_text("\n".join(md))
 
-    print(f"total={total} passed={summary['passed']} failed={summary['failed']} "
-          f"errors={summary['errors']} skipped={summary['skipped']}")
-    print(f"pass% of run={summary['pass_pct_of_run']}  of non-skipped={summary['pass_pct_of_nonskipped']}")
+    print(
+        f"total={total} passed={summary['passed']} failed={summary['failed']} "
+        f"errors={summary['errors']} skipped={summary['skipped']}"
+    )
+    print(
+        f"pass% of run={summary['pass_pct_of_run']}  of non-skipped={summary['pass_pct_of_nonskipped']}"
+    )
     if failed:
         print("FAILURES:")
         for c in failed:
-            print(f"  [{c['layer']}] {c['file']}::{c['name']} preexist={c.get('preexisting_guess')}")
+            print(
+                f"  [{c['layer']}] {c['file']}::{c['name']} preexist={c.get('preexisting_guess')}"
+            )
             print(f"      {c['message'][:160]}")
     else:
         print("0 failures / 0 errors.")

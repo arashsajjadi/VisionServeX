@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Arash Sajjadi
 """v3.7 Priority-Zero table remainders: interactive seg, RF-DETR-Seg, GD+SAM
 pipelines, SAM2.1 ONNX, tiny/HQ, edge/fast/ultralytics — each decided + wired."""
+
 from __future__ import annotations
 
 import csv
@@ -53,7 +54,12 @@ def test_pipelines_executed():
 # P0-D sam2.1 onnx
 def test_sam21_onnx_documented():
     sam = {r["variant_id"]: r for r in csv.DictReader((R / "v37_sam_variant_matrix.csv").open())}
-    for v in ["sam2.1-onnx-tiny", "sam2.1-onnx-small", "sam2.1-onnx-base-plus", "sam2.1-onnx-large"]:
+    for v in [
+        "sam2.1-onnx-tiny",
+        "sam2.1-onnx-small",
+        "sam2.1-onnx-base-plus",
+        "sam2.1-onnx-large",
+    ]:
         assert v in sam
         assert sam[v]["final_state"] in ("blocked_documented", "benchmark_passed")
 
