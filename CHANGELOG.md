@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [3.10.1] - 2026-06-08
+
+### Changed
+- README rewritten from 998 lines to 448 lines for public-product clarity:
+  removed internal audit percentages (111 PASS / 64.16%), removed all
+  public-facing Ultralytics/YOLO/FastSAM references, rewrote license/commercial
+  posture table with clear user-facing language, added verified SAM3/SAM3.1 real
+  mask results (62K / 307K px), added clean capability table and BYOT flow.
+- `docs/global_model_count.md` (new): explains policy rows, manifest entries,
+  and runnable-model counts without misleading comparisons.
+- `docs/sam3_mask_benchmark.md` (new): real mask evidence, threshold fix, artifacts.
+- `docs/dinov3_depth.md` (new): CHMv2 DPT depth head requirements and results.
+- `docs/sam21_onnx.md` (new): image-encoder ONNX export and limitations.
+- `tests/test_v39_readme_docs_sync.py`: version check accepts v3.10 (forward-compat).
+
+### Fixed
+- `scripts/v310_sam3_real_mask_benchmark.py`: ruff I001/E702 violations (CI lint).
+- `scripts/v310_sam21_onnx_attempt.py`: ruff E701/I001 violations.
+- ruff format applied to 18 tracked Python files.
+- `tests/test_extras_all_benchmark_v233.py`: updated dino extra assertion to `>=5.10`.
 
 ## [3.10.0] - 2026-06-08
 
