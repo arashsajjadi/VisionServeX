@@ -31,4 +31,4 @@ def test_dino_extra_pins_transformers_456() -> None:
     dino_idx = text.find("dino = [")
     assert dino_idx > 0
     chunk = text[dino_idx : dino_idx + 400]
-    assert "transformers>=4.56" in chunk
+    assert "transformers>=5.10" in chunk

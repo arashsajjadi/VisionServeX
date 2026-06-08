@@ -34,19 +34,24 @@ try:
     RESULT["onnx_version"] = onnx.__version__
 
     import torch
-    from transformers import Sam2Model, Sam2Processor
     from PIL import Image
+    from transformers import Sam2Model, Sam2Processor
 
     def get_token():
         try:
             from huggingface_hub import get_token as _get
+
             t = _get()
-            if t: return t
-        except Exception: pass
+            if t:
+                return t
+        except Exception:
+            pass
         import os
+
         for k in ("HF_TOKEN", "HUGGINGFACE_HUB_TOKEN"):
             v = os.environ.get(k, "")
-            if v: return v
+            if v:
+                return v
         return None
 
     token = get_token()
