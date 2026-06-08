@@ -105,7 +105,7 @@ def _extract_patch_features(model, processor, img, device: str, token=None):
         grid_w = proc_w // pw
         # Sanity: grid_h * grid_w should equal n_patches; if not fall back to sqrt
         if grid_h * grid_w != n_patches:
-            side = int(math.isqrt(n_patches))
+            side = math.isqrt(n_patches)
             grid_h = grid_w = side
     else:
         grid_h = grid_w = 1

@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 import typer
 
@@ -84,7 +83,7 @@ def run(
     model_id: str = typer.Option("insid3-large", help="INSID3 variant: small/base/large."),
     device: str = typer.Option("cpu", help="Device: cpu or cuda."),
     n_clusters: int = typer.Option(6, help="Agglomerative clustering count."),
-    out_dir: Optional[str] = typer.Option(
+    out_dir: str | None = typer.Option(
         None, help="Output directory for pred_mask.png, overlay.png, metadata.json."
     ),
 ):
@@ -123,7 +122,7 @@ def correspond(
     image_b: str = typer.Argument(..., help="Second image path."),
     model_id: str = typer.Option("insid3-large", help="INSID3 variant: small/base/large."),
     device: str = typer.Option("cpu", help="Device: cpu or cuda."),
-    out_dir: Optional[str] = typer.Option(None, help="Directory for correspondence heatmap."),
+    out_dir: str | None = typer.Option(None, help="Directory for correspondence heatmap."),
 ):
     """Compute DINOv3 feature correspondences between two images (exploratory)."""
     import json
