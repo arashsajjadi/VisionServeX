@@ -690,6 +690,24 @@ for _mid, (_repo, _desc) in _dinov3.items():
         )
     )
 
+# DINOv3 CHMv2 DPT depth head — separate repo, requires transformers>=5.10
+_ROWS.append(
+    _byot(
+        "dinov3-vitl16-chmv2-dpt-head",
+        "dinov3",
+        code=_DINOV3_LIC,
+        weights=_DINOV3_LIC,
+        hf_repo="facebook/dinov3-vitl16-chmv2-dpt-head",
+        upstream="https://huggingface.co/facebook/dinov3-vitl16-chmv2-dpt-head",
+        notes=(
+            "ViT-L/16 ~337M + CHMv2 DPT depth head. "
+            "Custom DINOv3 License; BYOT only. "
+            "Requires transformers>=5.10 (CHMv2ForDepthEstimation). "
+            "Task: monocular depth estimation."
+        ),
+    )
+)
+
 # ----- external_api_only_terms_required: GroundingDINO 1.5/1.6, DINO-X --------
 _ROWS += [
     _api(

@@ -181,7 +181,10 @@ def sam3_segment(
         outputs = model(**inputs)
     infer_ms = (time.perf_counter() - t1) * 1000.0
     # post-process to instance masks (API name varies across transformers builds)
+    # Use threshold=0.0 to get all proposals; SAM3 logit scores are mostly negative
+    # so any positive threshold silently filters out all results.
     n_masks = None
+    mask_area_px = 0
     scores: list[float] = []
     try:
         target = [(img.height, img.width)]
@@ -189,21 +192,33 @@ def sam3_segment(
         for fn in ("post_process_instance_segmentation", "post_process_grounded_object_detection"):
             if hasattr(proc, fn):
                 try:
-                    results = getattr(proc, fn)(outputs, target_sizes=target, threshold=0.4)
+                    results = getattr(proc, fn)(outputs, target_sizes=target, threshold=0.0)
                     break
                 except TypeError:
                     results = getattr(proc, fn)(outputs)
                     break
         if results:
             r0 = results[0]
-            for key in ("masks", "segmentation", "boxes"):
+            masks_t = None
+            for key in ("masks", "segmentation"):
                 val = r0.get(key) if isinstance(r0, dict) else None
                 if val is not None:
+                    masks_t = val
                     n_masks = len(val)
                     break
+            if masks_t is None:
+                boxes_val = r0.get("boxes") if isinstance(r0, dict) else None
+                if boxes_val is not None:
+                    n_masks = len(boxes_val)
             sc = r0.get("scores") if isinstance(r0, dict) else None
             if sc is not None:
-                scores = [round(float(s), 4) for s in list(sc)[:10]]
+                # Sort by score desc, keep top 5
+                top_idx = sc.argsort(descending=True)[:5]
+                scores = [round(float(sc[i]), 4) for i in top_idx.tolist()]
+                if masks_t is not None:
+                    top_masks = masks_t[top_idx].float().cpu().numpy()
+                    combined = top_masks.sum(axis=0) > 0 if top_masks.ndim == 3 else top_masks > 0
+                    mask_area_px = int(combined.sum())
     except Exception as exc:
         return {
             "status": "ok",
@@ -220,9 +235,10 @@ def sam3_segment(
             "warning": pol.warning_text,
         }
     n_params = sum(p.numel() for p in model.parameters())
+    state = "benchmark_passed_byot_mask" if mask_area_px > 0 else "benchmark_passed_byot"
     return {
         "status": "ok",
-        "state": "benchmark_passed_byot",
+        "state": state,
         "model_id": canonical,
         "hf_repo": repo,
         "task": "concept_segmentation",
@@ -230,6 +246,7 @@ def sam3_segment(
         "license": pol.weights_license,
         "device": device,
         "num_masks": n_masks,
+        "mask_area_px": mask_area_px,
         "scores": scores,
         "params_millions": round(n_params / 1e6, 2),
         "load_ms": round(load_ms, 1),
@@ -238,4 +255,70 @@ def sam3_segment(
     }
 
 
-__all__ = ["dinov3_embed", "sam3_segment"]
+def dinov3_depth(model_id: str, image, *, device: str = "cpu") -> dict[str, Any]:
+    """Run DINOv3 CHMv2 DPT depth estimation (BYOT). Requires transformers>=5.10."""
+    blocked = _preflight(model_id, ("dinov3",))
+    if blocked:
+        return blocked
+    canonical = _P.resolve_model_id(model_id)
+    pol = _P.get_policy(canonical)
+    repo = pol.hf_repo
+    try:
+        import torch
+        from transformers import AutoImageProcessor, AutoModelForDepthEstimation
+    except ImportError:
+        return {
+            "status": "blocked",
+            "state": "dependency_required",
+            "reason": "transformers/torch not installed",
+            "next_command": "pip install 'visionservex[dino]'",
+        }
+    # CHMv2ImageProcessorFast was added in transformers 5.10; give clear guidance.
+    import transformers as _tf
+    from packaging.version import Version
+
+    if Version(_tf.__version__) < Version("5.10.0"):
+        return {
+            "status": "blocked",
+            "state": "runtime_blocked_byot",
+            "reason": (
+                f"CHMv2ForDepthEstimation requires transformers>=5.10; "
+                f"installed: {_tf.__version__}"
+            ),
+            "next_command": "pip install 'transformers>=5.10'",
+        }
+    token = _H.hf_get_token()
+    img = _load_image(image)
+    t0 = time.perf_counter()
+    proc = AutoImageProcessor.from_pretrained(repo, token=token)
+    model = AutoModelForDepthEstimation.from_pretrained(repo, token=token).to(device).eval()
+    load_ms = (time.perf_counter() - t0) * 1000.0
+    inputs = proc(images=img, return_tensors="pt").to(device)
+    t1 = time.perf_counter()
+    with torch.no_grad():
+        outputs = model(**inputs)
+    infer_ms = (time.perf_counter() - t1) * 1000.0
+    depth = outputs.predicted_depth
+    depth_np = depth.squeeze().float().cpu().numpy()
+    n_params = sum(p.numel() for p in model.parameters())
+    return {
+        "status": "ok",
+        "state": "benchmark_passed_byot_depth",
+        "model_id": canonical,
+        "hf_repo": repo,
+        "task": "monocular_depth_estimation",
+        "license": pol.weights_license,
+        "device": device,
+        "depth_shape": list(depth.shape),
+        "depth_min": float(depth_np.min()),
+        "depth_max": float(depth_np.max()),
+        "depth_mean": float(depth_np.mean()),
+        "depth_nonzero_px": int((depth_np != 0).sum()),
+        "params_millions": round(n_params / 1e6, 2),
+        "load_ms": round(load_ms, 1),
+        "infer_ms": round(infer_ms, 1),
+        "warning": pol.warning_text,
+    }
+
+
+__all__ = ["dinov3_depth", "dinov3_embed", "sam3_segment"]
