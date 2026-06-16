@@ -46,7 +46,9 @@ def test_byot_license_required_count():
 
 def test_commercial_safe_core_count():
     core = [r for r in _rows() if r.final_policy == "commercial_safe_core"]
-    assert len(core) == 39, f"Expected 39 commercial_safe_core rows, got {len(core)}"
+    # v3.12.0 added 3 permissive LibreYOLO detectors (yolox-s, yolov9-s, rtdetr-r50)
+    # -> 42 total commercial_safe_core rows.
+    assert len(core) == 42, f"Expected 42 commercial_safe_core rows, got {len(core)}"
 
 
 def test_no_gated_in_commercial_safe_default_safe():

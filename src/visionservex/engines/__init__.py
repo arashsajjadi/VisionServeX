@@ -13,6 +13,7 @@ from visionservex.engines import grounded_sam2 as _grounded_sam2
 from visionservex.engines import grounding_dino as _gd
 from visionservex.engines import hf_classify as _hf_classify
 from visionservex.engines import huggingface as _hf
+from visionservex.engines import libreyolo as _libreyolo  # permissive YOLOX/YOLOv9/RT-DETR/D-FINE
 
 # Order matters: mock must be first because the stub engines fall back to MockEngine.
 from visionservex.engines import mock as _mock

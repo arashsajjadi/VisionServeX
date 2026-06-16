@@ -2,6 +2,28 @@
 
 ## [Unreleased]
 
+## [3.12.0] - 2026-06-15
+
+### Added — LibreYOLO runtime engine (permissive YOLO family)
+
+LibreYOLO detectors are now runnable through the standard VisionServeX engine
+path (`VisionModel` / `visionservex detect` / HTTP server), not only the
+dedicated `visionservex libreyolo` CLI. LibreYOLO is the permissive (MIT code;
+Apache-2.0 / MIT weights) alternative to AGPL Ultralytics YOLO / YOLO-World.
+Weights are pulled on demand from the official LibreYOLO Hugging Face org and
+are never bundled (`can_ship_weights=False`).
+
+- `src/visionservex/engines/libreyolo.py` — `LibreYOLOEngine`: maps
+  `libreyolo-<family>-<size>` ids to libreyolo package classes (YOLOX, YOLOv9,
+  RT-DETR, D-FINE) and converts results to `DetectionResult`. YOLO-NAS (Deci
+  non-commercial) is intentionally not exposed as a runnable family.
+- `src/visionservex/engines/__init__.py` — register the `libreyolo` engine.
+- `src/visionservex/registry/models.yaml` — 3 runnable rows: `libreyolo-yolox-s`,
+  `libreyolo-yolov9-s`, `libreyolo-rtdetr-r50`.
+- `src/visionservex/licensing/policy.py` — 3 `commercial_safe_core` rows
+  (105 total).
+- `tests/test_v312_libreyolo_engine.py` — weight-free wiring tests.
+
 ## [3.11.0] - 2026-06-08
 
 ### Added — INSID3 In-Context Segmentation (DINOv3 backbone)

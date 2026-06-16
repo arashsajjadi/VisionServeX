@@ -596,6 +596,46 @@ _ROWS += [
     ),
 ]
 
+# ----- LibreYOLO permissive detectors (v3.12.0): runnable engine wired ---------
+# Permissive alternative to AGPL Ultralytics YOLO / YOLO-World. Code is MIT (the
+# libreyolo package); weights are Apache-2.0 (YOLOX / RT-DETR) or MIT (YOLOv9 via
+# the MultimediaTechLab fork, NOT the GPL WongKinYiu release). Weights are pulled
+# on demand from the official LibreYOLO Hugging Face org and are never bundled.
+# YOLO-NAS (Deci proprietary, non-commercial) is intentionally NOT added here.
+_LIBREYOLO_URL = "https://github.com/LibreYOLO/libreyolo"
+_ROWS += [
+    _core(
+        "libreyolo-yolox-s",
+        "libreyolo",
+        code="MIT",
+        weights="Apache-2.0",
+        hf_repo="LibreYOLO/LibreYOLOXs",
+        upstream=_LIBREYOLO_URL,
+        notes="YOLOX-S (Apache-2.0 weights, MIT code). Permissive, commercial-safe "
+        "alternative to AGPL Ultralytics YOLO. Runnable via the libreyolo engine.",
+    ),
+    _core(
+        "libreyolo-yolov9-s",
+        "libreyolo",
+        code="MIT",
+        weights="MIT",
+        hf_repo="LibreYOLO/LibreYOLO9s",
+        upstream=_LIBREYOLO_URL,
+        notes="YOLOv9-S (MIT weights via MultimediaTechLab/YOLO fork, not GPL "
+        "WongKinYiu). Permissive, commercial-safe. Runnable via the libreyolo engine.",
+    ),
+    _core(
+        "libreyolo-rtdetr-r50",
+        "libreyolo",
+        code="MIT",
+        weights="Apache-2.0",
+        hf_repo="LibreYOLO/LibreRTDETRr50",
+        upstream=_LIBREYOLO_URL,
+        notes="RT-DETR-R50 (Apache-2.0 weights, MIT code). Permissive, commercial-safe "
+        "alternative to AGPL Ultralytics YOLO. Runnable via the libreyolo engine.",
+    ),
+]
+
 # ----- byot_license_required: SAM3 / SAM3.1 / DINOv3 (gated custom license) ---
 _SAM3_URL = "https://huggingface.co/facebook/sam3"
 _SAM31_URL = "https://huggingface.co/facebook/sam3.1"
