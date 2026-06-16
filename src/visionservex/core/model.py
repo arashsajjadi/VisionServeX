@@ -472,6 +472,14 @@ class VisionModel:
         """Return export capabilities for this model."""
         return _export_capabilities(self.entry.id)
 
+    def capabilities(self) -> dict[str, Any]:
+        """Return the canonical capability-truth object for this model (v3.15.0).
+
+        One honest dict: legal status, engine/inference readiness, and the
+        training/export truth. See :func:`model_capabilities`.
+        """
+        return model_capabilities(self.entry.id)
+
     def train(self, dataset: str | Path, **kwargs: Any) -> dict[str, Any]:
         """Train / fine-tune this model on a dataset (engine-dependent).
 
@@ -782,6 +790,26 @@ _TRAINING_TABLE: dict[str, dict[str, Any]] = {
         ),
         "docs": "https://github.com/LibreYOLO/libreyolo",
     },
+    "torchvision-classify": {
+        "train_supported": True,
+        "finetune_supported": True,
+        "resume_supported": False,
+        "checkpoint_save_supported": True,
+        "checkpoint_load_supported": True,
+        "trained_checkpoint_predict_supported": True,
+        "export_supported": ["onnx"],
+        "supported_dataset_formats": ["imagefolder"],
+        "required_extra": "torchvision",
+        "validated_variants": ["torchvision-resnet18"],
+        "known_blockers": [],
+        "notes": (
+            "Classic torchvision classifier fine-tune on an ImageFolder dataset "
+            "(BSD-3-Clause). Saves best.pt/last.pt with class names; reload via "
+            "VisionModel.from_checkpoint(model_id=...); ONNX export. Full lifecycle "
+            "validated live for resnet18 (the loop is arch-generic). No Ultralytics."
+        ),
+        "docs": "https://github.com/pytorch/vision",
+    },
     "swinv2": {
         "train_supported": False,
         "finetune_supported": False,
@@ -905,6 +933,19 @@ _EXPORT_TABLE: dict[str, dict[str, Any]] = {
         },
         "hf_save_pretrained": {"status": "unsupported", "notes": "Not HF-based."},
     },
+    "torchvision-classify": {
+        "onnx": {
+            "status": "supported",
+            "notes": "torch.onnx.export (opset 18, dynamic batch). "
+            "VisionModel.export(format='onnx', output_path=...).",
+        },
+        "torchscript": {
+            "status": "backend_supported_but_not_integrated",
+            "notes": "torch.jit.script/trace available; not surfaced/tested in v3.15.",
+        },
+        "tensorrt": {"status": "unsupported", "notes": "Not integrated."},
+        "hf_save_pretrained": {"status": "unsupported", "notes": "Not HF-based."},
+    },
     "swinv2": {
         "onnx": {
             "status": "experimental",
@@ -1001,4 +1042,102 @@ def _export_capabilities(model_id: str) -> dict[str, Any]:
     return info
 
 
-__all__ = ["VisionModel"]
+def model_capabilities(model_id: str) -> dict[str, Any]:
+    """Return the canonical capability-truth object for a model (v3.15.0).
+
+    Assembles legal status (curated policy when present, else the registry
+    license), engine/inference readiness, and the training/export truth into one
+    honest dict. ``readiness`` is one of: ``train-ready`` (train + reloaded-
+    checkpoint predict), ``inference-ready`` (wired engine + pretrained load),
+    ``catalog-only`` (registry row but no wired runtime engine), or ``blocked``.
+    """
+    from visionservex.engines.registry import _FACTORIES
+    from visionservex.licensing.policy import get_policy
+
+    entry = default_registry().get(model_id)
+    tcap = _training_capabilities(model_id)
+    ecap = _export_capabilities(model_id)
+    pol = get_policy(model_id)
+
+    engine_registered = entry.engine in _FACTORIES
+    status = entry.implementation_status
+    inference_ready = status == "wired" and engine_registered
+    train_ready = bool(
+        tcap.get("train_supported") and tcap.get("trained_checkpoint_predict_supported")
+    )
+
+    if pol is not None:
+        legal_status = pol.final_policy
+        commercial_safe = bool(pol.default_safe and pol.final_policy == "commercial_safe_core")
+        gated = bool(pol.gated)
+        license_code = pol.code_license
+        license_weights = pol.weights_license
+    else:
+        # No curated policy row → fall back to the registry license, and DO NOT
+        # claim commercial-safe-by-default (only the curated policy can grant that).
+        legal_status = "registry_license_only"
+        commercial_safe = False
+        gated = bool(entry.requires_auth)
+        license_code = entry.license
+        license_weights = None
+
+    if status == "stub" or not engine_registered:
+        readiness = "catalog-only"
+    elif train_ready and inference_ready:
+        readiness = "train-ready"
+    elif inference_ready:
+        readiness = "inference-ready"
+    else:
+        readiness = "blocked"
+
+    export_supported = [
+        k for k, v in ecap.items() if isinstance(v, dict) and v.get("status") == "supported"
+    ]
+
+    exact_blocker: str | None = None
+    if readiness == "catalog-only":
+        exact_blocker = entry.unavailable_reason or (
+            f"CATALOG_ONLY: engine {entry.engine!r} not wired (implementation_status={status})"
+        )
+    elif readiness == "blocked":
+        exact_blocker = entry.unavailable_reason or (
+            f"NOT_INFERENCE_READY: implementation_status={status}, engine_registered={engine_registered}"
+        )
+
+    return {
+        "model_id": model_id,
+        "family": entry.family,
+        "task": entry.task,
+        "engine": entry.engine,
+        "backend": entry.backend,
+        "model_category": str(entry.model_category) if entry.model_category else None,
+        "readiness": readiness,
+        "legal_status": legal_status,
+        "commercial_safe": commercial_safe,
+        "gated": gated,
+        "license_code": license_code,
+        "license_weights": license_weights,
+        "license_registry": entry.license,
+        "has_policy_row": pol is not None,
+        "implementation_status": status,
+        "engine_registered": engine_registered,
+        "pretrained_inference_supported": inference_ready,
+        "pretrained_load_supported": inference_ready and entry.download_type != "not_available",
+        "auto_download": bool(entry.auto_download),
+        "required_extra": entry.install_extra,
+        "train_supported": bool(tcap.get("train_supported")),
+        "finetune_supported": bool(tcap.get("finetune_supported")),
+        "checkpoint_save_supported": bool(tcap.get("checkpoint_save_supported")),
+        "checkpoint_load_supported": bool(tcap.get("checkpoint_load_supported")),
+        "trained_checkpoint_predict_supported": bool(
+            tcap.get("trained_checkpoint_predict_supported")
+        ),
+        "export_supported": export_supported,
+        "supported_dataset_formats": tcap.get("supported_dataset_formats", []),
+        "validated_variants": tcap.get("validated_variants", []),
+        "known_blockers": tcap.get("known_blockers", []),
+        "exact_blocker": exact_blocker,
+    }
+
+
+__all__ = ["VisionModel", "model_capabilities"]

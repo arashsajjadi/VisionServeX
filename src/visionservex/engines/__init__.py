@@ -31,6 +31,9 @@ from visionservex.engines import (
     sam_optional as _sam_optional,  # v2.55: efficientsam, hq-sam, mobilesam
 )
 from visionservex.engines import swinv2 as _swinv2
+from visionservex.engines import (
+    torchvision_classification as _tv_classify,  # v3.15: classic permissive classifiers
+)
 from visionservex.engines.base import BaseEngine, EngineError, MissingDependencyError
 from visionservex.engines.mock import MockEngine
 from visionservex.engines.registry import build_engine, register_engine

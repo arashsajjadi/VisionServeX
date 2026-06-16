@@ -2,6 +2,45 @@
 
 ## [Unreleased]
 
+## [3.15.0] - 2026-06-16
+
+### Added — model coverage + capability-truth contract
+
+A broad coverage/honesty sprint across the whole model universe (not YOLO-only).
+
+- **Classic torchvision classifiers (BSD-3-Clause, commercial-safe).** New
+  `engines/torchvision_classification.py` (`TorchvisionClassifyEngine`) with the
+  full lifecycle: pretrained ImageNet-1K inference → ImageFolder fine-tune →
+  checkpoint → reload (public API) → predict → ONNX export. 13 registry + policy
+  rows: AlexNet, ResNet-18/34/50/101/152, Wide-ResNet-50-2, ResNeXt-50-32x4d,
+  DenseNet-121, MobileNet-V2/V3-Large, EfficientNet-B0, ConvNeXt-Tiny. New
+  `torchvision` extra. Validated live (CPU) for resnet18 (arch-generic loop).
+- **Capability-truth contract.** `core/model.model_capabilities(id)` +
+  `VisionModel.capabilities()` return one honest per-model object: legal status
+  (curated policy or registry-license-only), engine/inference readiness, train /
+  reload-predict / export truth, exact blocker. `readiness ∈ {train-ready,
+  inference-ready, catalog-only, blocked}`. New invariant tests enforce: no
+  inference-ready without a registered engine; no train-ready without
+  reload+predict; `commercial_safe` only with a curated policy row; catalog-only
+  carries an exact blocker (no fake-ready).
+- **Full model inventory.** `tools/qa/v315_model_inventory.py` generates
+  `docs/qa/v315_model_coverage/{model_inventory.json,model_inventory.md,model_truth_table.md}`
+  derived from registry + policy + tables + engine registry (141 models; 70
+  inference-ready, 25 train-ready, 43 catalog-only).
+- **Docs:** `docs/torchvision_classifiers.md`, `docs/qa/v315_model_coverage/`
+  (preflight, inventory, truth table, v3.16 plan).
+- **Tests:** `tests/test_v315_capability_truth.py`,
+  `tests/test_v315_torchvision_classifiers.py`,
+  `tests/test_v315_registry_policy_sync.py`,
+  `tests/test_v315_checkpoint_contract.py`, plus gated
+  `tests/live/test_v315_{pretrained_inference,classifier_finetune}_live.py`.
+
+### Legal
+
+- No Ultralytics / AGPL / GPL in any runtime engine, core, or data path (test-enforced).
+- YOLO-NAS / Deci non-commercial remains non-trainable and non-default-safe.
+- torchvision weights are BSD-3-Clause (commercial-safe); never bundled.
+
 ## [3.14.0] - 2026-06-16
 
 ### Fixed — LibreYOLO trained-checkpoint reload (decode-after-reload crash)

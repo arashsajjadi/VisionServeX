@@ -3557,3 +3557,279 @@ models:
   status: beta
   model_category: accuracy_grade
   notes: "Alias for grounding-dino-swin-b. Uses IDEA-Research/grounding-dino-base (SwinB backbone). Same weights."
+# ----- v3.15.0: classic torchvision classifiers (BSD-3-Clause, commercial-safe).
+# Pretrained ImageNet-1K inference + ImageFolder fine-tune + checkpoint reload +
+# ONNX export. Weights downloaded on demand by torchvision; never bundled.
+- id: torchvision-alexnet
+  display_name: AlexNet (torchvision, ImageNet-1K)
+  task: classify
+  family: torchvision-classify
+  backend: torchvision
+  engine: torchvision_classify
+  license: BSD-3-Clause
+  license_notes: torchvision code + ImageNet-1K weights BSD-3-Clause (PyTorch). Commercial-safe; no Ultralytics/AGPL.
+  upstream_url: https://github.com/pytorch/vision
+  download_type: package_managed
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: torchvision
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cpu
+  supported_precisions: [fp32]
+  difficulty: easy
+  status: stable
+  model_category: production_recommended
+  notes: Classic AlexNet classifier wired in v3.15.0 (pretrained + fine-tune + reload + ONNX).
+- id: torchvision-resnet18
+  display_name: ResNet-18 (torchvision, ImageNet-1K)
+  task: classify
+  family: torchvision-classify
+  backend: torchvision
+  engine: torchvision_classify
+  license: BSD-3-Clause
+  license_notes: torchvision code + ImageNet-1K weights BSD-3-Clause (PyTorch). Commercial-safe; no Ultralytics/AGPL.
+  upstream_url: https://github.com/pytorch/vision
+  download_type: package_managed
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: torchvision
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cpu
+  supported_precisions: [fp32]
+  difficulty: easy
+  status: stable
+  model_category: production_recommended
+  notes: ResNet-18 wired in v3.15.0 (pretrained + fine-tune + reload + ONNX). Lightweight transfer backbone.
+- id: torchvision-resnet34
+  display_name: ResNet-34 (torchvision, ImageNet-1K)
+  task: classify
+  family: torchvision-classify
+  backend: torchvision
+  engine: torchvision_classify
+  license: BSD-3-Clause
+  license_notes: torchvision code + ImageNet-1K weights BSD-3-Clause (PyTorch). Commercial-safe; no Ultralytics/AGPL.
+  upstream_url: https://github.com/pytorch/vision
+  download_type: package_managed
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: torchvision
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cpu
+  supported_precisions: [fp32]
+  difficulty: easy
+  status: stable
+  model_category: production_recommended
+  notes: ResNet-34 wired in v3.15.0 (pretrained + fine-tune + reload + ONNX).
+- id: torchvision-resnet50
+  display_name: ResNet-50 (torchvision, ImageNet-1K)
+  task: classify
+  family: torchvision-classify
+  backend: torchvision
+  engine: torchvision_classify
+  license: BSD-3-Clause
+  license_notes: torchvision code + ImageNet-1K weights BSD-3-Clause (PyTorch). Commercial-safe; no Ultralytics/AGPL.
+  upstream_url: https://github.com/pytorch/vision
+  download_type: package_managed
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: torchvision
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cpu
+  supported_precisions: [fp32]
+  difficulty: easy
+  status: stable
+  model_category: production_recommended
+  notes: ResNet-50 wired in v3.15.0 (pretrained + fine-tune + reload + ONNX). Most common transfer backbone.
+- id: torchvision-resnet101
+  display_name: ResNet-101 (torchvision, ImageNet-1K)
+  task: classify
+  family: torchvision-classify
+  backend: torchvision
+  engine: torchvision_classify
+  license: BSD-3-Clause
+  license_notes: torchvision code + ImageNet-1K weights BSD-3-Clause (PyTorch). Commercial-safe; no Ultralytics/AGPL.
+  upstream_url: https://github.com/pytorch/vision
+  download_type: package_managed
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: torchvision
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cpu
+  supported_precisions: [fp32]
+  difficulty: easy
+  status: stable
+  model_category: accuracy_grade
+  notes: ResNet-101 wired in v3.15.0 (pretrained + fine-tune + reload + ONNX).
+- id: torchvision-resnet152
+  display_name: ResNet-152 (torchvision, ImageNet-1K)
+  task: classify
+  family: torchvision-classify
+  backend: torchvision
+  engine: torchvision_classify
+  license: BSD-3-Clause
+  license_notes: torchvision code + ImageNet-1K weights BSD-3-Clause (PyTorch). Commercial-safe; no Ultralytics/AGPL.
+  upstream_url: https://github.com/pytorch/vision
+  download_type: package_managed
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: torchvision
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cpu
+  supported_precisions: [fp32]
+  difficulty: easy
+  status: stable
+  model_category: accuracy_grade
+  notes: ResNet-152 wired in v3.15.0 (pretrained + fine-tune + reload + ONNX).
+- id: torchvision-wide-resnet50-2
+  display_name: Wide ResNet-50-2 (torchvision, ImageNet-1K)
+  task: classify
+  family: torchvision-classify
+  backend: torchvision
+  engine: torchvision_classify
+  license: BSD-3-Clause
+  license_notes: torchvision code + ImageNet-1K weights BSD-3-Clause (PyTorch). Commercial-safe; no Ultralytics/AGPL.
+  upstream_url: https://github.com/pytorch/vision
+  download_type: package_managed
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: torchvision
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cpu
+  supported_precisions: [fp32]
+  difficulty: easy
+  status: stable
+  model_category: accuracy_grade
+  notes: Wide ResNet-50-2 wired in v3.15.0 (pretrained + fine-tune + reload + ONNX).
+- id: torchvision-resnext50-32x4d
+  display_name: ResNeXt-50 32x4d (torchvision, ImageNet-1K)
+  task: classify
+  family: torchvision-classify
+  backend: torchvision
+  engine: torchvision_classify
+  license: BSD-3-Clause
+  license_notes: torchvision code + ImageNet-1K weights BSD-3-Clause (PyTorch). Commercial-safe; no Ultralytics/AGPL.
+  upstream_url: https://github.com/pytorch/vision
+  download_type: package_managed
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: torchvision
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cpu
+  supported_precisions: [fp32]
+  difficulty: easy
+  status: stable
+  model_category: accuracy_grade
+  notes: ResNeXt-50 32x4d wired in v3.15.0 (pretrained + fine-tune + reload + ONNX).
+- id: torchvision-densenet121
+  display_name: DenseNet-121 (torchvision, ImageNet-1K)
+  task: classify
+  family: torchvision-classify
+  backend: torchvision
+  engine: torchvision_classify
+  license: BSD-3-Clause
+  license_notes: torchvision code + ImageNet-1K weights BSD-3-Clause (PyTorch). Commercial-safe; no Ultralytics/AGPL.
+  upstream_url: https://github.com/pytorch/vision
+  download_type: package_managed
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: torchvision
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cpu
+  supported_precisions: [fp32]
+  difficulty: easy
+  status: stable
+  model_category: production_recommended
+  notes: DenseNet-121 wired in v3.15.0 (pretrained + fine-tune + reload + ONNX).
+- id: torchvision-mobilenet-v2
+  display_name: MobileNet-V2 (torchvision, ImageNet-1K)
+  task: classify
+  family: torchvision-classify
+  backend: torchvision
+  engine: torchvision_classify
+  license: BSD-3-Clause
+  license_notes: torchvision code + ImageNet-1K weights BSD-3-Clause (PyTorch). Commercial-safe; no Ultralytics/AGPL.
+  upstream_url: https://github.com/pytorch/vision
+  download_type: package_managed
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: torchvision
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cpu
+  supported_precisions: [fp32]
+  difficulty: easy
+  status: stable
+  model_category: production_recommended
+  notes: MobileNet-V2 wired in v3.15.0 (pretrained + fine-tune + reload + ONNX). Edge-friendly.
+- id: torchvision-mobilenet-v3-large
+  display_name: MobileNet-V3-Large (torchvision, ImageNet-1K)
+  task: classify
+  family: torchvision-classify
+  backend: torchvision
+  engine: torchvision_classify
+  license: BSD-3-Clause
+  license_notes: torchvision code + ImageNet-1K weights BSD-3-Clause (PyTorch). Commercial-safe; no Ultralytics/AGPL.
+  upstream_url: https://github.com/pytorch/vision
+  download_type: package_managed
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: torchvision
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cpu
+  supported_precisions: [fp32]
+  difficulty: easy
+  status: stable
+  model_category: production_recommended
+  notes: MobileNet-V3-Large wired in v3.15.0 (pretrained + fine-tune + reload + ONNX). Edge-friendly.
+- id: torchvision-efficientnet-b0
+  display_name: EfficientNet-B0 (torchvision, ImageNet-1K)
+  task: classify
+  family: torchvision-classify
+  backend: torchvision
+  engine: torchvision_classify
+  license: BSD-3-Clause
+  license_notes: torchvision code + ImageNet-1K weights BSD-3-Clause (PyTorch). Commercial-safe; no Ultralytics/AGPL.
+  upstream_url: https://github.com/pytorch/vision
+  download_type: package_managed
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: torchvision
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cpu
+  supported_precisions: [fp32]
+  difficulty: easy
+  status: stable
+  model_category: production_recommended
+  notes: EfficientNet-B0 wired in v3.15.0 (pretrained + fine-tune + reload + ONNX).
+- id: torchvision-convnext-tiny
+  display_name: ConvNeXt-Tiny (torchvision, ImageNet-1K)
+  task: classify
+  family: torchvision-classify
+  backend: torchvision
+  engine: torchvision_classify
+  license: BSD-3-Clause
+  license_notes: torchvision code + ImageNet-1K weights BSD-3-Clause (PyTorch). Commercial-safe; no Ultralytics/AGPL.
+  upstream_url: https://github.com/pytorch/vision
+  download_type: package_managed
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: torchvision
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cpu
+  supported_precisions: [fp32]
+  difficulty: easy
+  status: stable
+  model_category: production_recommended
+  notes: ConvNeXt-Tiny wired in v3.15.0 (pretrained + fine-tune + reload + ONNX).

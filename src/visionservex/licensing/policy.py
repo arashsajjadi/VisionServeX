@@ -646,6 +646,45 @@ _ROWS += [
     ),
 ]
 
+# ----- commercial_safe_core: classic torchvision classifiers (v3.15.0) ---------
+# torchvision code AND its ImageNet-1K pretrained weights are distributed by
+# PyTorch under BSD-3-Clause — permissive, commercial-safe. Weights pulled on
+# demand by torchvision; never bundled. Full lifecycle (pretrained inference +
+# ImageFolder fine-tune + checkpoint reload + ONNX export). No Ultralytics/AGPL.
+# (ImageNet *dataset* terms are research-only, but the trained weights torchvision
+# redistributes are BSD-3; dataset_risk noted accordingly.)
+_TORCHVISION_URL = "https://github.com/pytorch/vision"
+_TV_NOTE = (
+    "torchvision classifier (BSD-3-Clause code + ImageNet-1K weights). Permissive, "
+    "commercial-safe. Pretrained inference + ImageFolder fine-tune + reload + ONNX (v3.15.0)."
+)
+_ROWS += [
+    _core(
+        mid,
+        "torchvision-classify",
+        code="BSD-3-Clause",
+        weights="BSD-3-Clause",
+        dataset_risk="imagenet_weights_permissive",
+        upstream=_TORCHVISION_URL,
+        notes=_TV_NOTE,
+    )
+    for mid in (
+        "torchvision-alexnet",
+        "torchvision-resnet18",
+        "torchvision-resnet34",
+        "torchvision-resnet50",
+        "torchvision-resnet101",
+        "torchvision-resnet152",
+        "torchvision-wide-resnet50-2",
+        "torchvision-resnext50-32x4d",
+        "torchvision-densenet121",
+        "torchvision-mobilenet-v2",
+        "torchvision-mobilenet-v3-large",
+        "torchvision-efficientnet-b0",
+        "torchvision-convnext-tiny",
+    )
+]
+
 # ----- byot_license_required: SAM3 / SAM3.1 / DINOv3 (gated custom license) ---
 _SAM3_URL = "https://huggingface.co/facebook/sam3"
 _SAM31_URL = "https://huggingface.co/facebook/sam3.1"

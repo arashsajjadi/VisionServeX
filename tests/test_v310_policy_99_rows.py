@@ -48,7 +48,8 @@ def test_commercial_safe_core_count():
     core = [r for r in _rows() if r.final_policy == "commercial_safe_core"]
     # v3.12.0 added 3 permissive LibreYOLO detectors (yolox-s, yolov9-s, rtdetr-r50)
     # -> 42. v3.14.0 added libreyolo-dfine-n (trainable D-FINE) -> 43.
-    assert len(core) == 43, f"Expected 43 commercial_safe_core rows, got {len(core)}"
+    # v3.15.0 added 13 torchvision classifiers (BSD-3-Clause) -> 56.
+    assert len(core) == 56, f"Expected 56 commercial_safe_core rows, got {len(core)}"
 
 
 def test_no_gated_in_commercial_safe_default_safe():
