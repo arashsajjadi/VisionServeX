@@ -102,6 +102,23 @@ def _load_libreyolo_class(class_name: str):
     return cls
 
 
+def _force_eval(model: Any) -> None:
+    """Put a libreyolo model's inner torch module into eval mode.
+
+    libreyolo's ``_load_weights`` rebuilds the inner ``nn.Module`` via
+    ``_rebuild_for_new_classes`` when a checkpoint's class count differs from
+    COCO-80, and that rebuilt module is left in *training* mode. The detection
+    head then takes its training branch at ``predict()`` and crashes
+    (``'NoneType' object has no attribute 'sum'``). Forcing eval makes a
+    reloaded trained checkpoint behave exactly like base-weight inference; it is
+    a no-op for base weights (which already load in eval mode). This is the
+    v3.14.0 trained-checkpoint reload fix.
+    """
+    inner = getattr(model, "model", None)
+    if inner is not None and hasattr(inner, "eval"):
+        inner.eval()
+
+
 class LibreYOLOEngine(StubEngine):
     """Real LibreYOLO detection engine backed by the ``libreyolo`` package."""
 
@@ -165,6 +182,7 @@ class LibreYOLOEngine(StubEngine):
             ly_device,
         )
         self._model = cls(model_path=str(weight_path), size=size, device=ly_device)
+        _force_eval(self._model)
         _log.info("%s ready", class_name)
 
     def unload(self) -> None:

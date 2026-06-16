@@ -634,6 +634,16 @@ _ROWS += [
         notes="RT-DETR-R50 (Apache-2.0 weights, MIT code). Permissive, commercial-safe "
         "alternative to AGPL Ultralytics YOLO. Runnable via the libreyolo engine.",
     ),
+    _core(
+        "libreyolo-dfine-n",
+        "libreyolo",
+        code="MIT",
+        weights="Apache-2.0",
+        hf_repo="LibreYOLO/LibreDFINEn",
+        upstream=_LIBREYOLO_URL,
+        notes="D-FINE-N (Apache-2.0 weights, MIT code). Permissive, commercial-safe. "
+        "Runnable + trainable via the libreyolo engine (v3.14.0).",
+    ),
 ]
 
 # ----- byot_license_required: SAM3 / SAM3.1 / DINOv3 (gated custom license) ---

@@ -1,25 +1,39 @@
-# LibreYOLO Training (v3.13.0)
+# LibreYOLO Training (v3.13.0 → reliability-hardened in v3.14.0)
 
-VisionServeX v3.13.0 adds **detector training / fine-tuning** for the permissive
+VisionServeX adds **detector training / fine-tuning** for the permissive
 LibreYOLO families, on top of the inference engine shipped in v3.12.0. Training
 is backed entirely by the permissive [`libreyolo`](https://github.com/LibreYOLO/libreyolo)
 package (MIT code; Apache-2.0 / MIT weights). **No Ultralytics runtime** is
 imported on any training, checkpoint, or export path.
 
-## What is trainable
+> **v3.14.0 — trained-checkpoint reload fixed.** A trained checkpoint whose class
+> count differs from COCO-80 reloads via libreyolo's `_rebuild_for_new_classes`,
+> which left the inner module in *training* mode — so `predict()` crashed
+> (`'NoneType' object has no attribute 'sum'`). v3.14.0 forces eval after load,
+> so the **full lifecycle `train → checkpoint → reload → predict → export` is now
+> validated live** for every variant below. See the proof artifact
+> [`docs/qa/v314_train_reload_matrix.json`](qa/v314_train_reload_matrix.json)
+> (regenerate with `python tools/qa/v314_train_reload_matrix.py`).
 
-| Model id              | Family  | Inference | Train / fine-tune | Checkpoint reload | Export | License            |
-| --------------------- | ------- | :-------: | :---------------: | :---------------: | :----: | ------------------ |
-| `libreyolo-yolox-s`   | YOLOX   |     ✅     |         ✅         |         ✅         |  ONNX  | Apache-2.0         |
-| `libreyolo-yolov9-s`  | YOLOv9  |     ✅     |         ✅         |         ✅         |  ONNX  | MIT (MMTechLab)    |
-| `libreyolo-rtdetr-r50`| RT-DETR |     ✅     |         ✅         |         ✅         |  ONNX  | Apache-2.0         |
-| `libreyolo-dfine-*`   | D-FINE  |     ✅     |         ✅         |         ✅         |  ONNX  | Apache-2.0         |
+## What is trainable (full lifecycle validated live, v3.14.0)
 
-D-FINE via LibreYOLO (`libreyolo-dfine-*`) is trainable because it is routed
+| Model id               | Family  | Inference | Train / fine-tune | Reload → predict | Export | License            |
+| ---------------------- | ------- | :-------: | :---------------: | :--------------: | :----: | ------------------ |
+| `libreyolo-yolox-s`    | YOLOX   |     ✅     |         ✅         |        ✅         |  ONNX  | Apache-2.0         |
+| `libreyolo-yolov9-s`   | YOLOv9  |     ✅     |         ✅         |        ✅         |  ONNX  | MIT (MMTechLab)    |
+| `libreyolo-rtdetr-r50` | RT-DETR |     ✅     |         ✅         |        ✅         |  ONNX  | Apache-2.0         |
+| `libreyolo-dfine-n`    | D-FINE  |     ✅     |         ✅         |        ✅         |  ONNX  | Apache-2.0         |
+
+`libreyolo-dfine-n` is a registry-wired variant added in v3.14.0 (weights from
+`LibreYOLO/LibreDFINEn`). D-FINE via LibreYOLO is trainable because it routes
 through `LibreYOLOEngine`. The **standalone** Hugging Face `dfine-*` models
 (`DFINEEngine`) remain **inference-only** — HF Transformers does not expose a
 D-FINE training loop, so those report `TRAINING_NOT_SUPPORTED_IN_HF_BACKEND` and
 are not faked.
+
+`_training_capabilities(model_id)["trained_checkpoint_predict_supported"]` is the
+truth flag: `train_supported` is never `True` for a family unless a trained
+checkpoint can actually be reloaded and used for inference.
 
 ### Not trainable (by design)
 
@@ -81,17 +95,41 @@ Training **fine-tunes from the COCO-pretrained base weights** that the engine
 downloads on demand (never bundled). The class head is rebuilt to the dataset's
 `nc` automatically.
 
-## Trained-checkpoint reload
+## Trained-checkpoint reload (public API, v3.14.0)
+
+Reload a trained checkpoint through the clean public API — no reaching into
+internal engine classes:
 
 ```python
-model = VisionModel("libreyolo-yolox-s")
-model.engine.load_checkpoint("runs/train/libreyolo-yolox-s/weights/best.pt", device="cuda")
-det = model.engine.predict(image)   # uses the trained weights, no base-weight fallback
+from visionservex import VisionModel
+
+res = VisionModel("libreyolo-yolox-s").train("data.yaml", epochs=50, device="cuda")
+ckpt = res["best_checkpoint"] or res["last_checkpoint"]
+
+# Option A — classmethod factory:
+trained = VisionModel.from_checkpoint(ckpt, model_id="libreyolo-yolox-s", device="cuda")
+det = trained.predict(image)        # trained weights, normalized DetectionResult
+
+# Option B — in place:
+m = VisionModel("libreyolo-yolox-s")
+m.load_checkpoint(ckpt, device="cuda")
+det = m.predict(image)
 ```
 
-The family and input size come from the model id, never guessed from the file.
+The family and input size come from `model_id`, never guessed from the file.
 A missing checkpoint raises a clean error; there is **no** silent fall back to
-the base/pretrained weights.
+the base/pretrained weights. `from_checkpoint`/`load_checkpoint` also work for
+`rfdetr-*` (reload via the rfdetr package's `pretrain_weights`); engines without
+checkpoint-reload support raise a structured `CHECKPOINT_LOAD_UNSUPPORTED`.
+
+### RF-DETR note
+
+RF-DETR trains/fine-tunes via the mature `rfdetr` package's own API
+(`model.train(dataset_dir=...)`, COCO format) — VisionServeX does not wrap that
+loop, so `VisionModel("rfdetr-nano").train(...)` returns a structured
+`TRAIN_VIA_NATIVE_API` pointer rather than running. A resulting checkpoint
+reloads for inference here via `VisionModel.from_checkpoint(ckpt,
+model_id="rfdetr-nano")`.
 
 ## Export
 

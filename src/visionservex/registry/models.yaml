@@ -819,6 +819,40 @@ models:
   - transformer-based real-time detection
   notes: Permissive RT-DETR-R50 detector wired in v3.12.0. Commercial-safe alternative
     to AGPL Ultralytics YOLO.
+- id: libreyolo-dfine-n
+  display_name: LibreYOLO D-FINE-N (permissive)
+  task: detect
+  family: libreyolo
+  backend: libreyolo_package
+  engine: libreyolo
+  license: Apache-2.0
+  license_notes: LibreYOLO code MIT; D-FINE (Peterande) architecture + LibreYOLO-trained
+    weights Apache-2.0.
+  upstream_url: https://github.com/LibreYOLO/libreyolo
+  download_type: huggingface
+  hf_repo_id: LibreYOLO/LibreDFINEn
+  checkpoint_filename: LibreDFINEn.pt
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: libreyolo
+  implementation_notes: Uses the `libreyolo` package. Weights auto-downloaded from the
+    LibreYOLO Hugging Face org on first load; never bundled.
+  implementation_status: wired
+  supported_devices:
+  - cpu
+  - cuda
+  recommended_device: cuda
+  supported_precisions:
+  - fp32
+  - fp16
+  difficulty: easy
+  status: beta
+  model_category: production_recommended
+  best_for:
+  - permissive-license COCO detection
+  - transformer-based real-time detection (D-FINE)
+  notes: Permissive D-FINE-N detector wired + trainable via LibreYOLO in v3.14.0.
+    Commercial-safe alternative to AGPL Ultralytics YOLO.
 - id: rfdetr-nano
   display_name: RF-DETR (Nano) [demo]
   task: detect

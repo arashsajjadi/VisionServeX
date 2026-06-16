@@ -1,0 +1,240 @@
+{
+  "device": "cpu",
+  "epochs": 1,
+  "rows": [
+    {
+      "model_id": "libreyolo-yolox-s",
+      "family": "libreyolo",
+      "license": "Apache-2.0",
+      "engine": "libreyolo",
+      "training_capabilities": {
+        "train_supported": true,
+        "finetune_supported": true,
+        "checkpoint_load_supported": true,
+        "trained_checkpoint_predict_supported": true,
+        "export_supported": [
+          "onnx"
+        ]
+      },
+      "export_capabilities_onnx": "supported",
+      "train_status": "ok",
+      "best_checkpoint": "/home/arash/.cache/vsx_tmp/v314_qa_all/runs/libreyolo-yolox-s/weights/best.pt",
+      "last_checkpoint": "/home/arash/.cache/vsx_tmp/v314_qa_all/runs/libreyolo-yolox-s/weights/last.pt",
+      "checkpoint_exists": true,
+      "checkpoint_size": 71788791,
+      "reload_method": "VisionModel.from_checkpoint",
+      "reload_ok": true,
+      "predict_after_reload": true,
+      "num_boxes": 0,
+      "first_boxes": [],
+      "export_onnx": {
+        "path": "/home/arash/.cache/vsx_tmp/v314_qa_all/runs/libreyolo-yolox-s.onnx",
+        "exists": true,
+        "size": 35794646
+      },
+      "final_verdict": "LIFECYCLE_OK",
+      "exact_error_if_failed": null
+    },
+    {
+      "model_id": "libreyolo-yolov9-s",
+      "family": "libreyolo",
+      "license": "MIT",
+      "engine": "libreyolo",
+      "training_capabilities": {
+        "train_supported": true,
+        "finetune_supported": true,
+        "checkpoint_load_supported": true,
+        "trained_checkpoint_predict_supported": true,
+        "export_supported": [
+          "onnx"
+        ]
+      },
+      "export_capabilities_onnx": "supported",
+      "train_status": "ok",
+      "best_checkpoint": "/home/arash/.cache/vsx_tmp/v314_qa_all/runs/libreyolo-yolov9-s/weights/best.pt",
+      "last_checkpoint": "/home/arash/.cache/vsx_tmp/v314_qa_all/runs/libreyolo-yolov9-s/weights/last.pt",
+      "checkpoint_exists": true,
+      "checkpoint_size": 58243917,
+      "reload_method": "VisionModel.from_checkpoint",
+      "reload_ok": true,
+      "predict_after_reload": true,
+      "num_boxes": 14,
+      "first_boxes": [
+        {
+          "label": "obj0",
+          "class_id": 0,
+          "score": 0.0444,
+          "box": [
+            0.6,
+            0.0,
+            318.5,
+            317.6
+          ]
+        },
+        {
+          "label": "obj1",
+          "class_id": 1,
+          "score": 0.2514,
+          "box": [
+            2.2,
+            0.0,
+            318.8,
+            318.7
+          ]
+        },
+        {
+          "label": "obj1",
+          "class_id": 1,
+          "score": 0.1671,
+          "box": [
+            45.1,
+            0.2,
+            317.9,
+            106.4
+          ]
+        }
+      ],
+      "export_onnx": {
+        "path": "/home/arash/.cache/vsx_tmp/v314_qa_all/runs/libreyolo-yolov9-s.onnx",
+        "exists": true,
+        "size": 28925294
+      },
+      "final_verdict": "LIFECYCLE_OK",
+      "exact_error_if_failed": null
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r50",
+      "family": "libreyolo",
+      "license": "Apache-2.0",
+      "engine": "libreyolo",
+      "training_capabilities": {
+        "train_supported": true,
+        "finetune_supported": true,
+        "checkpoint_load_supported": true,
+        "trained_checkpoint_predict_supported": true,
+        "export_supported": [
+          "onnx"
+        ]
+      },
+      "export_capabilities_onnx": "supported",
+      "train_status": "ok",
+      "best_checkpoint": "/home/arash/.cache/vsx_tmp/v314_qa_all/runs/libreyolo-rtdetr-r50/weights/best.pt",
+      "last_checkpoint": "/home/arash/.cache/vsx_tmp/v314_qa_all/runs/libreyolo-rtdetr-r50/weights/last.pt",
+      "checkpoint_exists": true,
+      "checkpoint_size": 513557217,
+      "reload_method": "VisionModel.from_checkpoint",
+      "reload_ok": true,
+      "predict_after_reload": true,
+      "num_boxes": 288,
+      "first_boxes": [
+        {
+          "label": "obj1",
+          "class_id": 1,
+          "score": 0.0108,
+          "box": [
+            0.0,
+            211.0,
+            315.0,
+            320.0
+          ]
+        },
+        {
+          "label": "obj0",
+          "class_id": 0,
+          "score": 0.0119,
+          "box": [
+            0.0,
+            252.6,
+            276.6,
+            320.0
+          ]
+        },
+        {
+          "label": "obj0",
+          "class_id": 0,
+          "score": 0.0117,
+          "box": [
+            22.5,
+            0.0,
+            49.1,
+            14.2
+          ]
+        }
+      ],
+      "export_onnx": {
+        "path": "/home/arash/.cache/vsx_tmp/v314_qa_all/runs/libreyolo-rtdetr-r50.onnx",
+        "exists": true,
+        "size": 172068090
+      },
+      "final_verdict": "LIFECYCLE_OK",
+      "exact_error_if_failed": null
+    },
+    {
+      "model_id": "libreyolo-dfine-n",
+      "family": "libreyolo",
+      "license": "Apache-2.0",
+      "engine": "libreyolo",
+      "training_capabilities": {
+        "train_supported": true,
+        "finetune_supported": true,
+        "checkpoint_load_supported": true,
+        "trained_checkpoint_predict_supported": true,
+        "export_supported": [
+          "onnx"
+        ]
+      },
+      "export_capabilities_onnx": "supported",
+      "train_status": "ok",
+      "best_checkpoint": "/home/arash/.cache/vsx_tmp/v314_qa_all/runs/libreyolo-dfine-n/weights/best.pt",
+      "last_checkpoint": "/home/arash/.cache/vsx_tmp/v314_qa_all/runs/libreyolo-dfine-n/weights/last.pt",
+      "checkpoint_exists": true,
+      "checkpoint_size": 45347809,
+      "reload_method": "VisionModel.from_checkpoint",
+      "reload_ok": true,
+      "predict_after_reload": true,
+      "num_boxes": 300,
+      "first_boxes": [
+        {
+          "label": "obj1",
+          "class_id": 1,
+          "score": 0.0244,
+          "box": [
+            208.3,
+            -1.3,
+            215.0,
+            8.2
+          ]
+        },
+        {
+          "label": "obj1",
+          "class_id": 1,
+          "score": 0.0242,
+          "box": [
+            222.7,
+            2.5,
+            229.8,
+            8.5
+          ]
+        },
+        {
+          "label": "obj1",
+          "class_id": 1,
+          "score": 0.0241,
+          "box": [
+            307.6,
+            0.9,
+            321.3,
+            13.8
+          ]
+        }
+      ],
+      "export_onnx": {
+        "path": "/home/arash/.cache/vsx_tmp/v314_qa_all/runs/libreyolo-dfine-n.onnx",
+        "exists": true,
+        "size": 15445792
+      },
+      "final_verdict": "LIFECYCLE_OK",
+      "exact_error_if_failed": null
+    }
+  ]
+}

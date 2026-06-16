@@ -2,6 +2,44 @@
 
 ## [Unreleased]
 
+## [3.14.0] - 2026-06-16
+
+### Fixed — LibreYOLO trained-checkpoint reload (decode-after-reload crash)
+
+A trained LibreYOLO checkpoint whose class count differs from COCO-80 reloads via
+libreyolo's `_rebuild_for_new_classes`, which rebuilt the inner `nn.Module` and
+left it in **training mode**. The detection head then took its training branch at
+`predict()` and crashed (`'NoneType' object has no attribute 'sum'`) — exactly the
+failure Anastig reported for `libreyolo-yolox-s`. Base-weight inference was
+unaffected (no rebuild → stayed in eval).
+
+- `engines/libreyolo.py` — `_force_eval()` forces the inner module to eval after
+  load in `_real_load` (no-op for base weights; fixes all reloaded checkpoints).
+- The full lifecycle `train → checkpoint → reload → predict → export` is now
+  **validated live** (CPU) for `libreyolo-yolox-s`, `libreyolo-yolov9-s`,
+  `libreyolo-rtdetr-r50`, and `libreyolo-dfine-n` — see
+  `docs/qa/v314_train_reload_matrix.json` + `tools/qa/v314_train_reload_matrix.py`.
+
+### Added — canonical checkpoint-reload API + capability truth
+
+- `core/model.py` — `VisionModel.from_checkpoint(ckpt, model_id=..., device=...)`
+  (was a hard `NotImplementedError`) and `VisionModel.load_checkpoint(...)`:
+  clean public reload, no base-weight fallback, structured
+  `CHECKPOINT_LOAD_UNSUPPORTED` for engines without reload.
+- `_training_capabilities` gains `trained_checkpoint_predict_supported`
+  (+`validated_variants`/`known_blockers` for libreyolo). A new test enforces the
+  invariant: `train_supported` is never `True` without reload+predict support.
+- `engines/rfdetr.py` — `RFDETREngine.load_checkpoint()` (reload via the rfdetr
+  package's `pretrain_weights`). `VisionModel.train("rfdetr-nano")` now returns a
+  structured `TRAIN_VIA_NATIVE_API` pointer (train via the rfdetr package; reload
+  here) instead of "engine does not implement train()".
+- New registry + policy row `libreyolo-dfine-n` (Apache-2.0; weights
+  `LibreYOLO/LibreDFINEn`) — a real, validated trainable D-FINE variant.
+- Standalone HF `dfine-*` stays inference-only (`TRAINING_NOT_SUPPORTED_IN_HF_BACKEND`).
+- `tests/test_v314_train_reload.py` (12 weight-free contract tests) +
+  `tests/live/test_v314_train_reload_live.py` (gated `VSX_LIVE_TRAIN=1`).
+- No Ultralytics / AGPL / GPL on any path; YOLO-NAS remains non-trainable.
+
 ## [3.13.0] - 2026-06-16
 
 ### Added — LibreYOLO detector training / fine-tuning (permissive, no Ultralytics)

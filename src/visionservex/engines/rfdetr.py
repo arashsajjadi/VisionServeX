@@ -125,6 +125,9 @@ class RFDETREngine(StubEngine):
         super().__init__(entry)
         self._rfdetr_model: Any = None
         self._is_seg: bool = entry.id in _SEG_CLASSES
+        # When set (via load_checkpoint), a trained .pth overrides the base
+        # pretrained weights as the sole weight source.
+        self._checkpoint_override: Path | None = None
 
     # ------ lifecycle ------
 
@@ -136,10 +139,22 @@ class RFDETREngine(StubEngine):
                 install_hint="check visionservex list-models for supported ids",
             )
         cls = _load_rfdetr_class(class_name)
-        _log.info("loading %s on device=%s", class_name, device)
         # rfdetr accepts a device string; use 'cuda' or 'cpu'.
         # AMP is on by default in rfdetr (fp16 on GPU, fp32 on CPU).
-        self._rfdetr_model = cls(device=device)
+        if self._checkpoint_override is not None:
+            ckpt = self._checkpoint_override
+            if not Path(ckpt).is_file():
+                raise MissingDependencyError(
+                    f"trained checkpoint not found: {ckpt}",
+                    install_hint="pass an existing rfdetr training checkpoint (.pth)",
+                )
+            _log.info(
+                "loading %s from trained checkpoint %s on device=%s", class_name, ckpt, device
+            )
+            self._rfdetr_model = cls(pretrain_weights=str(ckpt), device=device)
+        else:
+            _log.info("loading %s on device=%s", class_name, device)
+            self._rfdetr_model = cls(device=device)
         _log.info("%s ready", class_name)
 
     def unload(self) -> None:
@@ -156,6 +171,33 @@ class RFDETREngine(StubEngine):
             self._rfdetr_model.predict(dummy, threshold=0.3)
         except Exception:
             pass
+
+    def load_checkpoint(
+        self,
+        checkpoint_path: str | Path,
+        *,
+        device: str | None = None,
+        precision: str = "fp32",
+    ) -> RFDETREngine:
+        """Load a trained RF-DETR checkpoint (``.pth``) for inference.
+
+        Re-instantiates the rfdetr model with ``pretrain_weights`` so the trained
+        weights are the sole source — no base-weight fallback. Raises
+        :class:`MissingDependencyError` if the file is absent. RF-DETR training
+        itself is performed through the mature ``rfdetr`` package's native API.
+        """
+        ckpt = Path(checkpoint_path)
+        if not ckpt.is_file():
+            raise MissingDependencyError(
+                f"trained checkpoint not found: {ckpt}",
+                install_hint="train RF-DETR via the rfdetr package and pass its output .pth",
+            )
+        if self._real_ready or self._rfdetr_model is not None:
+            self.unload()
+        self._real_ready = False
+        self._checkpoint_override = ckpt
+        self.load(device=device or self.device or "cpu", precision=precision)
+        return self
 
     # ------ inference ------
 

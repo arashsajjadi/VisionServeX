@@ -327,13 +327,57 @@ class VisionModel:
         return cls(model_id, **kwargs)
 
     @classmethod
-    def from_checkpoint(cls, checkpoint_path: str | Path, **kwargs: Any) -> VisionModel:
-        """Not generally supported. Raises a structured error with a hint."""
-        raise NotImplementedError(
-            "CHECKPOINT_LOAD_UNSUPPORTED: VisionModel does not support loading arbitrary "
-            "local checkpoints. Use VisionModel('MODEL_ID').pull() to download an official "
-            "checkpoint, or register a custom backend with visionservex model register-custom."
-        )
+    def from_checkpoint(
+        cls,
+        checkpoint_path: str | Path,
+        *,
+        model_id: str,
+        device: str | None = None,
+        **kwargs: Any,
+    ) -> VisionModel:
+        """Load a trained checkpoint for inference and return a ready model.
+
+        ``model_id`` identifies the family/variant the checkpoint was trained for
+        (e.g. ``"libreyolo-yolox-s"``) — it is required because a bare ``.pt``
+        does not reliably carry the engine/variant. The returned model predicts
+        through the SAME normalized schema as base inference, using the trained
+        weights with no base-weight fallback.
+
+        Supported for engines that implement ``load_checkpoint`` (LibreYOLO,
+        RF-DETR). Others raise a structured :class:`NotImplementedError`.
+
+        Example::
+
+            res = VisionModel("libreyolo-rtdetr-r50").train("data.yaml", epochs=1)
+            m = VisionModel.from_checkpoint(res["best_checkpoint"],
+                                            model_id="libreyolo-rtdetr-r50", device="cuda")
+            pred = m.predict(image)
+        """
+        model = cls(model_id, device=device, **kwargs)
+        model.load_checkpoint(checkpoint_path, device=device)
+        return model
+
+    def load_checkpoint(
+        self, checkpoint_path: str | Path, *, device: str | None = None
+    ) -> VisionModel:
+        """Load a trained checkpoint into this model in place (for inference).
+
+        Delegates to the engine's ``load_checkpoint``. After this call,
+        :meth:`predict` uses the trained weights — there is no silent reload of
+        the base weights. Raises :class:`NotImplementedError` for engines that
+        do not support trained-checkpoint reload.
+        """
+        fn = getattr(self.engine, "load_checkpoint", None)
+        if fn is None:
+            raise NotImplementedError(
+                f"CHECKPOINT_LOAD_UNSUPPORTED: the {self.entry.family!r} engine does not "
+                "support trained-checkpoint reload. Supported families: LibreYOLO, RF-DETR."
+            )
+        dev = device or self.device
+        fn(checkpoint_path, device=dev)
+        self.device = dev
+        self._loaded = True
+        return self
 
     def to(self, device: str) -> VisionModel:
         """Move model to a device (Ultralytics-style). Returns self."""
@@ -456,11 +500,23 @@ class VisionModel:
             }
         train_fn = getattr(self.engine, "train", None)
         if train_fn is None:
+            # The family IS trainable, but VisionServeX does not wrap its training
+            # loop — e.g. RF-DETR trains via the mature `rfdetr` package's own API.
+            # This is not a failure; it points to the native path and the reload
+            # route VisionServeX does provide.
             return {
-                "status": "TRAINING_NOT_SUPPORTED",
+                "status": "TRAIN_VIA_NATIVE_API",
                 "model_id": self.entry.id,
                 "family": self.entry.family,
-                "reason": "Engine does not implement train().",
+                "reason": cap.get(
+                    "notes", "Train via this family's native package API, then reload here."
+                ),
+                "supported_dataset_formats": cap.get("supported_dataset_formats", []),
+                "reload_hint": (
+                    f"After training, reload for inference via "
+                    f"VisionModel.from_checkpoint(ckpt, model_id='{self.entry.id}')."
+                ),
+                "docs": cap.get("docs", ""),
             }
         return train_fn(dataset, **kwargs)
 
@@ -669,10 +725,15 @@ _TRAINING_TABLE: dict[str, dict[str, Any]] = {
         "resume_supported": False,
         "checkpoint_save_supported": False,
         "checkpoint_load_supported": False,
+        "trained_checkpoint_predict_supported": False,
         "export_supported": ["onnx_experimental"],
         "supported_dataset_formats": [],
         "required_extra": "hf",
-        "notes": "TRAINING_NOT_SUPPORTED_IN_HF_BACKEND. HF Transformers does not expose D-FINE training. Use official Peterande/D-FINE repository for training.",
+        "notes": (
+            "TRAINING_NOT_SUPPORTED_IN_HF_BACKEND. HF Transformers does not expose "
+            "D-FINE training. For a trainable, permissive D-FINE use the LibreYOLO "
+            "variant `libreyolo-dfine-n` instead, or the official Peterande/D-FINE repo."
+        ),
         "docs": "https://github.com/Peterande/D-FINE",
     },
     "rfdetr": {
@@ -681,10 +742,17 @@ _TRAINING_TABLE: dict[str, dict[str, Any]] = {
         "resume_supported": True,
         "checkpoint_save_supported": True,
         "checkpoint_load_supported": True,
+        "trained_checkpoint_predict_supported": True,
         "export_supported": ["onnx"],
         "supported_dataset_formats": ["coco-json", "yolo"],
         "required_extra": "rfdetr",
-        "notes": "RF-DETR supports training/fine-tuning via the rfdetr package. Use rfdetr.train() directly.",
+        "notes": (
+            "RF-DETR trains/fine-tunes via the mature `rfdetr` package's native API "
+            "(model.train(dataset_dir=...), COCO format). A trained checkpoint reloads "
+            "for inference through VisionServeX via "
+            "VisionModel.from_checkpoint(ckpt, model_id='rfdetr-nano') or "
+            "engine.load_checkpoint(). Externally validated; Anastig-proven."
+        ),
         "docs": "https://github.com/roboflow/rf-detr",
     },
     "libreyolo": {
@@ -693,14 +761,24 @@ _TRAINING_TABLE: dict[str, dict[str, Any]] = {
         "resume_supported": True,
         "checkpoint_save_supported": True,
         "checkpoint_load_supported": True,
+        "trained_checkpoint_predict_supported": True,
         "export_supported": ["onnx"],
         "supported_dataset_formats": ["yolo"],
         "required_extra": "libreyolo",
+        "validated_variants": [
+            "libreyolo-yolox-s",
+            "libreyolo-yolov9-s",
+            "libreyolo-rtdetr-r50",
+            "libreyolo-dfine-n",
+        ],
+        "known_blockers": [],
         "notes": (
             "LibreYOLO training via the permissive `libreyolo` package "
             "(YOLOX / YOLOv9 / RT-DETR / D-FINE). YOLO data.yaml dataset format; "
             "fine-tunes from COCO-pretrained base weights; saves best.pt/last.pt. "
-            "No Ultralytics runtime. YOLO-NAS (Deci non-commercial) is excluded."
+            "v3.14.0 fixes trained-checkpoint reload (forces eval mode after the "
+            "class-count rebuild) so train->reload->predict->export is validated "
+            "live. No Ultralytics runtime. YOLO-NAS (Deci non-commercial) is excluded."
         ),
         "docs": "https://github.com/LibreYOLO/libreyolo",
     },
@@ -770,6 +848,7 @@ _TRAINING_TABLE: dict[str, dict[str, Any]] = {
         "resume_supported": False,
         "checkpoint_save_supported": False,
         "checkpoint_load_supported": False,
+        "trained_checkpoint_predict_supported": False,
         "export_supported": [],
         "supported_dataset_formats": [],
         "notes": "TRAINING_NOT_SUPPORTED for this model family.",

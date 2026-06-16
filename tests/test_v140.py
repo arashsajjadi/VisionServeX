@@ -250,8 +250,11 @@ def test_visionmodel_from_registry():
 def test_visionmodel_from_checkpoint_raises():
     from visionservex import VisionModel
 
+    # v3.14.0: from_checkpoint is implemented for engines that support trained-
+    # checkpoint reload (LibreYOLO, RF-DETR). For a family whose engine does NOT
+    # (e.g. the mock engine), it still raises a structured CHECKPOINT_LOAD_UNSUPPORTED.
     with pytest.raises(NotImplementedError) as exc_info:
-        VisionModel.from_checkpoint("some/path.pt")
+        VisionModel.from_checkpoint("some/path.pt", model_id="mock-detect")
     assert "CHECKPOINT_LOAD_UNSUPPORTED" in str(exc_info.value)
 
 
