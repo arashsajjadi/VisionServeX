@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-3.12.0-informational.svg" alt="v3.12.0">
+  <img src="https://img.shields.io/badge/version-3.13.0-informational.svg" alt="v3.13.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -38,6 +38,7 @@ status, and a clear commercial posture. Blockers are documented — not hidden.
 - **License-aware registry** — every model is classified: commercial-safe core, BYOT gated, non-commercial, or external-API-only
 - **Stable Python + CLI + HTTP API** — one interface across detection, segmentation, embedding, depth, classification, and open-vocabulary tasks
 - **Commercial-safe core** — SAM v1/2/2.1, DINOv2, RF-DETR, Florence-2, CLIP, OWLv2, Grounding DINO, and more; all Apache-2.0 or MIT, no token required
+- **Permissive detector training** *(new in v3.13.0)* — fine-tune LibreYOLO (YOLOX / YOLOv9 / RT-DETR / D-FINE) on your own YOLO datasets, reload trained checkpoints, and export to ONNX — no Ultralytics/AGPL. See [docs/libreyolo_training.md](docs/libreyolo_training.md). Standalone HF D-FINE stays inference-only; YOLO-NAS (non-commercial) is excluded.
 - **BYOT support for gated models** — SAM3/SAM3.1, DINOv3; your token, your cache, your accepted license
 - **No bundled gated weights** — VisionServeX never puts gated model weights into PyPI, GitHub, Docker, or any release artifact
 - **Honest blockers** — unavailable models explain exactly why and what to do next

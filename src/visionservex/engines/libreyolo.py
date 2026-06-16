@@ -27,19 +27,30 @@ through the standard VisionServeX downloader. VisionServeX never bundles them
 
 from __future__ import annotations
 
+import time
 from collections.abc import Sequence
+from pathlib import Path
 from typing import Any
 
 from PIL import Image
 
 from visionservex.core.results import BaseResult, Box, Detection, DetectionResult
 from visionservex.engines._stub import StubEngine
-from visionservex.engines.base import MissingDependencyError
+from visionservex.engines.base import EngineError, MissingDependencyError
 from visionservex.engines.registry import register_engine
 from visionservex.registry import ModelEntry
 from visionservex.utils.logging import get_logger
 
 _log = get_logger(__name__)
+
+
+class TrainingNotSupportedError(EngineError):
+    """Raised when training is requested for a non-trainable LibreYOLO family.
+
+    YOLO-NAS (Deci proprietary, non-commercial) and any non-permissive family
+    must never train through VisionServeX.
+    """
+
 
 # Permissive LibreYOLO families only. YOLO-NAS (non-commercial) is excluded by
 # design — it must never be reachable as a default-safe runnable engine.
@@ -49,6 +60,11 @@ _FAMILY_TO_CLASS: dict[str, str] = {
     "rtdetr": "LibreYOLORTDETR",
     "dfine": "LibreDFINE",
 }
+
+# Trainable families == the runnable permissive families. YOLO-NAS is
+# deliberately absent: training it would be a non-commercial / proprietary path.
+# Single source of truth — derived from _FAMILY_TO_CLASS so the two can't drift.
+_TRAINABLE_FAMILIES: frozenset[str] = frozenset(_FAMILY_TO_CLASS)
 
 
 def _parse_model_id(model_id: str) -> tuple[str, str] | None:
@@ -96,6 +112,9 @@ class LibreYOLOEngine(StubEngine):
     def __init__(self, entry: ModelEntry) -> None:
         super().__init__(entry)
         self._model: Any = None
+        # When set (via load_checkpoint), this trained .pt overrides the
+        # on-demand HF base-weight download as the sole weight source.
+        self._checkpoint_override: Path | None = None
 
     # ------ lifecycle ------
 
@@ -116,13 +135,26 @@ class LibreYOLOEngine(StubEngine):
             )
         cls = _load_libreyolo_class(class_name)
 
-        # Resolve weights via the standard VisionServeX downloader (HF org
-        # `LibreYOLO`). Pulled on demand to the local cache; never bundled.
-        from visionservex.runtime.downloads import cached_path, download
+        # Weight source: an explicitly-supplied trained checkpoint (set via
+        # ``load_checkpoint``) takes precedence over the on-demand HF base-weight
+        # download. This is what makes trained-checkpoint reload real — there is
+        # no silent fall back to base/pretrained weights once a checkpoint is set.
+        if self._checkpoint_override is not None:
+            weight_path = self._checkpoint_override
+            if not Path(weight_path).is_file():
+                raise MissingDependencyError(
+                    f"trained checkpoint not found: {weight_path}",
+                    install_hint="pass an existing best.pt/last.pt from LibreYOLOEngine.train()",
+                )
+            _log.info("loading %s from trained checkpoint %s", class_name, weight_path)
+        else:
+            # Resolve base weights via the standard VisionServeX downloader (HF
+            # org `LibreYOLO`). Pulled on demand to the local cache; never bundled.
+            from visionservex.runtime.downloads import cached_path, download
 
-        weight_path = cached_path(self.entry)
-        if weight_path is None:
-            weight_path = download(self.entry)
+            weight_path = cached_path(self.entry)
+            if weight_path is None:
+                weight_path = download(self.entry)
 
         ly_device = "cuda" if str(device).startswith("cuda") else str(device)
         _log.info(
@@ -149,6 +181,152 @@ class LibreYOLOEngine(StubEngine):
             self._model(dummy, save=False)
         except Exception:  # pragma: no cover - best-effort warmup only
             pass
+
+    # ------ training / fine-tuning ------
+
+    def train(
+        self,
+        dataset: str | Path,
+        *,
+        epochs: int = 100,
+        batch: int = 16,
+        imgsz: int = 640,
+        device: str | None = None,
+        lr0: float | None = None,
+        workers: int = 4,
+        seed: int = 0,
+        project: str | None = None,
+        name: str | None = None,
+        exist_ok: bool = False,
+        resume: bool = False,
+        amp: bool | None = None,
+        patience: int = 50,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Train / fine-tune this LibreYOLO detector on a YOLO-format dataset.
+
+        Args:
+            dataset: Path to a YOLO ``data.yaml`` or a directory containing one.
+            epochs/batch/imgsz/workers/seed/project/name/exist_ok/resume/patience:
+                forwarded to the libreyolo trainer.
+            device: ``None``/``"auto"`` auto-detects GPU; or pass ``"cuda"``/``"cpu"``.
+            lr0/amp: omitted → the family's own tuned default is used.
+            **extra: family-specific training kwargs forwarded verbatim.
+
+        Returns a normalized result dict (see ``_normalize_train_result``).
+
+        Legal: only the permissive families (YOLOX / YOLOv9 / RT-DETR / D-FINE)
+        train. YOLO-NAS (Deci, non-commercial) is rejected with
+        :class:`TrainingNotSupportedError`. No Ultralytics runtime is imported.
+        """
+        from visionservex.data.yolo_dataset import resolve_dataset_yaml, validate_yolo_yaml
+
+        parsed = _parse_model_id(self.entry.id)
+        if parsed is None:
+            raise MissingDependencyError(
+                f"{self.entry.id!r} is not a libreyolo-<family>-<size> id",
+                install_hint="check `visionservex list-models` for trainable libreyolo ids",
+            )
+        family, size = parsed
+        if family not in _TRAINABLE_FAMILIES:
+            raise TrainingNotSupportedError(
+                f"TRAINING_NOT_SUPPORTED: libreyolo family {family!r} is not trainable. "
+                f"Only permissive families {sorted(_TRAINABLE_FAMILIES)} are allowed "
+                f"(YOLO-NAS is Deci proprietary / non-commercial and is excluded)."
+            )
+
+        # Resolve + validate the YOLO dataset (safe_load only; a download: block
+        # is never executed here, and allow_download_scripts stays False below).
+        data_yaml = resolve_dataset_yaml(dataset)
+        verdict = validate_yolo_yaml(data_yaml)
+        if verdict.get("status") != "ok":
+            raise TrainingNotSupportedError(
+                f"DATASET_INVALID: {data_yaml} failed YOLO validation: {verdict.get('issues')}"
+            )
+
+        # Ensure the model is instantiated (base/pretrained weights as init).
+        if not self._real_ready:
+            self.load(device=device or "auto", precision="fp32")
+
+        train_device = "" if device in (None, "auto", "") else str(device)
+        kwargs: dict[str, Any] = {
+            "epochs": epochs,
+            "batch": batch,
+            "imgsz": imgsz,
+            "device": train_device,
+            "workers": workers,
+            "seed": seed,
+            "project": project or "runs/train",
+            "name": name or self.entry.id,
+            "exist_ok": exist_ok,
+            "resume": resume,
+            "patience": patience,
+            "allow_download_scripts": False,
+        }
+        if lr0 is not None:
+            kwargs["lr0"] = lr0
+        if amp is not None:
+            kwargs["amp"] = amp
+        kwargs.update(extra)
+
+        _log.info(
+            "training %s (%s-%s) on %s for %d epochs",
+            self.entry.id,
+            family,
+            size,
+            data_yaml,
+            epochs,
+        )
+        t0 = time.time()
+        raw = self._model.train(data=str(data_yaml), **kwargs)
+        elapsed_h = (time.time() - t0) / 3600.0
+        return _normalize_train_result(
+            raw,
+            model_id=self.entry.id,
+            variant=f"{family}-{size}",
+            data_yaml=data_yaml,
+            hours=elapsed_h,
+        )
+
+    def load_checkpoint(
+        self,
+        checkpoint_path: str | Path,
+        *,
+        device: str | None = None,
+        precision: str = "fp32",
+    ) -> LibreYOLOEngine:
+        """Load a trained LibreYOLO checkpoint (``best.pt``/``last.pt``) for inference.
+
+        The family and input size come from this engine's model id — never
+        guessed from the file. Raises :class:`MissingDependencyError` if the
+        file is absent. There is **no** silent fall back to base weights: once a
+        checkpoint is supplied it is the only weight source.
+        """
+        ckpt = Path(checkpoint_path)
+        if not ckpt.is_file():
+            raise MissingDependencyError(
+                f"trained checkpoint not found: {ckpt}",
+                install_hint="train one first: VisionModel('libreyolo-yolox-s').train(dataset)",
+            )
+        if self._real_ready or self._model is not None:
+            self.unload()
+        self._real_ready = False
+        self._checkpoint_override = ckpt
+        self.load(device=device or self.device or "cpu", precision=precision)
+        return self
+
+    def export(self, format: str, output_path: str | Path) -> Path:
+        """Export the loaded LibreYOLO model to a deployment format (ONNX, ...).
+
+        Delegates to the libreyolo package exporter. Loads base/pretrained
+        weights on demand if the model is not already in memory.
+        """
+        if not self._real_ready:
+            self.load(device=self.device or "cpu", precision="fp32")
+        out = Path(output_path)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        result_path = self._model.export(format=format, output_path=str(out))
+        return Path(result_path)
 
     # ------ inference ------
 
@@ -233,10 +411,65 @@ def _libre_to_detections(result: Any, model: Any) -> list[Detection]:
     return out
 
 
+def _normalize_train_result(
+    raw: Any, *, model_id: str, variant: str, data_yaml: Path, hours: float
+) -> dict[str, Any]:
+    """Normalize a libreyolo trainer dict into the VisionServeX train contract.
+
+    The underlying ``libreyolo`` ``model.train()`` returns a dict with keys like
+    ``save_dir``, ``best_checkpoint``, ``last_checkpoint``, ``best_mAP50``,
+    ``best_mAP50_95``, ``best_epoch``, ``final_loss`` and ``epoch_losses``. We
+    map those into a stable contract and attach the measured wall-clock time.
+    Optional artifact paths (``results.csv``, ``train_config.yaml``) are included
+    only when they actually exist on disk.
+    """
+    raw = raw if isinstance(raw, dict) else {}
+    save_dir = str(raw.get("save_dir") or raw.get("output_dir") or "")
+    weights_dir = str(Path(save_dir) / "weights") if save_dir else ""
+    best_ckpt = raw.get("best_checkpoint") or (
+        str(Path(weights_dir) / "best.pt") if weights_dir else ""
+    )
+    last_ckpt = raw.get("last_checkpoint") or (
+        str(Path(weights_dir) / "last.pt") if weights_dir else ""
+    )
+    epoch_losses = raw.get("epoch_losses") or []
+    epochs_completed = len(epoch_losses) if epoch_losses else raw.get("epochs_completed")
+
+    def _existing(path_str: str) -> str | None:
+        return path_str if path_str and Path(path_str).exists() else None
+
+    args_yaml = str(Path(save_dir) / "train_config.yaml") if save_dir else ""
+    results_csv = str(Path(save_dir) / "results.csv") if save_dir else ""
+    return {
+        "status": "ok",
+        "model_id": model_id,
+        "family": "libreyolo",
+        "variant": variant,
+        "dataset_format": "yolo",
+        "dataset_yaml": str(data_yaml),
+        "best_checkpoint": best_ckpt,
+        "last_checkpoint": last_ckpt,
+        "save_dir": save_dir,
+        "metrics": {
+            "best_mAP50": raw.get("best_mAP50"),
+            "best_mAP50_95": raw.get("best_mAP50_95"),
+            "best_epoch": raw.get("best_epoch"),
+            "epochs_completed": epochs_completed,
+            "final_loss": raw.get("final_loss"),
+            "training_time_hours": round(hours, 4),
+        },
+        "artifacts": {
+            "weights_dir": weights_dir or None,
+            "results_csv": _existing(results_csv),
+            "args_yaml": _existing(args_yaml),
+        },
+    }
+
+
 def _factory(entry: ModelEntry) -> LibreYOLOEngine:
     return LibreYOLOEngine(entry)
 
 
 register_engine("libreyolo", _factory)
 
-__all__ = ["LibreYOLOEngine"]
+__all__ = ["LibreYOLOEngine", "TrainingNotSupportedError"]

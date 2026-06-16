@@ -2,6 +2,36 @@
 
 ## [Unreleased]
 
+## [3.13.0] - 2026-06-16
+
+### Added — LibreYOLO detector training / fine-tuning (permissive, no Ultralytics)
+
+LibreYOLO detectors can now be **trained / fine-tuned** through VisionServeX, not
+just run for inference. Training is backed entirely by the permissive `libreyolo`
+package (MIT code; Apache-2.0 / MIT weights). No Ultralytics / AGPL / GPL runtime
+is imported on any training, checkpoint, or export path. Weights are pulled on
+demand and never bundled (`can_ship_weights=False`).
+
+- `src/visionservex/engines/libreyolo.py` — `LibreYOLOEngine.train()` (YOLO
+  `data.yaml` → normalized result with best.pt/last.pt + metrics),
+  `.load_checkpoint()` (trained-checkpoint reload, no silent base-weight
+  fallback), and `.export()` (ONNX). YOLO-NAS (Deci non-commercial) is
+  hard-rejected via `_TRAINABLE_FAMILIES`.
+- `src/visionservex/core/model.py` — `_TRAINING_TABLE["libreyolo"]` (train /
+  finetune / resume / checkpoint = true; dataset `yolo`),
+  `_EXPORT_TABLE["libreyolo"]` (`onnx: supported`), a per-sub-family YOLO-NAS
+  guard in `_training_capabilities`, and `VisionModel.train()`.
+- `src/visionservex/data/yolo_dataset.py` — YOLO `data.yaml` resolver + validator
+  (`yaml.safe_load` only; never executes a `download:` block).
+- `src/visionservex/cli/training_commands.py` — `visionservex training
+  train/finetune` now call the real engine trainer (with `--dry-run`, dataset
+  validation, and structured output).
+- D-FINE via LibreYOLO (`libreyolo-dfine-*`) is trainable (routed through
+  `LibreYOLOEngine`); standalone HF `dfine-*` stays inference-only
+  (`TRAINING_NOT_SUPPORTED_IN_HF_BACKEND`) — not faked.
+- `tests/test_v313_libreyolo_training.py` — weight-free training-contract tests.
+- `docs/libreyolo_training.md` — training guide (dataset format, API, CLI, legal).
+
 ## [3.12.0] - 2026-06-15
 
 ### Added — LibreYOLO runtime engine (permissive YOLO family)

@@ -201,63 +201,226 @@ def export_model(
 
 
 # ---------------------------------------------------------------------------
-# Train / finetune stubs
+# Train / finetune
 # ---------------------------------------------------------------------------
 
 
-def _training_stub(model_id: str, operation: str, data: str | None, json_: bool) -> None:
+def _emit_training(payload: dict, json_: bool, *, ok_status: str = "ok") -> None:
+    if json_:
+        typer.echo(json.dumps(payload, indent=2, default=str))
+        return
+    status = payload.get("status", "")
+    if status in (ok_status, "complete"):
+        console.print(f"[green]{status}[/green]: {payload.get('model_id', '-')}")
+        m = payload.get("metrics", {}) or {}
+        if m:
+            console.print(
+                f"  best mAP50: {m.get('best_mAP50', '-')}  "
+                f"mAP50:95: {m.get('best_mAP50_95', '-')}  "
+                f"epoch: {m.get('best_epoch', '-')}"
+            )
+        if payload.get("best_checkpoint"):
+            console.print(f"  best:  {payload['best_checkpoint']}")
+        if payload.get("last_checkpoint"):
+            console.print(f"  last:  {payload['last_checkpoint']}")
+        if payload.get("save_dir"):
+            console.print(f"  runs:  {payload['save_dir']}")
+    elif status == "DRY_RUN":
+        console.print(
+            f"[cyan]DRY_RUN[/cyan] ({payload.get('model_id', '-')}): no training executed"
+        )
+        console.print(f"  dataset: {payload.get('dataset', '-')} ({payload.get('dataset_format')})")
+        console.print(f"  config:  {payload.get('resolved_config')}")
+    else:
+        console.print(
+            f"[yellow]{status}:[/yellow] {payload.get('reason') or payload.get('issues')}"
+        )
+        if payload.get("hint"):
+            console.print(f"  hint: {payload['hint']}")
+
+
+def _run_training(
+    model_id: str,
+    operation: str,
+    *,
+    data: str | None,
+    epochs: int,
+    batch: int,
+    imgsz: int,
+    device: str,
+    dry_run: bool,
+    json_: bool,
+) -> None:
+    """Shared train/finetune driver. Calls the real engine trainer when the
+    model family supports it; otherwise emits a structured not-supported error.
+    """
     from visionservex.core.model import _training_capabilities
 
     cap = _training_capabilities(model_id)
-    key = f"{operation}_supported"
-    supported = cap.get(key, False)
+    if not cap.get(f"{operation}_supported", False):
+        _emit_training(
+            {
+                "status": "TRAINING_NOT_SUPPORTED",
+                "operation": operation,
+                "model_id": model_id,
+                "reason": cap.get("notes", f"{operation} is not supported for {model_id}."),
+                "supported_alternatives": cap.get("export_supported", []),
+                "docs": cap.get("docs", ""),
+                "hint": f"Check visionservex training capabilities --model {model_id}",
+            },
+            json_,
+        )
+        raise typer.Exit(2)
 
-    if not supported:
-        payload = {
-            "status": "TRAINING_NOT_SUPPORTED",
-            "operation": operation,
-            "model_id": model_id,
-            "reason": cap.get("notes", f"{operation} is not supported for {model_id}."),
-            "supported_alternatives": cap.get("export_supported", []),
-            "docs": cap.get("docs", ""),
-            "hint": f"Check visionservex training capabilities --model {model_id}",
-        }
-        if json_:
-            typer.echo(json.dumps(payload, indent=2))
-        else:
-            console.print(f"[yellow]TRAINING_NOT_SUPPORTED:[/yellow] {operation} for {model_id}")
-            console.print(f"  Reason: {cap.get('notes', '-')}")
-            if cap.get("docs"):
-                console.print(f"  Docs: {cap['docs']}")
+    if not data:
+        _emit_training(
+            {
+                "status": "DATASET_REQUIRED",
+                "operation": operation,
+                "model_id": model_id,
+                "reason": "No dataset provided.",
+                "hint": "pass --data path/to/data.yaml (YOLO format) or a dataset directory",
+            },
+            json_,
+        )
+        raise typer.Exit(2)
+
+    # Validate the YOLO dataset before doing any heavy work (safe_load only).
+    from visionservex.data.yolo_dataset import (
+        YoloDatasetError,
+        resolve_dataset_yaml,
+        validate_yolo_yaml,
+    )
+
+    try:
+        yaml_path = resolve_dataset_yaml(data)
+    except YoloDatasetError as exc:
+        _emit_training(
+            {
+                "status": "DATASET_INVALID",
+                "operation": operation,
+                "model_id": model_id,
+                "reason": str(exc),
+                "hint": "provide a YOLO data.yaml with train/val/nc/names",
+            },
+            json_,
+        )
+        raise typer.Exit(2)
+
+    verdict = validate_yolo_yaml(yaml_path)
+    if verdict.get("status") != "ok":
+        _emit_training(
+            {
+                "status": "DATASET_INVALID",
+                "operation": operation,
+                "model_id": model_id,
+                "dataset": str(yaml_path),
+                "issues": verdict.get("issues", []),
+                "hint": "fix the data.yaml (train/val splits, nc, names) and retry",
+            },
+            json_,
+        )
+        raise typer.Exit(2)
+
+    if dry_run:
+        _emit_training(
+            {
+                "status": "DRY_RUN",
+                "operation": operation,
+                "model_id": model_id,
+                "dataset": str(yaml_path),
+                "dataset_format": "yolo",
+                "n_train_images": verdict.get("n_train_images"),
+                "nc": verdict.get("nc"),
+                "resolved_config": {
+                    "epochs": epochs,
+                    "batch": batch,
+                    "imgsz": imgsz,
+                    "device": device,
+                },
+                "note": "Dry run only — NO training was executed.",
+            },
+            json_,
+        )
+        return
+
+    # Real training.
+    from visionservex.core.model import VisionModel
+
+    try:
+        model = VisionModel(model_id)
+        result = model.train(
+            str(yaml_path),
+            epochs=epochs,
+            batch=batch,
+            imgsz=imgsz,
+            device=None if device in ("auto", "") else device,
+        )
+    except Exception as exc:  # surface a clean structured error, not a traceback
+        _emit_training(
+            {
+                "status": "TRAINING_FAILED",
+                "operation": operation,
+                "model_id": model_id,
+                "error": str(exc)[:500],
+            },
+            json_,
+        )
+        raise typer.Exit(1)
+
+    _emit_training(result, json_)
+    if result.get("status") != "ok":
         raise typer.Exit(2)
 
 
-@training_app.command(
-    "train", help="Train a model (returns TRAINING_NOT_SUPPORTED for most models)."
-)
+@training_app.command("train", help="Train a model on a YOLO dataset (LibreYOLO families).")
 def train_model(
     model_id: str,
-    data: str | None = typer.Option(None, "--data"),
+    data: str | None = typer.Option(None, "--data", help="YOLO data.yaml or dataset dir."),
     epochs: int = typer.Option(50, "--epochs"),
+    batch: int = typer.Option(16, "--batch"),
+    imgsz: int = typer.Option(640, "--imgsz"),
     device: str = typer.Option("auto", "--device"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate config/dataset; do not train."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
-    """Train a model. Most models return a structured TRAINING_NOT_SUPPORTED error."""
-    _training_stub(model_id, "train", data, json_)
+    """Train a model. LibreYOLO detectors train; others return TRAINING_NOT_SUPPORTED."""
+    _run_training(
+        model_id,
+        "train",
+        data=data,
+        epochs=epochs,
+        batch=batch,
+        imgsz=imgsz,
+        device=device,
+        dry_run=dry_run,
+        json_=json_,
+    )
 
 
-@training_app.command(
-    "finetune", help="Fine-tune a model (returns structured error for most models)."
-)
+@training_app.command("finetune", help="Fine-tune a model on a YOLO dataset (LibreYOLO families).")
 def finetune_model(
     model_id: str,
-    data: str | None = typer.Option(None, "--data"),
+    data: str | None = typer.Option(None, "--data", help="YOLO data.yaml or dataset dir."),
     epochs: int = typer.Option(20, "--epochs"),
+    batch: int = typer.Option(16, "--batch"),
+    imgsz: int = typer.Option(640, "--imgsz"),
     device: str = typer.Option("auto", "--device"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate config/dataset; do not train."),
     json_: bool = typer.Option(False, "--json"),
 ) -> None:
-    """Fine-tune a model. Most models return a structured TRAINING_NOT_SUPPORTED error."""
-    _training_stub(model_id, "finetune", data, json_)
+    """Fine-tune a model. LibreYOLO detectors fine-tune; others return TRAINING_NOT_SUPPORTED."""
+    _run_training(
+        model_id,
+        "finetune",
+        data=data,
+        epochs=epochs,
+        batch=batch,
+        imgsz=imgsz,
+        device=device,
+        dry_run=dry_run,
+        json_=json_,
+    )
 
 
 # ---------------------------------------------------------------------------

@@ -428,6 +428,42 @@ class VisionModel:
         """Return export capabilities for this model."""
         return _export_capabilities(self.entry.id)
 
+    def train(self, dataset: str | Path, **kwargs: Any) -> dict[str, Any]:
+        """Train / fine-tune this model on a dataset (engine-dependent).
+
+        Supported for the LibreYOLO detector family (YOLOX / YOLOv9 / RT-DETR /
+        D-FINE) via the permissive ``libreyolo`` package. Other families return
+        a structured ``TRAINING_NOT_SUPPORTED`` dict rather than raising.
+
+        Args:
+            dataset: Path to a YOLO ``data.yaml`` or a directory containing one.
+            **kwargs: Forwarded to the engine trainer (``epochs``, ``batch``,
+                ``device``, ``imgsz``, ...). When ``device`` is omitted the
+                engine auto-detects a GPU.
+
+        Returns:
+            The engine's normalized training-result dict, or a
+            ``TRAINING_NOT_SUPPORTED`` envelope.
+        """
+        cap = _training_capabilities(self.entry.id)
+        if not (cap.get("train_supported") or cap.get("finetune_supported")):
+            return {
+                "status": "TRAINING_NOT_SUPPORTED",
+                "model_id": self.entry.id,
+                "family": self.entry.family,
+                "reason": cap.get("notes", "Training is not supported for this model."),
+                "docs": cap.get("docs", ""),
+            }
+        train_fn = getattr(self.engine, "train", None)
+        if train_fn is None:
+            return {
+                "status": "TRAINING_NOT_SUPPORTED",
+                "model_id": self.entry.id,
+                "family": self.entry.family,
+                "reason": "Engine does not implement train().",
+            }
+        return train_fn(dataset, **kwargs)
+
     def val(
         self,
         data: str | None = None,
@@ -651,6 +687,23 @@ _TRAINING_TABLE: dict[str, dict[str, Any]] = {
         "notes": "RF-DETR supports training/fine-tuning via the rfdetr package. Use rfdetr.train() directly.",
         "docs": "https://github.com/roboflow/rf-detr",
     },
+    "libreyolo": {
+        "train_supported": True,
+        "finetune_supported": True,
+        "resume_supported": True,
+        "checkpoint_save_supported": True,
+        "checkpoint_load_supported": True,
+        "export_supported": ["onnx"],
+        "supported_dataset_formats": ["yolo"],
+        "required_extra": "libreyolo",
+        "notes": (
+            "LibreYOLO training via the permissive `libreyolo` package "
+            "(YOLOX / YOLOv9 / RT-DETR / D-FINE). YOLO data.yaml dataset format; "
+            "fine-tunes from COCO-pretrained base weights; saves best.pt/last.pt. "
+            "No Ultralytics runtime. YOLO-NAS (Deci non-commercial) is excluded."
+        ),
+        "docs": "https://github.com/LibreYOLO/libreyolo",
+    },
     "swinv2": {
         "train_supported": False,
         "finetune_supported": False,
@@ -753,6 +806,26 @@ _EXPORT_TABLE: dict[str, dict[str, Any]] = {
         "torchscript": {"status": "unsupported", "notes": "Not supported."},
         "hf_save_pretrained": {"status": "unsupported", "notes": "Not HF-based."},
     },
+    "libreyolo": {
+        "onnx": {
+            "status": "supported",
+            "notes": "ONNX export via the libreyolo package exporter. "
+            "VisionModel.export(format='onnx', output_path=...).",
+        },
+        "torchscript": {
+            "status": "backend_supported_but_not_integrated",
+            "notes": "libreyolo supports TorchScript; not surfaced/tested in VisionServeX v3.13.",
+        },
+        "tensorrt": {
+            "status": "backend_supported_but_not_integrated",
+            "notes": "libreyolo supports TensorRT; not surfaced/tested in VisionServeX v3.13.",
+        },
+        "openvino": {
+            "status": "backend_supported_but_not_integrated",
+            "notes": "libreyolo supports OpenVINO; not surfaced/tested in VisionServeX v3.13.",
+        },
+        "hf_save_pretrained": {"status": "unsupported", "notes": "Not HF-based."},
+    },
     "swinv2": {
         "onnx": {
             "status": "experimental",
@@ -789,6 +862,18 @@ _EXPORT_TABLE: dict[str, dict[str, Any]] = {
 }
 
 
+# LibreYOLO sub-families that may train. Mirrors
+# ``engines.libreyolo._TRAINABLE_FAMILIES`` (permissive only). YOLO-NAS shares
+# family="libreyolo" but is Deci non-commercial and must never train.
+_LIBREYOLO_TRAINABLE_SUBFAMILIES = frozenset({"yolox", "yolov9", "rtdetr", "dfine"})
+
+
+def _libreyolo_subfamily(model_id: str) -> str:
+    """Extract the sub-family token from a ``libreyolo-<sub>-<size>`` id."""
+    parts = model_id.split("-")
+    return parts[1] if len(parts) >= 2 and parts[0] == "libreyolo" else ""
+
+
 def _training_capabilities(model_id: str) -> dict[str, Any]:
     """Return training/fine-tuning capability dict for a model."""
     try:
@@ -798,6 +883,26 @@ def _training_capabilities(model_id: str) -> dict[str, Any]:
         family = model_id.split("-")[0]
 
     info = _TRAINING_TABLE.get(family, _TRAINING_TABLE["default"]).copy()
+
+    # LibreYOLO training is per sub-family: YOLO-NAS shares family="libreyolo"
+    # but must never report trainable. Force a not-supported verdict for any
+    # *explicit* non-permissive sub-family, even when no registry row exists for
+    # it. A bare family name ("libreyolo", no sub-family token) keeps the
+    # family-level default so the capabilities listing shows the family as
+    # trainable.
+    _sub = _libreyolo_subfamily(model_id)
+    if family == "libreyolo" and _sub and _sub not in _LIBREYOLO_TRAINABLE_SUBFAMILIES:
+        info = {
+            **_TRAINING_TABLE["default"],
+            "required_extra": "libreyolo",
+            "notes": (
+                "TRAINING_NOT_SUPPORTED: non-permissive LibreYOLO family. Only "
+                "YOLOX / YOLOv9 / RT-DETR / D-FINE train; YOLO-NAS is Deci "
+                "proprietary / non-commercial and is excluded."
+            ),
+            "docs": "https://github.com/LibreYOLO/libreyolo",
+        }
+
     info["model_id"] = model_id
     info["family"] = family
     return info
