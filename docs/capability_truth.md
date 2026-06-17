@@ -1,55 +1,98 @@
-# VisionServeX Capability Truth (v3.17.0)
+# Capability Truth (v3.18)
 
-`model_capabilities(model_id)` (and `VisionModel(id).capabilities()`) is the single
-source of truth for what a model can do. It is derived from the registry, the
-licensing policy, the training/export tables, and the engine registry — and is
-enforced by the v3.13–v3.17 test suites.
-
-## Schema
+`visionservex.model_capabilities(model_id)` is the **single source of truth** for
+every model. Anastig and any downstream UI drive their entire model experience
+off this one object — there is no hardcoded allowlist beyond optional product
+ranking.
 
 ```python
-{
-  "model_id", "family", "task", "tasks": ["detect"], "engine", "backend",
-  "readiness": "train-ready | inference-ready | embedding-ready(=inference for embed) | catalog-only | blocked",
-  "legal_status", "commercial_safe", "gated", "license_code", "license_weights",
-  "pretrained_inference_supported", "pretrained_load_supported",
-  "train_supported", "finetune_supported",
-  "checkpoint_save_supported", "checkpoint_load_supported",
-  "trained_checkpoint_predict_supported", "post_nms_predict_supported",
-  "export_supported": ["onnx"], "supported_dataset_formats",
-  "validated_lifecycle", "validated_variants", "known_blockers", "exact_blocker",
-  "validated_syntax": {"predict": "...", "classify": "...", "train": "...", ...},
-}
+import visionservex as vsx
+cap = vsx.model_capabilities("libreyolo-yolox-s")
 ```
 
-## Rules (test-enforced)
+## The object
 
-- A model is **train-ready** only if `train_supported and trained_checkpoint_predict_supported
-  and validated_lifecycle` (full lifecycle train→checkpoint→reload→predict→NMS→export proven).
-- If inference works but training does not → **inference-ready** (`train_supported=False`,
-  `exact_blocker` set).
-- If the engine is not wired (`implementation_status=stub`) → **catalog-only** with
-  `exact_blocker="CATALOG_ONLY: ..."`.
-- `commercial_safe=True` only when a curated policy row grants default-safe.
-- Embedding models (`task=embed`) are inference-ready when `embed()` works; they are
-  **not** detectors/classifiers — use `embed()`/`similarity()`.
-- Correspondence is the INSID3 API; `VisionModel.correspond()` raises
-  `TaskNotSupportedError` (it is region/prototype matching, not segmentation).
-- Detection `predict()` returns **post-NMS** boxes by default; raw proposals only via
-  `return_raw=True`.
-
-## Which field to trust for each UI state
-
-| UI label | Condition |
+| Field | Meaning |
 |---|---|
-| Training ready | `readiness=="train-ready"` |
-| Inference ready | `readiness=="inference-ready"` |
-| Embedding ready | `readiness=="inference-ready" and task=="embed"` |
-| Similarity ready | embedding-ready (use `similarity()`) |
-| Correspondence ready | INSID3 ids only (`insid3-*`) |
-| Blocked by license | `legal_status in {noncommercial_restricted, enterprise_license_required}` |
-| Needs token | `gated==True` |
-| Experimental | `validated_lifecycle==False` (train-not-certified variants) |
-| Hidden / admin only | `readiness=="catalog-only"` |
+| `model_id`, `family`, `task`, `engine` | identity |
+| `readiness` | legacy coarse bucket: `train-ready` / `inference-ready` / `catalog-only` / `blocked` (kept byte-stable for backward compatibility) |
+| **`readiness_state`** | the precise v3.18 state (see taxonomy below) — **canonical** |
+| **`anastig_visibility`** | `show_train` / `show_inference` / `show_embedding` / `show_segmentation` / `show_token_required` / `hide` / `blocked_admin_only` |
+| `blocker` | one human-readable reason the model is not plug-and-play usable (`None` when live-ready) |
+| `license`, `license_class` | canonical effective license + class (`permissive`/`copyleft`/`noncommercial`/`custom_unknown`/`unknown`) |
+| `commercial_safe` | granted only by a curated `commercial_safe_core` policy row; never true for copyleft/non-commercial |
+| `gated`, `requires_token` | gated weights require the user's own token + license acceptance (BYOT) |
+| `legal_review_required` | license flagged for review → hidden from end users |
+| `predict_supported`, `live_verified_inference`, `live_verified_train` | what actually ran |
+| `train_supported`, `checkpoint_load_supported`, `trained_checkpoint_predict_supported`, `export_supported` | training/reload/export truth |
+| `validated_syntax` | the exact public-API call for each supported method |
 
-See `docs/model_matrix.md` (full table) and `docs/qa/v317_full_model_matrix/` (matrix JSON).
+The v3.13–v3.17 fields (`legal_status`, `license_code`, `license_weights`,
+`pretrained_inference_supported`, `post_nms_predict_supported`,
+`validated_lifecycle`, `exact_blocker`, `tasks`, …) are all still present.
+
+## Readiness taxonomy (`readiness_state`)
+
+The cardinal rule, enforced by `tests/test_v318_no_ready_without_live_or_derived_flag.py`:
+
+> No state promises readiness unless it is either **live-verified this sprint**
+> (`*_READY_LIVE`) or **explicitly flagged derived** (`*_DERIVED_NEEDS_LIVE_CONFIRMATION`).
+
+**Live-ready** (the only states a UI may treat as usable by default):
+`TRAIN_READY_LIVE`, `INFERENCE_READY_LIVE`, `EMBEDDING_READY_LIVE`,
+`SEGMENTATION_READY_LIVE`, `OPEN_VOCAB_READY_LIVE`, `VLM_READY_LIVE`,
+`CORRESPONDENCE_READY_LIVE`.
+
+**Derived** (capability-derived, awaiting live proof → hidden until promoted):
+`TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION`,
+`INFERENCE_READY_DERIVED_NEEDS_LIVE_CONFIRMATION`.
+
+**Legal / access:** `GATED_TOKEN_REQUIRED`, `LICENSE_BLOCKED`,
+`NON_COMMERCIAL_BLOCKED`.
+
+**Not wired / blocked:** `CATALOG_ONLY_ENGINE_NOT_WIRED`, `CUSTOM_LOADER_REQUIRED`,
+`DEPENDENCY_MISSING`, `WEIGHTS_MISSING`, `UPSTREAM_CRASH`, `OOM_BLOCKED`,
+`TASK_NOT_SUPPORTED`, `PARTIAL_IMPLEMENTATION_BLOCKED`, `UNKNOWN_REVIEW_REQUIRED`.
+
+The coarse `readiness` is a pure, compatible view of `readiness_state` — the two
+can never contradict (a `*_LIVE` precise state is always coarse train/inference).
+
+## Evidence chain — how `*_LIVE` is earned
+
+```
+tools/qa/v318_live_inference_matrix.py        ─┐  (really runs each model on CPU)
+tools/qa/v318_live_train_lifecycle_matrix.py  ─┤
+                                               ├─► docs/qa/v318_full_model_truth/*.json   (EVIDENCE, committed)
+tools/qa/v318_sync_live_evidence.py           ─┘
+                                               └─► src/visionservex/readiness/live_evidence.py  (CONCLUSIONS, baked)
+                                                        └─► model_capabilities() reads the baked frozensets
+```
+
+`model_capabilities()` never loads a model — it reads the baked frozensets, so it
+is fast and weight-free. `tests/test_v318_capability_truth_contract.py` fails CI
+if the baked conclusions ever drift from the committed matrices.
+
+A model that was **live-tested and FAILED** is never reported as an optimistic
+`*_DERIVED`; it gets its true blocker (`DEPENDENCY_MISSING`, `WEIGHTS_MISSING`,
+`UPSTREAM_CRASH`, …). Example: Florence-2 fails under transformers 5.10.2, so it
+is `DEPENDENCY_MISSING`, not "inference-ready-derived".
+
+## Honest nuance: train-derived but inference-live
+
+RF-DETR trains via its own package's native COCO trainer, which is too heavy for
+a CPU smoke, so its train lifecycle stays `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION`.
+But its *inference* IS live-verified, so `anastig_visibility` is `show_inference`
+(`live_verified_inference=True`, `live_verified_train=False`). The headline state
+tells the train story; visibility reflects what is actually usable now.
+
+## v3.18 live verification summary
+
+- **101 / 105** wired, legal, non-gated models passed real CPU inference.
+- **16** models passed the full train lifecycle (train → checkpoint → reload →
+  predict-after-reload → schema → ONNX export): 3 LibreYOLO detectors + 13
+  torchvision classifiers.
+- **8** RF-DETR variants are `TRAIN_READY_DERIVED` (native trainer, inference-live).
+- Honest blockers: Florence-2 ×2 (`DEPENDENCY_MISSING`), OneFormer DiNAT
+  (`DEPENDENCY_MISSING`), OneFormer ConvNeXt (`WEIGHTS_MISSING`, upstream 404).
+
+See `docs/qa/v318_full_model_truth/` for the full machine-readable matrices.

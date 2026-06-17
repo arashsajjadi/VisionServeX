@@ -47,6 +47,7 @@ _CLASSIFY_TASKS = frozenset({"classify", "classification"})
 _EMBED_TASKS = frozenset({"embed", "embedding"})
 _SEGMENT_TASKS = frozenset({"foundation_segment", "segment", "grounded_segment"})
 _DETECT_TASKS = frozenset({"detect", "obb", "open_vocab_detect"})
+_OPEN_VOCAB_TASKS = frozenset({"open_vocab_detect"})
 
 
 def _require_task(entry: ModelEntry, allowed: frozenset[str], method: str) -> None:
@@ -506,6 +507,25 @@ class VisionModel:
     # ------- task-specific public API (v3.17.0) -------
     # Thin, typed routers over predict(); each raises TaskNotSupportedError when
     # the model's registered task doesn't match (never silently mis-routes).
+
+    def detect(
+        self,
+        image: Image.Image | bytes | str | Path,
+        *,
+        prompts: Sequence[str] | None = None,
+        threshold: float | None = None,
+        **kwargs: Any,
+    ):
+        """Object detection → ``DetectionResult`` / ``OpenVocabularyResult`` / OBB.
+
+        Typed router over :meth:`predict` for the detection family
+        (``detect`` / ``obb`` / ``open_vocab_detect``). Open-vocabulary detectors
+        accept ``prompts=[...]``. Raises :class:`TaskNotSupportedError` when the
+        model's registered task is not a detection task — never silently
+        mis-routes (e.g. calling ``detect()`` on a classifier raises).
+        """
+        _require_task(self.entry, _DETECT_TASKS, "detect")
+        return self.predict(image, prompts=prompts, threshold=threshold, **kwargs)
 
     def classify(self, image: Image.Image | bytes | str | Path, *, top_k: int = 5, **kwargs: Any):
         """Top-k image classification → ``ClassificationResult``."""
@@ -1179,6 +1199,55 @@ def _export_capabilities(model_id: str) -> dict[str, Any]:
     return info
 
 
+def _readiness_blocker(
+    readiness_state: str, entry: Any, status: str, engine_registered: bool
+) -> str | None:
+    """A single canonical, human-readable blocker for a precise readiness state.
+
+    Returns ``None`` for the live-ready states. For derived/blocked states it
+    explains exactly why the model is not plug-and-play usable, reusing the
+    registry's curated ``unavailable_reason`` where one exists.
+    """
+    from visionservex.readiness import taxonomy as _tx
+
+    reason = entry.unavailable_reason
+    table: dict[str, str] = {
+        _tx.TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION: (
+            "Train lifecycle is capability-derived; not live-verified in v3.18."
+        ),
+        _tx.INFERENCE_READY_DERIVED_NEEDS_LIVE_CONFIRMATION: (
+            "Inference path is capability-derived; not live-verified in v3.18."
+        ),
+        _tx.GATED_TOKEN_REQUIRED: (
+            "Gated: requires your own Hugging Face token and acceptance of the "
+            "upstream license (BYOT). VisionServeX never ships the weights or token."
+        ),
+        _tx.LICENSE_BLOCKED: (
+            "Copyleft/enterprise license is forbidden on the VisionServeX runtime/training path."
+        ),
+        _tx.NON_COMMERCIAL_BLOCKED: (
+            "Non-commercial / research-only license; blocked from the commercial-safe default."
+        ),
+        _tx.CUSTOM_LOADER_REQUIRED: reason
+        or "Custom loader required from the official upstream repository.",
+        _tx.PARTIAL_IMPLEMENTATION_BLOCKED: reason
+        or f"Partial implementation (implementation_status={status}).",
+        _tx.CATALOG_ONLY_ENGINE_NOT_WIRED: reason
+        or f"Catalog-only: engine {entry.engine!r} not wired (implementation_status={status}).",
+        _tx.WEIGHTS_MISSING: reason or "Weights not released or unverifiable.",
+        _tx.DEPENDENCY_MISSING: reason or "A required optional dependency is not installed.",
+        _tx.UPSTREAM_CRASH: reason or "Upstream code crashes on this path.",
+        _tx.OOM_BLOCKED: reason or "Out of memory for this device.",
+        _tx.TASK_NOT_SUPPORTED: reason or "Task not supported by this engine.",
+        _tx.UNKNOWN_REVIEW_REQUIRED: (
+            "Unknown/custom license or unclassified state; hidden pending review."
+        ),
+    }
+    if readiness_state in _tx.LIVE_READY_STATES:
+        return None
+    return table.get(readiness_state, reason)
+
+
 def model_capabilities(model_id: str) -> dict[str, Any]:
     """Return the canonical capability-truth object for a model (v3.15.0).
 
@@ -1203,21 +1272,48 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
         tcap.get("train_supported") and tcap.get("trained_checkpoint_predict_supported")
     )
 
+    from visionservex.readiness import live_evidence, taxonomy
+
     if pol is not None:
         legal_status = pol.final_policy
-        commercial_safe = bool(pol.default_safe and pol.final_policy == "commercial_safe_core")
         gated = bool(pol.gated)
         license_code = pol.code_license
         license_weights = pol.weights_license
+        policy_bucket: str | None = pol.final_policy
     else:
         # No curated policy row → fall back to the registry license, and DO NOT
         # claim commercial-safe-by-default (only the curated policy can grant that).
         legal_status = "registry_license_only"
-        commercial_safe = False
         gated = bool(entry.requires_auth)
         license_code = entry.license
         license_weights = None
+        policy_bucket = None
 
+    # Canonical single license string + legal class. Governs the weights you
+    # would actually run: weights license first, else code license, else registry.
+    license_effective = license_weights or license_code or entry.license
+    license_class = taxonomy.classify_license(license_effective)
+
+    # commercial_safe is granted ONLY by a curated commercial_safe_core policy row,
+    # and is hard-gated so a copyleft / non-commercial license can never be
+    # commercial-safe even if a row were mis-entered (defense in depth).
+    commercial_safe = bool(
+        pol is not None
+        and pol.default_safe
+        and pol.final_policy == "commercial_safe_core"
+        and license_class not in ("copyleft", "noncommercial")
+    )
+    requires_token = bool(gated)
+
+    # Soft legal-review overlay: VisionServeX-flagged review, or a custom/unknown
+    # license with no curated policy row → hidden from end users pending review.
+    legal_review_required = bool(
+        policy_bucket == "legal_review_required"
+        or (pol is None and license_class in ("custom_unknown", "unknown"))
+    )
+
+    # Legacy coarse readiness — kept byte-identical for backward compatibility
+    # (existing tests and the v3.17 matrix assert these four values + counts).
     if status == "stub" or not engine_registered:
         readiness = "catalog-only"
     elif train_ready and inference_ready:
@@ -1226,6 +1322,32 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
         readiness = "inference-ready"
     else:
         readiness = "blocked"
+
+    # v3.18 precise readiness state (canonical, machine-consumable) + visibility.
+    live_inf = live_evidence.live_inference_verified(model_id)
+    live_trn = live_evidence.live_train_verified(model_id)
+    readiness_state = taxonomy.compute_readiness_state(
+        task=entry.task,
+        implementation_status=status,
+        engine=entry.engine,
+        engine_registered=engine_registered,
+        policy_bucket=policy_bucket,
+        license_class=license_class,
+        unavailable_reason=entry.unavailable_reason,
+        train_ready=train_ready,
+        inference_ready=inference_ready,
+        live_inference_verified=live_inf,
+        live_train_verified=live_trn,
+        live_inference_blocker=live_evidence.live_inference_blocker(model_id),
+    )
+    visibility = taxonomy.anastig_visibility(
+        readiness_state,
+        live_inference=live_inf,
+        live_train=live_trn,
+        task=entry.task,
+        legal_review=legal_review_required,
+    )
+    blocker = _readiness_blocker(readiness_state, entry, status, engine_registered)
 
     export_supported = [
         k for k, v in ecap.items() if isinstance(v, dict) and v.get("status") == "supported"
@@ -1253,15 +1375,25 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
         "backend": entry.backend,
         "model_category": str(entry.model_category) if entry.model_category else None,
         "readiness": readiness,
+        "readiness_state": readiness_state,
+        "anastig_visibility": visibility,
+        "blocker": blocker,
         "legal_status": legal_status,
+        "license": license_effective,
+        "license_class": license_class,
         "commercial_safe": commercial_safe,
         "gated": gated,
+        "requires_token": requires_token,
+        "legal_review_required": legal_review_required,
         "license_code": license_code,
         "license_weights": license_weights,
         "license_registry": entry.license,
         "has_policy_row": pol is not None,
         "implementation_status": status,
         "engine_registered": engine_registered,
+        "predict_supported": inference_ready,
+        "live_verified_inference": live_inf,
+        "live_verified_train": live_trn,
         "pretrained_inference_supported": inference_ready,
         "pretrained_load_supported": inference_ready and entry.download_type != "not_available",
         "auto_download": bool(entry.auto_download),
@@ -1298,7 +1430,9 @@ def _validated_syntax(
     if task in _SEGMENT_TASKS:
         syn["segment"] = f'VisionModel("{model_id}").segment("image.jpg", boxes=[[x, y, w, h]])'
     if task in _DETECT_TASKS:
-        syn["detect"] = f'VisionModel("{model_id}").predict("image.jpg", threshold=0.25)'
+        syn["detect"] = f'VisionModel("{model_id}").detect("image.jpg", threshold=0.25)'
+    if task in _OPEN_VOCAB_TASKS:
+        syn["detect"] = f'VisionModel("{model_id}").detect("image.jpg", prompts=["cat", "dog"])'
     if tcap.get("train_supported"):
         syn["train"] = f'VisionModel("{model_id}").train("data.yaml", epochs=1)'
         syn["from_checkpoint"] = f'VisionModel.from_checkpoint(ckpt, model_id="{model_id}")'

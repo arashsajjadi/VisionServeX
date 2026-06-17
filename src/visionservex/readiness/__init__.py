@@ -13,16 +13,43 @@ operational side covers "we know exactly why, we know exactly how a user
 can unblock it, and we ship the script that does it."
 """
 
+from visionservex.readiness import live_evidence, taxonomy
+from visionservex.readiness.live_evidence import (
+    LIVE_INFERENCE_VERIFIED,
+    LIVE_TRAIN_VERIFIED,
+    live_inference_verified,
+    live_train_verified,
+)
 from visionservex.readiness.metrics import (
     READINESS_ROWS,
     ReadinessRow,
     compute_readiness_table,
     is_row_release_ready,
 )
+from visionservex.readiness.taxonomy import (
+    LIVE_READY_STATES,
+    READINESS_STATES,
+    anastig_visibility,
+    classify_license,
+    coarse_readiness,
+    compute_readiness_state,
+)
 
 __all__ = [
+    "LIVE_INFERENCE_VERIFIED",
+    "LIVE_READY_STATES",
+    "LIVE_TRAIN_VERIFIED",
     "READINESS_ROWS",
+    "READINESS_STATES",
     "ReadinessRow",
+    "anastig_visibility",
+    "classify_license",
+    "coarse_readiness",
+    "compute_readiness_state",
     "compute_readiness_table",
     "is_row_release_ready",
+    "live_evidence",
+    "live_inference_verified",
+    "live_train_verified",
+    "taxonomy",
 ]

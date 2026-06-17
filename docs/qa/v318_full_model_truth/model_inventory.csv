@@ -1,0 +1,152 @@
+model_id,family,variant,task,engine,implementation_status,license,commercial_safe,gated,requires_token,readiness_state,default_visible,reason_if_hidden
+clip-vit-base-patch32,clip,vit-base-patch32,embed,clip,wired,MIT,True,False,False,EMBEDDING_READY_LIVE,True,
+clip-vit-large-patch14,clip,vit-large-patch14,embed,clip,wired,MIT,False,False,False,EMBEDDING_READY_LIVE,True,
+co-dino-inst-vit-l-coco,co-dino,inst-vit-l-coco,segment,openmmlab,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+co-dino-inst-vit-l-lvis,co-dino,inst-vit-l-lvis,segment,openmmlab,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+convnextv2-base,convnextv2,base,classify,convnextv2,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+convnextv2-large,convnextv2,large,classify,convnextv2,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+convnextv2-tiny,convnextv2,tiny,classify,convnextv2,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+deim-m,deim,m,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,No HF or pip-installable path verified. Custom loader required.
+deim-s,deim,s,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,No HF or pip-installable path verified. Requires custom loader from official DEIM repo. License and checkpoint download not yet validated.
+deimv2-atto,deim,deimv2-atto,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,DEIMv2 atto custom loader required from official repo. Checkpoint not yet on HF.
+deimv2-femto,deim,deimv2-femto,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,DEIMv2 femto custom loader required from official repo.
+deimv2-l,deim,deimv2-l,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,DEIMv2 large custom loader required from official repo.
+deimv2-m,deim,deimv2-m,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,Custom loader required from official repo. Checkpoint availability not verified.
+deimv2-n,deim,deimv2-n,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,DEIMv2 nano custom loader required from official repo.
+deimv2-pico,deim,deimv2-pico,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,DEIMv2 pico custom loader required from official repo.
+deimv2-s,deim,deimv2-s,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,DEIMv2 repo and checkpoint availability not independently verified. Custom loader required.
+deimv2-x,deim,deimv2-x,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,DEIMv2 XLarge custom loader required from official repo. Highest-priority target to challenge YOLO11x.
+dfine-l,dfine,l,detect,dfine,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+dfine-l-coco,dfine,l-coco,detect,dfine,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+dfine-l-o365-coco,dfine,l-o365-coco,detect,dfine,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+dfine-m,dfine,m,detect,dfine,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+dfine-m-coco,dfine,m-coco,detect,dfine,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+dfine-m-o365-coco,dfine,m-o365-coco,detect,dfine,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+dfine-n,dfine,n,detect,dfine,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+dfine-n-coco,dfine,n-coco,detect,dfine,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+dfine-s,dfine,s,detect,dfine,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+dfine-s-coco,dfine,s-coco,detect,dfine,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+dfine-s-o365-coco,dfine,s-o365-coco,detect,dfine,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+dfine-x,dfine,x,detect,dfine,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+dfine-x-coco,dfine,x-coco,detect,dfine,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+dfine-x-o365-coco,dfine,x-o365-coco,detect,dfine,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+dinov2-base,dinov2,base,embed,dinov2,wired,Apache-2.0,True,False,False,EMBEDDING_READY_LIVE,True,
+dinov2-giant,dinov2,giant,embed,dinov2,wired,Apache-2.0,True,False,False,EMBEDDING_READY_LIVE,True,
+dinov2-large,dinov2,large,embed,dinov2,wired,Apache-2.0,True,False,False,EMBEDDING_READY_LIVE,True,
+dinov2-small,dinov2,small,embed,dinov2,wired,Apache-2.0,True,False,False,EMBEDDING_READY_LIVE,True,
+efficientsam,efficientsam,efficientsam,foundation_segment,efficientsam,wired,Apache-2.0,True,False,False,SEGMENTATION_READY_LIVE,True,
+florence-2-base,florence-2,base,vlm,florence2,wired,MIT,True,False,False,DEPENDENCY_MISSING,False,A required optional dependency is not installed.
+florence-2-large,florence-2,large,vlm,florence2,wired,MIT,True,False,False,DEPENDENCY_MISSING,False,A required optional dependency is not installed.
+grounded-sam,grounded-sam,sam,grounded_segment,grounded_sam,wired,Apache-2.0,False,False,False,SEGMENTATION_READY_LIVE,True,
+grounded-sam2,grounded-sam,sam2,grounded_segment,grounded_sam2,wired,Apache-2.0,False,False,False,SEGMENTATION_READY_LIVE,True,
+grounding-dino-1.5,grounding-dino,1.5,open_vocab_detect,grounding_dino,stub,not released,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'grounding_dino' not wired (implementation_status=stub).
+grounding-dino-1.6,grounding-dino,1.6,open_vocab_detect,grounding_dino,stub,Custom,False,True,True,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'grounding_dino' not wired (implementation_status=stub).
+grounding-dino-original-swin-b,grounding-dino,original-swin-b,open_vocab_detect,grounding_dino,wired,Apache-2.0,False,False,False,OPEN_VOCAB_READY_LIVE,True,
+grounding-dino-original-swin-t,grounding-dino,original-swin-t,open_vocab_detect,grounding_dino,wired,Apache-2.0,False,False,False,OPEN_VOCAB_READY_LIVE,True,
+grounding-dino-swin-b,grounding-dino,swin-b,open_vocab_detect,grounding_dino,wired,Apache-2.0,True,False,False,OPEN_VOCAB_READY_LIVE,True,
+grounding-dino-swin-t,grounding-dino,swin-t,open_vocab_detect,grounding_dino,wired,Apache-2.0,True,False,False,OPEN_VOCAB_READY_LIVE,True,
+grounding-dino-tiny,grounding-dino,tiny,open_vocab_detect,grounding_dino,wired,Apache-2.0,True,False,False,OPEN_VOCAB_READY_LIVE,True,
+hq-sam,hq-sam,sam,foundation_segment,hq-sam,wired,Apache-2.0 weights / HQSeg-44K dataset partly NC,False,False,False,SEGMENTATION_READY_LIVE,False,SEGMENTATION_READY_LIVE
+internimage-b,internimage,b,classify,openmmlab,stub,MIT,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+internimage-h,internimage,h,classify,openmmlab,stub,MIT,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+internimage-l,internimage,l,classify,openmmlab,stub,MIT,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+internimage-s,internimage,s,classify,openmmlab,stub,MIT,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+internimage-t,internimage,t,classify,openmmlab,stub,MIT,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+libreyolo-dfine-l,libreyolo,dfine-l,detect,libreyolo,wired,Apache-2.0,True,False,False,INFERENCE_READY_LIVE,True,
+libreyolo-dfine-m,libreyolo,dfine-m,detect,libreyolo,wired,Apache-2.0,True,False,False,INFERENCE_READY_LIVE,True,
+libreyolo-dfine-n,libreyolo,dfine-n,detect,libreyolo,wired,Apache-2.0,True,False,False,INFERENCE_READY_LIVE,True,
+libreyolo-dfine-s,libreyolo,dfine-s,detect,libreyolo,wired,Apache-2.0,True,False,False,INFERENCE_READY_LIVE,True,
+libreyolo-dfine-x,libreyolo,dfine-x,detect,libreyolo,wired,Apache-2.0,True,False,False,INFERENCE_READY_LIVE,True,
+libreyolo-rtdetr-r101,libreyolo,rtdetr-r101,detect,libreyolo,wired,Apache-2.0,True,False,False,INFERENCE_READY_LIVE,True,
+libreyolo-rtdetr-r50,libreyolo,rtdetr-r50,detect,libreyolo,wired,Apache-2.0,True,False,False,TRAIN_READY_LIVE,True,
+libreyolo-yolov9-c,libreyolo,yolov9-c,detect,libreyolo,wired,MIT,True,False,False,INFERENCE_READY_LIVE,True,
+libreyolo-yolov9-m,libreyolo,yolov9-m,detect,libreyolo,wired,MIT,True,False,False,INFERENCE_READY_LIVE,True,
+libreyolo-yolov9-s,libreyolo,yolov9-s,detect,libreyolo,wired,MIT,True,False,False,TRAIN_READY_LIVE,True,
+libreyolo-yolox-l,libreyolo,yolox-l,detect,libreyolo,wired,Apache-2.0,True,False,False,INFERENCE_READY_LIVE,True,
+libreyolo-yolox-m,libreyolo,yolox-m,detect,libreyolo,wired,Apache-2.0,True,False,False,INFERENCE_READY_LIVE,True,
+libreyolo-yolox-s,libreyolo,yolox-s,detect,libreyolo,wired,Apache-2.0,True,False,False,TRAIN_READY_LIVE,True,
+libreyolo-yolox-x,libreyolo,yolox-x,detect,libreyolo,wired,Apache-2.0,True,False,False,INFERENCE_READY_LIVE,True,
+maskdino-r50-coco,maskdino,r50-coco,segment,openmmlab,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,Requires detectron2 + manual checkpoint. No HF path verified. Custom loader not yet implemented.
+maskdino-r50-panoptic,maskdino,r50-panoptic,segment,openmmlab,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,Requires detectron2 + manual checkpoint. Custom loader not yet implemented.
+maxvit-tiny-tf-224,maxvit,tiny-tf-224,classify,maxvit,partial,Apache-2.0,False,False,False,PARTIAL_IMPLEMENTATION_BLOCKED,False,Partial implementation (implementation_status=partial).
+medsam,sam,medsam,foundation_segment,sam_hf,wired,Apache-2.0 weights / medical dataset provenance,False,False,False,SEGMENTATION_READY_LIVE,False,SEGMENTATION_READY_LIVE
+mobilesam,mobilesam,mobilesam,foundation_segment,mobilesam,wired,Apache-2.0,True,False,False,SEGMENTATION_READY_LIVE,True,
+mock-classify,mock,classify,classify,mock,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+mock-detect,mock,detect,detect,mock,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+mock-foundation-segment,mock,foundation-segment,foundation_segment,mock,wired,Apache-2.0,False,False,False,SEGMENTATION_READY_LIVE,True,
+mock-grounded-segment,mock,grounded-segment,grounded_segment,mock,wired,Apache-2.0,False,False,False,SEGMENTATION_READY_LIVE,True,
+mock-obb,mock,obb,obb,mock,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+mock-open-vocab,mock,open-vocab,open_vocab_detect,mock,wired,Apache-2.0,False,False,False,OPEN_VOCAB_READY_LIVE,True,
+mock-pose,mock,pose,pose,mock,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
+mock-segment,mock,segment,segment,mock,wired,Apache-2.0,False,False,False,SEGMENTATION_READY_LIVE,True,
+oneformer-convnext-large,oneformer,convnext-large,segment,oneformer,wired,MIT weights / training-data review,False,False,False,WEIGHTS_MISSING,False,Weights not released or unverifiable.
+oneformer-dinat-large,oneformer,dinat-large,segment,oneformer,wired,MIT weights / training-data review,False,False,False,DEPENDENCY_MISSING,False,A required optional dependency is not installed.
+oneformer-swin-large,oneformer,swin-large,segment,oneformer,wired,MIT,False,False,False,SEGMENTATION_READY_LIVE,True,
+owlv2-base-patch16,owlv2,base-patch16,open_vocab_detect,owlv2,wired,Apache-2.0,False,False,False,OPEN_VOCAB_READY_LIVE,True,
+owlv2-large-patch14,owlv2,large-patch14,open_vocab_detect,owlv2,wired,Apache-2.0,False,False,False,OPEN_VOCAB_READY_LIVE,True,
+owlvit-base-patch32,owlvit,base-patch32,open_vocab_detect,owlvit,wired,Apache-2.0,True,False,False,OPEN_VOCAB_READY_LIVE,True,
+owlvit-large-patch14,owlvit,large-patch14,open_vocab_detect,owlvit,wired,Apache-2.0,False,False,False,OPEN_VOCAB_READY_LIVE,True,
+rfdetr-base,rfdetr,base,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
+rfdetr-large,rfdetr,large,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
+rfdetr-medium,rfdetr,medium,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
+rfdetr-nano,rfdetr,nano,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
+rfdetr-seg-2xlarge,rfdetr,seg-2xlarge,segment,rfdetr,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,HF checkpoint roboflow/rf-detr-seg-2xlarge not yet available.
+rfdetr-seg-large,rfdetr,seg-large,segment,rfdetr,stub,Apache-2.0,True,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,HF checkpoint roboflow/rf-detr-seg-large not yet available. Use rfdetr-seg-small/medium for verified inference.
+rfdetr-seg-medium,rfdetr,seg-medium,segment,rfdetr,wired,Apache-2.0,True,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
+rfdetr-seg-nano,rfdetr,seg-nano,segment,rfdetr,wired,Apache-2.0,True,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
+rfdetr-seg-small,rfdetr,seg-small,segment,rfdetr,wired,Apache-2.0,True,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
+rfdetr-seg-xlarge,rfdetr,seg-xlarge,segment,rfdetr,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,HF checkpoint roboflow/rf-detr-seg-xlarge not yet available.
+rfdetr-small,rfdetr,small,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
+rtdetrv4-l,rtdetrv4,l,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,Custom loader and verified checkpoint source required.
+rtdetrv4-m,rtdetrv4,m,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,Custom loader and verified checkpoint source required.
+rtdetrv4-s,rtdetrv4,s,detect,_stub,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,RT-DETRv4 is not an officially released numbered version; no verified checkpoint source or HF repo. License and export path unclear.
+rtdetrv4-x,rtdetrv4,x,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,Custom loader and verified checkpoint source required.
+rtmdet-r-l,rtmdet,r-l,obb,openmmlab,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+rtmdet-r-m,rtmdet,r-m,obb,openmmlab,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+rtmdet-r-s,rtmdet,r-s,obb,openmmlab,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+rtmdet-r-t,rtmdet,r-t,obb,openmmlab,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+rtmdet-r2-l,rtmdet,r2-l,obb,openmmlab,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+rtmdet-r2-m,rtmdet,r2-m,obb,openmmlab,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+rtmdet-r2-s,rtmdet,r2-s,obb,openmmlab_sidecar,partial,Apache-2.0,False,False,False,PARTIAL_IMPLEMENTATION_BLOCKED,False,Partial implementation (implementation_status=partial).
+rtmdet-r2-t,rtmdet,r2-t,obb,openmmlab,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+rtmpose-l,rtmpose,l,pose,openmmlab,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+rtmpose-l-384x288,rtmpose,l-384x288,pose,openmmlab,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+rtmpose-m,rtmpose,m,pose,openmmlab,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+rtmpose-m-384x288,rtmpose,m-384x288,pose,openmmlab,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+rtmpose-s,rtmpose,s,pose,openmmlab_sidecar,partial,Apache-2.0,False,False,False,PARTIAL_IMPLEMENTATION_BLOCKED,False,Partial implementation (implementation_status=partial).
+rtmpose-t,rtmpose,t,pose,openmmlab,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).
+sam-vit-base,sam,vit-base,foundation_segment,sam_hf,wired,Apache-2.0,True,False,False,SEGMENTATION_READY_LIVE,True,
+sam-vit-huge,sam,vit-huge,foundation_segment,sam_hf,wired,Apache-2.0,True,False,False,SEGMENTATION_READY_LIVE,True,
+sam-vit-large,sam,vit-large,foundation_segment,sam_hf,wired,Apache-2.0,True,False,False,SEGMENTATION_READY_LIVE,True,
+sam2-hiera-base-plus,sam2,hiera-base-plus,foundation_segment,sam2_hf,wired,Apache-2.0,True,False,False,SEGMENTATION_READY_LIVE,True,
+sam2-hiera-large,sam2,hiera-large,foundation_segment,sam2_hf,wired,Apache-2.0,True,False,False,SEGMENTATION_READY_LIVE,True,
+sam2-hiera-small,sam2,hiera-small,foundation_segment,sam2_hf,wired,Apache-2.0,True,False,False,SEGMENTATION_READY_LIVE,True,
+sam2-hiera-tiny,sam2,hiera-tiny,foundation_segment,sam2_hf,wired,Apache-2.0,True,False,False,SEGMENTATION_READY_LIVE,True,
+sam2.1-hiera-base-plus,sam2.1,hiera-base-plus,foundation_segment,sam2_hf,wired,Apache-2.0,True,False,False,SEGMENTATION_READY_LIVE,True,
+sam2.1-hiera-large,sam2.1,hiera-large,foundation_segment,sam2_hf,wired,Apache-2.0,True,False,False,SEGMENTATION_READY_LIVE,True,
+sam2.1-hiera-small,sam2.1,hiera-small,foundation_segment,sam2_hf,wired,Apache-2.0,True,False,False,SEGMENTATION_READY_LIVE,True,
+sam2.1-hiera-tiny,sam2.1,hiera-tiny,foundation_segment,sam2_hf,wired,Apache-2.0,True,False,False,SEGMENTATION_READY_LIVE,True,
+sam3-base,sam3,base,foundation_segment,huggingface,stub,"SAM License (Meta custom, gated)",False,True,True,GATED_TOKEN_REQUIRED,False,Gated: requires your own Hugging Face token and acceptance of the upstream license (BYOT). VisionServeX never ships the weights or token.
+seem-davit-d3,seem,davit-d3,grounded_segment,huggingface,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'huggingface' not wired (implementation_status=stub).
+seem-focal-t,seem,focal-t,grounded_segment,huggingface,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,Catalog-only: engine 'huggingface' not wired (implementation_status=stub).
+siglip-base-patch16-224,siglip,base-patch16-224,embed,siglip,wired,Apache-2.0,False,False,False,EMBEDDING_READY_LIVE,True,
+siglip2-base-patch16-224,siglip2,base-patch16-224,embed,siglip2,wired,Apache-2.0,False,False,False,EMBEDDING_READY_LIVE,True,
+siglip2-large-patch16-256,siglip2,large-patch16-256,embed,siglip2,wired,Apache-2.0,False,False,False,EMBEDDING_READY_LIVE,True,
+siglip2-so400m-patch14-384,siglip2,so400m-patch14-384,embed,siglip2,wired,Apache-2.0,False,False,False,EMBEDDING_READY_LIVE,True,
+swinv2-base,swinv2,base,classify,swinv2,wired,MIT,False,False,False,INFERENCE_READY_LIVE,True,
+swinv2-large,swinv2,large,classify,swinv2,wired,MIT,False,False,False,INFERENCE_READY_LIVE,True,
+swinv2-small,swinv2,small,classify,swinv2,wired,MIT,False,False,False,INFERENCE_READY_LIVE,True,
+swinv2-tiny,swinv2,tiny,classify,swinv2,wired,MIT,False,False,False,INFERENCE_READY_LIVE,True,
+torchvision-alexnet,torchvision-classify,alexnet,classify,torchvision_classify,wired,BSD-3-Clause,True,False,False,TRAIN_READY_LIVE,True,
+torchvision-convnext-tiny,torchvision-classify,convnext-tiny,classify,torchvision_classify,wired,BSD-3-Clause,True,False,False,TRAIN_READY_LIVE,True,
+torchvision-densenet121,torchvision-classify,densenet121,classify,torchvision_classify,wired,BSD-3-Clause,True,False,False,TRAIN_READY_LIVE,True,
+torchvision-efficientnet-b0,torchvision-classify,efficientnet-b0,classify,torchvision_classify,wired,BSD-3-Clause,True,False,False,TRAIN_READY_LIVE,True,
+torchvision-mobilenet-v2,torchvision-classify,mobilenet-v2,classify,torchvision_classify,wired,BSD-3-Clause,True,False,False,TRAIN_READY_LIVE,True,
+torchvision-mobilenet-v3-large,torchvision-classify,mobilenet-v3-large,classify,torchvision_classify,wired,BSD-3-Clause,True,False,False,TRAIN_READY_LIVE,True,
+torchvision-resnet101,torchvision-classify,resnet101,classify,torchvision_classify,wired,BSD-3-Clause,True,False,False,TRAIN_READY_LIVE,True,
+torchvision-resnet152,torchvision-classify,resnet152,classify,torchvision_classify,wired,BSD-3-Clause,True,False,False,TRAIN_READY_LIVE,True,
+torchvision-resnet18,torchvision-classify,resnet18,classify,torchvision_classify,wired,BSD-3-Clause,True,False,False,TRAIN_READY_LIVE,True,
+torchvision-resnet34,torchvision-classify,resnet34,classify,torchvision_classify,wired,BSD-3-Clause,True,False,False,TRAIN_READY_LIVE,True,
+torchvision-resnet50,torchvision-classify,resnet50,classify,torchvision_classify,wired,BSD-3-Clause,True,False,False,TRAIN_READY_LIVE,True,
+torchvision-resnext50-32x4d,torchvision-classify,resnext50-32x4d,classify,torchvision_classify,wired,BSD-3-Clause,True,False,False,TRAIN_READY_LIVE,True,
+torchvision-wide-resnet50-2,torchvision-classify,wide-resnet50-2,classify,torchvision_classify,wired,BSD-3-Clause,True,False,False,TRAIN_READY_LIVE,True,
