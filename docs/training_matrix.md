@@ -10,17 +10,17 @@ whose native COCO trainer is too heavy for a CPU smoke and is not faked).
 | `libreyolo-rtdetr-r50` | libreyolo | `TRAIN_READY_LIVE` | yes | yes | yes | yes | yes | yes |
 | `libreyolo-yolov9-s` | libreyolo | `TRAIN_READY_LIVE` | yes | yes | yes | yes | yes | yes |
 | `libreyolo-yolox-s` | libreyolo | `TRAIN_READY_LIVE` | yes | yes | yes | yes | yes | yes |
-| `rfdetr-base` | rfdetr | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | — | — | — | — | — | — |
-| `rfdetr-large` | rfdetr | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | — | — | — | — | — | — |
-| `rfdetr-medium` | rfdetr | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | — | — | — | — | — | — |
-| `rfdetr-nano` | rfdetr | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | — | — | — | — | — | — |
+| `rfdetr-base` | rfdetr | `TRAIN_READY_LIVE` | — | — | — | — | — | yes |
+| `rfdetr-large` | rfdetr | `TRAIN_READY_LIVE` | — | — | — | — | — | yes |
+| `rfdetr-medium` | rfdetr | `TRAIN_READY_LIVE` | — | — | — | — | — | yes |
+| `rfdetr-nano` | rfdetr | `TRAIN_READY_LIVE` | — | — | — | — | — | yes |
 | `rfdetr-seg-2xlarge` | rfdetr | `CATALOG_ONLY_ENGINE_NOT_WIRED` | — | — | — | — | — | — |
 | `rfdetr-seg-large` | rfdetr | `CATALOG_ONLY_ENGINE_NOT_WIRED` | — | — | — | — | — | — |
-| `rfdetr-seg-medium` | rfdetr | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | — | — | — | — | — | — |
-| `rfdetr-seg-nano` | rfdetr | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | — | — | — | — | — | — |
-| `rfdetr-seg-small` | rfdetr | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | — | — | — | — | — | — |
+| `rfdetr-seg-medium` | rfdetr | `TRAIN_READY_LIVE` | — | — | — | — | — | yes |
+| `rfdetr-seg-nano` | rfdetr | `TRAIN_READY_LIVE` | — | — | — | — | — | yes |
+| `rfdetr-seg-small` | rfdetr | `TRAIN_READY_LIVE` | — | — | — | — | — | yes |
 | `rfdetr-seg-xlarge` | rfdetr | `CATALOG_ONLY_ENGINE_NOT_WIRED` | — | — | — | — | — | — |
-| `rfdetr-small` | rfdetr | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | — | — | — | — | — | — |
+| `rfdetr-small` | rfdetr | `TRAIN_READY_LIVE` | — | — | — | — | — | yes |
 | `torchvision-alexnet` | torchvision-classify | `TRAIN_READY_LIVE` | yes | yes | yes | yes | yes | yes |
 | `torchvision-convnext-tiny` | torchvision-classify | `TRAIN_READY_LIVE` | yes | yes | yes | yes | yes | yes |
 | `torchvision-densenet121` | torchvision-classify | `TRAIN_READY_LIVE` | yes | yes | yes | yes | yes | yes |
@@ -35,4 +35,4 @@ whose native COCO trainer is too heavy for a CPU smoke and is not faked).
 | `torchvision-resnext50-32x4d` | torchvision-classify | `TRAIN_READY_LIVE` | yes | yes | yes | yes | yes | yes |
 | `torchvision-wide-resnet50-2` | torchvision-classify | `TRAIN_READY_LIVE` | yes | yes | yes | yes | yes | yes |
 
-**16 `TRAIN_READY_LIVE`** of 27 train-supported models. Full evidence: `docs/qa/v318_full_model_truth/live_train_lifecycle_matrix.json`.
+**24 `TRAIN_READY_LIVE`** of 27 train-supported models. Full evidence: `docs/qa/v318_full_model_truth/live_train_lifecycle_matrix.json`.

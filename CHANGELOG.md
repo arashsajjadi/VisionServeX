@@ -2,6 +2,59 @@
 
 ## [Unreleased]
 
+## [3.19.0] - 2026-06-17 (staged on branch — NOT tagged, NOT on PyPI)
+
+Operationalize-all-models sprint: promote models from blocked/derived to
+**live-ready only with real evidence**. **102 live-ready** (was 93);
+**24 TRAIN_READY_LIVE** (was 16); **0 derived-train states remain**.
+
+### Operationalized (real live evidence)
+
+- **RF-DETR — all 8 trainable variants → `TRAIN_READY_LIVE`.** Ran the real native
+  PyTorch-Lightning trainer on a tiny synthetic COCO smoke (GPU), full lifecycle
+  train → checkpoint → reload (`from_checkpoint`) → predict/segment-after-reload →
+  schema → ONNX export, for `rfdetr-{nano,small,medium,base,large}` +
+  `rfdetr-seg-{nano,small,medium}`. Evidence:
+  `docs/qa/v319_operationalize_all_models/rfdetr_live_train_matrix.json` (8/8 PASS,
+  ≤3.5 GB VRAM). Fixes: dataset `val→valid` bridge, native-resolution dataset
+  (base÷56, seg÷12/24), `PYTORCH_JIT=0` for the seg mask-loss nvrtc path, and a
+  new **`RFDETREngine.export`** (native ONNX). New `rfdetr-train` extra.
+- **`maxvit-tiny-tf-224` → `INFERENCE_READY_LIVE`.** transformers 5.x loads the
+  `timm/` repo via `TimmWrapperForImageClassification`; registry `partial → wired`,
+  live top-5 classify verified. (Resolves a v3.18 `PARTIAL_IMPLEMENTATION_BLOCKED`.)
+
+### Honestly NOT operationalized (exact blockers + plans, not faked)
+
+- **Florence-2** — deep transformers-5.x cascade (BartTokenizerFast import →
+  forced_bos_token_id → _supports_sdpa → legacy-cache protocol), reproduced live;
+  pin to `<5.0` is mutually exclusive with SAM3 (`>=5.0`). Kept `DEPENDENCY_MISSING`.
+- **OneFormer** — `convnext-large` has no ConvNeXt checkpoint on HF Hub
+  (`WEIGHTS_MISSING`, permanent); `dinat-large` is a NATTEN↔transformers API
+  mismatch, GPU-only (`DEPENDENCY_MISSING`, corrected diagnosis).
+- **DEIM/DEIMv2/RT-DETRv4** — in-process HF infeasible (non-HF configs / incomplete
+  native `deimv2` / `torch==2.5.1` pin conflict / GitHub-Drive-only). DINOv3-backbone
+  license caveat flagged. `CUSTOM_LOADER_REQUIRED`.
+- **OpenMMLab** (internimage/rtmdet/rtmpose/co-dino/maskdino/seem, + partials
+  rtmdet-r2-s/rtmpose-s) — host-native mmcv infeasible (py3.13/cu130); Docker sidecar
+  is the documented path. Stays hidden.
+
+Full feasibility evidence + matrices under `docs/qa/v319_operationalize_all_models/`.
+
+### Tests
+
+- `tests/test_v319_*.py` (no-fake-live-readiness, every-model-exact-blocker-or-
+  live-proof, rfdetr-train-live-or-exact-blocker, anastig-visibility-only-live-ready,
+  optional-deps-don't-break-base-install, gated-token-never-logged,
+  openmmlab/custom-loader-hidden, docs-generated-from-capabilities) + env-gated
+  `tests/live/test_v319_*.py`.
+
+### Contract
+
+- `docs/anastig_model_contract_v319.md` + `docs/anastig_model_allowlist_v319.json`
+  (14-bucket partition incl. `train_ready_derived_admin_only`,
+  `hidden_custom_loader_required`, `blocked_{dependency,weights,partial,license}`),
+  `docs/qa/v319_operationalize_all_models/final_model_matrix.{json,md}`.
+
 ## [3.18.0] - 2026-06-17
 
 ### Added — precise readiness taxonomy + live-verified capability truth

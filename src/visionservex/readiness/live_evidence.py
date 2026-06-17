@@ -79,6 +79,7 @@ LIVE_INFERENCE_VERIFIED: frozenset[str] = frozenset(
         "libreyolo-yolox-m",
         "libreyolo-yolox-s",
         "libreyolo-yolox-x",
+        "maxvit-tiny-tf-224",
         "medsam",
         "mobilesam",
         "mock-classify",
@@ -144,6 +145,14 @@ LIVE_TRAIN_VERIFIED: frozenset[str] = frozenset(
         "libreyolo-rtdetr-r50",
         "libreyolo-yolov9-s",
         "libreyolo-yolox-s",
+        "rfdetr-base",
+        "rfdetr-large",
+        "rfdetr-medium",
+        "rfdetr-nano",
+        "rfdetr-seg-medium",
+        "rfdetr-seg-nano",
+        "rfdetr-seg-small",
+        "rfdetr-small",
         "torchvision-alexnet",
         "torchvision-convnext-tiny",
         "torchvision-densenet121",
@@ -195,8 +204,14 @@ def live_train_verified(model_id: str) -> bool:
 # Evidence loaders (used by tools/tests to cross-check the baked conclusions).
 # --------------------------------------------------------------------------- #
 _DOCS_DIR = Path(__file__).resolve().parents[3] / "docs" / "qa" / "v318_full_model_truth"
+_DOCS_DIR_V319 = (
+    Path(__file__).resolve().parents[3] / "docs" / "qa" / "v319_operationalize_all_models"
+)
 INFERENCE_MATRIX_PATH = _DOCS_DIR / "live_inference_matrix.json"
 TRAIN_MATRIX_PATH = _DOCS_DIR / "live_train_lifecycle_matrix.json"
+# v3.19 operationalization matrices (additive — unioned with the v3.18 evidence).
+INFERENCE_MATRIX_PATH_V319 = _DOCS_DIR_V319 / "v319_inference_matrix.json"
+RFDETR_TRAIN_MATRIX_PATH = _DOCS_DIR_V319 / "rfdetr_live_train_matrix.json"
 
 
 def _passed_ids(matrix_path: Path) -> set[str]:
@@ -215,13 +230,13 @@ def _passed_ids(matrix_path: Path) -> set[str]:
 
 
 def inference_verified_from_matrix() -> set[str]:
-    """The PASS set recorded in the committed live-inference matrix."""
-    return _passed_ids(INFERENCE_MATRIX_PATH)
+    """The PASS set across the committed live-inference matrices (v3.18 + v3.19)."""
+    return _passed_ids(INFERENCE_MATRIX_PATH) | _passed_ids(INFERENCE_MATRIX_PATH_V319)
 
 
 def train_verified_from_matrix() -> set[str]:
-    """The PASS set recorded in the committed live-train-lifecycle matrix."""
-    return _passed_ids(TRAIN_MATRIX_PATH)
+    """The PASS set across the committed live-train matrices (v3.18 + v3.19 RF-DETR)."""
+    return _passed_ids(TRAIN_MATRIX_PATH) | _passed_ids(RFDETR_TRAIN_MATRIX_PATH)
 
 
 __all__ = [

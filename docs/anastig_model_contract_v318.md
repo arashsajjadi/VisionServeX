@@ -1,6 +1,6 @@
 # Anastig Model Contract (v3.18)
 
-Source of truth: `visionservex.model_capabilities(model_id)` (v3.18.0).
+Source of truth: `visionservex.model_capabilities(model_id)` (v3.19.0).
 Anastig drives its entire model UI from this contract — there is **no hardcoded
 model allowlist** required beyond optional product ranking. The machine-readable
 buckets live in `docs/anastig_model_allowlist_v318.json`.
@@ -28,25 +28,25 @@ live-verified** — Anastig must keep it hidden until it is promoted to `*_LIVE`
 
 | Bucket | Count |
 |---|---:|
-| `train_ready_live` | 16 |
-| `inference_ready_live` | 36 |
+| `train_ready_live` | 24 |
+| `inference_ready_live` | 37 |
 | `embedding_ready_live` | 10 |
 | `segmentation_ready_live` | 21 |
 | `open_vocab_ready_live` | 10 |
 | `gated_token_required` | 1 |
 | `hidden_catalog_only` | 43 |
-| `blocked` | 14 |
+| `blocked` | 5 |
 | `license_blocked` | 0 |
 
 ## Buckets
 
-### `train_ready_live` (16)
+### `train_ready_live` (24)
 
-`libreyolo-rtdetr-r50`, `libreyolo-yolov9-s`, `libreyolo-yolox-s`, `torchvision-alexnet`, `torchvision-convnext-tiny`, `torchvision-densenet121`, `torchvision-efficientnet-b0`, `torchvision-mobilenet-v2`, `torchvision-mobilenet-v3-large`, `torchvision-resnet101`, `torchvision-resnet152`, `torchvision-resnet18`, `torchvision-resnet34`, `torchvision-resnet50`, `torchvision-resnext50-32x4d`, `torchvision-wide-resnet50-2`
+`libreyolo-rtdetr-r50`, `libreyolo-yolov9-s`, `libreyolo-yolox-s`, `rfdetr-base`, `rfdetr-large`, `rfdetr-medium`, `rfdetr-nano`, `rfdetr-seg-medium`, `rfdetr-seg-nano`, `rfdetr-seg-small`, `rfdetr-small`, `torchvision-alexnet`, `torchvision-convnext-tiny`, `torchvision-densenet121`, `torchvision-efficientnet-b0`, `torchvision-mobilenet-v2`, `torchvision-mobilenet-v3-large`, `torchvision-resnet101`, `torchvision-resnet152`, `torchvision-resnet18`, `torchvision-resnet34`, `torchvision-resnet50`, `torchvision-resnext50-32x4d`, `torchvision-wide-resnet50-2`
 
-### `inference_ready_live` (36)
+### `inference_ready_live` (37)
 
-`convnextv2-base`, `convnextv2-large`, `convnextv2-tiny`, `dfine-l`, `dfine-l-coco`, `dfine-l-o365-coco`, `dfine-m`, `dfine-m-coco`, `dfine-m-o365-coco`, `dfine-n`, `dfine-n-coco`, `dfine-s`, `dfine-s-coco`, `dfine-s-o365-coco`, `dfine-x`, `dfine-x-coco`, `dfine-x-o365-coco`, `libreyolo-dfine-l`, `libreyolo-dfine-m`, `libreyolo-dfine-n`, `libreyolo-dfine-s`, `libreyolo-dfine-x`, `libreyolo-rtdetr-r101`, `libreyolo-yolov9-c`, `libreyolo-yolov9-m`, `libreyolo-yolox-l`, `libreyolo-yolox-m`, `libreyolo-yolox-x`, `mock-classify`, `mock-detect`, `mock-obb`, `mock-pose`, `swinv2-base`, `swinv2-large`, `swinv2-small`, `swinv2-tiny`
+`convnextv2-base`, `convnextv2-large`, `convnextv2-tiny`, `dfine-l`, `dfine-l-coco`, `dfine-l-o365-coco`, `dfine-m`, `dfine-m-coco`, `dfine-m-o365-coco`, `dfine-n`, `dfine-n-coco`, `dfine-s`, `dfine-s-coco`, `dfine-s-o365-coco`, `dfine-x`, `dfine-x-coco`, `dfine-x-o365-coco`, `libreyolo-dfine-l`, `libreyolo-dfine-m`, `libreyolo-dfine-n`, `libreyolo-dfine-s`, `libreyolo-dfine-x`, `libreyolo-rtdetr-r101`, `libreyolo-yolov9-c`, `libreyolo-yolov9-m`, `libreyolo-yolox-l`, `libreyolo-yolox-m`, `libreyolo-yolox-x`, `maxvit-tiny-tf-224`, `mock-classify`, `mock-detect`, `mock-obb`, `mock-pose`, `swinv2-base`, `swinv2-large`, `swinv2-small`, `swinv2-tiny`
 
 ### `embedding_ready_live` (10)
 
@@ -68,9 +68,9 @@ live-verified** — Anastig must keep it hidden until it is promoted to `*_LIVE`
 
 `co-dino-inst-vit-l-coco`, `co-dino-inst-vit-l-lvis`, `deim-m`, `deim-s`, `deimv2-atto`, `deimv2-femto`, `deimv2-l`, `deimv2-m`, `deimv2-n`, `deimv2-pico`, `deimv2-s`, `deimv2-x`, `grounding-dino-1.5`, `grounding-dino-1.6`, `internimage-b`, `internimage-h`, `internimage-l`, `internimage-s`, `internimage-t`, `maskdino-r50-coco`, `maskdino-r50-panoptic`, `oneformer-convnext-large`, `rfdetr-seg-2xlarge`, `rfdetr-seg-large`, `rfdetr-seg-xlarge`, `rtdetrv4-l`, `rtdetrv4-m`, `rtdetrv4-s`, `rtdetrv4-x`, `rtmdet-r-l`, `rtmdet-r-m`, `rtmdet-r-s`, `rtmdet-r-t`, `rtmdet-r2-l`, `rtmdet-r2-m`, `rtmdet-r2-t`, `rtmpose-l`, `rtmpose-l-384x288`, `rtmpose-m`, `rtmpose-m-384x288`, `rtmpose-t`, `seem-davit-d3`, `seem-focal-t`
 
-### `blocked` (14)
+### `blocked` (5)
 
-`florence-2-base`, `florence-2-large`, `maxvit-tiny-tf-224`, `oneformer-dinat-large`, `rfdetr-base`, `rfdetr-large`, `rfdetr-medium`, `rfdetr-nano`, `rfdetr-seg-medium`, `rfdetr-seg-nano`, `rfdetr-seg-small`, `rfdetr-small`, `rtmdet-r2-s`, `rtmpose-s`
+`florence-2-base`, `florence-2-large`, `oneformer-dinat-large`, `rtmdet-r2-s`, `rtmpose-s`
 
 ### `license_blocked` (0)
 

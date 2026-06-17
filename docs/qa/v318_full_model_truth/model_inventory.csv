@@ -68,7 +68,7 @@ libreyolo-yolox-s,libreyolo,yolox-s,detect,libreyolo,wired,Apache-2.0,True,False
 libreyolo-yolox-x,libreyolo,yolox-x,detect,libreyolo,wired,Apache-2.0,True,False,False,INFERENCE_READY_LIVE,True,
 maskdino-r50-coco,maskdino,r50-coco,segment,openmmlab,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,Requires detectron2 + manual checkpoint. No HF path verified. Custom loader not yet implemented.
 maskdino-r50-panoptic,maskdino,r50-panoptic,segment,openmmlab,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,Requires detectron2 + manual checkpoint. Custom loader not yet implemented.
-maxvit-tiny-tf-224,maxvit,tiny-tf-224,classify,maxvit,partial,Apache-2.0,False,False,False,PARTIAL_IMPLEMENTATION_BLOCKED,False,Partial implementation (implementation_status=partial).
+maxvit-tiny-tf-224,maxvit,tiny-tf-224,classify,maxvit,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
 medsam,sam,medsam,foundation_segment,sam_hf,wired,Apache-2.0 weights / medical dataset provenance,False,False,False,SEGMENTATION_READY_LIVE,False,SEGMENTATION_READY_LIVE
 mobilesam,mobilesam,mobilesam,foundation_segment,mobilesam,wired,Apache-2.0,True,False,False,SEGMENTATION_READY_LIVE,True,
 mock-classify,mock,classify,classify,mock,wired,Apache-2.0,False,False,False,INFERENCE_READY_LIVE,True,
@@ -86,17 +86,17 @@ owlv2-base-patch16,owlv2,base-patch16,open_vocab_detect,owlv2,wired,Apache-2.0,F
 owlv2-large-patch14,owlv2,large-patch14,open_vocab_detect,owlv2,wired,Apache-2.0,False,False,False,OPEN_VOCAB_READY_LIVE,True,
 owlvit-base-patch32,owlvit,base-patch32,open_vocab_detect,owlvit,wired,Apache-2.0,True,False,False,OPEN_VOCAB_READY_LIVE,True,
 owlvit-large-patch14,owlvit,large-patch14,open_vocab_detect,owlvit,wired,Apache-2.0,False,False,False,OPEN_VOCAB_READY_LIVE,True,
-rfdetr-base,rfdetr,base,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
-rfdetr-large,rfdetr,large,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
-rfdetr-medium,rfdetr,medium,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
-rfdetr-nano,rfdetr,nano,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
+rfdetr-base,rfdetr,base,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_LIVE,True,
+rfdetr-large,rfdetr,large,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_LIVE,True,
+rfdetr-medium,rfdetr,medium,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_LIVE,True,
+rfdetr-nano,rfdetr,nano,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_LIVE,True,
 rfdetr-seg-2xlarge,rfdetr,seg-2xlarge,segment,rfdetr,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,HF checkpoint roboflow/rf-detr-seg-2xlarge not yet available.
 rfdetr-seg-large,rfdetr,seg-large,segment,rfdetr,stub,Apache-2.0,True,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,HF checkpoint roboflow/rf-detr-seg-large not yet available. Use rfdetr-seg-small/medium for verified inference.
-rfdetr-seg-medium,rfdetr,seg-medium,segment,rfdetr,wired,Apache-2.0,True,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
-rfdetr-seg-nano,rfdetr,seg-nano,segment,rfdetr,wired,Apache-2.0,True,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
-rfdetr-seg-small,rfdetr,seg-small,segment,rfdetr,wired,Apache-2.0,True,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
+rfdetr-seg-medium,rfdetr,seg-medium,segment,rfdetr,wired,Apache-2.0,True,False,False,TRAIN_READY_LIVE,True,
+rfdetr-seg-nano,rfdetr,seg-nano,segment,rfdetr,wired,Apache-2.0,True,False,False,TRAIN_READY_LIVE,True,
+rfdetr-seg-small,rfdetr,seg-small,segment,rfdetr,wired,Apache-2.0,True,False,False,TRAIN_READY_LIVE,True,
 rfdetr-seg-xlarge,rfdetr,seg-xlarge,segment,rfdetr,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,HF checkpoint roboflow/rf-detr-seg-xlarge not yet available.
-rfdetr-small,rfdetr,small,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,True,
+rfdetr-small,rfdetr,small,detect,rfdetr,wired,Apache-2.0,False,False,False,TRAIN_READY_LIVE,True,
 rtdetrv4-l,rtdetrv4,l,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,Custom loader and verified checkpoint source required.
 rtdetrv4-m,rtdetrv4,m,detect,_stub,stub,Apache-2.0,False,False,False,CUSTOM_LOADER_REQUIRED,False,Custom loader and verified checkpoint source required.
 rtdetrv4-s,rtdetrv4,s,detect,_stub,stub,Apache-2.0,False,False,False,CATALOG_ONLY_ENGINE_NOT_WIRED,False,RT-DETRv4 is not an officially released numbered version; no verified checkpoint source or HF repo. License and export path unclear.

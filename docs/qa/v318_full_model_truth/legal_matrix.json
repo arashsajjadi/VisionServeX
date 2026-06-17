@@ -1,5 +1,5 @@
 {
-  "version": "3.18.0",
+  "version": "3.19.0",
   "license_class_counts": {
     "permissive": 148,
     "custom_unknown": 3
@@ -782,7 +782,7 @@
       "commercial_safe": false,
       "gated": false,
       "requires_token": false,
-      "readiness_state": "PARTIAL_IMPLEMENTATION_BLOCKED",
+      "readiness_state": "INFERENCE_READY_LIVE",
       "runtime_allowed": true,
       "default_commercial_use": false
     },
@@ -980,7 +980,7 @@
       "commercial_safe": false,
       "gated": false,
       "requires_token": false,
-      "readiness_state": "TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION",
+      "readiness_state": "TRAIN_READY_LIVE",
       "runtime_allowed": true,
       "default_commercial_use": false
     },
@@ -991,7 +991,7 @@
       "commercial_safe": false,
       "gated": false,
       "requires_token": false,
-      "readiness_state": "TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION",
+      "readiness_state": "TRAIN_READY_LIVE",
       "runtime_allowed": true,
       "default_commercial_use": false
     },
@@ -1002,7 +1002,7 @@
       "commercial_safe": false,
       "gated": false,
       "requires_token": false,
-      "readiness_state": "TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION",
+      "readiness_state": "TRAIN_READY_LIVE",
       "runtime_allowed": true,
       "default_commercial_use": false
     },
@@ -1013,7 +1013,7 @@
       "commercial_safe": false,
       "gated": false,
       "requires_token": false,
-      "readiness_state": "TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION",
+      "readiness_state": "TRAIN_READY_LIVE",
       "runtime_allowed": true,
       "default_commercial_use": false
     },
@@ -1046,7 +1046,7 @@
       "commercial_safe": true,
       "gated": false,
       "requires_token": false,
-      "readiness_state": "TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION",
+      "readiness_state": "TRAIN_READY_LIVE",
       "runtime_allowed": true,
       "default_commercial_use": true
     },
@@ -1057,7 +1057,7 @@
       "commercial_safe": true,
       "gated": false,
       "requires_token": false,
-      "readiness_state": "TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION",
+      "readiness_state": "TRAIN_READY_LIVE",
       "runtime_allowed": true,
       "default_commercial_use": true
     },
@@ -1068,7 +1068,7 @@
       "commercial_safe": true,
       "gated": false,
       "requires_token": false,
-      "readiness_state": "TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION",
+      "readiness_state": "TRAIN_READY_LIVE",
       "runtime_allowed": true,
       "default_commercial_use": true
     },
@@ -1090,7 +1090,7 @@
       "commercial_safe": false,
       "gated": false,
       "requires_token": false,
-      "readiness_state": "TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION",
+      "readiness_state": "TRAIN_READY_LIVE",
       "runtime_allowed": true,
       "default_commercial_use": false
     },

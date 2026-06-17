@@ -87,16 +87,34 @@ def _replace_block(text: str, name: str, replacement: str) -> str:
 
 
 def main() -> int:
+    qa319 = REPO / "docs" / "qa" / "v319_operationalize_all_models"
     inf = _rows(QA / "live_inference_matrix.json")
     trn = _rows(QA / "live_train_lifecycle_matrix.json")
+    # v3.19 operationalization matrices (additive — union with the v3.18 evidence).
+    rfdetr_trn = _rows(qa319 / "rfdetr_live_train_matrix.json")
+    inf319 = _rows(qa319 / "v319_inference_matrix.json")
 
-    inf_pass = [r["model_id"] for r in inf if r.get("status") == "PASS" and r.get("live_verified")]
+    inf_pass = sorted(
+        {
+            r["model_id"]
+            for r in (inf + inf319)
+            if r.get("status") == "PASS" and r.get("live_verified")
+        }
+    )
+    # A v3.19 PASS clears any earlier blocker for that model.
+    promoted = set(inf_pass)
     inf_failed = {
         r["model_id"]: classify_inference_blocker(r)
-        for r in inf
-        if r.get("status") in ("FAIL", "SKIP_BLOCKED")
+        for r in (inf + inf319)
+        if r.get("status") in ("FAIL", "SKIP_BLOCKED") and r["model_id"] not in promoted
     }
-    trn_pass = [r["model_id"] for r in trn if r.get("status") == "PASS" and r.get("live_verified")]
+    trn_pass = sorted(
+        {
+            r["model_id"]
+            for r in (trn + rfdetr_trn)
+            if r.get("status") == "PASS" and r.get("live_verified")
+        }
+    )
 
     text = TARGET.read_text()
     text = _replace_block(text, "LIVE_INFERENCE_VERIFIED", _fmt_frozenset(inf_pass))

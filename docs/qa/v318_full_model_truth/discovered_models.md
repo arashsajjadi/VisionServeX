@@ -1,4 +1,4 @@
-# v3.18 Discovered Models — 151 total (v3.18.0)
+# v3.18 Discovered Models — 151 total (v3.19.0)
 
 Programmatically discovered from `list_models()` + the registry + the license
 policy. Every row is a pure projection of `model_capabilities(model_id)`.
@@ -7,16 +7,15 @@ policy. Every row is a pure projection of `model_capabilities(model_id)`.
 
 | readiness_state | count |
 |---|---:|
-| `INFERENCE_READY_LIVE` | 36 |
+| `INFERENCE_READY_LIVE` | 37 |
 | `CATALOG_ONLY_ENGINE_NOT_WIRED` | 27 |
+| `TRAIN_READY_LIVE` | 24 |
 | `SEGMENTATION_READY_LIVE` | 21 |
-| `TRAIN_READY_LIVE` | 16 |
 | `CUSTOM_LOADER_REQUIRED` | 15 |
 | `EMBEDDING_READY_LIVE` | 10 |
 | `OPEN_VOCAB_READY_LIVE` | 10 |
-| `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | 8 |
 | `DEPENDENCY_MISSING` | 3 |
-| `PARTIAL_IMPLEMENTATION_BLOCKED` | 3 |
+| `PARTIAL_IMPLEMENTATION_BLOCKED` | 2 |
 | `WEIGHTS_MISSING` | 1 |
 | `GATED_TOKEN_REQUIRED` | 1 |
 
@@ -32,7 +31,7 @@ policy. Every row is a pure projection of `model_capabilities(model_id)`.
 | `internimage-l` | internimage | classify | openmmlab | MIT | — | — | `CATALOG_ONLY_ENGINE_NOT_WIRED` | — |
 | `internimage-s` | internimage | classify | openmmlab | MIT | — | — | `CATALOG_ONLY_ENGINE_NOT_WIRED` | — |
 | `internimage-t` | internimage | classify | openmmlab | MIT | — | — | `CATALOG_ONLY_ENGINE_NOT_WIRED` | — |
-| `maxvit-tiny-tf-224` | maxvit | classify | maxvit | Apache-2.0 | — | — | `PARTIAL_IMPLEMENTATION_BLOCKED` | — |
+| `maxvit-tiny-tf-224` | maxvit | classify | maxvit | Apache-2.0 | — | — | `INFERENCE_READY_LIVE` | yes |
 | `mock-classify` | mock | classify | mock | Apache-2.0 | — | — | `INFERENCE_READY_LIVE` | yes |
 | `swinv2-base` | swinv2 | classify | swinv2 | MIT | — | — | `INFERENCE_READY_LIVE` | yes |
 | `swinv2-large` | swinv2 | classify | swinv2 | MIT | — | — | `INFERENCE_READY_LIVE` | yes |
@@ -90,11 +89,11 @@ policy. Every row is a pure projection of `model_capabilities(model_id)`.
 | `libreyolo-yolox-s` | libreyolo | detect | libreyolo | Apache-2.0 | yes | — | `TRAIN_READY_LIVE` | yes |
 | `libreyolo-yolox-x` | libreyolo | detect | libreyolo | Apache-2.0 | yes | — | `INFERENCE_READY_LIVE` | yes |
 | `mock-detect` | mock | detect | mock | Apache-2.0 | — | — | `INFERENCE_READY_LIVE` | yes |
-| `rfdetr-base` | rfdetr | detect | rfdetr | Apache-2.0 | — | — | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | yes |
-| `rfdetr-large` | rfdetr | detect | rfdetr | Apache-2.0 | — | — | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | yes |
-| `rfdetr-medium` | rfdetr | detect | rfdetr | Apache-2.0 | — | — | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | yes |
-| `rfdetr-nano` | rfdetr | detect | rfdetr | Apache-2.0 | — | — | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | yes |
-| `rfdetr-small` | rfdetr | detect | rfdetr | Apache-2.0 | — | — | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | yes |
+| `rfdetr-base` | rfdetr | detect | rfdetr | Apache-2.0 | — | — | `TRAIN_READY_LIVE` | yes |
+| `rfdetr-large` | rfdetr | detect | rfdetr | Apache-2.0 | — | — | `TRAIN_READY_LIVE` | yes |
+| `rfdetr-medium` | rfdetr | detect | rfdetr | Apache-2.0 | — | — | `TRAIN_READY_LIVE` | yes |
+| `rfdetr-nano` | rfdetr | detect | rfdetr | Apache-2.0 | — | — | `TRAIN_READY_LIVE` | yes |
+| `rfdetr-small` | rfdetr | detect | rfdetr | Apache-2.0 | — | — | `TRAIN_READY_LIVE` | yes |
 | `rtdetrv4-l` | rtdetrv4 | detect | _stub | Apache-2.0 | — | — | `CUSTOM_LOADER_REQUIRED` | — |
 | `rtdetrv4-m` | rtdetrv4 | detect | _stub | Apache-2.0 | — | — | `CUSTOM_LOADER_REQUIRED` | — |
 | `rtdetrv4-s` | rtdetrv4 | detect | _stub | Apache-2.0 | — | — | `CATALOG_ONLY_ENGINE_NOT_WIRED` | — |
@@ -169,9 +168,9 @@ policy. Every row is a pure projection of `model_capabilities(model_id)`.
 | `oneformer-swin-large` | oneformer | segment | oneformer | MIT | — | — | `SEGMENTATION_READY_LIVE` | yes |
 | `rfdetr-seg-2xlarge` | rfdetr | segment | rfdetr | Apache-2.0 | — | — | `CATALOG_ONLY_ENGINE_NOT_WIRED` | — |
 | `rfdetr-seg-large` | rfdetr | segment | rfdetr | Apache-2.0 | yes | — | `CATALOG_ONLY_ENGINE_NOT_WIRED` | — |
-| `rfdetr-seg-medium` | rfdetr | segment | rfdetr | Apache-2.0 | yes | — | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | yes |
-| `rfdetr-seg-nano` | rfdetr | segment | rfdetr | Apache-2.0 | yes | — | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | yes |
-| `rfdetr-seg-small` | rfdetr | segment | rfdetr | Apache-2.0 | yes | — | `TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION` | yes |
+| `rfdetr-seg-medium` | rfdetr | segment | rfdetr | Apache-2.0 | yes | — | `TRAIN_READY_LIVE` | yes |
+| `rfdetr-seg-nano` | rfdetr | segment | rfdetr | Apache-2.0 | yes | — | `TRAIN_READY_LIVE` | yes |
+| `rfdetr-seg-small` | rfdetr | segment | rfdetr | Apache-2.0 | yes | — | `TRAIN_READY_LIVE` | yes |
 | `rfdetr-seg-xlarge` | rfdetr | segment | rfdetr | Apache-2.0 | — | — | `CATALOG_ONLY_ENGINE_NOT_WIRED` | — |
 | `florence-2-base` | florence-2 | vlm | florence2 | MIT | yes | — | `DEPENDENCY_MISSING` | — |
 | `florence-2-large` | florence-2 | vlm | florence2 | MIT | yes | — | `DEPENDENCY_MISSING` | — |

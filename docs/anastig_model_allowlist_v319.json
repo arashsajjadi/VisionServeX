@@ -27,6 +27,7 @@
     "torchvision-resnext50-32x4d",
     "torchvision-wide-resnet50-2"
   ],
+  "train_ready_derived_admin_only": [],
   "inference_ready_live": [
     "convnextv2-base",
     "convnextv2-large",
@@ -66,18 +67,6 @@
     "swinv2-small",
     "swinv2-tiny"
   ],
-  "embedding_ready_live": [
-    "clip-vit-base-patch32",
-    "clip-vit-large-patch14",
-    "dinov2-base",
-    "dinov2-giant",
-    "dinov2-large",
-    "dinov2-small",
-    "siglip-base-patch16-224",
-    "siglip2-base-patch16-224",
-    "siglip2-large-patch16-256",
-    "siglip2-so400m-patch14-384"
-  ],
   "segmentation_ready_live": [
     "efficientsam",
     "grounded-sam",
@@ -113,22 +102,24 @@
     "owlvit-base-patch32",
     "owlvit-large-patch14"
   ],
+  "embedding_ready_live": [
+    "clip-vit-base-patch32",
+    "clip-vit-large-patch14",
+    "dinov2-base",
+    "dinov2-giant",
+    "dinov2-large",
+    "dinov2-small",
+    "siglip-base-patch16-224",
+    "siglip2-base-patch16-224",
+    "siglip2-large-patch16-256",
+    "siglip2-so400m-patch14-384"
+  ],
   "gated_token_required": [
     "sam3-base"
   ],
   "hidden_catalog_only": [
     "co-dino-inst-vit-l-coco",
     "co-dino-inst-vit-l-lvis",
-    "deim-m",
-    "deim-s",
-    "deimv2-atto",
-    "deimv2-femto",
-    "deimv2-l",
-    "deimv2-m",
-    "deimv2-n",
-    "deimv2-pico",
-    "deimv2-s",
-    "deimv2-x",
     "grounding-dino-1.5",
     "grounding-dino-1.6",
     "internimage-b",
@@ -136,16 +127,10 @@
     "internimage-l",
     "internimage-s",
     "internimage-t",
-    "maskdino-r50-coco",
-    "maskdino-r50-panoptic",
-    "oneformer-convnext-large",
     "rfdetr-seg-2xlarge",
     "rfdetr-seg-large",
     "rfdetr-seg-xlarge",
-    "rtdetrv4-l",
-    "rtdetrv4-m",
     "rtdetrv4-s",
-    "rtdetrv4-x",
     "rtmdet-r-l",
     "rtmdet-r-m",
     "rtmdet-r-s",
@@ -161,12 +146,35 @@
     "seem-davit-d3",
     "seem-focal-t"
   ],
-  "blocked": [
+  "hidden_custom_loader_required": [
+    "deim-m",
+    "deim-s",
+    "deimv2-atto",
+    "deimv2-femto",
+    "deimv2-l",
+    "deimv2-m",
+    "deimv2-n",
+    "deimv2-pico",
+    "deimv2-s",
+    "deimv2-x",
+    "maskdino-r50-coco",
+    "maskdino-r50-panoptic",
+    "rtdetrv4-l",
+    "rtdetrv4-m",
+    "rtdetrv4-x"
+  ],
+  "blocked_dependency": [
     "florence-2-base",
     "florence-2-large",
-    "oneformer-dinat-large",
+    "oneformer-dinat-large"
+  ],
+  "blocked_weights": [
+    "oneformer-convnext-large"
+  ],
+  "blocked_partial": [
     "rtmdet-r2-s",
     "rtmpose-s"
   ],
-  "license_blocked": []
+  "blocked_license": [],
+  "unknown_review_required": []
 }

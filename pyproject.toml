@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "visionservex"
-version = "3.18.0"
+version = "3.19.0"
 description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -79,6 +79,15 @@ rfdetr = [
     "supervision>=0.22",
     "torch>=2.1",
     "torchvision>=0.16",
+]
+# RF-DETR *live training* (native PyTorch-Lightning path) — superset of the
+# inference extra. v3.19 live-verified the full train→checkpoint→reload→predict→
+# ONNX lifecycle for all 8 variants with these present.
+rfdetr-train = [
+    "rfdetr[train,loggers]>=1.6",
+    "supervision>=0.22",
+    "pytorch-lightning>=2.0",
+    "faster-coco-eval>=1.6",
 ]
 libreyolo = [
     "libreyolo>=1.1.1",
