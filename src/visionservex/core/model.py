@@ -42,6 +42,29 @@ from visionservex.utils.logging import get_logger
 
 _log = get_logger(__name__)
 
+# Task groups for the task-specific public API (v3.17.0).
+_CLASSIFY_TASKS = frozenset({"classify", "classification"})
+_EMBED_TASKS = frozenset({"embed", "embedding"})
+_SEGMENT_TASKS = frozenset({"foundation_segment", "segment", "grounded_segment"})
+_DETECT_TASKS = frozenset({"detect", "obb", "open_vocab_detect"})
+
+
+def _require_task(entry: ModelEntry, allowed: frozenset[str], method: str) -> None:
+    if entry.task not in allowed:
+        from visionservex.exceptions import TaskNotSupportedError
+
+        raise TaskNotSupportedError(
+            entry.id,
+            method,
+            entry.task,
+            hint=f"{method}() requires task in {sorted(allowed)}; use predict() instead.",
+        )
+
+
+def list_models(task: str | None = None, *, family: str | None = None) -> list[str]:
+    """Return every registered model id (optionally filtered by task/family)."""
+    return sorted(e.id for e in default_registry().list(task=task, family=family))
+
 
 class VisionModel:
     """User-facing wrapper around an engine and a registry entry.
@@ -479,6 +502,67 @@ class VisionModel:
         training/export truth. See :func:`model_capabilities`.
         """
         return model_capabilities(self.entry.id)
+
+    # ------- task-specific public API (v3.17.0) -------
+    # Thin, typed routers over predict(); each raises TaskNotSupportedError when
+    # the model's registered task doesn't match (never silently mis-routes).
+
+    def classify(self, image: Image.Image | bytes | str | Path, *, top_k: int = 5, **kwargs: Any):
+        """Top-k image classification → ``ClassificationResult``."""
+        _require_task(self.entry, _CLASSIFY_TASKS, "classify")
+        return self.predict(image, top_k=top_k, **kwargs)
+
+    def embed(self, image: Image.Image | bytes | str | Path, **kwargs: Any):
+        """Image embedding / feature extraction → ``EmbeddingResult``."""
+        _require_task(self.entry, _EMBED_TASKS, "embed")
+        return self.predict(image, **kwargs)
+
+    def segment(
+        self,
+        image: Image.Image | bytes | str | Path,
+        *,
+        boxes: list[list[float]] | None = None,
+        points: list[list[float]] | None = None,
+        point_labels: list[int] | None = None,
+        prompts: Sequence[str] | None = None,
+        **kwargs: Any,
+    ):
+        """Promptable / foundation / semantic segmentation → ``SegmentationResult``."""
+        _require_task(self.entry, _SEGMENT_TASKS, "segment")
+        return self.predict(
+            image, boxes=boxes, points=points, point_labels=point_labels, prompts=prompts, **kwargs
+        )
+
+    def similarity(self, a: Any, b: Any) -> float:
+        """Cosine similarity between two embeddings (``EmbeddingResult`` or arrays)."""
+        import numpy as np
+
+        from visionservex.runtime.embeddings import cosine_similarity
+
+        va = getattr(a, "embedding", a)
+        vb = getattr(b, "embedding", b)
+        return float(
+            cosine_similarity(
+                np.asarray(va, dtype=np.float32).ravel(),
+                np.asarray(vb, dtype=np.float32).ravel(),
+            )
+        )
+
+    def correspond(
+        self, source_image: Any, target_image: Any, *, source_region=None, **kwargs: Any
+    ):
+        """Semantic correspondence — provided by the dedicated INSID3 API, not here."""
+        from visionservex.exceptions import TaskNotSupportedError
+
+        raise TaskNotSupportedError(
+            self.entry.id,
+            "correspond",
+            self.entry.task,
+            hint=(
+                "Semantic correspondence / in-context segmentation is the INSID3 API: "
+                "visionservex.vsx.VSX.insid3(model_id).segment(query, ref, ref_mask)."
+            ),
+        )
 
     def train(self, dataset: str | Path, **kwargs: Any) -> dict[str, Any]:
         """Train / fine-tune this model on a dataset (engine-dependent).
@@ -1196,7 +1280,31 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
         "validated_variants": tcap.get("validated_variants", []),
         "known_blockers": tcap.get("known_blockers", []),
         "exact_blocker": exact_blocker,
+        "tasks": [entry.task],
+        "validated_syntax": _validated_syntax(model_id, entry.task, tcap, export_supported),
     }
 
 
-__all__ = ["VisionModel", "model_capabilities"]
+def _validated_syntax(
+    model_id: str, task: str, tcap: dict[str, Any], export_supported: list[str]
+) -> dict[str, str]:
+    """The public-API call syntax that applies to this model (v3.17.0)."""
+    syn = {"predict": f'VisionModel("{model_id}").predict("image.jpg")'}
+    if task in _CLASSIFY_TASKS:
+        syn["classify"] = f'VisionModel("{model_id}").classify("image.jpg", top_k=5)'
+    if task in _EMBED_TASKS:
+        syn["embed"] = f'VisionModel("{model_id}").embed("image.jpg")'
+        syn["similarity"] = 'model.similarity(model.embed("a.jpg"), model.embed("b.jpg"))'
+    if task in _SEGMENT_TASKS:
+        syn["segment"] = f'VisionModel("{model_id}").segment("image.jpg", boxes=[[x, y, w, h]])'
+    if task in _DETECT_TASKS:
+        syn["detect"] = f'VisionModel("{model_id}").predict("image.jpg", threshold=0.25)'
+    if tcap.get("train_supported"):
+        syn["train"] = f'VisionModel("{model_id}").train("data.yaml", epochs=1)'
+        syn["from_checkpoint"] = f'VisionModel.from_checkpoint(ckpt, model_id="{model_id}")'
+    if export_supported:
+        syn["export"] = f'VisionModel("{model_id}").export(format="onnx", output_path="m.onnx")'
+    return syn
+
+
+__all__ = ["VisionModel", "list_models", "model_capabilities"]

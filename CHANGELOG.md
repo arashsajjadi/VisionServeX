@@ -2,6 +2,50 @@
 
 ## [Unreleased]
 
+## [3.17.0] - 2026-06-17
+
+### Added — full evidence-backed model matrix (all 151 models)
+
+A complete, truthful lifecycle matrix across the **entire** catalog (not just
+LibreYOLO). Every registered model id is discovered programmatically and carries a
+per-stage status (`tools/qa/v317_model_lifecycle_matrix.py`,
+`docs/qa/v317_full_model_matrix/`):
+
+- **151 models** — 24 train-ready, 81 inference-ready, 43 catalog-only, 3 blocked.
+- The matrix is explicit about **live-verified vs capability-derived**: cheap stages
+  (instantiate / capabilities / engine / license / dependency) run live for all 151;
+  inference ran live (real `predict()`) for `torchvision-resnet50` (classification,
+  top-5) and `libreyolo-yolox-s` (detection, 1 box). Train/reload/export stages are
+  capability-derived and labelled `live_verified=false` (backed by the v3.15/v3.16
+  lifecycle proofs) — nothing is claimed live without evidence.
+
+### Added — task-specific public API with typed errors
+
+- `VisionModel.classify() / embed() / segment() / similarity() / correspond()` plus
+  `list_models(task=..., family=...)`. Each task method validates the model's
+  registered task and raises a typed **`TaskNotSupportedError`** (code
+  `TASK_NOT_SUPPORTED`) instead of silently mis-routing. `correspond()` always points
+  to the dedicated INSID3 API. `similarity()` is cosine over `EmbeddingResult`/arrays.
+- `model_capabilities()` now also returns **`tasks`** and **`validated_syntax`** (the
+  exact public-API call strings that apply to each model).
+
+### Added — generated + curated truth docs
+
+- Data-driven (regenerated from the live registry/capabilities):
+  `docs/model_matrix.md`, `docs/training_matrix.md`, `docs/legal_model_audit.md`.
+- Curated: `docs/model_syntax_matrix.md`, `docs/capability_truth.md`,
+  `docs/anastig_upgrade_notes.md`.
+
+### Tests / legal
+
+- `tests/test_v317_model_catalog_discovery.py`,
+  `tests/test_v317_model_syntax_contracts.py`,
+  `tests/test_v317_capability_truth_matrix.py`,
+  `tests/test_v317_legal_no_ultralytics_agpl.py`, and gated
+  `tests/live/test_v317_inference_matrix_live.py`.
+- Legal firewall extended catalog-wide: no Ultralytics/AGPL/GPL/SSPL runtime, no
+  copyleft default-safe row, YOLO-NAS/Deci stays non-default-safe (test-enforced).
+
 ## [3.16.0] - 2026-06-16
 
 ### Fixed — LibreYOLO trained-checkpoint predict reliability (eval≠predict)

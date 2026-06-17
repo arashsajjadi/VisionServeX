@@ -146,6 +146,19 @@ class EngineDependencyError(VisionServeXError):
         )
 
 
+class TaskNotSupportedError(VisionServeXError):
+    """Raised when a task-specific method (classify/embed/segment/correspond) is
+    called on a model whose registered task does not support it (v3.17.0)."""
+
+    def __init__(self, model_id: str, method: str, task: str, hint: str = "") -> None:
+        super().__init__(
+            f"{method}() is not supported for model {model_id!r} (task={task!r}).",
+            code="TASK_NOT_SUPPORTED",
+            hint=hint or f"visionservex info {model_id}",
+            docs="docs/model_syntax_matrix.md",
+        )
+
+
 __all__ = [
     "DeviceUnavailableError",
     "EngineDependencyError",
@@ -155,5 +168,6 @@ __all__ = [
     "ModelMissingWeightsError",
     "ModelNotFoundError",
     "SidecarNotRunningError",
+    "TaskNotSupportedError",
     "VisionServeXError",
 ]

@@ -1,0 +1,3128 @@
+[
+  {
+    "model_id": "convnextv2-base",
+    "family": "convnextv2",
+    "variant": "base",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=convnextv2-base (implementation_status=wired)"
+  },
+  {
+    "model_id": "convnextv2-large",
+    "family": "convnextv2",
+    "variant": "large",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=convnextv2-large (implementation_status=wired)"
+  },
+  {
+    "model_id": "convnextv2-tiny",
+    "family": "convnextv2",
+    "variant": "tiny",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=convnextv2-tiny (implementation_status=wired)"
+  },
+  {
+    "model_id": "internimage-b",
+    "family": "internimage",
+    "variant": "b",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=internimage-b (implementation_status=stub)"
+  },
+  {
+    "model_id": "internimage-h",
+    "family": "internimage",
+    "variant": "h",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=internimage-h (implementation_status=stub)"
+  },
+  {
+    "model_id": "internimage-l",
+    "family": "internimage",
+    "variant": "l",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=internimage-l (implementation_status=stub)"
+  },
+  {
+    "model_id": "internimage-s",
+    "family": "internimage",
+    "variant": "s",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=internimage-s (implementation_status=stub)"
+  },
+  {
+    "model_id": "internimage-t",
+    "family": "internimage",
+    "variant": "t",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=internimage-t (implementation_status=stub)"
+  },
+  {
+    "model_id": "maxvit-tiny-tf-224",
+    "family": "maxvit",
+    "variant": "tiny-tf-224",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "blocked",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "NOT_INFERENCE_READY: implementation_status=partial, engine_registered=True",
+    "exact_claim_source": "registry id=maxvit-tiny-tf-224 (implementation_status=partial)"
+  },
+  {
+    "model_id": "mock-classify",
+    "family": "mock",
+    "variant": "classify",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=mock-classify (implementation_status=wired)"
+  },
+  {
+    "model_id": "swinv2-base",
+    "family": "swinv2",
+    "variant": "base",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=swinv2-base (implementation_status=wired)"
+  },
+  {
+    "model_id": "swinv2-large",
+    "family": "swinv2",
+    "variant": "large",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=swinv2-large (implementation_status=wired)"
+  },
+  {
+    "model_id": "swinv2-small",
+    "family": "swinv2",
+    "variant": "small",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=swinv2-small (implementation_status=wired)"
+  },
+  {
+    "model_id": "swinv2-tiny",
+    "family": "swinv2",
+    "variant": "tiny",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=swinv2-tiny (implementation_status=wired)"
+  },
+  {
+    "model_id": "torchvision-alexnet",
+    "family": "torchvision-classify",
+    "variant": "torchvision-alexnet",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "BSD-3-Clause",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "torchvision"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=torchvision-alexnet (implementation_status=wired)"
+  },
+  {
+    "model_id": "torchvision-convnext-tiny",
+    "family": "torchvision-classify",
+    "variant": "torchvision-convnext-tiny",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "BSD-3-Clause",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "torchvision"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=torchvision-convnext-tiny (implementation_status=wired)"
+  },
+  {
+    "model_id": "torchvision-densenet121",
+    "family": "torchvision-classify",
+    "variant": "torchvision-densenet121",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "BSD-3-Clause",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "torchvision"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=torchvision-densenet121 (implementation_status=wired)"
+  },
+  {
+    "model_id": "torchvision-efficientnet-b0",
+    "family": "torchvision-classify",
+    "variant": "torchvision-efficientnet-b0",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "BSD-3-Clause",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "torchvision"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=torchvision-efficientnet-b0 (implementation_status=wired)"
+  },
+  {
+    "model_id": "torchvision-mobilenet-v2",
+    "family": "torchvision-classify",
+    "variant": "torchvision-mobilenet-v2",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "BSD-3-Clause",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "torchvision"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=torchvision-mobilenet-v2 (implementation_status=wired)"
+  },
+  {
+    "model_id": "torchvision-mobilenet-v3-large",
+    "family": "torchvision-classify",
+    "variant": "torchvision-mobilenet-v3-large",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "BSD-3-Clause",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "torchvision"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=torchvision-mobilenet-v3-large (implementation_status=wired)"
+  },
+  {
+    "model_id": "torchvision-resnet101",
+    "family": "torchvision-classify",
+    "variant": "torchvision-resnet101",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "BSD-3-Clause",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "torchvision"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=torchvision-resnet101 (implementation_status=wired)"
+  },
+  {
+    "model_id": "torchvision-resnet152",
+    "family": "torchvision-classify",
+    "variant": "torchvision-resnet152",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "BSD-3-Clause",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "torchvision"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=torchvision-resnet152 (implementation_status=wired)"
+  },
+  {
+    "model_id": "torchvision-resnet18",
+    "family": "torchvision-classify",
+    "variant": "torchvision-resnet18",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "BSD-3-Clause",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "torchvision"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=torchvision-resnet18 (implementation_status=wired)"
+  },
+  {
+    "model_id": "torchvision-resnet34",
+    "family": "torchvision-classify",
+    "variant": "torchvision-resnet34",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "BSD-3-Clause",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "torchvision"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=torchvision-resnet34 (implementation_status=wired)"
+  },
+  {
+    "model_id": "torchvision-resnet50",
+    "family": "torchvision-classify",
+    "variant": "torchvision-resnet50",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "BSD-3-Clause",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "torchvision"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=torchvision-resnet50 (implementation_status=wired)"
+  },
+  {
+    "model_id": "torchvision-resnext50-32x4d",
+    "family": "torchvision-classify",
+    "variant": "torchvision-resnext50-32x4d",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "BSD-3-Clause",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "torchvision"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=torchvision-resnext50-32x4d (implementation_status=wired)"
+  },
+  {
+    "model_id": "torchvision-wide-resnet50-2",
+    "family": "torchvision-classify",
+    "variant": "torchvision-wide-resnet50-2",
+    "task": "classify",
+    "source": "registry:models.yaml",
+    "license": "BSD-3-Clause",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "torchvision"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=torchvision-wide-resnet50-2 (implementation_status=wired)"
+  },
+  {
+    "model_id": "deim-m",
+    "family": "deim",
+    "variant": "m",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "No HF or pip-installable path verified. Custom loader required.",
+    "exact_claim_source": "registry id=deim-m (implementation_status=stub)"
+  },
+  {
+    "model_id": "deim-s",
+    "family": "deim",
+    "variant": "s",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "No HF or pip-installable path verified. Requires custom loader from official DEIM repo. License and checkpoint download not yet validated.",
+    "exact_claim_source": "registry id=deim-s (implementation_status=stub)"
+  },
+  {
+    "model_id": "deimv2-atto",
+    "family": "deim",
+    "variant": "deimv2-atto",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "DEIMv2 atto custom loader required from official repo. Checkpoint not yet on HF.",
+    "exact_claim_source": "registry id=deimv2-atto (implementation_status=stub)"
+  },
+  {
+    "model_id": "deimv2-femto",
+    "family": "deim",
+    "variant": "deimv2-femto",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "DEIMv2 femto custom loader required from official repo.",
+    "exact_claim_source": "registry id=deimv2-femto (implementation_status=stub)"
+  },
+  {
+    "model_id": "deimv2-l",
+    "family": "deim",
+    "variant": "deimv2-l",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "DEIMv2 large custom loader required from official repo.",
+    "exact_claim_source": "registry id=deimv2-l (implementation_status=stub)"
+  },
+  {
+    "model_id": "deimv2-m",
+    "family": "deim",
+    "variant": "deimv2-m",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "Custom loader required from official repo. Checkpoint availability not verified.",
+    "exact_claim_source": "registry id=deimv2-m (implementation_status=stub)"
+  },
+  {
+    "model_id": "deimv2-n",
+    "family": "deim",
+    "variant": "deimv2-n",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "DEIMv2 nano custom loader required from official repo.",
+    "exact_claim_source": "registry id=deimv2-n (implementation_status=stub)"
+  },
+  {
+    "model_id": "deimv2-pico",
+    "family": "deim",
+    "variant": "deimv2-pico",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "DEIMv2 pico custom loader required from official repo.",
+    "exact_claim_source": "registry id=deimv2-pico (implementation_status=stub)"
+  },
+  {
+    "model_id": "deimv2-s",
+    "family": "deim",
+    "variant": "deimv2-s",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "DEIMv2 repo and checkpoint availability not independently verified. Custom loader required.",
+    "exact_claim_source": "registry id=deimv2-s (implementation_status=stub)"
+  },
+  {
+    "model_id": "deimv2-x",
+    "family": "deim",
+    "variant": "deimv2-x",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "DEIMv2 XLarge custom loader required from official repo. Highest-priority target to challenge YOLO11x.",
+    "exact_claim_source": "registry id=deimv2-x (implementation_status=stub)"
+  },
+  {
+    "model_id": "dfine-l",
+    "family": "dfine",
+    "variant": "l",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dfine-l (implementation_status=wired)"
+  },
+  {
+    "model_id": "dfine-l-coco",
+    "family": "dfine",
+    "variant": "l-coco",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dfine-l-coco (implementation_status=wired)"
+  },
+  {
+    "model_id": "dfine-l-o365-coco",
+    "family": "dfine",
+    "variant": "l-o365-coco",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dfine-l-o365-coco (implementation_status=wired)"
+  },
+  {
+    "model_id": "dfine-m",
+    "family": "dfine",
+    "variant": "m",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dfine-m (implementation_status=wired)"
+  },
+  {
+    "model_id": "dfine-m-coco",
+    "family": "dfine",
+    "variant": "m-coco",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dfine-m-coco (implementation_status=wired)"
+  },
+  {
+    "model_id": "dfine-m-o365-coco",
+    "family": "dfine",
+    "variant": "m-o365-coco",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dfine-m-o365-coco (implementation_status=wired)"
+  },
+  {
+    "model_id": "dfine-n",
+    "family": "dfine",
+    "variant": "n",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dfine-n (implementation_status=wired)"
+  },
+  {
+    "model_id": "dfine-n-coco",
+    "family": "dfine",
+    "variant": "n-coco",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dfine-n-coco (implementation_status=wired)"
+  },
+  {
+    "model_id": "dfine-s",
+    "family": "dfine",
+    "variant": "s",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dfine-s (implementation_status=wired)"
+  },
+  {
+    "model_id": "dfine-s-coco",
+    "family": "dfine",
+    "variant": "s-coco",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dfine-s-coco (implementation_status=wired)"
+  },
+  {
+    "model_id": "dfine-s-o365-coco",
+    "family": "dfine",
+    "variant": "s-o365-coco",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dfine-s-o365-coco (implementation_status=wired)"
+  },
+  {
+    "model_id": "dfine-x",
+    "family": "dfine",
+    "variant": "x",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dfine-x (implementation_status=wired)"
+  },
+  {
+    "model_id": "dfine-x-coco",
+    "family": "dfine",
+    "variant": "x-coco",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dfine-x-coco (implementation_status=wired)"
+  },
+  {
+    "model_id": "dfine-x-o365-coco",
+    "family": "dfine",
+    "variant": "x-o365-coco",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dfine-x-o365-coco (implementation_status=wired)"
+  },
+  {
+    "model_id": "libreyolo-dfine-l",
+    "family": "libreyolo",
+    "variant": "dfine-l",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "libreyolo"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": "UPSTREAM_DFINE_FDR_TOPK_CRASH",
+    "exact_claim_source": "registry id=libreyolo-dfine-l (implementation_status=wired)"
+  },
+  {
+    "model_id": "libreyolo-dfine-m",
+    "family": "libreyolo",
+    "variant": "dfine-m",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "libreyolo"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": "UPSTREAM_DFINE_FDR_TOPK_CRASH",
+    "exact_claim_source": "registry id=libreyolo-dfine-m (implementation_status=wired)"
+  },
+  {
+    "model_id": "libreyolo-dfine-n",
+    "family": "libreyolo",
+    "variant": "dfine-n",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "libreyolo"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": "UPSTREAM_DFINE_FDR_TOPK_CRASH",
+    "exact_claim_source": "registry id=libreyolo-dfine-n (implementation_status=wired)"
+  },
+  {
+    "model_id": "libreyolo-dfine-s",
+    "family": "libreyolo",
+    "variant": "dfine-s",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "libreyolo"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": "UPSTREAM_DFINE_FDR_TOPK_CRASH",
+    "exact_claim_source": "registry id=libreyolo-dfine-s (implementation_status=wired)"
+  },
+  {
+    "model_id": "libreyolo-dfine-x",
+    "family": "libreyolo",
+    "variant": "dfine-x",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "libreyolo"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": "UPSTREAM_DFINE_FDR_TOPK_CRASH",
+    "exact_claim_source": "registry id=libreyolo-dfine-x (implementation_status=wired)"
+  },
+  {
+    "model_id": "libreyolo-rtdetr-r101",
+    "family": "libreyolo",
+    "variant": "rtdetr-r101",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "libreyolo"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": "VARIANT_NOT_LIFECYCLE_VALIDATED",
+    "exact_claim_source": "registry id=libreyolo-rtdetr-r101 (implementation_status=wired)"
+  },
+  {
+    "model_id": "libreyolo-rtdetr-r50",
+    "family": "libreyolo",
+    "variant": "rtdetr-r50",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "libreyolo"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=libreyolo-rtdetr-r50 (implementation_status=wired)"
+  },
+  {
+    "model_id": "libreyolo-yolov9-c",
+    "family": "libreyolo",
+    "variant": "yolov9-c",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "libreyolo"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": "VARIANT_NOT_LIFECYCLE_VALIDATED",
+    "exact_claim_source": "registry id=libreyolo-yolov9-c (implementation_status=wired)"
+  },
+  {
+    "model_id": "libreyolo-yolov9-m",
+    "family": "libreyolo",
+    "variant": "yolov9-m",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "libreyolo"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": "VARIANT_NOT_LIFECYCLE_VALIDATED",
+    "exact_claim_source": "registry id=libreyolo-yolov9-m (implementation_status=wired)"
+  },
+  {
+    "model_id": "libreyolo-yolov9-s",
+    "family": "libreyolo",
+    "variant": "yolov9-s",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "libreyolo"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=libreyolo-yolov9-s (implementation_status=wired)"
+  },
+  {
+    "model_id": "libreyolo-yolox-l",
+    "family": "libreyolo",
+    "variant": "yolox-l",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "libreyolo"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": "VARIANT_NOT_LIFECYCLE_VALIDATED",
+    "exact_claim_source": "registry id=libreyolo-yolox-l (implementation_status=wired)"
+  },
+  {
+    "model_id": "libreyolo-yolox-m",
+    "family": "libreyolo",
+    "variant": "yolox-m",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "libreyolo"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": "VARIANT_NOT_LIFECYCLE_VALIDATED",
+    "exact_claim_source": "registry id=libreyolo-yolox-m (implementation_status=wired)"
+  },
+  {
+    "model_id": "libreyolo-yolox-s",
+    "family": "libreyolo",
+    "variant": "yolox-s",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "libreyolo"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=libreyolo-yolox-s (implementation_status=wired)"
+  },
+  {
+    "model_id": "libreyolo-yolox-x",
+    "family": "libreyolo",
+    "variant": "yolox-x",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "libreyolo"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": "VARIANT_NOT_LIFECYCLE_VALIDATED",
+    "exact_claim_source": "registry id=libreyolo-yolox-x (implementation_status=wired)"
+  },
+  {
+    "model_id": "mock-detect",
+    "family": "mock",
+    "variant": "detect",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=mock-detect (implementation_status=wired)"
+  },
+  {
+    "model_id": "rfdetr-base",
+    "family": "rfdetr",
+    "variant": "base",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "rfdetr"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=rfdetr-base (implementation_status=wired)"
+  },
+  {
+    "model_id": "rfdetr-large",
+    "family": "rfdetr",
+    "variant": "large",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "rfdetr"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=rfdetr-large (implementation_status=wired)"
+  },
+  {
+    "model_id": "rfdetr-medium",
+    "family": "rfdetr",
+    "variant": "medium",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "rfdetr"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=rfdetr-medium (implementation_status=wired)"
+  },
+  {
+    "model_id": "rfdetr-nano",
+    "family": "rfdetr",
+    "variant": "nano",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "rfdetr"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=rfdetr-nano (implementation_status=wired)"
+  },
+  {
+    "model_id": "rfdetr-small",
+    "family": "rfdetr",
+    "variant": "small",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "rfdetr"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=rfdetr-small (implementation_status=wired)"
+  },
+  {
+    "model_id": "rtdetrv4-l",
+    "family": "rtdetrv4",
+    "variant": "l",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "Custom loader and verified checkpoint source required.",
+    "exact_claim_source": "registry id=rtdetrv4-l (implementation_status=stub)"
+  },
+  {
+    "model_id": "rtdetrv4-m",
+    "family": "rtdetrv4",
+    "variant": "m",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "Custom loader and verified checkpoint source required.",
+    "exact_claim_source": "registry id=rtdetrv4-m (implementation_status=stub)"
+  },
+  {
+    "model_id": "rtdetrv4-s",
+    "family": "rtdetrv4",
+    "variant": "s",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "RT-DETRv4 is not an officially released numbered version; no verified checkpoint source or HF repo. License and export path unclear.",
+    "exact_claim_source": "registry id=rtdetrv4-s (implementation_status=stub)"
+  },
+  {
+    "model_id": "rtdetrv4-x",
+    "family": "rtdetrv4",
+    "variant": "x",
+    "task": "detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "Custom loader and verified checkpoint source required.",
+    "exact_claim_source": "registry id=rtdetrv4-x (implementation_status=stub)"
+  },
+  {
+    "model_id": "clip-vit-base-patch32",
+    "family": "clip",
+    "variant": "vit-base-patch32",
+    "task": "embed",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=clip-vit-base-patch32 (implementation_status=wired)"
+  },
+  {
+    "model_id": "clip-vit-large-patch14",
+    "family": "clip",
+    "variant": "vit-large-patch14",
+    "task": "embed",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=clip-vit-large-patch14 (implementation_status=wired)"
+  },
+  {
+    "model_id": "dinov2-base",
+    "family": "dinov2",
+    "variant": "base",
+    "task": "embed",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dinov2-base (implementation_status=wired)"
+  },
+  {
+    "model_id": "dinov2-giant",
+    "family": "dinov2",
+    "variant": "giant",
+    "task": "embed",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dinov2-giant (implementation_status=wired)"
+  },
+  {
+    "model_id": "dinov2-large",
+    "family": "dinov2",
+    "variant": "large",
+    "task": "embed",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dinov2-large (implementation_status=wired)"
+  },
+  {
+    "model_id": "dinov2-small",
+    "family": "dinov2",
+    "variant": "small",
+    "task": "embed",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=dinov2-small (implementation_status=wired)"
+  },
+  {
+    "model_id": "siglip-base-patch16-224",
+    "family": "siglip",
+    "variant": "base-patch16-224",
+    "task": "embed",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=siglip-base-patch16-224 (implementation_status=wired)"
+  },
+  {
+    "model_id": "siglip2-base-patch16-224",
+    "family": "siglip2",
+    "variant": "base-patch16-224",
+    "task": "embed",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=siglip2-base-patch16-224 (implementation_status=wired)"
+  },
+  {
+    "model_id": "siglip2-large-patch16-256",
+    "family": "siglip2",
+    "variant": "large-patch16-256",
+    "task": "embed",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=siglip2-large-patch16-256 (implementation_status=wired)"
+  },
+  {
+    "model_id": "siglip2-so400m-patch14-384",
+    "family": "siglip2",
+    "variant": "so400m-patch14-384",
+    "task": "embed",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=siglip2-so400m-patch14-384 (implementation_status=wired)"
+  },
+  {
+    "model_id": "efficientsam",
+    "family": "efficientsam",
+    "variant": "efficientsam",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "promptable-extra"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=efficientsam (implementation_status=wired)"
+  },
+  {
+    "model_id": "hq-sam",
+    "family": "hq-sam",
+    "variant": "hq-sam",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "promptable-extra"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=hq-sam (implementation_status=wired)"
+  },
+  {
+    "model_id": "mobilesam",
+    "family": "mobilesam",
+    "variant": "mobilesam",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "promptable-extra"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=mobilesam (implementation_status=wired)"
+  },
+  {
+    "model_id": "mock-foundation-segment",
+    "family": "mock",
+    "variant": "foundation-segment",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=mock-foundation-segment (implementation_status=wired)"
+  },
+  {
+    "model_id": "medsam",
+    "family": "sam",
+    "variant": "medsam",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=medsam (implementation_status=wired)"
+  },
+  {
+    "model_id": "sam-vit-base",
+    "family": "sam",
+    "variant": "vit-base",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=sam-vit-base (implementation_status=wired)"
+  },
+  {
+    "model_id": "sam-vit-huge",
+    "family": "sam",
+    "variant": "vit-huge",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=sam-vit-huge (implementation_status=wired)"
+  },
+  {
+    "model_id": "sam-vit-large",
+    "family": "sam",
+    "variant": "vit-large",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=sam-vit-large (implementation_status=wired)"
+  },
+  {
+    "model_id": "sam2-hiera-base-plus",
+    "family": "sam2",
+    "variant": "hiera-base-plus",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=sam2-hiera-base-plus (implementation_status=wired)"
+  },
+  {
+    "model_id": "sam2-hiera-large",
+    "family": "sam2",
+    "variant": "hiera-large",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=sam2-hiera-large (implementation_status=wired)"
+  },
+  {
+    "model_id": "sam2-hiera-small",
+    "family": "sam2",
+    "variant": "hiera-small",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=sam2-hiera-small (implementation_status=wired)"
+  },
+  {
+    "model_id": "sam2-hiera-tiny",
+    "family": "sam2",
+    "variant": "hiera-tiny",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=sam2-hiera-tiny (implementation_status=wired)"
+  },
+  {
+    "model_id": "sam2.1-hiera-base-plus",
+    "family": "sam2.1",
+    "variant": "hiera-base-plus",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=sam2.1-hiera-base-plus (implementation_status=wired)"
+  },
+  {
+    "model_id": "sam2.1-hiera-large",
+    "family": "sam2.1",
+    "variant": "hiera-large",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=sam2.1-hiera-large (implementation_status=wired)"
+  },
+  {
+    "model_id": "sam2.1-hiera-small",
+    "family": "sam2.1",
+    "variant": "hiera-small",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=sam2.1-hiera-small (implementation_status=wired)"
+  },
+  {
+    "model_id": "sam2.1-hiera-tiny",
+    "family": "sam2.1",
+    "variant": "hiera-tiny",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=sam2.1-hiera-tiny (implementation_status=wired)"
+  },
+  {
+    "model_id": "sam3-base",
+    "family": "sam3",
+    "variant": "base",
+    "task": "foundation_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": true,
+    "requires_hf_token": true,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "Access may be gated at facebook namespace. Auth-aware wrapper required.",
+    "exact_claim_source": "registry id=sam3-base (implementation_status=stub)"
+  },
+  {
+    "model_id": "grounded-sam",
+    "family": "grounded-sam",
+    "variant": "grounded-sam",
+    "task": "grounded_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "grounding"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=grounded-sam (implementation_status=wired)"
+  },
+  {
+    "model_id": "grounded-sam2",
+    "family": "grounded-sam",
+    "variant": "grounded-sam2",
+    "task": "grounded_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=grounded-sam2 (implementation_status=wired)"
+  },
+  {
+    "model_id": "mock-grounded-segment",
+    "family": "mock",
+    "variant": "grounded-segment",
+    "task": "grounded_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=mock-grounded-segment (implementation_status=wired)"
+  },
+  {
+    "model_id": "seem-davit-d3",
+    "family": "seem",
+    "variant": "davit-d3",
+    "task": "grounded_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'huggingface' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=seem-davit-d3 (implementation_status=stub)"
+  },
+  {
+    "model_id": "seem-focal-t",
+    "family": "seem",
+    "variant": "focal-t",
+    "task": "grounded_segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'huggingface' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=seem-focal-t (implementation_status=stub)"
+  },
+  {
+    "model_id": "mock-obb",
+    "family": "mock",
+    "variant": "obb",
+    "task": "obb",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=mock-obb (implementation_status=wired)"
+  },
+  {
+    "model_id": "rtmdet-r-l",
+    "family": "rtmdet",
+    "variant": "r-l",
+    "task": "obb",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=rtmdet-r-l (implementation_status=stub)"
+  },
+  {
+    "model_id": "rtmdet-r-m",
+    "family": "rtmdet",
+    "variant": "r-m",
+    "task": "obb",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=rtmdet-r-m (implementation_status=stub)"
+  },
+  {
+    "model_id": "rtmdet-r-s",
+    "family": "rtmdet",
+    "variant": "r-s",
+    "task": "obb",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=rtmdet-r-s (implementation_status=stub)"
+  },
+  {
+    "model_id": "rtmdet-r-t",
+    "family": "rtmdet",
+    "variant": "r-t",
+    "task": "obb",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=rtmdet-r-t (implementation_status=stub)"
+  },
+  {
+    "model_id": "rtmdet-r2-l",
+    "family": "rtmdet",
+    "variant": "r2-l",
+    "task": "obb",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=rtmdet-r2-l (implementation_status=stub)"
+  },
+  {
+    "model_id": "rtmdet-r2-m",
+    "family": "rtmdet",
+    "variant": "r2-m",
+    "task": "obb",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=rtmdet-r2-m (implementation_status=stub)"
+  },
+  {
+    "model_id": "rtmdet-r2-s",
+    "family": "rtmdet",
+    "variant": "r2-s",
+    "task": "obb",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "blocked",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "NOT_INFERENCE_READY: implementation_status=partial, engine_registered=True",
+    "exact_claim_source": "registry id=rtmdet-r2-s (implementation_status=partial)"
+  },
+  {
+    "model_id": "rtmdet-r2-t",
+    "family": "rtmdet",
+    "variant": "r2-t",
+    "task": "obb",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=rtmdet-r2-t (implementation_status=stub)"
+  },
+  {
+    "model_id": "grounding-dino-1.5",
+    "family": "grounding-dino",
+    "variant": "1.5",
+    "task": "open_vocab_detect",
+    "source": "registry:models.yaml",
+    "license": "Custom",
+    "gated": false,
+    "requires_hf_token": true,
+    "dependencies": [],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'grounding_dino' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=grounding-dino-1.5 (implementation_status=stub)"
+  },
+  {
+    "model_id": "grounding-dino-1.6",
+    "family": "grounding-dino",
+    "variant": "1.6",
+    "task": "open_vocab_detect",
+    "source": "registry:models.yaml",
+    "license": "Custom",
+    "gated": true,
+    "requires_hf_token": true,
+    "dependencies": [],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'grounding_dino' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=grounding-dino-1.6 (implementation_status=stub)"
+  },
+  {
+    "model_id": "grounding-dino-original-swin-b",
+    "family": "grounding-dino",
+    "variant": "original-swin-b",
+    "task": "open_vocab_detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "grounding"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=grounding-dino-original-swin-b (implementation_status=wired)"
+  },
+  {
+    "model_id": "grounding-dino-original-swin-t",
+    "family": "grounding-dino",
+    "variant": "original-swin-t",
+    "task": "open_vocab_detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "grounding"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=grounding-dino-original-swin-t (implementation_status=wired)"
+  },
+  {
+    "model_id": "grounding-dino-swin-b",
+    "family": "grounding-dino",
+    "variant": "swin-b",
+    "task": "open_vocab_detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "grounding"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=grounding-dino-swin-b (implementation_status=wired)"
+  },
+  {
+    "model_id": "grounding-dino-swin-t",
+    "family": "grounding-dino",
+    "variant": "swin-t",
+    "task": "open_vocab_detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "grounding"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=grounding-dino-swin-t (implementation_status=wired)"
+  },
+  {
+    "model_id": "grounding-dino-tiny",
+    "family": "grounding-dino",
+    "variant": "tiny",
+    "task": "open_vocab_detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "grounding"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "hf_save_pretrained"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=grounding-dino-tiny (implementation_status=wired)"
+  },
+  {
+    "model_id": "mock-open-vocab",
+    "family": "mock",
+    "variant": "open-vocab",
+    "task": "open_vocab_detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=mock-open-vocab (implementation_status=wired)"
+  },
+  {
+    "model_id": "owlv2-base-patch16",
+    "family": "owlv2",
+    "variant": "base-patch16",
+    "task": "open_vocab_detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=owlv2-base-patch16 (implementation_status=wired)"
+  },
+  {
+    "model_id": "owlv2-large-patch14",
+    "family": "owlv2",
+    "variant": "large-patch14",
+    "task": "open_vocab_detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=owlv2-large-patch14 (implementation_status=wired)"
+  },
+  {
+    "model_id": "owlvit-base-patch32",
+    "family": "owlvit",
+    "variant": "base-patch32",
+    "task": "open_vocab_detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=owlvit-base-patch32 (implementation_status=wired)"
+  },
+  {
+    "model_id": "owlvit-large-patch14",
+    "family": "owlvit",
+    "variant": "large-patch14",
+    "task": "open_vocab_detect",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=owlvit-large-patch14 (implementation_status=wired)"
+  },
+  {
+    "model_id": "mock-pose",
+    "family": "mock",
+    "variant": "pose",
+    "task": "pose",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=mock-pose (implementation_status=wired)"
+  },
+  {
+    "model_id": "rtmpose-l",
+    "family": "rtmpose",
+    "variant": "l",
+    "task": "pose",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=rtmpose-l (implementation_status=stub)"
+  },
+  {
+    "model_id": "rtmpose-l-384x288",
+    "family": "rtmpose",
+    "variant": "l-384x288",
+    "task": "pose",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=rtmpose-l-384x288 (implementation_status=stub)"
+  },
+  {
+    "model_id": "rtmpose-m",
+    "family": "rtmpose",
+    "variant": "m",
+    "task": "pose",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=rtmpose-m (implementation_status=stub)"
+  },
+  {
+    "model_id": "rtmpose-m-384x288",
+    "family": "rtmpose",
+    "variant": "m-384x288",
+    "task": "pose",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=rtmpose-m-384x288 (implementation_status=stub)"
+  },
+  {
+    "model_id": "rtmpose-s",
+    "family": "rtmpose",
+    "variant": "s",
+    "task": "pose",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "blocked",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "NOT_INFERENCE_READY: implementation_status=partial, engine_registered=True",
+    "exact_claim_source": "registry id=rtmpose-s (implementation_status=partial)"
+  },
+  {
+    "model_id": "rtmpose-t",
+    "family": "rtmpose",
+    "variant": "t",
+    "task": "pose",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=rtmpose-t (implementation_status=stub)"
+  },
+  {
+    "model_id": "co-dino-inst-vit-l-coco",
+    "family": "co-dino",
+    "variant": "inst-vit-l-coco",
+    "task": "segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=co-dino-inst-vit-l-coco (implementation_status=stub)"
+  },
+  {
+    "model_id": "co-dino-inst-vit-l-lvis",
+    "family": "co-dino",
+    "variant": "inst-vit-l-lvis",
+    "task": "segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "CATALOG_ONLY: engine 'openmmlab' not wired (implementation_status=stub)",
+    "exact_claim_source": "registry id=co-dino-inst-vit-l-lvis (implementation_status=stub)"
+  },
+  {
+    "model_id": "maskdino-r50-coco",
+    "family": "maskdino",
+    "variant": "r50-coco",
+    "task": "segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "Requires detectron2 + manual checkpoint. No HF path verified. Custom loader not yet implemented.",
+    "exact_claim_source": "registry id=maskdino-r50-coco (implementation_status=stub)"
+  },
+  {
+    "model_id": "maskdino-r50-panoptic",
+    "family": "maskdino",
+    "variant": "r50-panoptic",
+    "task": "segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "openmmlab"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": "Requires detectron2 + manual checkpoint. Custom loader not yet implemented.",
+    "exact_claim_source": "registry id=maskdino-r50-panoptic (implementation_status=stub)"
+  },
+  {
+    "model_id": "mock-segment",
+    "family": "mock",
+    "variant": "segment",
+    "task": "segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=mock-segment (implementation_status=wired)"
+  },
+  {
+    "model_id": "oneformer-convnext-large",
+    "family": "oneformer",
+    "variant": "convnext-large",
+    "task": "segment",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=oneformer-convnext-large (implementation_status=wired)"
+  },
+  {
+    "model_id": "oneformer-dinat-large",
+    "family": "oneformer",
+    "variant": "dinat-large",
+    "task": "segment",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=oneformer-dinat-large (implementation_status=wired)"
+  },
+  {
+    "model_id": "oneformer-swin-large",
+    "family": "oneformer",
+    "variant": "swin-large",
+    "task": "segment",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": false,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=oneformer-swin-large (implementation_status=wired)"
+  },
+  {
+    "model_id": "rfdetr-seg-2xlarge",
+    "family": "rfdetr",
+    "variant": "seg-2xlarge",
+    "task": "segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "rfdetr"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": "HF checkpoint roboflow/rf-detr-seg-2xlarge not yet available.",
+    "exact_claim_source": "registry id=rfdetr-seg-2xlarge (implementation_status=stub)"
+  },
+  {
+    "model_id": "rfdetr-seg-large",
+    "family": "rfdetr",
+    "variant": "seg-large",
+    "task": "segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "rfdetr"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": "HF checkpoint roboflow/rf-detr-seg-large not yet available. Use rfdetr-seg-small/medium for verified inference.",
+    "exact_claim_source": "registry id=rfdetr-seg-large (implementation_status=stub)"
+  },
+  {
+    "model_id": "rfdetr-seg-medium",
+    "family": "rfdetr",
+    "variant": "seg-medium",
+    "task": "segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "rfdetr"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=rfdetr-seg-medium (implementation_status=wired)"
+  },
+  {
+    "model_id": "rfdetr-seg-nano",
+    "family": "rfdetr",
+    "variant": "seg-nano",
+    "task": "segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "rfdetr"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=rfdetr-seg-nano (implementation_status=wired)"
+  },
+  {
+    "model_id": "rfdetr-seg-small",
+    "family": "rfdetr",
+    "variant": "seg-small",
+    "task": "segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "rfdetr"
+    ],
+    "claimed_readiness": "train-ready",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=rfdetr-seg-small (implementation_status=wired)"
+  },
+  {
+    "model_id": "rfdetr-seg-xlarge",
+    "family": "rfdetr",
+    "variant": "seg-xlarge",
+    "task": "segment",
+    "source": "registry:models.yaml",
+    "license": "Apache-2.0",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "rfdetr"
+    ],
+    "claimed_readiness": "catalog-only",
+    "claimed_train_supported": true,
+    "claimed_inference_supported": false,
+    "claimed_export_supported": [
+      "onnx"
+    ],
+    "commercial_safe": false,
+    "exact_blocker": "HF checkpoint roboflow/rf-detr-seg-xlarge not yet available.",
+    "exact_claim_source": "registry id=rfdetr-seg-xlarge (implementation_status=stub)"
+  },
+  {
+    "model_id": "florence-2-base",
+    "family": "florence-2",
+    "variant": "base",
+    "task": "vlm",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=florence-2-base (implementation_status=wired)"
+  },
+  {
+    "model_id": "florence-2-large",
+    "family": "florence-2",
+    "variant": "large",
+    "task": "vlm",
+    "source": "registry:models.yaml",
+    "license": "MIT",
+    "gated": false,
+    "requires_hf_token": false,
+    "dependencies": [
+      "hf"
+    ],
+    "claimed_readiness": "inference-ready",
+    "claimed_train_supported": false,
+    "claimed_inference_supported": true,
+    "claimed_export_supported": [],
+    "commercial_safe": true,
+    "exact_blocker": null,
+    "exact_claim_source": "registry id=florence-2-large (implementation_status=wired)"
+  }
+]
