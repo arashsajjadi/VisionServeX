@@ -184,6 +184,99 @@ LIVE_INFERENCE_FAILED: dict[str, str] = {
 }
 # <<< END GENERATED: LIVE_INFERENCE_FAILED
 
+# v3.20: the reload (from_checkpoint) and export stages were live-proven for these
+# models as part of their committed train/finetune lifecycle matrices.
+# >>> BEGIN GENERATED: LIVE_RELOAD_VERIFIED
+LIVE_RELOAD_VERIFIED: frozenset[str] = frozenset(
+    {
+        "clip-vit-base-patch32",
+        "clip-vit-large-patch14",
+        "dinov2-base",
+        "dinov2-giant",
+        "dinov2-large",
+        "dinov2-small",
+        "libreyolo-rtdetr-r50",
+        "libreyolo-yolov9-s",
+        "libreyolo-yolox-s",
+        "rfdetr-base",
+        "rfdetr-large",
+        "rfdetr-medium",
+        "rfdetr-nano",
+        "rfdetr-seg-medium",
+        "rfdetr-seg-nano",
+        "rfdetr-seg-small",
+        "rfdetr-small",
+        "siglip-base-patch16-224",
+        "siglip2-base-patch16-224",
+        "siglip2-large-patch16-256",
+        "siglip2-so400m-patch14-384",
+        "torchvision-alexnet",
+        "torchvision-convnext-tiny",
+        "torchvision-densenet121",
+        "torchvision-efficientnet-b0",
+        "torchvision-mobilenet-v2",
+        "torchvision-mobilenet-v3-large",
+        "torchvision-resnet101",
+        "torchvision-resnet152",
+        "torchvision-resnet18",
+        "torchvision-resnet34",
+        "torchvision-resnet50",
+        "torchvision-resnext50-32x4d",
+        "torchvision-wide-resnet50-2",
+    }
+)
+# <<< END GENERATED: LIVE_RELOAD_VERIFIED
+
+# >>> BEGIN GENERATED: LIVE_EXPORT_VERIFIED
+LIVE_EXPORT_VERIFIED: frozenset[str] = frozenset(
+    {
+        "libreyolo-rtdetr-r50",
+        "libreyolo-yolov9-s",
+        "libreyolo-yolox-s",
+        "rfdetr-base",
+        "rfdetr-large",
+        "rfdetr-medium",
+        "rfdetr-nano",
+        "rfdetr-seg-medium",
+        "rfdetr-seg-nano",
+        "rfdetr-seg-small",
+        "rfdetr-small",
+        "torchvision-alexnet",
+        "torchvision-convnext-tiny",
+        "torchvision-densenet121",
+        "torchvision-efficientnet-b0",
+        "torchvision-mobilenet-v2",
+        "torchvision-mobilenet-v3-large",
+        "torchvision-resnet101",
+        "torchvision-resnet152",
+        "torchvision-resnet18",
+        "torchvision-resnet34",
+        "torchvision-resnet50",
+        "torchvision-resnext50-32x4d",
+        "torchvision-wide-resnet50-2",
+    }
+)
+# <<< END GENERATED: LIVE_EXPORT_VERIFIED
+
+# v3.20: models whose FINE-TUNE lifecycle (head/adapter/contrastive train ->
+# checkpoint -> reload -> embed/similarity-after-reload) passed live this sprint.
+# >>> BEGIN GENERATED: LIVE_FINETUNE_VERIFIED
+LIVE_FINETUNE_VERIFIED: frozenset[str] = frozenset(
+    {
+        "clip-vit-base-patch32",
+        "clip-vit-large-patch14",
+        "dinov2-base",
+        "dinov2-giant",
+        "dinov2-large",
+        "dinov2-small",
+        "siglip-base-patch16-224",
+        "siglip2-base-patch16-224",
+        "siglip2-large-patch16-256",
+        "siglip2-so400m-patch14-384",
+    }
+)
+# <<< END GENERATED: LIVE_FINETUNE_VERIFIED
+
 
 def live_inference_verified(model_id: str) -> bool:
     """True iff ``model_id``'s live inference smoke passed this sprint."""
@@ -200,6 +293,21 @@ def live_train_verified(model_id: str) -> bool:
     return model_id in LIVE_TRAIN_VERIFIED
 
 
+def live_reload_verified(model_id: str) -> bool:
+    """True iff ``model_id``'s checkpoint reload+predict was live-proven this sprint."""
+    return model_id in LIVE_RELOAD_VERIFIED
+
+
+def live_export_verified(model_id: str) -> bool:
+    """True iff ``model_id``'s export was live-proven this sprint."""
+    return model_id in LIVE_EXPORT_VERIFIED
+
+
+def live_finetune_verified(model_id: str) -> bool:
+    """True iff ``model_id``'s fine-tune lifecycle passed live this sprint."""
+    return model_id in LIVE_FINETUNE_VERIFIED
+
+
 # --------------------------------------------------------------------------- #
 # Evidence loaders (used by tools/tests to cross-check the baked conclusions).
 # --------------------------------------------------------------------------- #
@@ -212,42 +320,102 @@ TRAIN_MATRIX_PATH = _DOCS_DIR / "live_train_lifecycle_matrix.json"
 # v3.19 operationalization matrices (additive — unioned with the v3.18 evidence).
 INFERENCE_MATRIX_PATH_V319 = _DOCS_DIR_V319 / "v319_inference_matrix.json"
 RFDETR_TRAIN_MATRIX_PATH = _DOCS_DIR_V319 / "rfdetr_live_train_matrix.json"
+# v3.20 final-operationalization matrices.
+_DOCS_DIR_V320 = (
+    Path(__file__).resolve().parents[3] / "docs" / "qa" / "v320_final_operationalization"
+)
+TRAIN_FINETUNE_MATRIX_PATH = _DOCS_DIR_V320 / "train_finetune_matrix.json"
+INFERENCE_MATRIX_PATH_V320 = _DOCS_DIR_V320 / "v320_inference_matrix.json"
+
+_ALL_TRAIN_MATRICES = (TRAIN_MATRIX_PATH, RFDETR_TRAIN_MATRIX_PATH, TRAIN_FINETUNE_MATRIX_PATH)
 
 
 def _passed_ids(matrix_path: Path) -> set[str]:
     """Return the set of model ids whose matrix row is a genuine live PASS."""
+    return {r["model_id"] for r in _rows(matrix_path) if _is_pass(r)}
+
+
+def _rows(matrix_path: Path) -> list[dict]:
     if not matrix_path.exists():
-        return set()
+        return []
     data: Any = json.loads(matrix_path.read_text())
     rows = data.get("results", data) if isinstance(data, dict) else data
+    return [r for r in rows if isinstance(r, dict)]
+
+
+def _is_pass(row: dict) -> bool:
+    return row.get("status") == "PASS" and row.get("live_verified") is True
+
+
+def _stage_ids(matrices, stage: str) -> set[str]:
+    """ids whose PASS row has the given lifecycle stage flag True (e.g. reload/export)."""
     out: set[str] = set()
-    for row in rows:
-        if not isinstance(row, dict):
-            continue
-        if row.get("status") == "PASS" and row.get("live_verified") is True:
-            out.add(row["model_id"])
+    for mp in matrices:
+        for r in _rows(mp):
+            if _is_pass(r) and bool(r.get(stage)):
+                out.add(r["model_id"])
     return out
 
 
 def inference_verified_from_matrix() -> set[str]:
-    """The PASS set across the committed live-inference matrices (v3.18 + v3.19)."""
-    return _passed_ids(INFERENCE_MATRIX_PATH) | _passed_ids(INFERENCE_MATRIX_PATH_V319)
+    """The PASS set across the committed live-inference matrices (v3.18 + v3.19 + v3.20)."""
+    return (
+        _passed_ids(INFERENCE_MATRIX_PATH)
+        | _passed_ids(INFERENCE_MATRIX_PATH_V319)
+        | _passed_ids(INFERENCE_MATRIX_PATH_V320)
+    )
 
 
 def train_verified_from_matrix() -> set[str]:
-    """The PASS set across the committed live-train matrices (v3.18 + v3.19 RF-DETR)."""
+    """The PASS set across the committed full-train matrices (v3.18 + v3.19 RF-DETR)."""
     return _passed_ids(TRAIN_MATRIX_PATH) | _passed_ids(RFDETR_TRAIN_MATRIX_PATH)
+
+
+_FINETUNE_METHODS = ("fine_tune", "adapter_train", "head_train", "contrastive_train", "lora")
+
+
+def finetune_verified_from_matrix() -> set[str]:
+    """PASS rows in the v3.20 train/finetune matrix whose method is a fine-tune."""
+    out: set[str] = set()
+    for r in _rows(TRAIN_FINETUNE_MATRIX_PATH):
+        method = str(r.get("method", ""))
+        if _is_pass(r) and any(fm in method for fm in _FINETUNE_METHODS):
+            out.add(r["model_id"])
+    return out
+
+
+def reload_verified_from_matrix() -> set[str]:
+    """ids whose committed lifecycle proved checkpoint reload."""
+    return _stage_ids(_ALL_TRAIN_MATRICES, "reload") | _stage_ids(
+        _ALL_TRAIN_MATRICES, "reload_verified"
+    )
+
+
+def export_verified_from_matrix() -> set[str]:
+    """ids whose committed lifecycle proved export."""
+    return _stage_ids(_ALL_TRAIN_MATRICES, "export") | _stage_ids(
+        _ALL_TRAIN_MATRICES, "export_verified"
+    )
 
 
 __all__ = [
     "INFERENCE_MATRIX_PATH",
+    "LIVE_EXPORT_VERIFIED",
+    "LIVE_FINETUNE_VERIFIED",
     "LIVE_INFERENCE_FAILED",
     "LIVE_INFERENCE_VERIFIED",
+    "LIVE_RELOAD_VERIFIED",
     "LIVE_TRAIN_VERIFIED",
     "TRAIN_MATRIX_PATH",
+    "export_verified_from_matrix",
+    "finetune_verified_from_matrix",
     "inference_verified_from_matrix",
+    "live_export_verified",
+    "live_finetune_verified",
     "live_inference_blocker",
     "live_inference_verified",
+    "live_reload_verified",
     "live_train_verified",
+    "reload_verified_from_matrix",
     "train_verified_from_matrix",
 ]

@@ -34,10 +34,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     VISIONSERVEX_CACHE_DIR=/cache/visionservex
 
-# OS deps
+# OS deps. libxcb1 / libgl1 / libglib2.0-0 are the runtime shared libraries
+# OpenCV (pulled by mmcv) links against — without them `import mmcv` fails with
+# `ImportError: libxcb.so.1: cannot open shared object file` on the slim base.
 RUN bash -c "apt-get update -qq || (sleep 5 && apt-get update -qq)" && apt-get install -y --no-install-recommends \
     ca-certificates \
-    git wget build-essential && rm -rf /var/lib/apt/lists/*
+    git wget build-essential \
+    libxcb1 libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

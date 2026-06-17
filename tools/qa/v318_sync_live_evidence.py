@@ -77,56 +77,51 @@ def _replace_block(text: str, name: str, replacement: str) -> str:
     if not pat.search(text):
         raise SystemExit(f"marker block for {name} not found in {TARGET}")
     # Re-emit the assignment line + value inside the markers.
-    if name == "LIVE_INFERENCE_VERIFIED":
-        assign = f"LIVE_INFERENCE_VERIFIED: frozenset[str] = {replacement}"
-    elif name == "LIVE_TRAIN_VERIFIED":
-        assign = f"LIVE_TRAIN_VERIFIED: frozenset[str] = {replacement}"
-    else:
-        assign = f"LIVE_INFERENCE_FAILED: dict[str, str] = {replacement}"
+    typ = "dict[str, str]" if name.endswith("_FAILED") else "frozenset[str]"
+    assign = f"{name}: {typ} = {replacement}"
     return pat.sub(lambda m: m.group(1) + assign + m.group(2), text)
 
 
 def main() -> int:
-    qa319 = REPO / "docs" / "qa" / "v319_operationalize_all_models"
-    inf = _rows(QA / "live_inference_matrix.json")
-    trn = _rows(QA / "live_train_lifecycle_matrix.json")
-    # v3.19 operationalization matrices (additive — union with the v3.18 evidence).
-    rfdetr_trn = _rows(qa319 / "rfdetr_live_train_matrix.json")
-    inf319 = _rows(qa319 / "v319_inference_matrix.json")
+    # The live_evidence loaders are the single source of matrix-reading logic
+    # (they union v3.18 + v3.19 + v3.20 matrices); this tool bakes their output.
+    from visionservex.readiness import live_evidence as le
 
-    inf_pass = sorted(
-        {
-            r["model_id"]
-            for r in (inf + inf319)
-            if r.get("status") == "PASS" and r.get("live_verified")
-        }
+    qa319 = REPO / "docs" / "qa" / "v319_operationalize_all_models"
+    qa320 = REPO / "docs" / "qa" / "v320_final_operationalization"
+
+    inf_pass = sorted(le.inference_verified_from_matrix())
+    trn_pass = sorted(le.train_verified_from_matrix())
+    ftune_pass = sorted(le.finetune_verified_from_matrix())
+    reload_pass = sorted(le.reload_verified_from_matrix())
+    export_pass = sorted(le.export_verified_from_matrix())
+
+    # A live PASS (inference OR fine-tune) clears any earlier blocker for that model.
+    promoted = set(inf_pass) | set(ftune_pass) | set(trn_pass)
+    inf_rows = (
+        _rows(QA / "live_inference_matrix.json")
+        + _rows(qa319 / "v319_inference_matrix.json")
+        + _rows(qa320 / "v320_inference_matrix.json")
     )
-    # A v3.19 PASS clears any earlier blocker for that model.
-    promoted = set(inf_pass)
     inf_failed = {
         r["model_id"]: classify_inference_blocker(r)
-        for r in (inf + inf319)
+        for r in inf_rows
         if r.get("status") in ("FAIL", "SKIP_BLOCKED") and r["model_id"] not in promoted
     }
-    trn_pass = sorted(
-        {
-            r["model_id"]
-            for r in (trn + rfdetr_trn)
-            if r.get("status") == "PASS" and r.get("live_verified")
-        }
-    )
 
     text = TARGET.read_text()
     text = _replace_block(text, "LIVE_INFERENCE_VERIFIED", _fmt_frozenset(inf_pass))
     text = _replace_block(text, "LIVE_TRAIN_VERIFIED", _fmt_frozenset(trn_pass))
     text = _replace_block(text, "LIVE_INFERENCE_FAILED", _fmt_dict(inf_failed))
+    text = _replace_block(text, "LIVE_RELOAD_VERIFIED", _fmt_frozenset(reload_pass))
+    text = _replace_block(text, "LIVE_EXPORT_VERIFIED", _fmt_frozenset(export_pass))
+    text = _replace_block(text, "LIVE_FINETUNE_VERIFIED", _fmt_frozenset(ftune_pass))
     TARGET.write_text(text)
 
     print(
-        f"[sync] live_inference PASS={len(inf_pass)} FAILED/BLOCKED={len(inf_failed)} "
-        f"| live_train PASS={len(trn_pass)}"
+        f"[sync] inference={len(inf_pass)} train={len(trn_pass)} finetune={len(ftune_pass)} "
+        f"reload={len(reload_pass)} export={len(export_pass)} failed/blocked={len(inf_failed)}"
     )
-    print("[sync] inference blockers:", json.dumps(inf_failed, indent=0))
     print(f"[sync] wrote {TARGET.relative_to(REPO)}")
     return 0
 

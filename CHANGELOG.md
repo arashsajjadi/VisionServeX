@@ -2,6 +2,47 @@
 
 ## [Unreleased]
 
+## [3.20.0] - 2026-06-17 (staged on branch — NOT tagged, NOT on PyPI; awaiting owner approval)
+
+Final pre-publish operationalization. Promote nothing without real evidence.
+
+### Added — train/fine-tune capability dimensions
+- `model_capabilities()` now exposes separate **inference / train / fine-tune**
+  dimensions, each with a `*_live_verified` flag backed by committed matrices:
+  `inference_ready`, `train_ready`, `fine_tune_ready`, `reload_supported`,
+  `reload_live_verified`, `export_live_verified`, `fine_tune_live_verified`,
+  `token_never_logged`, `anastig_train_visibility`, `anastig_finetune_visibility`.
+
+### Added — real embedding head fine-tune (10 models → FINE_TUNE_READY_LIVE)
+- New public `visionservex.training.finetune_embedding_head` + `EmbeddingHeadModel`
+  (frozen backbone + linear-probe head). Full lifecycle live-verified for all 10
+  embedders (DINOv2 ×4, CLIP ×2, SigLIP, SigLIP2 ×3): head_train → checkpoint →
+  reload → classify/embed/similarity-after-reload (train_acc 1.0).
+  `tools/qa/v320_train_finetune_matrix.py`.
+
+### Added — OpenMMLab Docker sidecar (built + CPU-proven)
+- Fixed the sidecar image build (`libxcb1 libgl1 libglib2.0-0` in
+  `docker/openmmlab/Dockerfile`; added `.dockerignore`). `mmdet`/`mmpose`/`mmcv`
+  import cleanly; ran a live rtmdet **CPU** smoke in the container. GPU is blocked on
+  this host (RTX 5080 sm_120 vs mmcv-pinned torch 2.1.0+cu121). Models stay hidden in
+  the default package (sidecar is opt-in); the path is now proven.
+
+### Honestly still blocked (reproduced, exact next steps)
+- **Florence-2** — even an isolated venv fails: transformers ≤4.49 (needed for
+  `_supports_sdpa`) has no `tokenizers` wheel for Python 3.13. Needs a py3.10/3.11
+  sidecar. `DEPENDENCY_MISSING`.
+- **OneFormer** convnext (permanent HF 404) / dinat (NATTEN API mismatch, GPU-only).
+- **DEIM/DEIMv2/RT-DETRv4** custom-loader (non-HF configs / torch 2.5.1 pin / DINOv3
+  license caveat). **OpenMMLab** GPU (sm_120 incompatibility).
+
+### Tests / contract
+- `tests/test_v320_*.py` (13) + `tests/live/test_v320_*.py` (6). New Anastig contract
+  `docs/anastig_model_{contract,allowlist}_v320` (18-bucket primary partition of 151 +
+  4 live views + UI copy). Evidence under `docs/qa/v320_final_operationalization/`.
+
+**Gains:** 0 → **10 FINE_TUNE_READY_LIVE**; 24 train-live + reload/export re-proven;
+102 live-ready readiness states preserved; OpenMMLab sidecar operationalized (CPU).
+
 ## [3.19.0] - 2026-06-17 (staged on branch — NOT tagged, NOT on PyPI)
 
 Operationalize-all-models sprint: promote models from blocked/derived to

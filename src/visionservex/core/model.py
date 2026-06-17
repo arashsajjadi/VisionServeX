@@ -1349,6 +1349,30 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
     )
     blocker = _readiness_blocker(readiness_state, entry, status, engine_registered)
 
+    # v3.20: separate inference / train / fine-tune lifecycle dimensions, each with
+    # a *_live_verified flag backed by the committed matrices.
+    live_reload = live_evidence.live_reload_verified(model_id)
+    live_export = live_evidence.live_export_verified(model_id)
+    live_ftune = live_evidence.live_finetune_verified(model_id)
+    reload_supported = bool(tcap.get("checkpoint_load_supported"))
+    # A fine-tune path exists for trainable models and for embedding models (a
+    # frozen-backbone head/linear-probe fine-tune). It is only *_live_verified once
+    # the committed v3.20 train/finetune matrix proves it.
+    fine_tune_ready = bool(train_ready or (entry.task in _EMBED_TASKS and inference_ready))
+
+    def _stage_visibility(supported: bool, live: bool, show_verb: str) -> str:
+        if live:
+            return show_verb
+        # admin_only only when the engine is actually usable (inference-ready) but
+        # the train/finetune lifecycle is not yet live-proven; a catalog-only model
+        # whose engine is unwired cannot train, so it is hidden.
+        if supported and inference_ready:
+            return "admin_only"
+        return "hide"
+
+    anastig_train_visibility = _stage_visibility(train_ready, live_trn, "show_train")
+    anastig_finetune_visibility = _stage_visibility(fine_tune_ready, live_ftune, "show_finetune")
+
     export_supported = [
         k for k, v in ecap.items() if isinstance(v, dict) and v.get("status") == "supported"
     ]
@@ -1394,6 +1418,19 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
         "predict_supported": inference_ready,
         "live_verified_inference": live_inf,
         "live_verified_train": live_trn,
+        # v3.20: explicit per-lifecycle-dimension truth for Anastig.
+        "inference_ready": inference_ready,
+        "inference_live_verified": live_inf,
+        "train_ready": train_ready,
+        "train_live_verified": live_trn,
+        "fine_tune_ready": fine_tune_ready,
+        "fine_tune_live_verified": live_ftune,
+        "reload_supported": reload_supported,
+        "reload_live_verified": live_reload,
+        "export_live_verified": live_export,
+        "token_never_logged": True,
+        "anastig_train_visibility": anastig_train_visibility,
+        "anastig_finetune_visibility": anastig_finetune_visibility,
         "pretrained_inference_supported": inference_ready,
         "pretrained_load_supported": inference_ready and entry.download_type != "not_available",
         "auto_download": bool(entry.auto_download),

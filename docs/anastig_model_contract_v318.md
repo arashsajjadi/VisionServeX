@@ -1,6 +1,6 @@
 # Anastig Model Contract (v3.18)
 
-Source of truth: `visionservex.model_capabilities(model_id)` (v3.19.0).
+Source of truth: `visionservex.model_capabilities(model_id)` (v3.20.0).
 Anastig drives its entire model UI from this contract — there is **no hardcoded
 model allowlist** required beyond optional product ranking. The machine-readable
 buckets live in `docs/anastig_model_allowlist_v318.json`.

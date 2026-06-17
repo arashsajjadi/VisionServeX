@@ -1,0 +1,29 @@
+{
+  "schema": "v320_florence2_live_matrix",
+  "results": [
+    {
+      "model_id": "florence-2-base",
+      "task": "vlm",
+      "status": "FAIL",
+      "blocker": "DEPENDENCY_MISSING",
+      "reason": "py3.13 has no tokenizers wheel for the transformers<=4.49 that Florence-2 needs (_supports_sdpa+legacy cache); needs py3.10/3.11 sidecar",
+      "attempts": [
+        "transformers 5.x cascade",
+        "transformers<5 \u2192 4.57.6 _supports_sdpa fail",
+        "transformers==4.44.2 tokenizers py3.13 build fail"
+      ]
+    },
+    {
+      "model_id": "florence-2-large",
+      "task": "vlm",
+      "status": "FAIL",
+      "blocker": "DEPENDENCY_MISSING",
+      "reason": "py3.13 has no tokenizers wheel for the transformers<=4.49 that Florence-2 needs (_supports_sdpa+legacy cache); needs py3.10/3.11 sidecar",
+      "attempts": [
+        "transformers 5.x cascade",
+        "transformers<5 \u2192 4.57.6 _supports_sdpa fail",
+        "transformers==4.44.2 tokenizers py3.13 build fail"
+      ]
+    }
+  ]
+}

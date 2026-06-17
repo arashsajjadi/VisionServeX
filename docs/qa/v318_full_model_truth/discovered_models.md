@@ -1,4 +1,4 @@
-# v3.18 Discovered Models — 151 total (v3.19.0)
+# v3.18 Discovered Models — 151 total (v3.20.0)
 
 Programmatically discovered from `list_models()` + the registry + the license
 policy. Every row is a pure projection of `model_capabilities(model_id)`.

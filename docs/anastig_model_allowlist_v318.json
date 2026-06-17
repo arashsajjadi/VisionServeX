@@ -1,5 +1,5 @@
 {
-  "version": "3.19.0",
+  "version": "3.20.0",
   "generated_from": "visionservex.model_capabilities (do not hand-edit)",
   "train_ready_live": [
     "libreyolo-rtdetr-r50",
