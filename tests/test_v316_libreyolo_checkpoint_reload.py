@@ -38,7 +38,7 @@ def test_best_checkpoint_falls_back_to_last(tmp_path):
 def test_trained_imgsz_read_and_applied(tmp_path, monkeypatch):
     """load_checkpoint reads the training imgsz from the checkpoint config and sets
     the model's input_size, so predict() infers at the trained resolution."""
-    import torch  # available with the libreyolo extra
+    torch = pytest.importorskip("torch")  # CI's minimal "quick tests" env has no torch
 
     import visionservex.engines.libreyolo as ly
     from visionservex.engines import build_engine

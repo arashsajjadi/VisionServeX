@@ -647,8 +647,15 @@ _ROWS += [
 ]
 # v3.16.0: larger LibreYOLO variants (inference-ready, permissive, commercial-safe).
 _ROWS += [
-    _core(mid, "libreyolo", code="MIT", weights=wt, hf_repo=repo, upstream=_LIBREYOLO_URL,
-          notes=f"{mid} — permissive ({wt} weights, MIT code). Commercial-safe; inference-ready (v3.16.0).")
+    _core(
+        mid,
+        "libreyolo",
+        code="MIT",
+        weights=wt,
+        hf_repo=repo,
+        upstream=_LIBREYOLO_URL,
+        notes=f"{mid} — permissive ({wt} weights, MIT code). Commercial-safe; inference-ready (v3.16.0).",
+    )
     for mid, wt, repo in (
         ("libreyolo-yolox-m", "Apache-2.0", "LibreYOLO/LibreYOLOXm"),
         ("libreyolo-yolox-l", "Apache-2.0", "LibreYOLO/LibreYOLOXl"),
