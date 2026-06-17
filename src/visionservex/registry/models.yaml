@@ -3833,3 +3833,238 @@ models:
   status: stable
   model_category: production_recommended
   notes: ConvNeXt-Tiny wired in v3.15.0 (pretrained + fine-tune + reload + ONNX).
+# ----- v3.16.0: larger LibreYOLO variants (INFERENCE-READY). Same permissive
+# engine + HF weights as the validated base variants; their train→reload→predict
+# lifecycle is not individually validated this release (see model_capabilities:
+# VARIANT_NOT_LIFECYCLE_VALIDATED), and D-FINE training is blocked upstream
+# (UPSTREAM_DFINE_FDR_TOPK_CRASH). Validated train targets: yolox-s/yolov9-s/rtdetr-r50.
+- id: libreyolo-yolox-m
+  display_name: LibreYOLO YOLOX-M (permissive)
+  task: detect
+  family: libreyolo
+  backend: libreyolo_package
+  engine: libreyolo
+  license: Apache-2.0
+  license_notes: LibreYOLO code MIT; YOLOX weights Apache-2.0.
+  upstream_url: https://github.com/LibreYOLO/libreyolo
+  download_type: huggingface
+  hf_repo_id: LibreYOLO/LibreYOLOXm
+  checkpoint_filename: LibreYOLOXm.pt
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: libreyolo
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cuda
+  supported_precisions: [fp32, fp16]
+  difficulty: easy
+  status: beta
+  model_category: accuracy_grade
+  notes: YOLOX-M inference-ready (v3.16.0). Train via the validated yolox engine; not individually lifecycle-validated.
+- id: libreyolo-yolox-l
+  display_name: LibreYOLO YOLOX-L (permissive)
+  task: detect
+  family: libreyolo
+  backend: libreyolo_package
+  engine: libreyolo
+  license: Apache-2.0
+  license_notes: LibreYOLO code MIT; YOLOX weights Apache-2.0.
+  upstream_url: https://github.com/LibreYOLO/libreyolo
+  download_type: huggingface
+  hf_repo_id: LibreYOLO/LibreYOLOXl
+  checkpoint_filename: LibreYOLOXl.pt
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: libreyolo
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cuda
+  supported_precisions: [fp32, fp16]
+  difficulty: easy
+  status: beta
+  model_category: accuracy_grade
+  notes: YOLOX-L inference-ready (v3.16.0). Train via the validated yolox engine; not individually lifecycle-validated.
+- id: libreyolo-yolox-x
+  display_name: LibreYOLO YOLOX-X (permissive)
+  task: detect
+  family: libreyolo
+  backend: libreyolo_package
+  engine: libreyolo
+  license: Apache-2.0
+  license_notes: LibreYOLO code MIT; YOLOX weights Apache-2.0.
+  upstream_url: https://github.com/LibreYOLO/libreyolo
+  download_type: huggingface
+  hf_repo_id: LibreYOLO/LibreYOLOXx
+  checkpoint_filename: LibreYOLOXx.pt
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: libreyolo
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cuda
+  supported_precisions: [fp32, fp16]
+  difficulty: easy
+  status: beta
+  model_category: accuracy_grade
+  notes: YOLOX-X inference-ready (v3.16.0). Train via the validated yolox engine; not individually lifecycle-validated.
+- id: libreyolo-yolov9-m
+  display_name: LibreYOLO YOLOv9-M (permissive)
+  task: detect
+  family: libreyolo
+  backend: libreyolo_package
+  engine: libreyolo
+  license: MIT
+  license_notes: LibreYOLO code MIT; YOLOv9 weights MIT (MultimediaTechLab fork, not GPL WongKinYiu).
+  upstream_url: https://github.com/LibreYOLO/libreyolo
+  download_type: huggingface
+  hf_repo_id: LibreYOLO/LibreYOLO9m
+  checkpoint_filename: LibreYOLO9m.pt
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: libreyolo
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cuda
+  supported_precisions: [fp32, fp16]
+  difficulty: easy
+  status: beta
+  model_category: accuracy_grade
+  notes: YOLOv9-M inference-ready (v3.16.0). MIT weights. Train via the validated yolov9 engine; not individually lifecycle-validated.
+- id: libreyolo-yolov9-c
+  display_name: LibreYOLO YOLOv9-C (permissive)
+  task: detect
+  family: libreyolo
+  backend: libreyolo_package
+  engine: libreyolo
+  license: MIT
+  license_notes: LibreYOLO code MIT; YOLOv9 weights MIT (MultimediaTechLab fork, not GPL WongKinYiu).
+  upstream_url: https://github.com/LibreYOLO/libreyolo
+  download_type: huggingface
+  hf_repo_id: LibreYOLO/LibreYOLO9c
+  checkpoint_filename: LibreYOLO9c.pt
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: libreyolo
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cuda
+  supported_precisions: [fp32, fp16]
+  difficulty: easy
+  status: beta
+  model_category: accuracy_grade
+  notes: YOLOv9-C inference-ready (v3.16.0). MIT weights. Train via the validated yolov9 engine; not individually lifecycle-validated.
+- id: libreyolo-rtdetr-r101
+  display_name: LibreYOLO RT-DETR-R101 (permissive)
+  task: detect
+  family: libreyolo
+  backend: libreyolo_package
+  engine: libreyolo
+  license: Apache-2.0
+  license_notes: LibreYOLO code MIT; RT-DETR (Baidu) weights Apache-2.0.
+  upstream_url: https://github.com/LibreYOLO/libreyolo
+  download_type: huggingface
+  hf_repo_id: LibreYOLO/LibreRTDETRr101
+  checkpoint_filename: LibreRTDETRr101.pt
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: libreyolo
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cuda
+  supported_precisions: [fp32, fp16]
+  difficulty: medium
+  status: beta
+  model_category: accuracy_grade
+  notes: RT-DETR-R101 inference-ready (v3.16.0). Train via the validated rtdetr engine; not individually lifecycle-validated.
+- id: libreyolo-dfine-s
+  display_name: LibreYOLO D-FINE-S (permissive)
+  task: detect
+  family: libreyolo
+  backend: libreyolo_package
+  engine: libreyolo
+  license: Apache-2.0
+  license_notes: LibreYOLO code MIT; D-FINE weights Apache-2.0.
+  upstream_url: https://github.com/LibreYOLO/libreyolo
+  download_type: huggingface
+  hf_repo_id: LibreYOLO/LibreDFINEs
+  checkpoint_filename: LibreDFINEs.pt
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: libreyolo
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cuda
+  supported_precisions: [fp32, fp16]
+  difficulty: easy
+  status: beta
+  model_category: accuracy_grade
+  notes: D-FINE-S inference-ready (v3.16.0). Training BLOCKED upstream (UPSTREAM_DFINE_FDR_TOPK_CRASH).
+- id: libreyolo-dfine-m
+  display_name: LibreYOLO D-FINE-M (permissive)
+  task: detect
+  family: libreyolo
+  backend: libreyolo_package
+  engine: libreyolo
+  license: Apache-2.0
+  license_notes: LibreYOLO code MIT; D-FINE weights Apache-2.0.
+  upstream_url: https://github.com/LibreYOLO/libreyolo
+  download_type: huggingface
+  hf_repo_id: LibreYOLO/LibreDFINEm
+  checkpoint_filename: LibreDFINEm.pt
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: libreyolo
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cuda
+  supported_precisions: [fp32, fp16]
+  difficulty: easy
+  status: beta
+  model_category: accuracy_grade
+  notes: D-FINE-M inference-ready (v3.16.0). Training BLOCKED upstream (UPSTREAM_DFINE_FDR_TOPK_CRASH).
+- id: libreyolo-dfine-l
+  display_name: LibreYOLO D-FINE-L (permissive)
+  task: detect
+  family: libreyolo
+  backend: libreyolo_package
+  engine: libreyolo
+  license: Apache-2.0
+  license_notes: LibreYOLO code MIT; D-FINE weights Apache-2.0.
+  upstream_url: https://github.com/LibreYOLO/libreyolo
+  download_type: huggingface
+  hf_repo_id: LibreYOLO/LibreDFINEl
+  checkpoint_filename: LibreDFINEl.pt
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: libreyolo
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cuda
+  supported_precisions: [fp32, fp16]
+  difficulty: medium
+  status: beta
+  model_category: accuracy_grade
+  notes: D-FINE-L inference-ready (v3.16.0). Training BLOCKED upstream (UPSTREAM_DFINE_FDR_TOPK_CRASH).
+- id: libreyolo-dfine-x
+  display_name: LibreYOLO D-FINE-X (permissive)
+  task: detect
+  family: libreyolo
+  backend: libreyolo_package
+  engine: libreyolo
+  license: Apache-2.0
+  license_notes: LibreYOLO code MIT; D-FINE weights Apache-2.0.
+  upstream_url: https://github.com/LibreYOLO/libreyolo
+  download_type: huggingface
+  hf_repo_id: LibreYOLO/LibreDFINEx
+  checkpoint_filename: LibreDFINEx.pt
+  auto_download: true
+  requires_optional_extra: true
+  install_extra: libreyolo
+  implementation_status: wired
+  supported_devices: [cpu, cuda]
+  recommended_device: cuda
+  supported_precisions: [fp32, fp16]
+  difficulty: medium
+  status: beta
+  model_category: accuracy_grade
+  notes: D-FINE-X inference-ready (v3.16.0). Training BLOCKED upstream (UPSTREAM_DFINE_FDR_TOPK_CRASH).

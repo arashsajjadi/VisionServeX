@@ -1,0 +1,104 @@
+{
+  "epochs": 25,
+  "device": "cpu",
+  "rows": [
+    {
+      "model_id": "libreyolo-yolox-s",
+      "final_verdict": "PREDICT_OK",
+      "error": null,
+      "train_status": "ok",
+      "eval_mAP50_train": 0.5278052805280529,
+      "checkpoint": "/home/arash/.cache/vsx_tmp/v316_qa/runs/libreyolo-yolox-s/weights/best.pt",
+      "checkpoint_exists": true,
+      "eval_mAP50_reload": 1.0,
+      "predict_thr_0.25": {
+        "n": 1,
+        "score_min": 0.9589,
+        "score_max": 0.9589,
+        "area_min": 8513.9,
+        "area_max": 8513.9,
+        "labels": [
+          "obj0"
+        ]
+      },
+      "predict_thr_0.05": {
+        "n": 1,
+        "score_min": 0.9589,
+        "score_max": 0.9589,
+        "area_min": 8513.9,
+        "area_max": 8513.9,
+        "labels": [
+          "obj0"
+        ]
+      }
+    },
+    {
+      "model_id": "libreyolo-yolov9-s",
+      "final_verdict": "PREDICT_OK",
+      "error": null,
+      "train_status": "ok",
+      "eval_mAP50_train": 0.30867895799063577,
+      "checkpoint": "/home/arash/.cache/vsx_tmp/v316_qa/runs/libreyolo-yolov9-s/weights/best.pt",
+      "checkpoint_exists": true,
+      "eval_mAP50_reload": 0.9504950495049505,
+      "predict_thr_0.25": {
+        "n": 1,
+        "score_min": 0.4834,
+        "score_max": 0.4834,
+        "area_min": 2182.3,
+        "area_max": 2182.3,
+        "labels": [
+          "obj0"
+        ]
+      },
+      "predict_thr_0.05": {
+        "n": 2,
+        "score_min": 0.1517,
+        "score_max": 0.4834,
+        "area_min": 2182.3,
+        "area_max": 2218.9,
+        "labels": [
+          "obj0",
+          "obj1"
+        ]
+      }
+    },
+    {
+      "model_id": "libreyolo-rtdetr-r50",
+      "final_verdict": "PREDICT_OK",
+      "error": null,
+      "train_status": "ok",
+      "eval_mAP50_train": 0.39684280016312873,
+      "checkpoint": "/home/arash/.cache/vsx_tmp/v316_qa/runs/libreyolo-rtdetr-r50/weights/best.pt",
+      "checkpoint_exists": true,
+      "eval_mAP50_reload": 0.43552569542668546,
+      "predict_thr_0.25": {
+        "n": 2,
+        "score_min": 0.3027,
+        "score_max": 0.3191,
+        "area_min": 8542.2,
+        "area_max": 8561.7,
+        "labels": [
+          "obj0",
+          "obj1"
+        ]
+      },
+      "predict_thr_0.05": {
+        "n": 38,
+        "score_min": 0.0501,
+        "score_max": 0.3191,
+        "area_min": 845.7,
+        "area_max": 28582.2,
+        "labels": [
+          "obj0",
+          "obj1"
+        ]
+      }
+    },
+    {
+      "model_id": "libreyolo-dfine-n",
+      "final_verdict": "CRASHED",
+      "error": "Traceback (most recent call last):\n  File \"/home/arash/PycharmProjects/VisionServeX/tools/qa/v316_libreyolo_train_predict_matrix.py\", line 96, in test_one\n    res = VisionModel(model_id).train(\n        str(yaml), epochs=epochs, device=None if device in (\"auto\", \"\") else device,\n        imgsz=imgsz, batch=4, project=str(project), exist_ok=True,\n    )\n  File \"/home/arash/PycharmProjects/VisionServeX/src/visionservex/core/model.py\", line 529, in train\n    return train_fn(dataset, **kwargs)\n  File \"/home/arash/PycharmProjects/VisionServeX/src/visionservex/engines/libreyolo.py\", line 331, in train\n    raw = self._model.train(data=str(data_yaml), **kwargs)\n  File \"/home/arash/miniconda3/lib/python3.13/site-packages/libreyolo/models/dfine/model.py\", line 251, in train\n    results = trainer.train()\n  File \"/home/arash/miniconda3/lib/python3.13/site-packages/libreyolo/training/trainer.py\", line 379, in train\n    epoch_loss, val_metrics = self._train_epoch(epoch)\n                              ~~~~~~~~~~~~~~~~~^^^^^^^\n  File \"/home/arash/miniconda3/lib/python3.13/site-packages/libreyolo/models/dfine/trainer.py\", line 441, in _train_epoch\n    outputs = self.on_forward(imgs, targets)\nRuntimeError: selected index k out of range\n"
+    }
+  ]
+}

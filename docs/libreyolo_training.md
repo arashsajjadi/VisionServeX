@@ -1,4 +1,4 @@
-# LibreYOLO Training (v3.13.0 → reliability-hardened in v3.14.0)
+# LibreYOLO Training (v3.13.0 → reliability-hardened through v3.16.0)
 
 VisionServeX adds **detector training / fine-tuning** for the permissive
 LibreYOLO families, on top of the inference engine shipped in v3.12.0. Training
@@ -6,30 +6,44 @@ is backed entirely by the permissive [`libreyolo`](https://github.com/LibreYOLO/
 package (MIT code; Apache-2.0 / MIT weights). **No Ultralytics runtime** is
 imported on any training, checkpoint, or export path.
 
-> **v3.14.0 — trained-checkpoint reload fixed.** A trained checkpoint whose class
-> count differs from COCO-80 reloads via libreyolo's `_rebuild_for_new_classes`,
-> which left the inner module in *training* mode — so `predict()` crashed
-> (`'NoneType' object has no attribute 'sum'`). v3.14.0 forces eval after load,
-> so the **full lifecycle `train → checkpoint → reload → predict → export` is now
-> validated live** for every variant below. See the proof artifact
-> [`docs/qa/v314_train_reload_matrix.json`](qa/v314_train_reload_matrix.json)
-> (regenerate with `python tools/qa/v314_train_reload_matrix.py`).
+> **v3.16.0 — trained-checkpoint predict reliability.** A checkpoint that trained
+> + evaluated fine could return 0 boxes (or raw/duplicate floods) through
+> `predict()` after reload. Four package-level causes were fixed: (1) **EMA off by
+> default** — the saved EMA (decay 0.9998) was ~99% the initial weights for short
+> fine-tunes; (2) predict() now **infers at the training imgsz** (a model trained
+> at 320 but inferred at the native 640 produced low-confidence boxes); (3)
+> `best_checkpoint` **falls back to `last.pt`**; (4) predict() applies **class-aware
+> NMS** (DETR decoders are NMS-free and flooded duplicates). Proof:
+> [`docs/qa/v316_libreyolo_reliability/`](qa/v316_libreyolo_reliability/). Pass
+> `ema=True` to `train(...)` for long runs where EMA converges.
+>
+> **v3.14.0 — reload eval-mode fix.** A custom-class checkpoint reloaded in
+> *training* mode → `predict()` crashed (`'NoneType' has no 'sum'`); forced eval
+> after load.
 
-## What is trainable (full lifecycle validated live, v3.14.0)
+## What is trainable (full lifecycle validated live, v3.16.0)
 
-| Model id               | Family  | Inference | Train / fine-tune | Reload → predict | Export | License            |
-| ---------------------- | ------- | :-------: | :---------------: | :--------------: | :----: | ------------------ |
-| `libreyolo-yolox-s`    | YOLOX   |     ✅     |         ✅         |        ✅         |  ONNX  | Apache-2.0         |
-| `libreyolo-yolov9-s`   | YOLOv9  |     ✅     |         ✅         |        ✅         |  ONNX  | MIT (MMTechLab)    |
-| `libreyolo-rtdetr-r50` | RT-DETR |     ✅     |         ✅         |        ✅         |  ONNX  | Apache-2.0         |
-| `libreyolo-dfine-n`    | D-FINE  |     ✅     |         ✅         |        ✅         |  ONNX  | Apache-2.0         |
+| Model id               | Family  | Readiness | Train / fine-tune | Reload → predict (NMS) | Export | License            |
+| ---------------------- | ------- | --------- | :---------------: | :--------------------: | :----: | ------------------ |
+| `libreyolo-yolox-s`    | YOLOX   | train-ready  | ✅ | ✅ | ONNX | Apache-2.0      |
+| `libreyolo-yolov9-s`   | YOLOv9  | train-ready  | ✅ | ✅ | ONNX | MIT (MMTechLab) |
+| `libreyolo-rtdetr-r50` | RT-DETR | train-ready  | ✅ | ✅ | ONNX | Apache-2.0      |
+| `libreyolo-yolox-{m,l,x}`, `yolov9-{m,c}`, `rtdetr-r101` | — | inference-ready | ⚠️ not certified | — | ONNX | permissive |
+| `libreyolo-dfine-{n,s,m,l,x}` | D-FINE | inference-ready | ❌ blocked | — | ONNX | Apache-2.0 |
 
-`libreyolo-dfine-n` is a registry-wired variant added in v3.14.0 (weights from
-`LibreYOLO/LibreDFINEn`). D-FINE via LibreYOLO is trainable because it routes
-through `LibreYOLOEngine`. The **standalone** Hugging Face `dfine-*` models
-(`DFINEEngine`) remain **inference-only** — HF Transformers does not expose a
-D-FINE training loop, so those report `TRAINING_NOT_SUPPORTED_IN_HF_BACKEND` and
-are not faked.
+Only the three **train-ready** variants are lifecycle-validated. Larger YOLO /
+RT-DETR variants are **inference-ready** (same engine; not individually certified,
+`exact_blocker=VARIANT_NOT_LIFECYCLE_VALIDATED`). **D-FINE training is blocked**
+upstream (libreyolo FDR `topk` crash, `exact_blocker=UPSTREAM_DFINE_FDR_TOPK_CRASH`)
+— D-FINE inference is fully supported. Standalone HF `dfine-*` remains
+inference-only (`TRAINING_NOT_SUPPORTED_IN_HF_BACKEND`) — not faked.
+
+## Clean predict output (NMS + raw access)
+
+`predict()` returns FINAL post-NMS detections. `result.metadata` carries
+`raw_count`, `post_nms_count`, `nms_applied`. Tune with
+`predict(image, threshold=..., nms_iou=..., max_det=...)`; pass `return_raw=True`
+to bypass NMS and inspect raw proposals.
 
 `_training_capabilities(model_id)["trained_checkpoint_predict_supported"]` is the
 truth flag: `train_supported` is never `True` for a family unless a trained

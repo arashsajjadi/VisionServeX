@@ -128,13 +128,18 @@ def test_libreyolo_yolox_not_marked_train_ready_if_reload_predict_fails():
 
 
 def test_libreyolo_dfine_train_lifecycle_contract_if_registered():
+    # v3.16.0: libreyolo D-FINE training is BLOCKED upstream (FDR topk crash);
+    # it is inference-only, not train-ready. (Was train-ready in v3.14/v3.15.)
+    from visionservex.core.model import _training_capabilities
     from visionservex.registry import default_registry
 
     try:
         default_registry().get("libreyolo-dfine-n")
     except Exception:
         pytest.skip("libreyolo-dfine-n not registered")
-    _assert_full_lifecycle("libreyolo-dfine-n")
+    cap = _training_capabilities("libreyolo-dfine-n")
+    assert cap["train_supported"] is False
+    assert cap["exact_blocker"] == "UPSTREAM_DFINE_FDR_TOPK_CRASH"
 
 
 # ---------------------------------------------------------------------------

@@ -27,6 +27,7 @@ through the standard VisionServeX downloader. VisionServeX never bundles them
 
 from __future__ import annotations
 
+import contextlib
 import time
 from collections.abc import Sequence
 from pathlib import Path
@@ -132,6 +133,11 @@ class LibreYOLOEngine(StubEngine):
         # When set (via load_checkpoint), this trained .pt overrides the
         # on-demand HF base-weight download as the sole weight source.
         self._checkpoint_override: Path | None = None
+        # The imgsz the checkpoint was trained at (read from its config). predict()
+        # must infer at the SAME resolution; the model's native input size (e.g.
+        # 640) otherwise yields low-confidence/empty boxes for a model fine-tuned
+        # at a different imgsz.
+        self._trained_imgsz: int | None = None
 
     # ------ lifecycle ------
 
@@ -163,6 +169,19 @@ class LibreYOLOEngine(StubEngine):
                     f"trained checkpoint not found: {weight_path}",
                     install_hint="pass an existing best.pt/last.pt from LibreYOLOEngine.train()",
                 )
+            # Read the imgsz this checkpoint was trained at so predict() infers at
+            # the matching resolution (see _trained_imgsz).
+            try:
+                import torch  # type: ignore
+
+                _ck = torch.load(str(weight_path), map_location="cpu", weights_only=False)
+                _isz = (
+                    int((_ck.get("config") or {}).get("imgsz") or 0) if isinstance(_ck, dict) else 0
+                )
+                self._trained_imgsz = _isz or None
+                del _ck
+            except Exception:  # pragma: no cover - best-effort metadata read
+                self._trained_imgsz = None
             _log.info("loading %s from trained checkpoint %s", class_name, weight_path)
         else:
             # Resolve base weights via the standard VisionServeX downloader (HF
@@ -183,6 +202,12 @@ class LibreYOLOEngine(StubEngine):
         )
         self._model = cls(model_path=str(weight_path), size=size, device=ly_device)
         _force_eval(self._model)
+        # Infer at the resolution the checkpoint was trained at (not the native
+        # input size) so a model fine-tuned at e.g. 320 predicts confidently.
+        if self._checkpoint_override is not None and self._trained_imgsz:
+            with contextlib.suppress(Exception):
+                self._model.input_size = self._trained_imgsz
+                _log.info("predict input_size set to trained imgsz=%d", self._trained_imgsz)
         _log.info("%s ready", class_name)
 
     def unload(self) -> None:
@@ -219,6 +244,7 @@ class LibreYOLOEngine(StubEngine):
         resume: bool = False,
         amp: bool | None = None,
         patience: int = 50,
+        ema: bool = False,
         **extra: Any,
     ) -> dict[str, Any]:
         """Train / fine-tune this LibreYOLO detector on a YOLO-format dataset.
@@ -229,6 +255,13 @@ class LibreYOLOEngine(StubEngine):
                 forwarded to the libreyolo trainer.
             device: ``None``/``"auto"`` auto-detects GPU; or pass ``"cuda"``/``"cpu"``.
             lr0/amp: omitted → the family's own tuned default is used.
+            ema: EMA is **disabled by default** (v3.16.0). libreyolo's EMA decay
+                (0.9998) lags ~99% toward the initial weights for short fine-tunes,
+                so the saved EMA checkpoint produces near-base, low-confidence
+                predictions (eval mAP looks fine, but predict() at the default
+                threshold returns ~0 boxes). Disabling EMA saves the actual trained
+                weights → confident, usable checkpoints. Pass ``ema=True`` for long
+                training runs where EMA has time to converge.
             **extra: family-specific training kwargs forwarded verbatim.
 
         Returns a normalized result dict (see ``_normalize_train_result``).
@@ -279,6 +312,7 @@ class LibreYOLOEngine(StubEngine):
             "exist_ok": exist_ok,
             "resume": resume,
             "patience": patience,
+            "ema": ema,
             "allow_download_scripts": False,
         }
         if lr0 is not None:
@@ -354,8 +388,20 @@ class LibreYOLOEngine(StubEngine):
         *,
         prompts: Sequence[str] | None = None,
         threshold: float = 0.25,
+        nms_iou: float | None = None,
+        max_det: int = 300,
+        return_raw: bool = False,
         **kwargs: Any,
     ) -> BaseResult:
+        """Run detection and return FINAL (post-NMS) detections by default.
+
+        DETR-style decoders (RT-DETR / D-FINE) are set-based and emit up to ~300
+        boxes with no NMS — an undertrained/low-threshold model can flood
+        overlapping duplicates. We apply a class-aware NMS safety net on top of
+        libreyolo's output (idempotent for already-NMS'd YOLO output). Pass
+        ``return_raw=True`` to bypass NMS and get the raw proposals for debugging;
+        the result's ``metadata`` always carries ``raw_count``/``post_nms_count``.
+        """
         if not self._real_ready:
             return super().predict(image, prompts=prompts, **kwargs)
 
@@ -363,7 +409,9 @@ class LibreYOLOEngine(StubEngine):
         # libreyolo's ImageLoader accepts a PIL Image directly and normalizes to
         # RGB, so we forward the decoded image without a temp file.
         result = self._model(image, conf=conf, save=False)
-        return self._to_result(result, image)
+        return self._to_result(
+            result, image, nms_iou=nms_iou, max_det=max_det, return_raw=return_raw
+        )
 
     def infer(self, preprocessed: Any, **kwargs: Any) -> Any:
         """Unused: predict() is overridden to drive the package directly."""
@@ -373,10 +421,30 @@ class LibreYOLOEngine(StubEngine):
         """Unused: predict() is overridden to drive the package directly."""
         return self._mock.postprocess(raw, image=image, **kwargs)
 
-    def _to_result(self, result: Any, image: Image.Image) -> BaseResult:
-        """Convert a LibreYOLO ``Results`` object → VisionServeX DetectionResult."""
+    def _to_result(
+        self,
+        result: Any,
+        image: Image.Image,
+        *,
+        nms_iou: float | None = None,
+        max_det: int = 300,
+        return_raw: bool = False,
+    ) -> BaseResult:
+        """Convert a LibreYOLO ``Results`` object → VisionServeX DetectionResult.
+
+        Applies a class-aware NMS safety net unless ``return_raw`` is set, and
+        records ``raw_count``/``post_nms_count`` in the result metadata.
+        """
         w, h = image.size
-        detections = _libre_to_detections(result, self._model)
+        raw_dets = _libre_to_detections(result, self._model)
+        raw_count = len(raw_dets)
+        if return_raw:
+            detections = raw_dets
+        else:
+            from visionservex.runtime.postprocess import DEFAULT_NMS_IOU, class_aware_nms
+
+            iou = DEFAULT_NMS_IOU if nms_iou is None else float(nms_iou)
+            detections = class_aware_nms(raw_dets, iou_thres=iou, max_det=max_det)
         return DetectionResult(
             kind="detection",
             model_id=self.entry.id,
@@ -386,6 +454,12 @@ class LibreYOLOEngine(StubEngine):
             precision=self.precision,
             backend=self.backend_label,
             detections=detections,
+            metadata={
+                "raw_count": raw_count,
+                "post_nms_count": len(detections),
+                "nms_applied": not return_raw,
+                "checkpoint": str(self._checkpoint_override) if self._checkpoint_override else None,
+            },
         )
 
 
@@ -456,6 +530,17 @@ def _normalize_train_result(
     def _existing(path_str: str) -> str | None:
         return path_str if path_str and Path(path_str).exists() else None
 
+    # best.pt is only written when val mAP improves; on tiny/short runs it may
+    # never be written (only last.pt). Fall back so best_checkpoint always points
+    # to a file that actually exists — otherwise Anastig's reload of
+    # best_checkpoint fails on a non-existent path. `checkpoint` is the one to use.
+    best_exists = bool(best_ckpt and Path(best_ckpt).is_file())
+    last_exists = bool(last_ckpt and Path(last_ckpt).is_file())
+    if not best_exists and last_exists:
+        best_ckpt = last_ckpt
+        best_exists = True
+    usable_ckpt = best_ckpt if best_exists else (last_ckpt if last_exists else "")
+
     args_yaml = str(Path(save_dir) / "train_config.yaml") if save_dir else ""
     results_csv = str(Path(save_dir) / "results.csv") if save_dir else ""
     return {
@@ -467,6 +552,7 @@ def _normalize_train_result(
         "dataset_yaml": str(data_yaml),
         "best_checkpoint": best_ckpt,
         "last_checkpoint": last_ckpt,
+        "checkpoint": usable_ckpt,
         "save_dir": save_dir,
         "metrics": {
             "best_mAP50": raw.get("best_mAP50"),

@@ -642,8 +642,25 @@ _ROWS += [
         hf_repo="LibreYOLO/LibreDFINEn",
         upstream=_LIBREYOLO_URL,
         notes="D-FINE-N (Apache-2.0 weights, MIT code). Permissive, commercial-safe. "
-        "Runnable + trainable via the libreyolo engine (v3.14.0).",
+        "Inference-ready; D-FINE training blocked upstream (v3.16.0).",
     ),
+]
+# v3.16.0: larger LibreYOLO variants (inference-ready, permissive, commercial-safe).
+_ROWS += [
+    _core(mid, "libreyolo", code="MIT", weights=wt, hf_repo=repo, upstream=_LIBREYOLO_URL,
+          notes=f"{mid} — permissive ({wt} weights, MIT code). Commercial-safe; inference-ready (v3.16.0).")
+    for mid, wt, repo in (
+        ("libreyolo-yolox-m", "Apache-2.0", "LibreYOLO/LibreYOLOXm"),
+        ("libreyolo-yolox-l", "Apache-2.0", "LibreYOLO/LibreYOLOXl"),
+        ("libreyolo-yolox-x", "Apache-2.0", "LibreYOLO/LibreYOLOXx"),
+        ("libreyolo-yolov9-m", "MIT", "LibreYOLO/LibreYOLO9m"),
+        ("libreyolo-yolov9-c", "MIT", "LibreYOLO/LibreYOLO9c"),
+        ("libreyolo-rtdetr-r101", "Apache-2.0", "LibreYOLO/LibreRTDETRr101"),
+        ("libreyolo-dfine-s", "Apache-2.0", "LibreYOLO/LibreDFINEs"),
+        ("libreyolo-dfine-m", "Apache-2.0", "LibreYOLO/LibreDFINEm"),
+        ("libreyolo-dfine-l", "Apache-2.0", "LibreYOLO/LibreDFINEl"),
+        ("libreyolo-dfine-x", "Apache-2.0", "LibreYOLO/LibreDFINEx"),
+    )
 ]
 
 # ----- commercial_safe_core: classic torchvision classifiers (v3.15.0) ---------

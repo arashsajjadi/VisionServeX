@@ -243,12 +243,13 @@ def test_standalone_dfine_stays_inference_only(mid):
 
 
 def test_libreyolo_dfine_train_capability():
-    """D-FINE via LibreYOLO routes through LibreYOLOEngine and IS trainable;
-    standalone HF ``dfine-*`` stays inference-only."""
+    """v3.16.0: libreyolo D-FINE *training* is BLOCKED (upstream FDR topk crash);
+    it remains inference-ready. Standalone HF ``dfine-*`` also stays inference-only."""
     from visionservex.core.model import _training_capabilities
 
     cap = _training_capabilities("libreyolo-dfine-n")
-    assert cap["train_supported"] is True
+    assert cap["train_supported"] is False
+    assert cap["exact_blocker"] == "UPSTREAM_DFINE_FDR_TOPK_CRASH"
     assert cap["family"] == "libreyolo"
     assert _training_capabilities("dfine-n")["train_supported"] is False
 

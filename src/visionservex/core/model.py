@@ -751,6 +751,8 @@ _TRAINING_TABLE: dict[str, dict[str, Any]] = {
         "checkpoint_save_supported": True,
         "checkpoint_load_supported": True,
         "trained_checkpoint_predict_supported": True,
+        "post_nms_predict_supported": True,
+        "validated_lifecycle": True,
         "export_supported": ["onnx"],
         "supported_dataset_formats": ["coco-json", "yolo"],
         "required_extra": "rfdetr",
@@ -770,6 +772,8 @@ _TRAINING_TABLE: dict[str, dict[str, Any]] = {
         "checkpoint_save_supported": True,
         "checkpoint_load_supported": True,
         "trained_checkpoint_predict_supported": True,
+        "post_nms_predict_supported": True,
+        "validated_lifecycle": True,
         "export_supported": ["onnx"],
         "supported_dataset_formats": ["yolo"],
         "required_extra": "libreyolo",
@@ -777,16 +781,17 @@ _TRAINING_TABLE: dict[str, dict[str, Any]] = {
             "libreyolo-yolox-s",
             "libreyolo-yolov9-s",
             "libreyolo-rtdetr-r50",
-            "libreyolo-dfine-n",
         ],
-        "known_blockers": [],
+        "known_blockers": ["libreyolo-dfine-*: UPSTREAM_DFINE_FDR_TOPK_CRASH (train blocked)"],
         "notes": (
-            "LibreYOLO training via the permissive `libreyolo` package "
-            "(YOLOX / YOLOv9 / RT-DETR / D-FINE). YOLO data.yaml dataset format; "
-            "fine-tunes from COCO-pretrained base weights; saves best.pt/last.pt. "
-            "v3.14.0 fixes trained-checkpoint reload (forces eval mode after the "
-            "class-count rebuild) so train->reload->predict->export is validated "
-            "live. No Ultralytics runtime. YOLO-NAS (Deci non-commercial) is excluded."
+            "LibreYOLO training via the permissive `libreyolo` package (YOLOX / "
+            "YOLOv9 / RT-DETR). YOLO data.yaml dataset format; fine-tunes from "
+            "COCO-pretrained base weights; saves best.pt/last.pt. v3.16.0 fixes the "
+            "eval/=predict gap: EMA off by default (saves the actual trained weights, "
+            "not the lagged EMA), predict uses the training imgsz, best.pt falls back "
+            "to last.pt, and predict applies class-aware NMS. Validated live for "
+            "yolox-s/yolov9-s/rtdetr-r50. D-FINE training is BLOCKED upstream "
+            "(FDR topk crash) — inference-only. No Ultralytics. YOLO-NAS excluded."
         ),
         "docs": "https://github.com/LibreYOLO/libreyolo",
     },
@@ -797,6 +802,8 @@ _TRAINING_TABLE: dict[str, dict[str, Any]] = {
         "checkpoint_save_supported": True,
         "checkpoint_load_supported": True,
         "trained_checkpoint_predict_supported": True,
+        "validated_lifecycle": True,
+        "post_nms_predict_supported": True,
         "export_supported": ["onnx"],
         "supported_dataset_formats": ["imagefolder"],
         "required_extra": "torchvision",
@@ -982,10 +989,18 @@ _EXPORT_TABLE: dict[str, dict[str, Any]] = {
 }
 
 
-# LibreYOLO sub-families that may train. Mirrors
-# ``engines.libreyolo._TRAINABLE_FAMILIES`` (permissive only). YOLO-NAS shares
+# LibreYOLO sub-families that are permissive (commercial-safe). YOLO-NAS shares
 # family="libreyolo" but is Deci non-commercial and must never train.
 _LIBREYOLO_TRAINABLE_SUBFAMILIES = frozenset({"yolox", "yolov9", "rtdetr", "dfine"})
+
+# v3.16.0: variants whose FULL lifecycle (train -> checkpoint -> reload -> predict
+# confident boxes -> NMS -> export) is live-validated. Only these report
+# train-ready; larger/other variants are inference-ready (same engine, not
+# individually validated) — we do NOT overclaim.
+_LIBREYOLO_LIFECYCLE_VALIDATED = frozenset(
+    {"libreyolo-yolox-s", "libreyolo-yolov9-s", "libreyolo-rtdetr-r50"}
+)
+_LIBREYOLO_DOCS = "https://github.com/LibreYOLO/libreyolo"
 
 
 def _libreyolo_subfamily(model_id: str) -> str:
@@ -995,7 +1010,7 @@ def _libreyolo_subfamily(model_id: str) -> str:
 
 
 def _training_capabilities(model_id: str) -> dict[str, Any]:
-    """Return training/fine-tuning capability dict for a model."""
+    """Return training/fine-tuning capability dict for a model (per-variant truth)."""
     try:
         entry = default_registry().get(model_id)
         family = entry.family
@@ -1003,25 +1018,63 @@ def _training_capabilities(model_id: str) -> dict[str, Any]:
         family = model_id.split("-")[0]
 
     info = _TRAINING_TABLE.get(family, _TRAINING_TABLE["default"]).copy()
+    info.setdefault("post_nms_predict_supported", False)
+    info.setdefault("validated_lifecycle", False)
+    info.setdefault("exact_blocker", None)
 
-    # LibreYOLO training is per sub-family: YOLO-NAS shares family="libreyolo"
-    # but must never report trainable. Force a not-supported verdict for any
-    # *explicit* non-permissive sub-family, even when no registry row exists for
-    # it. A bare family name ("libreyolo", no sub-family token) keeps the
-    # family-level default so the capabilities listing shows the family as
-    # trainable.
+    # LibreYOLO training truth is PER SUB-FAMILY and PER VARIANT (v3.16.0).
     _sub = _libreyolo_subfamily(model_id)
-    if family == "libreyolo" and _sub and _sub not in _LIBREYOLO_TRAINABLE_SUBFAMILIES:
-        info = {
+    if family == "libreyolo" and _sub:
+        not_supported = {
             **_TRAINING_TABLE["default"],
             "required_extra": "libreyolo",
-            "notes": (
-                "TRAINING_NOT_SUPPORTED: non-permissive LibreYOLO family. Only "
-                "YOLOX / YOLOv9 / RT-DETR / D-FINE train; YOLO-NAS is Deci "
-                "proprietary / non-commercial and is excluded."
-            ),
-            "docs": "https://github.com/LibreYOLO/libreyolo",
+            "trained_checkpoint_predict_supported": False,
+            "validated_lifecycle": False,
+            "docs": _LIBREYOLO_DOCS,
         }
+        if _sub not in _LIBREYOLO_TRAINABLE_SUBFAMILIES:
+            # YOLO-NAS (Deci non-commercial) and any non-permissive family.
+            info = {
+                **not_supported,
+                "post_nms_predict_supported": False,
+                "exact_blocker": "LIBREYOLO_NONCOMMERCIAL_FAMILY",
+                "notes": (
+                    "TRAINING_NOT_SUPPORTED: non-permissive LibreYOLO family. Only "
+                    "YOLOX / YOLOv9 / RT-DETR train; YOLO-NAS is Deci non-commercial."
+                ),
+            }
+        elif _sub == "dfine":
+            # D-FINE training crashes upstream (libreyolo FDR 'selected index k out
+            # of range'). Inference + reload of existing checkpoints still work;
+            # only the train loop is blocked. (Validated in docs/qa/v316_*.)
+            info = {
+                **not_supported,
+                "post_nms_predict_supported": True,
+                "exact_blocker": "UPSTREAM_DFINE_FDR_TOPK_CRASH",
+                "notes": (
+                    "TRAINING_BLOCKED: libreyolo D-FINE training crashes upstream "
+                    "(FDR topk 'selected index k out of range'). Inference is fully "
+                    "supported; use libreyolo-yolox/yolov9/rtdetr to train."
+                ),
+            }
+        elif model_id in _LIBREYOLO_LIFECYCLE_VALIDATED:
+            info["trained_checkpoint_predict_supported"] = True
+            info["post_nms_predict_supported"] = True
+            info["validated_lifecycle"] = True
+            info["exact_blocker"] = None
+        else:
+            # permissive yolox/yolov9/rtdetr variant NOT individually validated.
+            info = {
+                **not_supported,
+                "post_nms_predict_supported": True,
+                "exact_blocker": "VARIANT_NOT_LIFECYCLE_VALIDATED",
+                "notes": (
+                    "Inference-ready. Training uses the same validated libreyolo "
+                    "engine, but this variant is not individually lifecycle-validated "
+                    "in v3.16. Validated train targets: libreyolo-yolox-s / yolov9-s / "
+                    "rtdetr-r50."
+                ),
+            }
 
     info["model_id"] = model_id
     info["family"] = family
@@ -1103,6 +1156,10 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
         exact_blocker = entry.unavailable_reason or (
             f"NOT_INFERENCE_READY: implementation_status={status}, engine_registered={engine_registered}"
         )
+    elif not train_ready and tcap.get("exact_blocker"):
+        # inference-ready detector whose TRAINING is blocked/not-validated: surface
+        # the training blocker (e.g. UPSTREAM_DFINE_FDR_TOPK_CRASH).
+        exact_blocker = tcap.get("exact_blocker")
 
     return {
         "model_id": model_id,
@@ -1132,6 +1189,8 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
         "trained_checkpoint_predict_supported": bool(
             tcap.get("trained_checkpoint_predict_supported")
         ),
+        "post_nms_predict_supported": bool(tcap.get("post_nms_predict_supported")),
+        "validated_lifecycle": bool(tcap.get("validated_lifecycle")),
         "export_supported": export_supported,
         "supported_dataset_formats": tcap.get("supported_dataset_formats", []),
         "validated_variants": tcap.get("validated_variants", []),

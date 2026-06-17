@@ -2,6 +2,51 @@
 
 ## [Unreleased]
 
+## [3.16.0] - 2026-06-16
+
+### Fixed — LibreYOLO trained-checkpoint predict reliability (eval≠predict)
+
+A LibreYOLO checkpoint that trained + evaluated fine could return **0 boxes** (or
+raw/duplicate floods) through `predict()` after reload. Root-caused four
+package-level issues (`tools/qa/v316_libreyolo_train_predict_matrix.py`,
+`docs/qa/v316_libreyolo_reliability/`):
+
+- **EMA off by default** in `LibreYOLOEngine.train()` — the saved EMA (decay
+  0.9998) was ~99% the *initial* weights for short fine-tunes → near-base,
+  low-confidence predictions. Pass `ema=True` for long runs.
+- **predict() infers at the training imgsz** — read from the checkpoint config in
+  `_real_load`; a model trained at 320 but inferred at the native 640 produced
+  low-confidence/empty boxes.
+- **best.pt → last.pt fallback** — `train()` returned a `best_checkpoint` path that
+  may not exist (best.pt is only written when val mAP improves). Now it falls back
+  and adds a `checkpoint` key pointing at the usable file.
+- **Class-aware NMS** safety net in `predict()` (`runtime/postprocess.py`, pure
+  numpy). DETR decoders (RT-DETR/D-FINE) are NMS-free and flooded duplicates.
+  `result.metadata` carries `raw_count`/`post_nms_count`/`nms_applied`; pass
+  `return_raw=True` to bypass.
+
+### Changed — honest per-variant capability truth
+
+- `model_capabilities`/`_training_capabilities` are now **per-variant**. Only
+  lifecycle-validated variants are train-ready: **`libreyolo-yolox-s`,
+  `libreyolo-yolov9-s`, `libreyolo-rtdetr-r50`** (validated live at 25 epochs).
+  New fields `post_nms_predict_supported`, `validated_lifecycle`, `exact_blocker`.
+- **`libreyolo-dfine-*` training is BLOCKED** (`UPSTREAM_DFINE_FDR_TOPK_CRASH` —
+  libreyolo D-FINE training crashes upstream); inference-ready (a downgrade from
+  the v3.14/v3.15 train-ready claim — honest).
+- Larger variants are **inference-ready, not train-ready**
+  (`VARIANT_NOT_LIFECYCLE_VALIDATED`).
+
+### Added — larger LibreYOLO variants (inference-ready)
+
+- 10 registry + policy rows: `libreyolo-yolox-{m,l,x}`, `libreyolo-yolov9-{m,c}`,
+  `libreyolo-rtdetr-r101`, `libreyolo-dfine-{s,m,l,x}` (permissive, commercial-safe).
+- Tests: `tests/test_v316_*` (lifecycle, checkpoint reload, NMS, capability truth,
+  variant registry, no-ultralytics) + gated
+  `tests/live/test_v316_libreyolo_train_predict_live.py`. Docs:
+  `docs/qa/v316_libreyolo_reliability/` (preflight, matrix, anastig_upgrade_notes).
+- No Ultralytics/AGPL/GPL; YOLO-NAS stays blocked.
+
 ## [3.15.0] - 2026-06-16
 
 ### Added — model coverage + capability-truth contract
