@@ -43,7 +43,8 @@ def test_non_sidecar_openmmlab_models_are_hidden_and_blocked():
 
 def test_sidecar_live_openmmlab_is_visible_via_sidecar_only():
     sidecar = {
-        m: c for m, c in OPENMMLAB.items()
+        m: c
+        for m, c in OPENMMLAB.items()
         if c["readiness_state"] in taxonomy.LIVE_SIDECAR_READY_STATES
     }
     assert "rtmpose-m" in sidecar  # promoted in v3.21

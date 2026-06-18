@@ -31,8 +31,8 @@ _SEG_TASKS = frozenset({"foundation_segment", "segment", "grounded_segment"})
 
 def _load_sam(model_id: str, device: str):
     """Load the HF SamModel + SamProcessor behind ``model_id``."""
-    from transformers import SamModel, SamProcessor
-
+    # Torch-free validation FIRST (task + weights), so an ineligible model raises
+    # before importing the heavy transformers/torch stack.
     model = VisionModel(model_id, device=device)
     if model.entry.task not in _SEG_TASKS:
         from visionservex.exceptions import TaskNotSupportedError
@@ -46,6 +46,9 @@ def _load_sam(model_id: str, device: str):
     repo = model.entry.hf_repo_id
     if not repo:
         raise ValueError(f"WEIGHTS_MISSING: {model_id} has no hf_repo_id to fine-tune from")
+
+    from transformers import SamModel, SamProcessor
+
     proc = SamProcessor.from_pretrained(repo)
     sam = SamModel.from_pretrained(repo).to(device)
     return sam, proc, repo
@@ -93,11 +96,12 @@ def finetune_sam_decoder(
     output_dir: str | Path | None = None,
 ) -> dict[str, Any]:
     """Fine-tune only the SAM mask decoder on box-prompted masks. Frozen encoders."""
-    import torch
-
     if not samples:
         raise ValueError("DATASET_INVALID: need >=1 {image, box, mask} sample")
+    # ``_load_sam`` validates the task torch-free; only then do we need torch.
     sam, proc, repo = _load_sam(model_id, device)
+    import torch
+
     trainable = _freeze_encoders(sam)
 
     # Pre-encode the (frozen) inputs once; only the decoder sees gradients.

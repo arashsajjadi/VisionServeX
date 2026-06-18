@@ -95,8 +95,8 @@ def finetune_embedding_head(
     deeper head is mini-batched over multiple passes so it can actually fit the
     non-linearity; both produce a single reloadable artifact.
     """
-    import torch
-
+    # Cheap, torch-free validation FIRST so a bad head_type / non-embed model
+    # raises immediately even in a torch-less environment (e.g. CI quick tests).
     if head_type not in _HEAD_TYPES:
         raise ValueError(f"HEAD_TYPE_INVALID: {head_type!r} not in {sorted(_HEAD_TYPES)}")
 
@@ -110,6 +110,8 @@ def finetune_embedding_head(
             model.entry.task,
             hint="embedding head fine-tune requires an `embed`-task model.",
         )
+
+    import torch
 
     root = _resolve_imagefolder(dataset)
     classes = sorted(p.name for p in root.iterdir() if p.is_dir())
