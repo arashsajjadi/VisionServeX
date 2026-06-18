@@ -34,10 +34,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     VISIONSERVEX_CACHE_DIR=/cache/visionservex
 
-# OS deps
+# OS deps. libxcb1 / libgl1 / libglib2.0-0 are the runtime shared libraries
+# OpenCV (pulled by mmcv) links against — without them `import mmcv` fails with
+# `ImportError: libxcb.so.1: cannot open shared object file` on the slim base.
 RUN bash -c "apt-get update -qq || (sleep 5 && apt-get update -qq)" && apt-get install -y --no-install-recommends \
     ca-certificates \
-    git wget build-essential && rm -rf /var/lib/apt/lists/*
+    git wget build-essential \
+    libxcb1 libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -73,7 +76,14 @@ RUN pip install --force-reinstall --no-deps "numpy==1.26.4" && \
 # Sanity probe.
 RUN python -c "import torch, mmcv, mmpose, mmdet; print('torch', torch.__version__, 'mmcv', mmcv.__version__, 'mmpose', mmpose.__version__, 'mmdet', mmdet.__version__)"
 
+# HTTP sidecar server (FastAPI). Small final layer — keeps the heavy mmcv layers
+# cached. ``sidecar_app:app`` exposes /health, /predict/pose, /predict/obb, etc.
+RUN pip install --no-deps fastapi "uvicorn[standard]" python-multipart anyio starlette \
+    sniffio h11
+COPY docker/openmmlab/sidecar_app.py ./sidecar_app.py
+
 VOLUME ["/cache/visionservex"]
 
+EXPOSE 8090
 ENTRYPOINT ["visionservex"]
 CMD ["openmmlab", "doctor"]

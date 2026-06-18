@@ -129,12 +129,19 @@ class HQSAMEngine(BaseEngine):
 
     def load(self, *, device: str = "cuda", precision: str = "fp32") -> None:
         try:
+            import torch
             from segment_anything_hq import SamPredictor, build_sam_vit_b
         except ImportError:
             raise MissingDependencyError("pip install segment-anything-hq") from None
         if not HQSAM_CKPT.exists():
             raise FileNotFoundError(f"HQ-SAM checkpoint missing: {HQSAM_CKPT}")
-        model = build_sam_vit_b(checkpoint=str(HQSAM_CKPT))
+        # Build the architecture first, then load the state dict with an explicit
+        # CPU map_location. The upstream ``build_sam_vit_b(checkpoint=...)`` path
+        # calls a bare ``torch.load`` that fails on CPU-only hosts when the
+        # checkpoint carries CUDA tensors ("Attempting to deserialize ... CUDA ...").
+        model = build_sam_vit_b(checkpoint=None)
+        state = torch.load(str(HQSAM_CKPT), map_location="cpu")
+        model.load_state_dict(state)
         model.eval()
         try:
             model.to(device)

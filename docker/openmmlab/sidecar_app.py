@@ -30,7 +30,7 @@ _MODELS_DIR = Path(os.environ.get("OPENMMLAB_MODELS_DIR", "/models"))
 # ---------------------------------------------------------------------------
 
 try:
-    from fastapi import FastAPI, File, HTTPException, UploadFile
+    from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 except ImportError:
     print("FastAPI not installed. Run: pip install fastapi uvicorn", file=sys.stderr)
     sys.exit(1)
@@ -160,7 +160,7 @@ async def pull_model(model_id: str) -> dict[str, Any]:
 @app.post("/predict/pose")
 async def predict_pose(
     image: UploadFile = File(...),
-    model_id: str = "rtmpose-s",
+    model_id: str = Form("rtmpose-s"),
 ) -> dict[str, Any]:
     """Pose estimation via RTMPose.  Returns CHECKPOINT_REQUIRED if not set up."""
     try:
@@ -181,7 +181,12 @@ async def predict_pose(
             detail={"code": "MODEL_NOT_FOUND", "message": f"Unknown pose model: {model_id!r}"},
         )
 
-    if not _model_ready(model_id):
+    # rtmpose-m is served by mmpose's upstream ``pose2d='human'`` alias, which
+    # auto-downloads the Apache-2.0 RTMPose-m checkpoint (+ person detector) on
+    # first use — no pre-mounted checkpoint needed. Other variants still require a
+    # mounted checkpoint (their specific weights are not wired for auto-download).
+    auto_alias = model_id == "rtmpose-m"
+    if not auto_alias and not _model_ready(model_id):
         raise _checkpoint_required(model_id)
 
     # --- real MMPose inference path ---
@@ -189,25 +194,43 @@ async def predict_pose(
     try:
         from mmpose.apis import MMPoseInferencer  # type: ignore
 
-        inferencer = MMPoseInferencer(
-            pose2d=str(_config_path(model_id)),
-            pose2d_weights=str(_checkpoint_path(model_id)),
-        )
+        if auto_alias:
+            inferencer = MMPoseInferencer(pose2d="human")
+        else:
+            inferencer = MMPoseInferencer(
+                pose2d=str(_config_path(model_id)),
+                pose2d_weights=str(_checkpoint_path(model_id)),
+            )
         import numpy as np
         from PIL import Image as _PIL
 
         pil_img = _PIL.open(io.BytesIO(img_bytes)).convert("RGB")
         img_np = np.array(pil_img)
-        result_gen = inferencer(img_np)
+        result_gen = inferencer(img_np, show=False, return_vis=False, vis_out_dir=None)
         result = next(iter(result_gen))
 
+        # ``predictions`` is a list of frames; each frame is a list of instance
+        # dicts (keypoints / keypoint_scores / bbox / bbox_score).
+        preds = result.get("predictions", []) if isinstance(result, dict) else []
         persons = []
-        for pred in result.get("predictions", [[]]):
-            keypoints = [
-                {"x": float(kp[0]), "y": float(kp[1]), "score": float(kp[2])}
-                for kp in pred.get("keypoints", [])
-            ]
-            persons.append({"keypoints": keypoints, "score": float(pred.get("bbox_score", 0.9))})
+        for frame_preds in preds:
+            frame_list = frame_preds if isinstance(frame_preds, list) else [frame_preds]
+            for inst in frame_list:
+                if not isinstance(inst, dict):
+                    continue
+                kps = inst.get("keypoints") or []
+                scs = inst.get("keypoint_scores") or []
+                keypoints = [
+                    {
+                        "x": float(kp[0]),
+                        "y": float(kp[1]),
+                        "score": float(scs[i]) if i < len(scs) else 0.0,
+                    }
+                    for i, kp in enumerate(kps)
+                ]
+                persons.append(
+                    {"keypoints": keypoints, "score": float(inst.get("bbox_score") or 0.0)}
+                )
 
         return {
             "model_id": model_id,
@@ -230,7 +253,7 @@ async def predict_pose(
 @app.post("/predict/obb")
 async def predict_obb(
     image: UploadFile = File(...),
-    model_id: str = "rtmdet-r2-s",
+    model_id: str = Form("rtmdet-r2-s"),
 ) -> dict[str, Any]:
     """OBB detection via RTMDet-R/R2.  Returns CHECKPOINT_REQUIRED if not set up."""
     try:
@@ -302,7 +325,7 @@ async def predict_obb(
 @app.post("/predict/segment")
 async def predict_segment(
     image: UploadFile = File(...),
-    model_id: str = "co-dino-inst-vit-l-coco",
+    model_id: str = Form("co-dino-inst-vit-l-coco"),
 ) -> dict[str, Any]:
     if not _model_ready(model_id):
         raise _checkpoint_required(model_id)
@@ -319,7 +342,7 @@ async def predict_segment(
 @app.post("/predict/classify")
 async def predict_classify(
     image: UploadFile = File(...),
-    model_id: str = "internimage-t",
+    model_id: str = Form("internimage-t"),
 ) -> dict[str, Any]:
     if not _model_ready(model_id):
         raise _checkpoint_required(model_id)

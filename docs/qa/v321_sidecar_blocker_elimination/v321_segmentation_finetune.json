@@ -1,0 +1,24 @@
+{
+  "sprint": "v3.21",
+  "component": "segmentation_finetune",
+  "note": "SAM mask-decoder fine-tune (frozen vision+prompt encoders). Only the mask decoder state_dict is trained/saved; encoder weights are never modified or redistributed. Lifecycle: train decoder -> save -> reload (encoder+tuned decoder) -> segment box prompt.",
+  "results": [
+    {
+      "model_id": "sam-vit-base",
+      "task": "foundation_segment",
+      "method": "sam_decoder_finetune",
+      "status": "PASS",
+      "live_verified": true,
+      "reload_verified": true,
+      "post_reload_method": "segment",
+      "trainable_params": 4058340,
+      "frozen": [
+        "vision_encoder",
+        "prompt_encoder"
+      ],
+      "final_loss": 0.0,
+      "post_reload_iou": 1.0,
+      "device": "cpu"
+    }
+  ]
+}

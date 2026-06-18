@@ -37,7 +37,7 @@ from visionservex.core.results import (
     SegmentationResult,
 )
 from visionservex.engines._stub import StubEngine
-from visionservex.engines.base import MissingDependencyError
+from visionservex.engines.base import EngineError, MissingDependencyError
 from visionservex.engines.registry import register_engine
 from visionservex.registry import ModelEntry
 from visionservex.utils.logging import get_logger
@@ -223,6 +223,36 @@ class RFDETREngine(StubEngine):
     def postprocess(self, raw: Any, *, image: Any, **kwargs: Any) -> BaseResult:
         """Not called when predict() is overridden."""
         return self._mock.postprocess(raw, image=image, **kwargs)
+
+    def export(self, format: str, output_path: Path) -> Path:
+        """Export the loaded/trained RF-DETR model to ONNX via the native exporter.
+
+        Delegates to the ``rfdetr`` package's own ``model.export()`` (Apache-2.0),
+        which writes an ONNX file to a directory; we move it to ``output_path``.
+        Only ONNX is supported.
+        """
+        fmt = format.lower()
+        if fmt != "onnx":
+            raise NotImplementedError(f"RFDETREngine supports ONNX export only, not {format!r}")
+        if not self._real_ready:
+            self.load(device=self.device or "cpu", precision=self.precision)
+
+        import shutil
+        import tempfile
+
+        out = Path(output_path)
+        with tempfile.TemporaryDirectory() as td:
+            self._rfdetr_model.export(output_dir=td, opset_version=17, verbose=False)
+            onnx_files = sorted(Path(td).rglob("*.onnx"))
+            if not onnx_files:
+                raise EngineError("RF-DETR native export produced no .onnx file")
+            # Prefer the full inference model over a backbone-only export.
+            chosen = next(
+                (p for p in onnx_files if "backbone" not in p.name.lower()), onnx_files[0]
+            )
+            out.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(chosen), str(out))
+        return out
 
     def _sv_to_result(self, dets: Any, image: Image.Image) -> BaseResult:
         """Convert supervision.Detections → VisionServeX result."""

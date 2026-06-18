@@ -2,6 +2,210 @@
 
 ## [Unreleased]
 
+## [3.21.0] - 2026-06-18 (staged on branch — NOT tagged, NOT on PyPI; awaiting owner approval)
+
+Sidecar & blocker-elimination sprint. Operationalize previously-blocked models
+through isolated Docker sidecars; promote nothing without committed live evidence.
+
+### Added — models live via isolated Docker sidecars
+- **Florence-2** `base` + `large` → `VLM_READY_LIVE_SIDECAR`. New py3.11 /
+  transformers-4.44 sidecar (`docker/florence2/`); caption + detailed-caption + OD
+  return real output on CPU. The `flash_attn` hard import is dropped via a
+  `get_imports` patch (eager attention).
+- **OpenMMLab RTMPose** `rtmpose-m` → `INFERENCE_READY_LIVE_SIDECAR`. mmcv-2.1
+  sidecar now serves `/predict/pose` (17 keypoints over HTTP, CPU, Apache-2.0
+  auto-download). Form-field + result-parser fixes; FastAPI baked into the image.
+
+### Added — honest fine-tuning pushes (live-verified)
+- **SAM mask-decoder fine-tune** (`training.finetune_sam_decoder` +
+  `SamDecoderModel`): frozen vision+prompt encoders, decoder-only training. Live on
+  `sam-vit-base` (reload→segment IoU 1.0). `fine_tune_kind=frozen_encoder_decoder`
+  for the four HF SamModel segmenters.
+- **Deeper embedding fine-tune**: `finetune_embedding_head(head_type='linear'|'mlp')`
+  — a deeper `Linear→GELU→Dropout→Linear` head alongside the linear probe; backbone
+  stays frozen. `fine_tune_kind=frozen_backbone_head`.
+
+### Added — generic sidecar architecture + taxonomy
+- `sidecars/{base,client,protocol,errors}.py`: HTTP client to isolated sidecars,
+  normalized request/response protocol, typed errors with `hf_` token redaction.
+- 3 readiness states: `VLM_/INFERENCE_/SEGMENTATION_READY_LIVE_SIDECAR` — live but
+  not host-runnable; they supersede host technical blockers, never a legal / gated /
+  weights block.
+- Capability fields: `sidecar_supported/required/name/live/cpu_verified/
+  gpu_verified`, `anastig_sidecar_visibility`, `fine_tune_kind`. Anastig contract
+  v3.21 (`docs/anastig_model_contract_v321.md`).
+
+### Honestly still blocked (reproduced 2026-06-18, exact next steps)
+- **OneFormer-dinat** `DEPENDENCY_MISSING`: natten 0.21.6 installed but
+  `transformers.models.dinat` imports the removed `natten2dav` API (needs natten
+  ≤0.15 + matching torch). `oneformer-swin-large` already covers OneFormer live.
+- **OneFormer-convnext** `WEIGHTS_MISSING`: weights never released.
+- **RT-DETRv4**: no official release (HF has only community manga fine-tunes).
+- **DEIMv2 / DEIM**: official checkpoints exist (`Intellindust/DEIMv2_DINOv3_S_COCO`)
+  but need the upstream custom-architecture loader.
+- `sam3-base` stays `GATED_TOKEN_REQUIRED` (no token supplied; never tested/printed).
+
+## [3.20.0] - 2026-06-17 (staged on branch — NOT tagged, NOT on PyPI; awaiting owner approval)
+
+Final pre-publish operationalization. Promote nothing without real evidence.
+
+### Added — train/fine-tune capability dimensions
+- `model_capabilities()` now exposes separate **inference / train / fine-tune**
+  dimensions, each with a `*_live_verified` flag backed by committed matrices:
+  `inference_ready`, `train_ready`, `fine_tune_ready`, `reload_supported`,
+  `reload_live_verified`, `export_live_verified`, `fine_tune_live_verified`,
+  `token_never_logged`, `anastig_train_visibility`, `anastig_finetune_visibility`.
+
+### Added — real embedding head fine-tune (10 models → FINE_TUNE_READY_LIVE)
+- New public `visionservex.training.finetune_embedding_head` + `EmbeddingHeadModel`
+  (frozen backbone + linear-probe head). Full lifecycle live-verified for all 10
+  embedders (DINOv2 ×4, CLIP ×2, SigLIP, SigLIP2 ×3): head_train → checkpoint →
+  reload → classify/embed/similarity-after-reload (train_acc 1.0).
+  `tools/qa/v320_train_finetune_matrix.py`.
+
+### Added — OpenMMLab Docker sidecar (built + CPU-proven)
+- Fixed the sidecar image build (`libxcb1 libgl1 libglib2.0-0` in
+  `docker/openmmlab/Dockerfile`; added `.dockerignore`). `mmdet`/`mmpose`/`mmcv`
+  import cleanly; ran a live rtmdet **CPU** smoke in the container. GPU is blocked on
+  this host (RTX 5080 sm_120 vs mmcv-pinned torch 2.1.0+cu121). Models stay hidden in
+  the default package (sidecar is opt-in); the path is now proven.
+
+### Honestly still blocked (reproduced, exact next steps)
+- **Florence-2** — even an isolated venv fails: transformers ≤4.49 (needed for
+  `_supports_sdpa`) has no `tokenizers` wheel for Python 3.13. Needs a py3.10/3.11
+  sidecar. `DEPENDENCY_MISSING`.
+- **OneFormer** convnext (permanent HF 404) / dinat (NATTEN API mismatch, GPU-only).
+- **DEIM/DEIMv2/RT-DETRv4** custom-loader (non-HF configs / torch 2.5.1 pin / DINOv3
+  license caveat). **OpenMMLab** GPU (sm_120 incompatibility).
+
+### Tests / contract
+- `tests/test_v320_*.py` (13) + `tests/live/test_v320_*.py` (6). New Anastig contract
+  `docs/anastig_model_{contract,allowlist}_v320` (18-bucket primary partition of 151 +
+  4 live views + UI copy). Evidence under `docs/qa/v320_final_operationalization/`.
+
+**Gains:** 0 → **10 FINE_TUNE_READY_LIVE**; 24 train-live + reload/export re-proven;
+102 live-ready readiness states preserved; OpenMMLab sidecar operationalized (CPU).
+
+## [3.19.0] - 2026-06-17 (staged on branch — NOT tagged, NOT on PyPI)
+
+Operationalize-all-models sprint: promote models from blocked/derived to
+**live-ready only with real evidence**. **102 live-ready** (was 93);
+**24 TRAIN_READY_LIVE** (was 16); **0 derived-train states remain**.
+
+### Operationalized (real live evidence)
+
+- **RF-DETR — all 8 trainable variants → `TRAIN_READY_LIVE`.** Ran the real native
+  PyTorch-Lightning trainer on a tiny synthetic COCO smoke (GPU), full lifecycle
+  train → checkpoint → reload (`from_checkpoint`) → predict/segment-after-reload →
+  schema → ONNX export, for `rfdetr-{nano,small,medium,base,large}` +
+  `rfdetr-seg-{nano,small,medium}`. Evidence:
+  `docs/qa/v319_operationalize_all_models/rfdetr_live_train_matrix.json` (8/8 PASS,
+  ≤3.5 GB VRAM). Fixes: dataset `val→valid` bridge, native-resolution dataset
+  (base÷56, seg÷12/24), `PYTORCH_JIT=0` for the seg mask-loss nvrtc path, and a
+  new **`RFDETREngine.export`** (native ONNX). New `rfdetr-train` extra.
+- **`maxvit-tiny-tf-224` → `INFERENCE_READY_LIVE`.** transformers 5.x loads the
+  `timm/` repo via `TimmWrapperForImageClassification`; registry `partial → wired`,
+  live top-5 classify verified. (Resolves a v3.18 `PARTIAL_IMPLEMENTATION_BLOCKED`.)
+
+### Honestly NOT operationalized (exact blockers + plans, not faked)
+
+- **Florence-2** — deep transformers-5.x cascade (BartTokenizerFast import →
+  forced_bos_token_id → _supports_sdpa → legacy-cache protocol), reproduced live;
+  pin to `<5.0` is mutually exclusive with SAM3 (`>=5.0`). Kept `DEPENDENCY_MISSING`.
+- **OneFormer** — `convnext-large` has no ConvNeXt checkpoint on HF Hub
+  (`WEIGHTS_MISSING`, permanent); `dinat-large` is a NATTEN↔transformers API
+  mismatch, GPU-only (`DEPENDENCY_MISSING`, corrected diagnosis).
+- **DEIM/DEIMv2/RT-DETRv4** — in-process HF infeasible (non-HF configs / incomplete
+  native `deimv2` / `torch==2.5.1` pin conflict / GitHub-Drive-only). DINOv3-backbone
+  license caveat flagged. `CUSTOM_LOADER_REQUIRED`.
+- **OpenMMLab** (internimage/rtmdet/rtmpose/co-dino/maskdino/seem, + partials
+  rtmdet-r2-s/rtmpose-s) — host-native mmcv infeasible (py3.13/cu130); Docker sidecar
+  is the documented path. Stays hidden.
+
+Full feasibility evidence + matrices under `docs/qa/v319_operationalize_all_models/`.
+
+### Tests
+
+- `tests/test_v319_*.py` (no-fake-live-readiness, every-model-exact-blocker-or-
+  live-proof, rfdetr-train-live-or-exact-blocker, anastig-visibility-only-live-ready,
+  optional-deps-don't-break-base-install, gated-token-never-logged,
+  openmmlab/custom-loader-hidden, docs-generated-from-capabilities) + env-gated
+  `tests/live/test_v319_*.py`.
+
+### Contract
+
+- `docs/anastig_model_contract_v319.md` + `docs/anastig_model_allowlist_v319.json`
+  (14-bucket partition incl. `train_ready_derived_admin_only`,
+  `hidden_custom_loader_required`, `blocked_{dependency,weights,partial,license}`),
+  `docs/qa/v319_operationalize_all_models/final_model_matrix.{json,md}`.
+
+## [3.18.0] - 2026-06-17
+
+### Added — precise readiness taxonomy + live-verified capability truth
+
+The full-catalog reliability sprint: every model is now live-verified or honestly
+hidden/blocked with a precise reason. Nothing is "ready" without evidence.
+
+- **22-state readiness taxonomy** (`src/visionservex/readiness/taxonomy.py`):
+  `model_capabilities()` gains `readiness_state` (e.g. `TRAIN_READY_LIVE`,
+  `INFERENCE_READY_LIVE`, `EMBEDDING_READY_LIVE`, `SEGMENTATION_READY_LIVE`,
+  `OPEN_VOCAB_READY_LIVE`, `GATED_TOKEN_REQUIRED`, `LICENSE_BLOCKED`,
+  `NON_COMMERCIAL_BLOCKED`, `CATALOG_ONLY_ENGINE_NOT_WIRED`, `CUSTOM_LOADER_REQUIRED`,
+  `DEPENDENCY_MISSING`, `WEIGHTS_MISSING`, `PARTIAL_IMPLEMENTATION_BLOCKED`,
+  `*_DERIVED_NEEDS_LIVE_CONFIRMATION`, …). No state promises readiness unless it is
+  live-verified (`*_LIVE`) or explicitly flagged derived. The legacy coarse
+  `readiness` is kept byte-stable for backward compatibility.
+- **`anastig_visibility`** (`show_train` / `show_inference` / `show_embedding` /
+  `show_segmentation` / `show_token_required` / `hide` / `blocked_admin_only`) so a
+  downstream UI is driven entirely from the capability object — no hardcoded allowlist.
+- New capability fields: `license`, `license_class`, `requires_token`,
+  `legal_review_required`, `blocker`, `predict_supported`, `live_verified_inference`,
+  `live_verified_train`. `commercial_safe` is now hard-gated against copyleft/non-commercial.
+
+### Added — live verification matrices (real runs, committed evidence)
+
+- **Live inference matrix** (`tools/qa/v318_live_inference_matrix.py`): real CPU smoke
+  inference for all 105 wired, legal, non-gated models. **101 passed.** Honest blockers
+  for the rest (Florence-2 ×2 `DEPENDENCY_MISSING`, OneFormer DiNAT `DEPENDENCY_MISSING`,
+  OneFormer ConvNeXt `WEIGHTS_MISSING`).
+- **Live train-lifecycle matrix** (`tools/qa/v318_live_train_lifecycle_matrix.py`):
+  full train → checkpoint → reload → predict-after-reload → schema → ONNX export.
+  **16 `TRAIN_READY_LIVE`** (3 LibreYOLO detectors + 13 torchvision classifiers).
+  RF-DETR (×8) stays `TRAIN_READY_DERIVED` — its native COCO trainer is too heavy for a
+  CPU smoke and is not faked; its inference is live-verified, so it still shows for inference.
+- Evidence is committed under `docs/qa/v318_full_model_truth/`; the conclusions are baked
+  into `src/visionservex/readiness/live_evidence.py` (`tools/qa/v318_sync_live_evidence.py`),
+  so `model_capabilities()` stays weight-free. A model that was live-tested and **failed**
+  gets its true blocker, never an optimistic "derived".
+
+### Added — typed detect() + top-level exports
+
+- `VisionModel.detect(...)` — typed router for the detection family (open-vocab takes
+  `prompts=`); raises `TaskNotSupportedError` on a non-detector.
+- `visionservex.list_models` and `visionservex.model_capabilities` are now top-level exports.
+
+### Added — Anastig contract + legal audit + inventory (all generated)
+
+- `docs/anastig_model_contract_v318.md` + `docs/anastig_model_allowlist_v318.json`
+  (buckets: train/inference/embedding/segmentation/open-vocab ready-live, gated,
+  hidden-catalog-only, blocked, license-blocked).
+- `docs/legal_model_audit.md` + `docs/qa/v318_full_model_truth/legal_matrix.json`:
+  permissive-only catalog confirmed (no AGPL/GPL/SSPL, no non-commercial); 1 gated (BYOT).
+- `docs/qa/v318_full_model_truth/{discovered_models.json,discovered_models.md,model_inventory.csv}`.
+
+### Fixed
+
+- **HQ-SAM** now loads on CPU-only hosts: build the architecture, then load the state
+  dict with an explicit CPU `map_location` (was crashing on the upstream bare `torch.load`).
+
+### Tests
+
+- `tests/test_v318_*.py` (catalog completeness, capability-truth contract, no-ready-without-
+  live-or-derived, Anastig allowlist, public-API syntax, wrong-task typed errors, detection/
+  embedding/segmentation/train-lifecycle/checkpoint-reload/export contracts, legal: no
+  Ultralytics runtime / no copyleft default-safe / gated-require-token / unknown-license-hidden).
+- Gated live tests behind env flags: `tests/live/test_v318_{live_inference_matrix,live_train_lifecycle_matrix,gated_models}.py`.
+
 ## [3.17.0] - 2026-06-17
 
 ### Added — full evidence-backed model matrix (all 151 models)

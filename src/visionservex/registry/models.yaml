@@ -3212,11 +3212,13 @@ models:
   # under the `timm/` org. We surface this as an upstream blocker rather
   # than retry a 404 every time.
   hf_repo_id: timm/maxvit_tiny_tf_224.in1k
-  auto_download: false
+  auto_download: true
   requires_optional_extra: true
   install_extra: hf
-  # v2.29.0: promoted to partial — engine is wired via hf_classify, requires timm.
-  implementation_status: partial
+  # v3.19.0: WIRED. transformers>=5 loads the timm/ repo via TimmWrapperForImage-
+  # Classification; live classify smoke verified (top-5 on a real image). Requires
+  # the `timm` package (present in the `hf` extra path).
+  implementation_status: wired
   supported_devices:
   - cpu
   - cuda

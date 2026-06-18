@@ -47,6 +47,45 @@ _CLASSIFY_TASKS = frozenset({"classify", "classification"})
 _EMBED_TASKS = frozenset({"embed", "embedding"})
 _SEGMENT_TASKS = frozenset({"foundation_segment", "segment", "grounded_segment"})
 _DETECT_TASKS = frozenset({"detect", "obb", "open_vocab_detect"})
+_OPEN_VOCAB_TASKS = frozenset({"open_vocab_detect"})
+
+# v3.21: model-family -> isolated Docker sidecar that can serve it when the host
+# environment cannot. A family appearing here means a sidecar *exists*; whether it
+# is *live-verified* is governed independently by ``live_evidence.LIVE_SIDECAR_VERIFIED``.
+_SIDECAR_BY_FAMILY: dict[str, str] = {
+    "florence-2": "florence2",
+    "rtmdet": "openmmlab",
+    "rtmpose": "openmmlab",
+    "deim": "deimv2",
+    "deimv2": "deimv2",
+    "rtdetrv4": "rtdetrv4",
+}
+
+
+# HF ``SamModel`` engines whose mask decoder can be fine-tuned with frozen
+# encoders (``training.segmentation_finetune``). SAM2 uses a different arch.
+_SAM_DECODER_FINETUNE_ENGINES = frozenset({"sam_hf"})
+
+
+def _fine_tune_kind(*, train_ready: bool, task: str, inference_ready: bool, engine: str) -> str:
+    """Classify the *kind* of fine-tune a model honestly supports (v3.21).
+
+    - ``full_supervised``         — end-to-end trainable detector/classifier
+      (RF-DETR, LibreYOLO, torchvision classifiers).
+    - ``frozen_backbone_head``    — frozen-backbone head fine-tune for embedding
+      backbones, linear probe OR deeper MLP head
+      (``training.embedding_finetune``, ``head_type='linear'|'mlp'``).
+    - ``frozen_encoder_decoder``  — frozen-encoder SAM mask-decoder fine-tune for
+      HF SamModel segmenters (``training.segmentation_finetune``).
+    - ``none``                    — no fine-tune path wired.
+    """
+    if train_ready:
+        return "full_supervised"
+    if task in _EMBED_TASKS and inference_ready:
+        return "frozen_backbone_head"
+    if task in _SEGMENT_TASKS and engine in _SAM_DECODER_FINETUNE_ENGINES and inference_ready:
+        return "frozen_encoder_decoder"
+    return "none"
 
 
 def _require_task(entry: ModelEntry, allowed: frozenset[str], method: str) -> None:
@@ -506,6 +545,25 @@ class VisionModel:
     # ------- task-specific public API (v3.17.0) -------
     # Thin, typed routers over predict(); each raises TaskNotSupportedError when
     # the model's registered task doesn't match (never silently mis-routes).
+
+    def detect(
+        self,
+        image: Image.Image | bytes | str | Path,
+        *,
+        prompts: Sequence[str] | None = None,
+        threshold: float | None = None,
+        **kwargs: Any,
+    ):
+        """Object detection → ``DetectionResult`` / ``OpenVocabularyResult`` / OBB.
+
+        Typed router over :meth:`predict` for the detection family
+        (``detect`` / ``obb`` / ``open_vocab_detect``). Open-vocabulary detectors
+        accept ``prompts=[...]``. Raises :class:`TaskNotSupportedError` when the
+        model's registered task is not a detection task — never silently
+        mis-routes (e.g. calling ``detect()`` on a classifier raises).
+        """
+        _require_task(self.entry, _DETECT_TASKS, "detect")
+        return self.predict(image, prompts=prompts, threshold=threshold, **kwargs)
 
     def classify(self, image: Image.Image | bytes | str | Path, *, top_k: int = 5, **kwargs: Any):
         """Top-k image classification → ``ClassificationResult``."""
@@ -1179,6 +1237,55 @@ def _export_capabilities(model_id: str) -> dict[str, Any]:
     return info
 
 
+def _readiness_blocker(
+    readiness_state: str, entry: Any, status: str, engine_registered: bool
+) -> str | None:
+    """A single canonical, human-readable blocker for a precise readiness state.
+
+    Returns ``None`` for the live-ready states. For derived/blocked states it
+    explains exactly why the model is not plug-and-play usable, reusing the
+    registry's curated ``unavailable_reason`` where one exists.
+    """
+    from visionservex.readiness import taxonomy as _tx
+
+    reason = entry.unavailable_reason
+    table: dict[str, str] = {
+        _tx.TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION: (
+            "Train lifecycle is capability-derived; not live-verified in v3.18."
+        ),
+        _tx.INFERENCE_READY_DERIVED_NEEDS_LIVE_CONFIRMATION: (
+            "Inference path is capability-derived; not live-verified in v3.18."
+        ),
+        _tx.GATED_TOKEN_REQUIRED: (
+            "Gated: requires your own Hugging Face token and acceptance of the "
+            "upstream license (BYOT). VisionServeX never ships the weights or token."
+        ),
+        _tx.LICENSE_BLOCKED: (
+            "Copyleft/enterprise license is forbidden on the VisionServeX runtime/training path."
+        ),
+        _tx.NON_COMMERCIAL_BLOCKED: (
+            "Non-commercial / research-only license; blocked from the commercial-safe default."
+        ),
+        _tx.CUSTOM_LOADER_REQUIRED: reason
+        or "Custom loader required from the official upstream repository.",
+        _tx.PARTIAL_IMPLEMENTATION_BLOCKED: reason
+        or f"Partial implementation (implementation_status={status}).",
+        _tx.CATALOG_ONLY_ENGINE_NOT_WIRED: reason
+        or f"Catalog-only: engine {entry.engine!r} not wired (implementation_status={status}).",
+        _tx.WEIGHTS_MISSING: reason or "Weights not released or unverifiable.",
+        _tx.DEPENDENCY_MISSING: reason or "A required optional dependency is not installed.",
+        _tx.UPSTREAM_CRASH: reason or "Upstream code crashes on this path.",
+        _tx.OOM_BLOCKED: reason or "Out of memory for this device.",
+        _tx.TASK_NOT_SUPPORTED: reason or "Task not supported by this engine.",
+        _tx.UNKNOWN_REVIEW_REQUIRED: (
+            "Unknown/custom license or unclassified state; hidden pending review."
+        ),
+    }
+    if readiness_state in _tx.LIVE_READY_STATES:
+        return None
+    return table.get(readiness_state, reason)
+
+
 def model_capabilities(model_id: str) -> dict[str, Any]:
     """Return the canonical capability-truth object for a model (v3.15.0).
 
@@ -1203,21 +1310,48 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
         tcap.get("train_supported") and tcap.get("trained_checkpoint_predict_supported")
     )
 
+    from visionservex.readiness import live_evidence, taxonomy
+
     if pol is not None:
         legal_status = pol.final_policy
-        commercial_safe = bool(pol.default_safe and pol.final_policy == "commercial_safe_core")
         gated = bool(pol.gated)
         license_code = pol.code_license
         license_weights = pol.weights_license
+        policy_bucket: str | None = pol.final_policy
     else:
         # No curated policy row → fall back to the registry license, and DO NOT
         # claim commercial-safe-by-default (only the curated policy can grant that).
         legal_status = "registry_license_only"
-        commercial_safe = False
         gated = bool(entry.requires_auth)
         license_code = entry.license
         license_weights = None
+        policy_bucket = None
 
+    # Canonical single license string + legal class. Governs the weights you
+    # would actually run: weights license first, else code license, else registry.
+    license_effective = license_weights or license_code or entry.license
+    license_class = taxonomy.classify_license(license_effective)
+
+    # commercial_safe is granted ONLY by a curated commercial_safe_core policy row,
+    # and is hard-gated so a copyleft / non-commercial license can never be
+    # commercial-safe even if a row were mis-entered (defense in depth).
+    commercial_safe = bool(
+        pol is not None
+        and pol.default_safe
+        and pol.final_policy == "commercial_safe_core"
+        and license_class not in ("copyleft", "noncommercial")
+    )
+    requires_token = bool(gated)
+
+    # Soft legal-review overlay: VisionServeX-flagged review, or a custom/unknown
+    # license with no curated policy row → hidden from end users pending review.
+    legal_review_required = bool(
+        policy_bucket == "legal_review_required"
+        or (pol is None and license_class in ("custom_unknown", "unknown"))
+    )
+
+    # Legacy coarse readiness — kept byte-identical for backward compatibility
+    # (existing tests and the v3.17 matrix assert these four values + counts).
     if status == "stub" or not engine_registered:
         readiness = "catalog-only"
     elif train_ready and inference_ready:
@@ -1226,6 +1360,91 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
         readiness = "inference-ready"
     else:
         readiness = "blocked"
+
+    # v3.18 precise readiness state (canonical, machine-consumable) + visibility.
+    live_inf = live_evidence.live_inference_verified(model_id)
+    live_trn = live_evidence.live_train_verified(model_id)
+    # v3.21: live via an isolated Docker sidecar (e.g. Florence-2). A legal/gated/
+    # weights block still wins inside ``compute_readiness_state``.
+    live_sidecar = live_evidence.live_sidecar_verified(model_id)
+    readiness_state = taxonomy.compute_readiness_state(
+        task=entry.task,
+        implementation_status=status,
+        engine=entry.engine,
+        engine_registered=engine_registered,
+        policy_bucket=policy_bucket,
+        license_class=license_class,
+        unavailable_reason=entry.unavailable_reason,
+        train_ready=train_ready,
+        inference_ready=inference_ready,
+        live_inference_verified=live_inf,
+        live_train_verified=live_trn,
+        live_inference_blocker=live_evidence.live_inference_blocker(model_id),
+        sidecar_live_verified=live_sidecar,
+    )
+    visibility = taxonomy.anastig_visibility(
+        readiness_state,
+        live_inference=live_inf,
+        live_train=live_trn,
+        task=entry.task,
+        legal_review=legal_review_required,
+    )
+    blocker = _readiness_blocker(readiness_state, entry, status, engine_registered)
+
+    # v3.21: a sidecar-live model is usable (via the sidecar), so its coarse legacy
+    # bucket is "inference-ready" even though its host engine is an honest stub.
+    # Without this the coarse view would contradict the precise sidecar state.
+    if readiness_state in taxonomy.LIVE_SIDECAR_READY_STATES:
+        readiness = "inference-ready"
+
+    # v3.21 sidecar dimension. ``sidecar_required`` is True only when the model's
+    # *sole* working path is the sidecar (i.e. it earned a ``*_READY_LIVE_SIDECAR``
+    # state); a host-runnable model that merely *also* has a sidecar is not required
+    # to use it. CPU was the verification device this sprint; GPU is unverified.
+    sidecar_name = _SIDECAR_BY_FAMILY.get(entry.family)
+    sidecar_supported = sidecar_name is not None
+    sidecar_required = readiness_state in taxonomy.LIVE_SIDECAR_READY_STATES
+    if sidecar_required:
+        anastig_sidecar_visibility = visibility  # e.g. "show_inference_sidecar"
+    elif sidecar_supported:
+        anastig_sidecar_visibility = "host_preferred_sidecar_available"
+    else:
+        anastig_sidecar_visibility = "none"
+
+    # v3.20: separate inference / train / fine-tune lifecycle dimensions, each with
+    # a *_live_verified flag backed by the committed matrices.
+    live_reload = live_evidence.live_reload_verified(model_id)
+    live_export = live_evidence.live_export_verified(model_id)
+    live_ftune = live_evidence.live_finetune_verified(model_id)
+    reload_supported = bool(tcap.get("checkpoint_load_supported"))
+    # A fine-tune path exists for trainable models and for embedding models (a
+    # frozen-backbone head/linear-probe fine-tune). It is only *_live_verified once
+    # the committed v3.20 train/finetune matrix proves it.
+    sam_decoder_finetunable = entry.engine in _SAM_DECODER_FINETUNE_ENGINES
+    fine_tune_ready = bool(
+        train_ready
+        or (entry.task in _EMBED_TASKS and inference_ready)
+        or (entry.task in _SEGMENT_TASKS and sam_decoder_finetunable and inference_ready)
+    )
+    fine_tune_kind = _fine_tune_kind(
+        train_ready=train_ready,
+        task=entry.task,
+        inference_ready=inference_ready,
+        engine=entry.engine,
+    )
+
+    def _stage_visibility(supported: bool, live: bool, show_verb: str) -> str:
+        if live:
+            return show_verb
+        # admin_only only when the engine is actually usable (inference-ready) but
+        # the train/finetune lifecycle is not yet live-proven; a catalog-only model
+        # whose engine is unwired cannot train, so it is hidden.
+        if supported and inference_ready:
+            return "admin_only"
+        return "hide"
+
+    anastig_train_visibility = _stage_visibility(train_ready, live_trn, "show_train")
+    anastig_finetune_visibility = _stage_visibility(fine_tune_ready, live_ftune, "show_finetune")
 
     export_supported = [
         k for k, v in ecap.items() if isinstance(v, dict) and v.get("status") == "supported"
@@ -1253,15 +1472,47 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
         "backend": entry.backend,
         "model_category": str(entry.model_category) if entry.model_category else None,
         "readiness": readiness,
+        "readiness_state": readiness_state,
+        "anastig_visibility": visibility,
+        "blocker": blocker,
         "legal_status": legal_status,
+        "license": license_effective,
+        "license_class": license_class,
         "commercial_safe": commercial_safe,
         "gated": gated,
+        "requires_token": requires_token,
+        "legal_review_required": legal_review_required,
         "license_code": license_code,
         "license_weights": license_weights,
         "license_registry": entry.license,
         "has_policy_row": pol is not None,
         "implementation_status": status,
         "engine_registered": engine_registered,
+        "predict_supported": inference_ready,
+        "live_verified_inference": live_inf,
+        "live_verified_train": live_trn,
+        # v3.20: explicit per-lifecycle-dimension truth for Anastig.
+        "inference_ready": inference_ready,
+        "inference_live_verified": live_inf,
+        "train_ready": train_ready,
+        "train_live_verified": live_trn,
+        "fine_tune_ready": fine_tune_ready,
+        "fine_tune_live_verified": live_ftune,
+        "fine_tune_kind": fine_tune_kind,
+        "reload_supported": reload_supported,
+        "reload_live_verified": live_reload,
+        "export_live_verified": live_export,
+        "token_never_logged": True,
+        "anastig_train_visibility": anastig_train_visibility,
+        "anastig_finetune_visibility": anastig_finetune_visibility,
+        # v3.21: isolated-sidecar dimension (Florence-2, OpenMMLab, DEIMv2, ...).
+        "sidecar_supported": sidecar_supported,
+        "sidecar_required": sidecar_required,
+        "sidecar_name": sidecar_name,
+        "sidecar_live": live_sidecar,
+        "sidecar_cpu_verified": live_sidecar,
+        "sidecar_gpu_verified": False,
+        "anastig_sidecar_visibility": anastig_sidecar_visibility,
         "pretrained_inference_supported": inference_ready,
         "pretrained_load_supported": inference_ready and entry.download_type != "not_available",
         "auto_download": bool(entry.auto_download),
@@ -1298,7 +1549,9 @@ def _validated_syntax(
     if task in _SEGMENT_TASKS:
         syn["segment"] = f'VisionModel("{model_id}").segment("image.jpg", boxes=[[x, y, w, h]])'
     if task in _DETECT_TASKS:
-        syn["detect"] = f'VisionModel("{model_id}").predict("image.jpg", threshold=0.25)'
+        syn["detect"] = f'VisionModel("{model_id}").detect("image.jpg", threshold=0.25)'
+    if task in _OPEN_VOCAB_TASKS:
+        syn["detect"] = f'VisionModel("{model_id}").detect("image.jpg", prompts=["cat", "dog"])'
     if tcap.get("train_supported"):
         syn["train"] = f'VisionModel("{model_id}").train("data.yaml", epochs=1)'
         syn["from_checkpoint"] = f'VisionModel.from_checkpoint(ckpt, model_id="{model_id}")'

@@ -1,0 +1,33 @@
+{
+  "sprint": "v3.21",
+  "component": "embedding_deeper_finetune",
+  "note": "Frozen-backbone head fine-tune, linear probe vs deeper MLP head (Linear->GELU->Dropout->Linear). Backbone never modified/redistributed. Full lifecycle: train head -> save -> reload (architecture reconstructed from head_type) -> classify.",
+  "results": [
+    {
+      "model_id": "dinov2-small",
+      "head_type": "linear",
+      "method": "head_train",
+      "train_acc": 1.0,
+      "status": "PASS",
+      "reload_head_type": "linear",
+      "post_reload_classify_top1": [
+        "warm",
+        0.8725
+      ],
+      "device": "cpu"
+    },
+    {
+      "model_id": "dinov2-small",
+      "head_type": "mlp",
+      "method": "mlp_head_train",
+      "train_acc": 1.0,
+      "status": "PASS",
+      "reload_head_type": "mlp",
+      "post_reload_classify_top1": [
+        "warm",
+        1.0
+      ],
+      "device": "cpu"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+# Keep the Docker build context small — the OpenMMLab sidecar Dockerfile only
+# COPYs pyproject.toml/README.md/LICENSE/src/docs. Everything below is excluded
+# so multi-GB weights, notebooks, and caches never ship to the daemon.
+.git
+.github
+__pycache__
+*.pyc
+*.pt
+*.pth
+*.onnx
+*.engine
+dist
+build
+*.egg-info
+.venv
+venv
+notebook
+outputs
+plots
+reports
+visuals
+weight
+weights
+pretrain
+models
+visionservex_v27_run
+.pytest_cache
+.ruff_cache
+.mypy_cache
+tests
+examples
+scripts
+tools
+docker
+# Re-include the OpenMMLab sidecar server so the image can host the HTTP API
+# (the rest of docker/ stays excluded to keep the build context small).
+!docker/openmmlab/sidecar_app.py

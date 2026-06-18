@@ -1,0 +1,263 @@
+{
+  "schema": "v320_openmmlab_sidecar_matrix",
+  "sidecar_image": "visionservex-openmmlab:v320 (built this sprint, 13.1GB)",
+  "live_smoke": {
+    "model": "rtmdet_tiny_8xb32-300e_coco",
+    "engine": "mmdet.DetInferencer",
+    "device_cpu": "PASS (300 proposals returned in container)",
+    "device_gpu": "BLOCKED: CUDA error no kernel image \u2014 RTX5080 sm_120 vs mmcv-pinned torch2.1.0+cu121 (max sm_89)"
+  },
+  "build_fix": "added libxcb1/libgl1/libglib2.0-0 to Dockerfile (was ImportError libxcb.so.1)",
+  "results": [
+    {
+      "model_id": "co-dino-inst-vit-l-coco",
+      "family": "co-dino",
+      "task": "segment",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "co-dino-inst-vit-l-lvis",
+      "family": "co-dino",
+      "task": "segment",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "internimage-b",
+      "family": "internimage",
+      "task": "classify",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "MIT",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "internimage-h",
+      "family": "internimage",
+      "task": "classify",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "MIT",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "internimage-l",
+      "family": "internimage",
+      "task": "classify",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "MIT",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "internimage-s",
+      "family": "internimage",
+      "task": "classify",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "MIT",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "internimage-t",
+      "family": "internimage",
+      "task": "classify",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "MIT",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "maskdino-r50-coco",
+      "family": "maskdino",
+      "task": "segment",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CUSTOM_LOADER_REQUIRED",
+      "blocker": "Requires detectron2 + manual checkpoint. No HF path verified. Custom loader not yet implemented.",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "maskdino-r50-panoptic",
+      "family": "maskdino",
+      "task": "segment",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CUSTOM_LOADER_REQUIRED",
+      "blocker": "Requires detectron2 + manual checkpoint. Custom loader not yet implemented.",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "rtmdet-r-l",
+      "family": "rtmdet",
+      "task": "obb",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "rtmdet-r-m",
+      "family": "rtmdet",
+      "task": "obb",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "rtmdet-r-s",
+      "family": "rtmdet",
+      "task": "obb",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "rtmdet-r-t",
+      "family": "rtmdet",
+      "task": "obb",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "rtmdet-r2-l",
+      "family": "rtmdet",
+      "task": "obb",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "rtmdet-r2-m",
+      "family": "rtmdet",
+      "task": "obb",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "rtmdet-r2-s",
+      "family": "rtmdet",
+      "task": "obb",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "PARTIAL_IMPLEMENTATION_BLOCKED",
+      "blocker": "Partial implementation (implementation_status=partial).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "rtmdet-r2-t",
+      "family": "rtmdet",
+      "task": "obb",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "rtmpose-l",
+      "family": "rtmpose",
+      "task": "pose",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "rtmpose-l-384x288",
+      "family": "rtmpose",
+      "task": "pose",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "rtmpose-m",
+      "family": "rtmpose",
+      "task": "pose",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "rtmpose-m-384x288",
+      "family": "rtmpose",
+      "task": "pose",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "rtmpose-s",
+      "family": "rtmpose",
+      "task": "pose",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "PARTIAL_IMPLEMENTATION_BLOCKED",
+      "blocker": "Partial implementation (implementation_status=partial).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "rtmpose-t",
+      "family": "rtmpose",
+      "task": "pose",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'openmmlab' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "seem-davit-d3",
+      "family": "seem",
+      "task": "grounded_segment",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'huggingface' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    },
+    {
+      "model_id": "seem-focal-t",
+      "family": "seem",
+      "task": "grounded_segment",
+      "status": "SIDECAR_CPU_PROVEN_DEFAULT_HIDDEN",
+      "readiness_state": "CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "blocker": "Catalog-only: engine 'huggingface' not wired (implementation_status=stub).",
+      "license": "Apache-2.0",
+      "note": "runnable via the OpenMMLab Docker sidecar (CPU proven); in-process engine is a stub \u2192 hidden by default"
+    }
+  ]
+}

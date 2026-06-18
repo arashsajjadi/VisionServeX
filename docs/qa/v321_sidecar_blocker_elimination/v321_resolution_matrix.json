@@ -1,0 +1,52 @@
+{
+  "sprint": "v3.21",
+  "component": "blocked_family_resolution",
+  "note": "Freshly-reproduced exact blockers for the families targeted under maximum pressure this sprint. Promotions land in v321_sidecar_matrix.json / live_evidence; everything below is kept honestly hidden with the exact reproduced failure and the precise unblock condition.",
+  "resolved_live": [
+    {"family": "florence-2", "models": ["florence-2-base", "florence-2-large"], "outcome": "VLM_READY_LIVE_SIDECAR", "via": "py3.11 transformers==4.44.2 Docker sidecar (flash_attn dropped, eager attention)"},
+    {"family": "rtmpose", "models": ["rtmpose-m"], "outcome": "INFERENCE_READY_LIVE_SIDECAR", "via": "OpenMMLab mmcv-2.1 Docker sidecar, pose2d=human auto-download, CPU, HTTP /predict/pose"}
+  ],
+  "still_blocked": [
+    {
+      "family": "oneformer",
+      "model_id": "oneformer-dinat-large",
+      "state": "DEPENDENCY_MISSING",
+      "reproduced": "natten 0.21.6+torch2110cu130 IS installed, but `transformers.models.dinat.modeling_dinat` does `from natten.functional import natten2dav, natten2dqkrpb` -> ImportError: cannot import name 'natten2dav' (removed in natten >=0.17). DiNAT needs natten <=0.15.x, which in turn pins an older torch.",
+      "date_reproduced": "2026-06-18",
+      "unblock_condition": "Isolated sidecar with natten 0.15.x + matching torch + transformers DiNAT, OR a transformers release that targets the natten >=0.17 fused-NA API.",
+      "note": "Low marginal value: oneformer-swin-large is already SEGMENTATION_READY_LIVE, so the OneFormer family is operational without dinat."
+    },
+    {
+      "family": "oneformer",
+      "model_id": "oneformer-convnext-large",
+      "state": "WEIGHTS_MISSING",
+      "reproduced": "No released checkpoint for the ConvNeXt OneFormer variant on HF or the official model zoo; weights were never published.",
+      "date_reproduced": "2026-06-18",
+      "unblock_condition": "Upstream publishes ConvNeXt OneFormer weights under a permissive license. Permanent blocker until then."
+    },
+    {
+      "family": "rtdetrv4",
+      "models": ["rtdetrv4-s", "rtdetrv4-m", "rtdetrv4-l", "rtdetrv4-x"],
+      "state": "CUSTOM_LOADER_REQUIRED / CATALOG_ONLY_ENGINE_NOT_WIRED",
+      "reproduced": "HF search for 'RT-DETRv4' returns only community manga-detection fine-tunes (tori29umai/rtdetrv4-x-manga109s, aoiandroid/...). No official numbered RT-DETRv4 release or general-purpose checkpoint exists.",
+      "date_reproduced": "2026-06-18",
+      "unblock_condition": "An official RT-DETRv4 release with a verified, permissively-licensed general checkpoint. Cannot operationalize a model whose weights do not exist."
+    },
+    {
+      "family": "deimv2",
+      "models": ["deimv2-s", "deimv2-x", "deimv2-l", "deimv2-m", "deimv2-n", "deimv2-pico", "deimv2-femto", "deimv2-atto"],
+      "state": "CUSTOM_LOADER_REQUIRED",
+      "reproduced": "Official checkpoints DO exist on HF (e.g. Intellindust/DEIMv2_DINOv3_S_COCO), upgrading the prior 'availability not independently verified'. But DEIMv2 is a DINOv3-backbone + DEIM-head custom architecture: the checkpoint is a raw state_dict that needs the official DEIMv2 repo code to instantiate, NOT a transformers/timm-loadable model.",
+      "date_reproduced": "2026-06-18",
+      "unblock_condition": "Vendor the DEIMv2 repo model code into an isolated sidecar (+ confirm the DINOv3 backbone weights are not gated) and wire a normalizer (sidecars/deimv2_normalize.py already exists). Checkpoint existence is now confirmed; the remaining work is the custom-architecture loader."
+    },
+    {
+      "family": "deim",
+      "models": ["deim-s", "deim-m"],
+      "state": "CUSTOM_LOADER_REQUIRED",
+      "reproduced": "No HF/pip-installable path; DEIM (CVPR'25) ships as an official training repo with custom architecture. Checkpoints require the upstream repo loader.",
+      "date_reproduced": "2026-06-18",
+      "unblock_condition": "Vendor the DEIM repo model code into an isolated sidecar with a verified permissive checkpoint."
+    }
+  ]
+}

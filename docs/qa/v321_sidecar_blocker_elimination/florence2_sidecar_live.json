@@ -1,0 +1,49 @@
+{
+  "sprint": "v3.21",
+  "component": "florence2_sidecar",
+  "transport": "http_docker_sidecar",
+  "image": "visionservex-florence2:v321",
+  "env": {
+    "python": "3.11.15",
+    "torch": "2.12.1+cu130",
+    "transformers": "4.44.2"
+  },
+  "device": "cpu",
+  "flash_attn_workaround": "get_imports patched to drop flash_attn (eager attention)",
+  "models": [
+    "florence-2-base",
+    "florence-2-large"
+  ],
+  "results": [
+    {
+      "model_id": "florence-2-base",
+      "task": "caption",
+      "ok": true,
+      "text": "the flag of colorado",
+      "n_detections": 0
+    },
+    {
+      "model_id": "florence-2-base",
+      "task": "detailed_caption",
+      "ok": true,
+      "text": "The image shows a blue background with a yellow circle in the center, surrounded by a red square.",
+      "n_detections": 0
+    },
+    {
+      "model_id": "florence-2-base",
+      "task": "od",
+      "ok": true,
+      "text": "flag",
+      "n_detections": 1
+    },
+    {
+      "model_id": "florence-2-large",
+      "task": "caption",
+      "ok": true,
+      "text": "a blue and yellow flag with a red square in the middle",
+      "n_detections": 0
+    }
+  ],
+  "all_ok": true,
+  "promoted_state": "VLM_READY_LIVE_SIDECAR"
+}

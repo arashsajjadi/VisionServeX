@@ -1,0 +1,21 @@
+{
+  "schema": "v319_inference_matrix",
+  "device": "cpu",
+  "note": "models operationalized in the v3.19 sprint",
+  "results": [
+    {
+      "model_id": "maxvit-tiny-tf-224",
+      "task": "classify",
+      "live_verified": true,
+      "status": "PASS",
+      "method_called": "classify",
+      "input_fixture": "smoke_rgb_320.jpg",
+      "output_schema_valid": true,
+      "latency_ms": 3990.5,
+      "device": "cpu",
+      "error_type": null,
+      "error_message": null,
+      "blocker": null
+    }
+  ]
+}

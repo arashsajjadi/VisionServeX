@@ -1,10 +1,13 @@
-# VisionServeX Model Syntax Matrix (v3.17.0)
+# VisionServeX Model Syntax Matrix (v3.18)
 
 Canonical public API per task. Every model is constructed the same way; the
 task-specific method validates the model's registered task and raises a typed
 `TaskNotSupportedError` (never silently mis-routes). Discover ids with
-`from visionservex.core.model import list_models; list_models(task="detect")` and
-the exact per-model syntax with `VisionModel(id).capabilities()["validated_syntax"]`.
+`visionservex.list_models(task="detect")` and the exact per-model syntax with
+`VisionModel(id).capabilities()["validated_syntax"]`.
+
+`visionservex.list_models` and `visionservex.model_capabilities` are now top-level
+exports.
 
 ## Generic / detection inference
 
@@ -12,11 +15,16 @@ the exact per-model syntax with `VisionModel(id).capabilities()["validated_synta
 from visionservex import VisionModel
 
 model = VisionModel("libreyolo-yolox-s", device="cuda")
-result = model.predict("image.jpg", threshold=0.25, nms_iou=0.5)
+result = model.detect("image.jpg", threshold=0.25)     # typed detect (v3.18)
+# equivalently: model.predict("image.jpg", threshold=0.25, nms_iou=0.5)
 # result.metadata -> {raw_count, post_nms_count, nms_applied, checkpoint}
 # result.detections -> [Detection(label, score, box, class_id), ...]  (post-NMS)
 raw = model.predict("image.jpg", return_raw=True)   # raw proposals (debug)
 ```
+
+`detect()` is the typed router for the detection family (`detect` / `obb` /
+`open_vocab_detect`); calling it on a non-detector raises
+`TaskNotSupportedError(code="TASK_NOT_SUPPORTED")`.
 
 Detection model IDs (task `detect`/`obb`/`open_vocab_detect`): `libreyolo-*`,
 `rfdetr-*`, `dfine-*`, `grounding-dino-*`, `owlv2-*`, `owlvit-*`, … (see

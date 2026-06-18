@@ -1,71 +1,67 @@
-# Anastig upgrade notes — VisionServeX v3.17.0 (full model matrix)
+# Anastig upgrade notes — VisionServeX v3.18 (live truth + visibility contract)
 
 ## Package pin
 
 ```bash
-pip install --upgrade "visionservex[all]==3.17.0"
+pip install --upgrade "visionservex[all]==3.18.0"
 ```
 
-## What v3.17.0 adds
+## What v3.18 changes for Anastig
 
-- A complete, evidence-backed **model matrix** for all 151 registered models
-  (`docs/model_matrix.md`, `docs/qa/v317_full_model_matrix/`).
-- Task-specific public API with **typed errors**: `classify()`, `embed()`,
-  `segment()`, `similarity()`, `correspond()`, plus `list_models(task=...)`.
-- `model_capabilities()` now carries `tasks` + `validated_syntax`.
+v3.18 makes the catalog **live-verified and self-describing**. Anastig no longer
+needs any heuristics about which models to show — it switches on two new fields.
 
-## Drive the UI from `model_capabilities(model_id)`
+- **`readiness_state`** — the precise readiness (22 states; see
+  `docs/capability_truth.md`). This supersedes the coarse `readiness`, which is
+  kept byte-stable for backward compatibility.
+- **`anastig_visibility`** — the verb Anastig acts on directly.
+- **`live_verified_inference` / `live_verified_train`** — whether the model was
+  actually run this sprint (not merely capability-derived).
+- **`requires_token`**, **`license`**, **`license_class`**, **`blocker`**,
+  **`legal_review_required`** — explicit legal/UX fields.
+- New top-level imports: `visionservex.list_models`, `visionservex.model_capabilities`.
+- New typed method: `VisionModel(id).detect(...)` (open-vocab detectors take `prompts=`).
 
-Discover ids per task with `list_models(task="detect")`. Build the picker from the
-capability object — do not hardcode.
+## Drive the entire UI from `anastig_visibility`
 
-| UI label | Condition | Method to call |
-|---|---|---|
-| **Training ready** | `readiness=="train-ready"` | `model.train(...)` → `VisionModel.from_checkpoint(...)` |
-| **Inference ready** | `readiness=="inference-ready"`, task detect/segment | `model.predict(...)` / `model.segment(...)` |
-| **Embedding ready** | `readiness=="inference-ready"`, `task=="embed"` | `model.embed(...)`, `model.similarity(a,b)` |
-| **Similarity ready** | embedding-ready | `model.similarity(model.embed(a), model.embed(b))` |
-| **Correspondence ready** | `insid3-*` only | `VSX.insid3(id).segment(query, ref, ref_mask)` |
-| **Blocked by license** | `legal_status` non-commercial/enterprise | hide / disable |
-| **Needs token** | `gated==True` | BYOT token (server-side only) |
-| **Experimental** | `train_supported and not validated_lifecycle` | inference now; train at own risk |
-| **Hidden / admin only** | `readiness=="catalog-only"` | hide |
+| `anastig_visibility` | Anastig behaviour |
+|---|---|
+| `show_train` | Show train **and** inference UI (`TRAIN_READY_LIVE`). |
+| `show_inference` | Show inference UI (`INFERENCE_READY_LIVE` / `OPEN_VOCAB_READY_LIVE` / `VLM_READY_LIVE`, or a train-derived model whose inference is live). |
+| `show_embedding` | Show embedding/similarity UI (`EMBEDDING_READY_LIVE`). |
+| `show_segmentation` | Show segmentation UI (`SEGMENTATION_READY_LIVE`). |
+| `show_token_required` | Show BYOT/token UI (`GATED_TOKEN_REQUIRED`). Never run without the user's token. |
+| `hide` | Hide entirely (catalog-only, custom-loader, partial, dependency/weights/crash/oom, **or derived-not-yet-live**). |
+| `blocked_admin_only` | Hide from end users; visible to admins (legal-review, license-blocked, unknown-review). |
 
-## Exact model IDs
+**Hard rule:** only `*_READY_LIVE` states are usable-by-default. A
+`*_DERIVED_NEEDS_LIVE_CONFIRMATION` model is capability-derived and **not yet
+live-verified** — keep it hidden until it is promoted to `*_LIVE`.
 
-- **Train** (validated lifecycle): `libreyolo-yolox-s`, `libreyolo-yolov9-s`,
-  `libreyolo-rtdetr-r50`; `rfdetr-*`; `torchvision-*` (ImageFolder classifier
-  fine-tune). 24 train-ready total — see `docs/training_matrix.md`.
-- **Inference (detect)**: `libreyolo-*` (incl. larger inference-only variants),
-  `rfdetr-*`, `dfine-*`, `grounding-dino-*`, `owlv2-*`, `owlvit-*`.
-- **Inference (segment)**: `sam-*`, `sam2-*`, `sam2.1-*`, `efficientsam-*`,
-  `mobilesam`, `hq-sam`, `oneformer-*`, `rfdetr-seg-*`.
-- **Classification**: `torchvision-*`, `convnextv2-*`, `swinv2-*`, `maxvit-*`.
-- **Embedding / Similarity**: `dinov2-*`, `clip-*`, `siglip-*`, `siglip2-*`.
-- **Correspondence**: `insid3-*` (INSID3 API only).
-- **Blocked (partial impl — engine registered, not inference-wired)**: the 3 rows
-  `maxvit-tiny-tf-224`, `rtmdet-r2-s`, `rtmpose-s` — `exact_blocker` =
-  `NOT_INFERENCE_READY: implementation_status=partial, engine_registered=True`.
-- **Hidden / catalog-only**: OpenMMLab `_stub` families (`internimage-*`, most
-  `rtmdet-*` / `rtmpose-*`) → `CATALOG_ONLY: engine 'openmmlab' not wired`; and the
-  `deim-*` / `deimv2-*` rows → custom loader required from the official repo.
-- **Needs token (gated)**: `grounding-dino-1.6` (registry license) and `sam3-base`
-  (BYOT license required) — token server-side only, never logged/committed.
+## The machine-readable contract
 
-## Capability fields to trust
+`docs/anastig_model_allowlist_v318.json` is generated straight from
+`model_capabilities()`. Buckets: `train_ready_live`, `inference_ready_live`,
+`embedding_ready_live`, `segmentation_ready_live`, `open_vocab_ready_live`,
+`gated_token_required`, `hidden_catalog_only`, `blocked`, `license_blocked`.
+Full prose: `docs/anastig_model_contract_v318.md`.
 
-`readiness`, `train_supported`, `trained_checkpoint_predict_supported`,
-`post_nms_predict_supported`, `validated_lifecycle`, `gated`, `commercial_safe`,
-`exact_blocker`, `validated_syntax`.
+## v3.18 live results (what is actually proven)
 
-## API syntax
+- **16 `TRAIN_READY_LIVE`** (full train→checkpoint→reload→predict→ONNX export):
+  `libreyolo-yolox-s` / `libreyolo-yolov9-s` / `libreyolo-rtdetr-r50` + all 13
+  `torchvision-*` classifiers.
+- **8 `TRAIN_READY_DERIVED`** (inference-live, native trainer not smoke-run):
+  `rfdetr-*`. These show as `show_inference`.
+- **~85 live inference-ready** across detect / segment / embed / open-vocab.
+- **1 `GATED_TOKEN_REQUIRED`**: `sam3-base` (BYOT).
+- **Hidden/blocked**: OpenMMLab `_stub` families, `deim-*`/`deimv2-*`/`rtdetrv4-*`
+  (custom loader), 3 partial rows, Florence-2 (`DEPENDENCY_MISSING`), OneFormer
+  ConvNeXt (`WEIGHTS_MISSING`), `medsam`/`hq-sam` (live but `blocked_admin_only`
+  pending legal review).
 
-See `docs/model_syntax_matrix.md`. Detection `predict()` returns **post-NMS** boxes;
-`result.metadata` has `raw_count`/`post_nms_count`/`nms_applied`. Unsupported task
-methods raise `TaskNotSupportedError` (code `TASK_NOT_SUPPORTED`) — handle it, don't
-expect a silent empty result.
-
-## Token handling
+## Token handling (unchanged, still strict)
 
 Gated models use a server/worker-side HF token only. The token is never printed,
-logged, or committed by VisionServeX.
+logged, committed, or embedded in any `model_capabilities()` payload (enforced by
+`tests/live/test_v318_gated_models.py`).
