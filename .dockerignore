@@ -32,3 +32,6 @@ examples
 scripts
 tools
 docker
+# Re-include the OpenMMLab sidecar server so the image can host the HTTP API
+# (the rest of docker/ stays excluded to keep the build context small).
+!docker/openmmlab/sidecar_app.py

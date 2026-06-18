@@ -13,10 +13,15 @@ from visionservex.readiness import taxonomy
 
 CAPS = {m: model_capabilities(m) for m in list_models()}
 
+# A model is "usable" (and therefore carries no blocker) when it is host-live OR
+# live through an isolated Docker sidecar (v3.21). Both are honest live-proof; the
+# sidecar variant simply requires the sidecar instead of the default host env.
+USABLE_STATES = taxonomy.LIVE_READY_STATES | taxonomy.LIVE_SIDECAR_READY_STATES
+
 
 def test_every_model_is_live_or_blocked_never_neither():
     for mid, c in CAPS.items():
-        is_live = c["readiness_state"] in taxonomy.LIVE_READY_STATES
+        is_live = c["readiness_state"] in USABLE_STATES
         has_blocker = bool(c["blocker"])
         assert is_live != has_blocker or (is_live and not has_blocker), mid
         # precise: live -> no blocker; not live -> a blocker string exists
@@ -28,16 +33,16 @@ def test_every_model_is_live_or_blocked_never_neither():
 
 def test_blocker_is_nonempty_and_specific_for_blocked_models():
     for mid, c in CAPS.items():
-        if c["readiness_state"] not in taxonomy.LIVE_READY_STATES:
+        if c["readiness_state"] not in USABLE_STATES:
             assert c["blocker"] and len(c["blocker"]) > 10, (mid, c["blocker"])
 
 
 def test_default_visible_models_are_all_live():
     for mid, c in CAPS.items():
-        if c["anastig_visibility"] in (
-            "show_train",
-            "show_inference",
-            "show_embedding",
-            "show_segmentation",
-        ):
+        vis = c["anastig_visibility"]
+        # Sidecar-live models surface as ``show_*_sidecar`` and are proven live via
+        # the sidecar (not the host inference/train path).
+        if vis.endswith("_sidecar"):
+            assert c["sidecar_live"], mid
+        elif vis in ("show_train", "show_inference", "show_embedding", "show_segmentation"):
             assert c["live_verified_inference"] or c["live_verified_train"], mid

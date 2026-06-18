@@ -25,7 +25,7 @@ of the precise state, so the two can never silently drift.
 from __future__ import annotations
 
 # --------------------------------------------------------------------------- #
-# The 22 readiness states.
+# The 25 readiness states (22 base + 3 sidecar-live, v3.21).
 # --------------------------------------------------------------------------- #
 TRAIN_READY_LIVE = "TRAIN_READY_LIVE"
 TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION = "TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION"
@@ -36,6 +36,13 @@ SEGMENTATION_READY_LIVE = "SEGMENTATION_READY_LIVE"
 OPEN_VOCAB_READY_LIVE = "OPEN_VOCAB_READY_LIVE"
 VLM_READY_LIVE = "VLM_READY_LIVE"
 CORRESPONDENCE_READY_LIVE = "CORRESPONDENCE_READY_LIVE"
+# Sidecar-live states (v3.21): the model is live-verified, but only through an
+# isolated Docker sidecar — it is NOT loadable in the default-safe host env
+# (e.g. Florence-2 needs transformers<5 / py3.11; OpenMMLab needs mmcv-pinned
+# torch). These are honestly distinct from the host-runnable ``*_READY_LIVE``.
+INFERENCE_READY_LIVE_SIDECAR = "INFERENCE_READY_LIVE_SIDECAR"
+SEGMENTATION_READY_LIVE_SIDECAR = "SEGMENTATION_READY_LIVE_SIDECAR"
+VLM_READY_LIVE_SIDECAR = "VLM_READY_LIVE_SIDECAR"
 GATED_TOKEN_REQUIRED = "GATED_TOKEN_REQUIRED"
 LICENSE_BLOCKED = "LICENSE_BLOCKED"
 NON_COMMERCIAL_BLOCKED = "NON_COMMERCIAL_BLOCKED"
@@ -60,6 +67,9 @@ READINESS_STATES: frozenset[str] = frozenset(
         OPEN_VOCAB_READY_LIVE,
         VLM_READY_LIVE,
         CORRESPONDENCE_READY_LIVE,
+        INFERENCE_READY_LIVE_SIDECAR,
+        SEGMENTATION_READY_LIVE_SIDECAR,
+        VLM_READY_LIVE_SIDECAR,
         GATED_TOKEN_REQUIRED,
         LICENSE_BLOCKED,
         NON_COMMERCIAL_BLOCKED,
@@ -106,6 +116,30 @@ _LIVE_STATE_FOR_TASK: dict[str, str] = {
     "correspondence": CORRESPONDENCE_READY_LIVE,
 }
 
+# Sidecar-live "ready" states — usable, but only through an isolated Docker
+# sidecar (NOT the default host env). Kept separate from ``LIVE_READY_STATES`` so
+# a downstream UI can flag the Docker requirement instead of implying pip-and-go.
+LIVE_SIDECAR_READY_STATES: frozenset[str] = frozenset(
+    {
+        INFERENCE_READY_LIVE_SIDECAR,
+        SEGMENTATION_READY_LIVE_SIDECAR,
+        VLM_READY_LIVE_SIDECAR,
+    }
+)
+
+# Per-task sidecar-live inference state.
+_SIDECAR_STATE_FOR_TASK: dict[str, str] = {
+    "detect": INFERENCE_READY_LIVE_SIDECAR,
+    "obb": INFERENCE_READY_LIVE_SIDECAR,
+    "pose": INFERENCE_READY_LIVE_SIDECAR,
+    "classify": INFERENCE_READY_LIVE_SIDECAR,
+    "classification": INFERENCE_READY_LIVE_SIDECAR,
+    "segment": SEGMENTATION_READY_LIVE_SIDECAR,
+    "foundation_segment": SEGMENTATION_READY_LIVE_SIDECAR,
+    "grounded_segment": SEGMENTATION_READY_LIVE_SIDECAR,
+    "vlm": VLM_READY_LIVE_SIDECAR,
+}
+
 
 # --------------------------------------------------------------------------- #
 # Coarse legacy bucket (kept for backward compatibility / existing tests).
@@ -118,14 +152,18 @@ def coarse_readiness(state: str) -> str:
     """
     if state in (TRAIN_READY_LIVE, TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION):
         return "train-ready"
-    if state in (
-        INFERENCE_READY_LIVE,
-        INFERENCE_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,
-        EMBEDDING_READY_LIVE,
-        SEGMENTATION_READY_LIVE,
-        OPEN_VOCAB_READY_LIVE,
-        VLM_READY_LIVE,
-        CORRESPONDENCE_READY_LIVE,
+    if (
+        state
+        in (
+            INFERENCE_READY_LIVE,
+            INFERENCE_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,
+            EMBEDDING_READY_LIVE,
+            SEGMENTATION_READY_LIVE,
+            OPEN_VOCAB_READY_LIVE,
+            VLM_READY_LIVE,
+            CORRESPONDENCE_READY_LIVE,
+        )
+        or state in LIVE_SIDECAR_READY_STATES
     ):
         return "inference-ready"
     if state in (CATALOG_ONLY_ENGINE_NOT_WIRED, CUSTOM_LOADER_REQUIRED, WEIGHTS_MISSING):
@@ -197,6 +235,10 @@ def anastig_visibility(
     # train-ready model whose inference is live but whose train is still derived).
     if live_inference or state in LIVE_READY_STATES:
         return _inference_show_verb(task)
+    # Sidecar-live: usable, but only via the Docker sidecar. Same UI surface with
+    # an explicit ``_sidecar`` marker so Anastig can require the sidecar.
+    if state in LIVE_SIDECAR_READY_STATES:
+        return _inference_show_verb(task) + "_sidecar"
     # Derived-but-not-live-verified, or anything else -> hidden until confirmed.
     return "hide"
 
@@ -306,6 +348,7 @@ def compute_readiness_state(
     live_inference_verified: bool,
     live_train_verified: bool,
     live_inference_blocker: str | None = None,
+    sidecar_live_verified: bool = False,
 ) -> str:
     """Compute the precise readiness state for one model.
 
@@ -351,6 +394,14 @@ def compute_readiness_state(
     # 4) Not released / unverifiable.
     if policy_bucket == "not_released_or_unverifiable" or "not released" in reason:
         return WEIGHTS_MISSING
+
+    # 4.5) Sidecar-live: the host env cannot load it, but an isolated Docker
+    #      sidecar runs it and a live smoke passed this sprint. Legal/gated/
+    #      weights gates above still win (a sidecar cannot launder a license, and
+    #      missing weights leave nothing to run); every *technical* host blocker
+    #      below (custom-loader, partial, dependency-missing) is superseded.
+    if sidecar_live_verified:
+        return _SIDECAR_STATE_FOR_TASK.get(task, INFERENCE_READY_LIVE_SIDECAR)
 
     # 5) Custom loader required (DEIM / DEIMv2 / RT-DETRv4 etc.).
     if "custom loader" in reason:
@@ -399,20 +450,24 @@ __all__ = [
     "GATED_TOKEN_REQUIRED",
     "INFERENCE_READY_DERIVED_NEEDS_LIVE_CONFIRMATION",
     "INFERENCE_READY_LIVE",
+    "INFERENCE_READY_LIVE_SIDECAR",
     "LICENSE_BLOCKED",
     "LIVE_READY_STATES",
+    "LIVE_SIDECAR_READY_STATES",
     "NON_COMMERCIAL_BLOCKED",
     "OOM_BLOCKED",
     "OPEN_VOCAB_READY_LIVE",
     "PARTIAL_IMPLEMENTATION_BLOCKED",
     "READINESS_STATES",
     "SEGMENTATION_READY_LIVE",
+    "SEGMENTATION_READY_LIVE_SIDECAR",
     "TASK_NOT_SUPPORTED",
     "TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION",
     "TRAIN_READY_LIVE",
     "UNKNOWN_REVIEW_REQUIRED",
     "UPSTREAM_CRASH",
     "VLM_READY_LIVE",
+    "VLM_READY_LIVE_SIDECAR",
     "WEIGHTS_MISSING",
     "anastig_visibility",
     "classify_license",

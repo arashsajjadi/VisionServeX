@@ -17,6 +17,9 @@ CAPS = {m: model_capabilities(m) for m in list_models()}
 
 # The only states whose name contains "READY".
 _LIVE = taxonomy.LIVE_READY_STATES
+# v3.21: sidecar-live states are live-PROVEN (just through an isolated Docker
+# sidecar), so they are a legitimate READY-named category alongside host-live.
+_SIDECAR = taxonomy.LIVE_SIDECAR_READY_STATES
 _DERIVED = {
     taxonomy.TRAIN_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,
     taxonomy.INFERENCE_READY_DERIVED_NEEDS_LIVE_CONFIRMATION,
@@ -27,9 +30,16 @@ def test_ready_named_states_are_only_live_or_derived():
     for mid, cap in CAPS.items():
         state = cap["readiness_state"]
         if "READY" in state:
-            assert state in (_LIVE | _DERIVED), (
-                f"{mid}: state {state!r} contains READY but is neither live nor explicitly derived"
+            assert state in (_LIVE | _SIDECAR | _DERIVED), (
+                f"{mid}: state {state!r} contains READY but is neither live, "
+                "sidecar-live, nor explicitly derived"
             )
+
+
+def test_sidecar_ready_states_have_sidecar_live_proof():
+    for mid, cap in CAPS.items():
+        if cap["readiness_state"] in _SIDECAR:
+            assert cap["sidecar_live"], f"{mid}: sidecar-ready state without sidecar_live proof"
 
 
 def test_live_ready_requires_a_live_flag():

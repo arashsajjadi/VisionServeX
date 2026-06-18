@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-3.20.0-informational.svg" alt="v3.20.0">
+  <img src="https://img.shields.io/badge/version-3.21.0-informational.svg" alt="v3.21.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 

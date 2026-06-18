@@ -2,6 +2,49 @@
 
 ## [Unreleased]
 
+## [3.21.0] - 2026-06-18 (staged on branch — NOT tagged, NOT on PyPI; awaiting owner approval)
+
+Sidecar & blocker-elimination sprint. Operationalize previously-blocked models
+through isolated Docker sidecars; promote nothing without committed live evidence.
+
+### Added — models live via isolated Docker sidecars
+- **Florence-2** `base` + `large` → `VLM_READY_LIVE_SIDECAR`. New py3.11 /
+  transformers-4.44 sidecar (`docker/florence2/`); caption + detailed-caption + OD
+  return real output on CPU. The `flash_attn` hard import is dropped via a
+  `get_imports` patch (eager attention).
+- **OpenMMLab RTMPose** `rtmpose-m` → `INFERENCE_READY_LIVE_SIDECAR`. mmcv-2.1
+  sidecar now serves `/predict/pose` (17 keypoints over HTTP, CPU, Apache-2.0
+  auto-download). Form-field + result-parser fixes; FastAPI baked into the image.
+
+### Added — honest fine-tuning pushes (live-verified)
+- **SAM mask-decoder fine-tune** (`training.finetune_sam_decoder` +
+  `SamDecoderModel`): frozen vision+prompt encoders, decoder-only training. Live on
+  `sam-vit-base` (reload→segment IoU 1.0). `fine_tune_kind=frozen_encoder_decoder`
+  for the four HF SamModel segmenters.
+- **Deeper embedding fine-tune**: `finetune_embedding_head(head_type='linear'|'mlp')`
+  — a deeper `Linear→GELU→Dropout→Linear` head alongside the linear probe; backbone
+  stays frozen. `fine_tune_kind=frozen_backbone_head`.
+
+### Added — generic sidecar architecture + taxonomy
+- `sidecars/{base,client,protocol,errors}.py`: HTTP client to isolated sidecars,
+  normalized request/response protocol, typed errors with `hf_` token redaction.
+- 3 readiness states: `VLM_/INFERENCE_/SEGMENTATION_READY_LIVE_SIDECAR` — live but
+  not host-runnable; they supersede host technical blockers, never a legal / gated /
+  weights block.
+- Capability fields: `sidecar_supported/required/name/live/cpu_verified/
+  gpu_verified`, `anastig_sidecar_visibility`, `fine_tune_kind`. Anastig contract
+  v3.21 (`docs/anastig_model_contract_v321.md`).
+
+### Honestly still blocked (reproduced 2026-06-18, exact next steps)
+- **OneFormer-dinat** `DEPENDENCY_MISSING`: natten 0.21.6 installed but
+  `transformers.models.dinat` imports the removed `natten2dav` API (needs natten
+  ≤0.15 + matching torch). `oneformer-swin-large` already covers OneFormer live.
+- **OneFormer-convnext** `WEIGHTS_MISSING`: weights never released.
+- **RT-DETRv4**: no official release (HF has only community manga fine-tunes).
+- **DEIMv2 / DEIM**: official checkpoints exist (`Intellindust/DEIMv2_DINOv3_S_COCO`)
+  but need the upstream custom-architecture loader.
+- `sam3-base` stays `GATED_TOKEN_REQUIRED` (no token supplied; never tested/printed).
+
 ## [3.20.0] - 2026-06-17 (staged on branch — NOT tagged, NOT on PyPI; awaiting owner approval)
 
 Final pre-publish operationalization. Promote nothing without real evidence.

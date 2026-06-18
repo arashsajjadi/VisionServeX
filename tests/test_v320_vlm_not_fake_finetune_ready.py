@@ -24,6 +24,21 @@ def test_vlms_are_not_fake_train_or_finetune_live():
 def test_blocked_vlms_have_exact_blocker():
     from visionservex.readiness import taxonomy
 
+    # Sidecar-live VLMs (e.g. Florence-2 via the py3.11 sidecar) are usable, not
+    # blocked, so they legitimately carry no blocker.
+    usable = taxonomy.LIVE_READY_STATES | taxonomy.LIVE_SIDECAR_READY_STATES
     for mid, c in VLM.items():
-        if c["readiness_state"] not in taxonomy.LIVE_READY_STATES:
+        if c["readiness_state"] not in usable:
             assert (c["blocker"] and "transformers" in c["blocker"].lower()) or c["blocker"], mid
+
+
+def test_sidecar_live_vlms_are_usable_without_blocker():
+    from visionservex.readiness import taxonomy
+
+    sidecar_vlms = {
+        m: c for m, c in VLM.items() if c["readiness_state"] in taxonomy.LIVE_SIDECAR_READY_STATES
+    }
+    assert sidecar_vlms  # florence-2-base/large promoted in v3.21
+    for mid, c in sidecar_vlms.items():
+        assert not c["blocker"], mid
+        assert c["sidecar_required"] and c["sidecar_live"], mid

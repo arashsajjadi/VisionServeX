@@ -76,7 +76,14 @@ RUN pip install --force-reinstall --no-deps "numpy==1.26.4" && \
 # Sanity probe.
 RUN python -c "import torch, mmcv, mmpose, mmdet; print('torch', torch.__version__, 'mmcv', mmcv.__version__, 'mmpose', mmpose.__version__, 'mmdet', mmdet.__version__)"
 
+# HTTP sidecar server (FastAPI). Small final layer — keeps the heavy mmcv layers
+# cached. ``sidecar_app:app`` exposes /health, /predict/pose, /predict/obb, etc.
+RUN pip install --no-deps fastapi "uvicorn[standard]" python-multipart anyio starlette \
+    sniffio h11
+COPY docker/openmmlab/sidecar_app.py ./sidecar_app.py
+
 VOLUME ["/cache/visionservex"]
 
+EXPOSE 8090
 ENTRYPOINT ["visionservex"]
 CMD ["openmmlab", "doctor"]

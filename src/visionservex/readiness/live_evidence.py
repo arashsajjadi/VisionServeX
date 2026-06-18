@@ -177,8 +177,6 @@ LIVE_TRAIN_VERIFIED: frozenset[str] = frozenset(
 # "*_DERIVED_NEEDS_LIVE_CONFIRMATION" — it gets its true blocker instead.
 # >>> BEGIN GENERATED: LIVE_INFERENCE_FAILED
 LIVE_INFERENCE_FAILED: dict[str, str] = {
-    "florence-2-base": "DEPENDENCY_MISSING",
-    "florence-2-large": "DEPENDENCY_MISSING",
     "oneformer-convnext-large": "WEIGHTS_MISSING",
     "oneformer-dinat-large": "DEPENDENCY_MISSING",
 }
@@ -269,6 +267,7 @@ LIVE_FINETUNE_VERIFIED: frozenset[str] = frozenset(
         "dinov2-giant",
         "dinov2-large",
         "dinov2-small",
+        "sam-vit-base",
         "siglip-base-patch16-224",
         "siglip2-base-patch16-224",
         "siglip2-large-patch16-256",
@@ -276,6 +275,21 @@ LIVE_FINETUNE_VERIFIED: frozenset[str] = frozenset(
     }
 )
 # <<< END GENERATED: LIVE_FINETUNE_VERIFIED
+
+# v3.21: models live-verified ONLY through an isolated Docker sidecar — not
+# loadable in the default-safe host env, but a real inference smoke passed this
+# sprint via the sidecar (e.g. Florence-2 on transformers<5 / py3.11). These earn
+# a ``*_READY_LIVE_SIDECAR`` state, which is honestly distinct from host-runnable
+# ``*_READY_LIVE`` and supersedes the host DEPENDENCY_MISSING blocker.
+# >>> BEGIN GENERATED: LIVE_SIDECAR_VERIFIED
+LIVE_SIDECAR_VERIFIED: frozenset[str] = frozenset(
+    {
+        "florence-2-base",
+        "florence-2-large",
+        "rtmpose-m",
+    }
+)
+# <<< END GENERATED: LIVE_SIDECAR_VERIFIED
 
 
 def live_inference_verified(model_id: str) -> bool:
@@ -308,6 +322,11 @@ def live_finetune_verified(model_id: str) -> bool:
     return model_id in LIVE_FINETUNE_VERIFIED
 
 
+def live_sidecar_verified(model_id: str) -> bool:
+    """True iff ``model_id`` ran a live inference smoke via an isolated sidecar."""
+    return model_id in LIVE_SIDECAR_VERIFIED
+
+
 # --------------------------------------------------------------------------- #
 # Evidence loaders (used by tools/tests to cross-check the baked conclusions).
 # --------------------------------------------------------------------------- #
@@ -326,6 +345,12 @@ _DOCS_DIR_V320 = (
 )
 TRAIN_FINETUNE_MATRIX_PATH = _DOCS_DIR_V320 / "train_finetune_matrix.json"
 INFERENCE_MATRIX_PATH_V320 = _DOCS_DIR_V320 / "v320_inference_matrix.json"
+# v3.21 sidecar blocker-elimination matrix (isolated Docker sidecars).
+_DOCS_DIR_V321 = (
+    Path(__file__).resolve().parents[3] / "docs" / "qa" / "v321_sidecar_blocker_elimination"
+)
+SIDECAR_MATRIX_PATH_V321 = _DOCS_DIR_V321 / "v321_sidecar_matrix.json"
+SEG_FINETUNE_MATRIX_PATH_V321 = _DOCS_DIR_V321 / "v321_segmentation_finetune.json"
 
 _ALL_TRAIN_MATRICES = (TRAIN_MATRIX_PATH, RFDETR_TRAIN_MATRIX_PATH, TRAIN_FINETUNE_MATRIX_PATH)
 
@@ -371,17 +396,30 @@ def train_verified_from_matrix() -> set[str]:
     return _passed_ids(TRAIN_MATRIX_PATH) | _passed_ids(RFDETR_TRAIN_MATRIX_PATH)
 
 
-_FINETUNE_METHODS = ("fine_tune", "adapter_train", "head_train", "contrastive_train", "lora")
+_FINETUNE_METHODS = (
+    "fine_tune",
+    "adapter_train",
+    "head_train",
+    "contrastive_train",
+    "lora",
+    "sam_decoder_finetune",  # v3.21: frozen-encoder SAM mask-decoder fine-tune
+)
 
 
 def finetune_verified_from_matrix() -> set[str]:
-    """PASS rows in the v3.20 train/finetune matrix whose method is a fine-tune."""
+    """PASS rows whose method is a fine-tune (v3.20 head/adapter + v3.21 SAM decoder)."""
     out: set[str] = set()
-    for r in _rows(TRAIN_FINETUNE_MATRIX_PATH):
-        method = str(r.get("method", ""))
-        if _is_pass(r) and any(fm in method for fm in _FINETUNE_METHODS):
-            out.add(r["model_id"])
+    for mp in (TRAIN_FINETUNE_MATRIX_PATH, SEG_FINETUNE_MATRIX_PATH_V321):
+        for r in _rows(mp):
+            method = str(r.get("method", ""))
+            if _is_pass(r) and any(fm in method for fm in _FINETUNE_METHODS):
+                out.add(r["model_id"])
     return out
+
+
+def sidecar_verified_from_matrix() -> set[str]:
+    """PASS set in the committed v3.21 sidecar matrix (live via isolated sidecar)."""
+    return _passed_ids(SIDECAR_MATRIX_PATH_V321)
 
 
 def reload_verified_from_matrix() -> set[str]:
@@ -405,7 +443,9 @@ __all__ = [
     "LIVE_INFERENCE_FAILED",
     "LIVE_INFERENCE_VERIFIED",
     "LIVE_RELOAD_VERIFIED",
+    "LIVE_SIDECAR_VERIFIED",
     "LIVE_TRAIN_VERIFIED",
+    "SIDECAR_MATRIX_PATH_V321",
     "TRAIN_MATRIX_PATH",
     "export_verified_from_matrix",
     "finetune_verified_from_matrix",
@@ -415,7 +455,9 @@ __all__ = [
     "live_inference_blocker",
     "live_inference_verified",
     "live_reload_verified",
+    "live_sidecar_verified",
     "live_train_verified",
     "reload_verified_from_matrix",
+    "sidecar_verified_from_matrix",
     "train_verified_from_matrix",
 ]

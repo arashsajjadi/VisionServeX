@@ -1,0 +1,47 @@
+{
+  "sprint": "v3.21",
+  "component": "openmmlab_sidecar_cli_smoke",
+  "transport": "cli_in_docker_sidecar",
+  "image": "visionservex-openmmlab:v320",
+  "device": "cpu",
+  "env": {"python": "3.10", "torch": "2.1.0+cu121", "mmcv": "2.1.0", "mmengine": "0.10.7", "mmpose": "1.3.2", "mmdet": "3.3.0"},
+  "note": "Live CPU inference proven via `visionservex openmmlab smoke-test <id> --device cpu --image ... --json` inside the OpenMMLab Docker sidecar. mmpose/mmdet Inferencer aliases auto-download Apache-2.0 checkpoints (no pre-mounted weights). rtmpose-m is a registry model -> promoted to INFERENCE_READY_LIVE_SIDECAR (see v321_sidecar_matrix.json). The two rtmdet-*-coco detect ids are CLI-only smoke ids (NOT in the VisionModel registry), recorded here as capability evidence only; they are NOT promoted in model_capabilities.",
+  "results": [
+    {
+      "model_id": "rtmpose-m",
+      "registry_model": true,
+      "task": "pose",
+      "status": "PASS",
+      "live_verified": true,
+      "inferencer_alias": "pose2d=human",
+      "n_instances": 1,
+      "n_keypoints": 17,
+      "evidence": "17 body keypoints + bbox returned on examples/images/person.jpg",
+      "license": "Apache-2.0"
+    },
+    {
+      "model_id": "rtmdet-tiny-coco",
+      "registry_model": false,
+      "task": "detect",
+      "status": "PASS",
+      "live_verified": true,
+      "inferencer_alias": "rtmdet_tiny_8xb32-300e_coco",
+      "evidence": "mmdet DetInferencer auto-downloaded RTMDet-tiny and returned COCO boxes/scores/labels on CPU",
+      "license": "Apache-2.0"
+    },
+    {
+      "model_id": "rtmdet-l-coco",
+      "registry_model": false,
+      "task": "detect",
+      "status": "PASS",
+      "live_verified": true,
+      "inferencer_alias": "rtmdet_l_8xb32-300e_coco",
+      "evidence": "mmdet DetInferencer auto-downloaded RTMDet-l and returned COCO boxes/scores/labels on CPU",
+      "license": "Apache-2.0"
+    }
+  ],
+  "blocked_in_same_family": {
+    "rtmdet-r-*/rtmdet-r2-* (obb/rotated)": "mmrotate 0.3.4 requires mmdet 2.x / mmcv-full 1.x, incompatible with the mmcv 2.1 sidecar stack. Blocker reproduced in smoke-test obb branch (OBB_INFERENCER_UNAVAILABLE). Stays CATALOG_ONLY/PARTIAL until a RotatedDetInferencer shim or mmrotate 1.x (mmcv 2.x) lands.",
+    "rtmpose-{t,s,l,m-384x288,l-384x288}": "Only the rtmpose-m checkpoint is wired for auto-download (pose2d=human alias). The other variants' specific weights are not individually exercised, so they stay at their honest current state (not promoted)."
+  }
+}

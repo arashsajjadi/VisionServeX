@@ -95,9 +95,10 @@ def main() -> int:
     ftune_pass = sorted(le.finetune_verified_from_matrix())
     reload_pass = sorted(le.reload_verified_from_matrix())
     export_pass = sorted(le.export_verified_from_matrix())
+    sidecar_pass = sorted(le.sidecar_verified_from_matrix())
 
-    # A live PASS (inference OR fine-tune) clears any earlier blocker for that model.
-    promoted = set(inf_pass) | set(ftune_pass) | set(trn_pass)
+    # A live PASS (inference OR fine-tune OR sidecar) clears any earlier blocker.
+    promoted = set(inf_pass) | set(ftune_pass) | set(trn_pass) | set(sidecar_pass)
     inf_rows = (
         _rows(QA / "live_inference_matrix.json")
         + _rows(qa319 / "v319_inference_matrix.json")
@@ -116,11 +117,13 @@ def main() -> int:
     text = _replace_block(text, "LIVE_RELOAD_VERIFIED", _fmt_frozenset(reload_pass))
     text = _replace_block(text, "LIVE_EXPORT_VERIFIED", _fmt_frozenset(export_pass))
     text = _replace_block(text, "LIVE_FINETUNE_VERIFIED", _fmt_frozenset(ftune_pass))
+    text = _replace_block(text, "LIVE_SIDECAR_VERIFIED", _fmt_frozenset(sidecar_pass))
     TARGET.write_text(text)
 
     print(
         f"[sync] inference={len(inf_pass)} train={len(trn_pass)} finetune={len(ftune_pass)} "
-        f"reload={len(reload_pass)} export={len(export_pass)} failed/blocked={len(inf_failed)}"
+        f"reload={len(reload_pass)} export={len(export_pass)} sidecar={len(sidecar_pass)} "
+        f"failed/blocked={len(inf_failed)}"
     )
     print(f"[sync] wrote {TARGET.relative_to(REPO)}")
     return 0

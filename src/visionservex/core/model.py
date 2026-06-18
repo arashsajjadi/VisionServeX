@@ -49,6 +49,44 @@ _SEGMENT_TASKS = frozenset({"foundation_segment", "segment", "grounded_segment"}
 _DETECT_TASKS = frozenset({"detect", "obb", "open_vocab_detect"})
 _OPEN_VOCAB_TASKS = frozenset({"open_vocab_detect"})
 
+# v3.21: model-family -> isolated Docker sidecar that can serve it when the host
+# environment cannot. A family appearing here means a sidecar *exists*; whether it
+# is *live-verified* is governed independently by ``live_evidence.LIVE_SIDECAR_VERIFIED``.
+_SIDECAR_BY_FAMILY: dict[str, str] = {
+    "florence-2": "florence2",
+    "rtmdet": "openmmlab",
+    "rtmpose": "openmmlab",
+    "deim": "deimv2",
+    "deimv2": "deimv2",
+    "rtdetrv4": "rtdetrv4",
+}
+
+
+# HF ``SamModel`` engines whose mask decoder can be fine-tuned with frozen
+# encoders (``training.segmentation_finetune``). SAM2 uses a different arch.
+_SAM_DECODER_FINETUNE_ENGINES = frozenset({"sam_hf"})
+
+
+def _fine_tune_kind(*, train_ready: bool, task: str, inference_ready: bool, engine: str) -> str:
+    """Classify the *kind* of fine-tune a model honestly supports (v3.21).
+
+    - ``full_supervised``         — end-to-end trainable detector/classifier
+      (RF-DETR, LibreYOLO, torchvision classifiers).
+    - ``frozen_backbone_head``    — frozen-backbone head fine-tune for embedding
+      backbones, linear probe OR deeper MLP head
+      (``training.embedding_finetune``, ``head_type='linear'|'mlp'``).
+    - ``frozen_encoder_decoder``  — frozen-encoder SAM mask-decoder fine-tune for
+      HF SamModel segmenters (``training.segmentation_finetune``).
+    - ``none``                    — no fine-tune path wired.
+    """
+    if train_ready:
+        return "full_supervised"
+    if task in _EMBED_TASKS and inference_ready:
+        return "frozen_backbone_head"
+    if task in _SEGMENT_TASKS and engine in _SAM_DECODER_FINETUNE_ENGINES and inference_ready:
+        return "frozen_encoder_decoder"
+    return "none"
+
 
 def _require_task(entry: ModelEntry, allowed: frozenset[str], method: str) -> None:
     if entry.task not in allowed:
@@ -1326,6 +1364,9 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
     # v3.18 precise readiness state (canonical, machine-consumable) + visibility.
     live_inf = live_evidence.live_inference_verified(model_id)
     live_trn = live_evidence.live_train_verified(model_id)
+    # v3.21: live via an isolated Docker sidecar (e.g. Florence-2). A legal/gated/
+    # weights block still wins inside ``compute_readiness_state``.
+    live_sidecar = live_evidence.live_sidecar_verified(model_id)
     readiness_state = taxonomy.compute_readiness_state(
         task=entry.task,
         implementation_status=status,
@@ -1339,6 +1380,7 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
         live_inference_verified=live_inf,
         live_train_verified=live_trn,
         live_inference_blocker=live_evidence.live_inference_blocker(model_id),
+        sidecar_live_verified=live_sidecar,
     )
     visibility = taxonomy.anastig_visibility(
         readiness_state,
@@ -1349,6 +1391,26 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
     )
     blocker = _readiness_blocker(readiness_state, entry, status, engine_registered)
 
+    # v3.21: a sidecar-live model is usable (via the sidecar), so its coarse legacy
+    # bucket is "inference-ready" even though its host engine is an honest stub.
+    # Without this the coarse view would contradict the precise sidecar state.
+    if readiness_state in taxonomy.LIVE_SIDECAR_READY_STATES:
+        readiness = "inference-ready"
+
+    # v3.21 sidecar dimension. ``sidecar_required`` is True only when the model's
+    # *sole* working path is the sidecar (i.e. it earned a ``*_READY_LIVE_SIDECAR``
+    # state); a host-runnable model that merely *also* has a sidecar is not required
+    # to use it. CPU was the verification device this sprint; GPU is unverified.
+    sidecar_name = _SIDECAR_BY_FAMILY.get(entry.family)
+    sidecar_supported = sidecar_name is not None
+    sidecar_required = readiness_state in taxonomy.LIVE_SIDECAR_READY_STATES
+    if sidecar_required:
+        anastig_sidecar_visibility = visibility  # e.g. "show_inference_sidecar"
+    elif sidecar_supported:
+        anastig_sidecar_visibility = "host_preferred_sidecar_available"
+    else:
+        anastig_sidecar_visibility = "none"
+
     # v3.20: separate inference / train / fine-tune lifecycle dimensions, each with
     # a *_live_verified flag backed by the committed matrices.
     live_reload = live_evidence.live_reload_verified(model_id)
@@ -1358,7 +1420,18 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
     # A fine-tune path exists for trainable models and for embedding models (a
     # frozen-backbone head/linear-probe fine-tune). It is only *_live_verified once
     # the committed v3.20 train/finetune matrix proves it.
-    fine_tune_ready = bool(train_ready or (entry.task in _EMBED_TASKS and inference_ready))
+    sam_decoder_finetunable = entry.engine in _SAM_DECODER_FINETUNE_ENGINES
+    fine_tune_ready = bool(
+        train_ready
+        or (entry.task in _EMBED_TASKS and inference_ready)
+        or (entry.task in _SEGMENT_TASKS and sam_decoder_finetunable and inference_ready)
+    )
+    fine_tune_kind = _fine_tune_kind(
+        train_ready=train_ready,
+        task=entry.task,
+        inference_ready=inference_ready,
+        engine=entry.engine,
+    )
 
     def _stage_visibility(supported: bool, live: bool, show_verb: str) -> str:
         if live:
@@ -1425,12 +1498,21 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
         "train_live_verified": live_trn,
         "fine_tune_ready": fine_tune_ready,
         "fine_tune_live_verified": live_ftune,
+        "fine_tune_kind": fine_tune_kind,
         "reload_supported": reload_supported,
         "reload_live_verified": live_reload,
         "export_live_verified": live_export,
         "token_never_logged": True,
         "anastig_train_visibility": anastig_train_visibility,
         "anastig_finetune_visibility": anastig_finetune_visibility,
+        # v3.21: isolated-sidecar dimension (Florence-2, OpenMMLab, DEIMv2, ...).
+        "sidecar_supported": sidecar_supported,
+        "sidecar_required": sidecar_required,
+        "sidecar_name": sidecar_name,
+        "sidecar_live": live_sidecar,
+        "sidecar_cpu_verified": live_sidecar,
+        "sidecar_gpu_verified": False,
+        "anastig_sidecar_visibility": anastig_sidecar_visibility,
         "pretrained_inference_supported": inference_ready,
         "pretrained_load_supported": inference_ready and entry.download_type != "not_available",
         "auto_download": bool(entry.auto_download),

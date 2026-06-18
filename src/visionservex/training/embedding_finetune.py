@@ -30,6 +30,29 @@ from visionservex.core.model import VisionModel
 from visionservex.core.results import ClassificationResult
 
 _EMBED_TASKS = frozenset({"embed", "embedding"})
+_HEAD_TYPES = frozenset({"linear", "mlp"})
+
+
+def _build_head(head_type: str, dim: int, n_classes: int, hidden_dim: int, dropout: float):
+    """Construct the trainable head on top of the frozen embedder.
+
+    ``linear`` is the classic linear probe (one ``nn.Linear``). ``mlp`` is the
+    deeper, more expressive head — ``Linear -> GELU -> Dropout -> Linear`` — which
+    can separate features a single hyperplane cannot, while STILL leaving the
+    backbone frozen (no backbone weight is modified or redistributed).
+    """
+    import torch
+
+    if head_type == "linear":
+        return torch.nn.Linear(dim, n_classes)
+    if head_type == "mlp":
+        return torch.nn.Sequential(
+            torch.nn.Linear(dim, hidden_dim),
+            torch.nn.GELU(),
+            torch.nn.Dropout(dropout),
+            torch.nn.Linear(hidden_dim, n_classes),
+        )
+    raise ValueError(f"HEAD_TYPE_INVALID: {head_type!r} not in {sorted(_HEAD_TYPES)}")
 
 
 def _resolve_imagefolder(dataset: str | Path) -> Path:
@@ -60,12 +83,22 @@ def finetune_embedding_head(
     lr: float = 1e-2,
     device: str = "cpu",
     output_dir: str | Path | None = None,
+    head_type: str = "linear",
+    hidden_dim: int = 256,
+    dropout: float = 0.1,
 ) -> dict[str, Any]:
-    """Fit a linear classification head on a frozen embedder. Returns a result dict.
+    """Fit a classification head on a frozen embedder. Returns a result dict.
 
-    The backbone stays frozen; only the ``nn.Linear`` head is trained and saved.
+    The backbone stays frozen; only the head is trained and saved. ``head_type``
+    selects the depth: ``linear`` (classic linear probe) or ``mlp`` (a deeper
+    ``Linear -> GELU -> Dropout -> Linear`` head with ``hidden_dim`` units). The
+    deeper head is mini-batched over multiple passes so it can actually fit the
+    non-linearity; both produce a single reloadable artifact.
     """
     import torch
+
+    if head_type not in _HEAD_TYPES:
+        raise ValueError(f"HEAD_TYPE_INVALID: {head_type!r} not in {sorted(_HEAD_TYPES)}")
 
     model = VisionModel(model_id, device=device)
     if model.entry.task not in _EMBED_TASKS:
@@ -92,7 +125,7 @@ def finetune_embedding_head(
     x = torch.tensor(np.stack(feats), dtype=torch.float32)
     y = torch.tensor(labels, dtype=torch.long)
     dim = x.shape[1]
-    head = torch.nn.Linear(dim, len(classes))
+    head = _build_head(head_type, dim, len(classes), hidden_dim, dropout)
     opt = torch.optim.AdamW(head.parameters(), lr=lr, weight_decay=1e-4)
     loss_fn = torch.nn.CrossEntropyLoss()
     head.train()
@@ -115,13 +148,16 @@ def finetune_embedding_head(
             "embed_dim": dim,
             "model_id": model_id,
             "normalized": True,
-            "head_type": "linear_probe",
+            "head_type": head_type,
+            "hidden_dim": hidden_dim,
+            "dropout": dropout,
         },
         ckpt,
     )
     return {
         "status": "OK",
-        "method": "head_train",
+        "method": "head_train" if head_type == "linear" else "mlp_head_train",
+        "head_type": head_type,
         "checkpoint": str(ckpt),
         "class_names": classes,
         "embed_dim": dim,
@@ -150,7 +186,17 @@ class EmbeddingHeadModel:
         blob = torch.load(str(checkpoint_path), map_location="cpu", weights_only=False)
         classes = blob["class_names"]
         dim = int(blob["embed_dim"])
-        head = torch.nn.Linear(dim, len(classes))
+        # "linear_probe" is the legacy (v3.20) tag for a single linear head.
+        head_type = (
+            "linear" if blob.get("head_type") in (None, "linear_probe") else blob["head_type"]
+        )
+        head = _build_head(
+            head_type,
+            dim,
+            len(classes),
+            int(blob.get("hidden_dim", 256)),
+            float(blob.get("dropout", 0.1)),
+        )
         head.load_state_dict(blob["head_state_dict"])
         head.eval()
         return cls(blob["model_id"], head, classes, dim, device)

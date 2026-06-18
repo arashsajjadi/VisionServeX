@@ -10,8 +10,9 @@ CAPS = {m: model_capabilities(m) for m in list_models()}
 
 
 def test_each_model_is_live_or_has_a_specific_blocker():
+    usable = taxonomy.LIVE_READY_STATES | taxonomy.LIVE_SIDECAR_READY_STATES
     for mid, c in CAPS.items():
-        live = c["readiness_state"] in taxonomy.LIVE_READY_STATES
+        live = c["readiness_state"] in usable
         if live:
             assert not c["blocker"], f"{mid} is live but carries a blocker"
         else:
