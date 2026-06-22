@@ -1,0 +1,87 @@
+{
+  "model_id": "dfine-n",
+  "device": "cuda:0",
+  "frames": 16,
+  "frame_size": [
+    1280,
+    720
+  ],
+  "proof_true_forward_batch": {
+    "single_image_loop_forward_calls_for_8": 8,
+    "batched_forward_calls_for_8": 1,
+    "input_tensor_batch_dim_for_8": 8,
+    "single_image_det_counts_thr0.3": [
+      95,
+      64,
+      77,
+      57,
+      51,
+      71,
+      59,
+      81
+    ],
+    "batched_det_counts_thr0.3": [
+      96,
+      64,
+      77,
+      57,
+      51,
+      72,
+      59,
+      81
+    ],
+    "neighbor_independence_max_logit_diff": 0.0,
+    "neighbor_independent_allclose_1e-4": true,
+    "imageA_strict_thr0.5_single": 20,
+    "imageA_strict_thr0.5_in_batch_pos0": 20,
+    "note": "single-vs-batched count delta at thr=0.3 is benign FP/kernel nondeterminism (different cuBLAS GEMM per batch dim flips borderline queries); neighbor-independence proves NO cross-image contamination.",
+    "VERDICT": "TRUE_TENSOR_BATCH"
+  },
+  "ladder": [
+    {
+      "batch_size": 1,
+      "forward_calls_per_run": 1,
+      "latency_ms": 9.45,
+      "throughput_fps": 105.77,
+      "vram_peak_mb": 85.7,
+      "gpu_util_avg": 1.0,
+      "gpu_util_peak": 1
+    },
+    {
+      "batch_size": 2,
+      "forward_calls_per_run": 1,
+      "latency_ms": 14.66,
+      "throughput_fps": 136.38,
+      "vram_peak_mb": 126.9,
+      "gpu_util_avg": 29.0,
+      "gpu_util_peak": 36
+    },
+    {
+      "batch_size": 4,
+      "forward_calls_per_run": 1,
+      "latency_ms": 22.64,
+      "throughput_fps": 176.68,
+      "vram_peak_mb": 212.4,
+      "gpu_util_avg": 36.0,
+      "gpu_util_peak": 36
+    },
+    {
+      "batch_size": 8,
+      "forward_calls_per_run": 1,
+      "latency_ms": 33.1,
+      "throughput_fps": 241.71,
+      "vram_peak_mb": 387.9,
+      "gpu_util_avg": 36.0,
+      "gpu_util_peak": 36
+    },
+    {
+      "batch_size": 16,
+      "forward_calls_per_run": 1,
+      "latency_ms": 73.25,
+      "throughput_fps": 218.42,
+      "vram_peak_mb": 737.4,
+      "gpu_util_avg": 36.0,
+      "gpu_util_peak": 36
+    }
+  ]
+}

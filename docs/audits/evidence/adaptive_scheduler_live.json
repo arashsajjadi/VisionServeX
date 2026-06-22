@@ -1,0 +1,13 @@
+{
+  "context": "v3.22 Phase 3 — AdaptiveBatchScheduler driving live D-FINE waves, RTX 5080, max_throughput",
+  "model": "dfine-n", "vram_total_mb": 16303,
+  "waves": [
+    {"batch": 4,  "fps": 71.4,  "forward_ms": 28.5, "preprocess_ms": 12.0, "util": 1, "vram_pct": 1.2, "action": "grow"},
+    {"batch": 6,  "fps": 141.9, "forward_ms": 23.1, "preprocess_ms": 16.7, "util": 1, "vram_pct": 1.8, "action": "grow"},
+    {"batch": 8,  "fps": 179.3, "forward_ms": 23.0, "preprocess_ms": 19.2, "util": 6, "vram_pct": 2.3, "action": "grow"},
+    {"batch": 12, "fps": 209.7, "forward_ms": 26.7, "preprocess_ms": 26.7, "util": 9, "vram_pct": 3.4, "action": "hold"}
+  ],
+  "trajectory": [4, 6, 8, 12], "converged": true,
+  "final_reason": "preprocess-bound (cpu 29ms vs forward 27ms) and throughput plateaued -> hold at 12; growing batch won't help the GPU",
+  "headline": "Scheduler climbed 4->12 (71->210 fps, 3x) then STOPPED at the measured CPU-preprocess bottleneck. Honest 'why not more GPU' with numbers."
+}

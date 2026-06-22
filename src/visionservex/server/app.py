@@ -132,6 +132,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
 
     _register_routes(app)
+    # v3.22.0 — batch + video + job-lifecycle routes
+    from visionservex.server.video_routes import build_media_router
+
+    app.include_router(build_media_router())
     _register_exception_handlers(app)
     return app
 

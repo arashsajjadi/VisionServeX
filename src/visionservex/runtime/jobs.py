@@ -46,7 +46,7 @@ JobStatus = Literal[
 class Job:
     job_id: str
     model_id: str
-    kind: str  # "pull", "predict", etc.
+    kind: str  # "pull", "predict", "video_infer", etc.
     status: JobStatus = "queued"
     message: str = ""
     created_at: float = field(default_factory=time.time)
@@ -55,10 +55,20 @@ class Job:
     result: Any | None = None
     error: dict[str, Any] | None = None
     cancelled: bool = False
+    run_id: str = field(default_factory=lambda: secrets.token_urlsafe(8))
+    # Real cancellation signal (v3.22.0). Worker loops MUST check this between
+    # waves. ``JobStore.cancel`` sets it; this is what makes cancel actually
+    # interrupt running work rather than only flipping a status field.
+    cancel_event: threading.Event = field(default_factory=threading.Event, repr=False)
+
+    @property
+    def cancel_requested(self) -> bool:
+        return self.cancel_event.is_set() or self.cancelled
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "job_id": self.job_id,
+            "run_id": self.run_id,
             "model_id": self.model_id,
             "kind": self.kind,
             "status": self.status,
@@ -69,6 +79,7 @@ class Job:
             "result": self.result,
             "error": self.error,
             "cancelled": self.cancelled,
+            "cancel_requested": self.cancel_requested,
         }
 
 
@@ -128,16 +139,24 @@ class JobStore:
             return job
 
     def cancel(self, job_id: str) -> bool:
+        """Request cancellation. Sets the real cancel_event so a running worker
+        loop stops submitting new waves and releases resources, then marks the
+        job cancelled. Returns True if the job was active and is now cancelling.
+        """
         with self._lock:
             job = self._jobs.get(job_id)
             if job is None:
                 return False
             if job.status in {"completed", "failed", "cancelled"}:
                 return False
+            job.cancel_event.set()  # <-- the signal worker loops actually check
             job.cancelled = True
             job.status = "cancelled"
             job.message = "cancelled by client"
             job.updated_at = time.time()
+            for listener in self._listeners.get(job_id, []):
+                with contextlib.suppress(Exception):
+                    listener(job)
             return True
 
     def subscribe(self, job_id: str, listener: Callable[[Job], None]) -> None:

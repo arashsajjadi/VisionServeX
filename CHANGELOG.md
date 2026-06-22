@@ -2,6 +2,46 @@
 
 ## [Unreleased]
 
+## [3.22.0] - 2026-06-22 — Video / true-batch / GPU / memory sprint
+
+Backend/worker performance, batching, video, memory, and model-output-correctness
+sprint so Anastig can call VisionServeX honestly. All claims below are backed by
+live evidence on an RTX 5080 (see `docs/audits/evidence/` and
+`docs/audits/vsx_3_22_video_batch_gpu_release_report.md`).
+
+### Added
+- **True tensor batch** — `BaseEngine.predict_batch` + `supports_true_batch`;
+  `DFINEEngine` runs ONE forward over a stacked batch (proven: 8 imgs→1 forward,
+  bitwise-identical per-image logits, 77→231 fps). `runtime/batch_infer.py`
+  provides a forward-call verifier + `/infer-batch` telemetry.
+- **Adaptive GPU scheduler** (`runtime/adaptive_batch.py`) — non-power-of-two
+  ladder, VRAM caps (85/92/95%), OOM halving, anti-thrash hysteresis, and
+  measured bottleneck attribution (forward/preprocess/postprocess/vram).
+- **Worker video pipeline** — `runtime/ffmpeg_tools.py` (ffprobe, lossless
+  faststart remux, browser-H.264 transcode via NVENC, hwaccel detection,
+  preset-only security), `runtime/video_pipeline.py` (streamed, cancellable,
+  adaptive video inference), `runtime/video_export.py` (overlay MP4 + exporters).
+  New HTTP routes: `/infer-batch`, `/video/{probe,remux-faststart,
+  transcode-browser-h264,extract-frames,infer,export-overlay}`,
+  `/jobs/{id}/{cancel,artifacts,cleanup}`.
+- **Segmentation output truth** (`runtime/mask_encoding.py`) — masks serialized as
+  COCO RLE by default (round-trip IoU 1.0), polygons on request, mask quality +
+  honest masks-unavailable warning. New `return_*` flags.
+- **Tiled inference** (`runtime/tiling.py`) — overlapping tiles + cross-tile
+  class-aware NMS for small objects; per-frame diagnostics with empty-reason.
+
+### Changed
+- **Real cancellation** — `Job.cancel_event` is now checked between waves; cancel
+  interrupts a running video batch and releases VRAM (was a no-op flag).
+- Registry `batch_support` corrected to match measured behavior (true iff engine
+  is `dfine`); `model_capabilities` exposes authoritative `supports_true_batch`,
+  `batch_path`, `max_batch_size_hint`, `preferred_batch_sizes`.
+- Media routes get a higher upload cap (`limits.max_video_upload_bytes`).
+
+### Docs
+- `docs/{video_inference,gpu_batching,model_output_contract,memory_lifecycle,
+  worker_job_lifecycle,anastig_integration_contract}.md` + audit reports.
+
 ## [3.21.0] - 2026-06-18 (staged on branch — NOT tagged, NOT on PyPI; awaiting owner approval)
 
 Sidecar & blocker-elimination sprint. Operationalize previously-blocked models

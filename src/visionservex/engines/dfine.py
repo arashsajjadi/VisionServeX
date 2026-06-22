@@ -78,11 +78,23 @@ def _resolve_repo(entry: ModelEntry) -> str:
 
 
 class DFINEEngine(StubEngine):
-    """Real D-FINE detection engine backed by HF Transformers (``d_fine`` model type)."""
+    """Real D-FINE detection engine backed by HF Transformers (``d_fine`` model type).
+
+    TRUE TENSOR BATCH: ``predict_batch`` stacks N images into one processor call
+    and runs ``model.forward`` ONCE (proven on RTX 5080 — 8 images → 1 forward,
+    bitwise-identical per-image logits regardless of batch-mates). See
+    ``scripts/bench/_dfine_truebatch_probe.py`` and
+    ``docs/audits/model_batch_output_truth_matrix.md`` §2.
+    """
 
     real_install_extra = "dfine"
     real_modules = ("transformers", "torch")
     backend_label = "huggingface_dfine"
+
+    # Batch capability (Phase 2). Verified live; the scheduler may probe higher.
+    supports_true_batch = True
+    max_batch_size_hint = 32
+    preferred_batch_sizes = (1, 2, 4, 8, 16, 32)
 
     def __init__(self, entry: ModelEntry) -> None:
         super().__init__(entry)
@@ -178,13 +190,16 @@ class DFINEEngine(StubEngine):
         results = self._processor.post_process_object_detection(
             out, threshold=threshold, target_sizes=[(h, w)]
         )
-        first = results[0]
+        return self._build_result(results[0], (w, h))
 
+    def _build_result(self, result_dict: Any, size_wh: tuple[int, int]) -> DetectionResult:
+        """Convert one post-processed D-FINE result dict → DetectionResult."""
+        w, h = size_wh
         detections: list[Detection] = []
         for box, score, label_id in zip(
-            first["boxes"].tolist(),
-            first["scores"].tolist(),
-            first["labels"].tolist(),
+            result_dict["boxes"].tolist(),
+            result_dict["scores"].tolist(),
+            result_dict["labels"].tolist(),
             strict=False,
         ):
             label = self._id2label.get(int(label_id), f"class_{label_id}")
@@ -196,7 +211,6 @@ class DFINEEngine(StubEngine):
                     class_id=int(label_id),
                 )
             )
-
         return DetectionResult(
             kind="detection",
             model_id=self.entry.id,
@@ -207,6 +221,70 @@ class DFINEEngine(StubEngine):
             backend=self.backend_label,
             detections=detections,
         )
+
+    def predict_batch(
+        self,
+        images: Sequence[Image.Image],
+        *,
+        prompts: Sequence[str] | None = None,
+        threshold: float = 0.3,
+        **kwargs: Any,
+    ) -> list[BaseResult]:
+        """TRUE tensor batch: one ``model.forward`` over a stacked batch of N images.
+
+        Per-image results are independent (D-FINE has no cross-image attention).
+        Falls back to the honest internal-loop default if the real backend is not
+        loaded (mock mode).
+        """
+        import time as _time
+
+        imgs = list(images)
+        if not imgs:
+            return []
+        if not self._real_ready:
+            return super().predict_batch(imgs, prompts=prompts, threshold=threshold, **kwargs)
+
+        model_device = next(self._model.parameters()).device
+        model_dtype = next(self._model.parameters()).dtype
+        sizes_hw = [(im.size[1], im.size[0]) for im in imgs]  # (h, w) per image
+
+        t0 = _time.perf_counter()
+        inputs = self._processor(images=imgs, return_tensors="pt")
+        inputs_dev: dict[str, Any] = {}
+        for k, v in inputs.items():
+            v = v.to(device=model_device)
+            if v.is_floating_point():
+                v = v.to(dtype=model_dtype)
+            inputs_dev[k] = v
+        is_cuda = str(model_device).startswith("cuda")
+        t1 = _time.perf_counter()
+        with self._torch.no_grad():
+            out = self._model(**inputs_dev)
+        if is_cuda:
+            self._torch.cuda.synchronize()
+        t2 = _time.perf_counter()
+        results = self._processor.post_process_object_detection(
+            out, threshold=threshold, target_sizes=sizes_hw
+        )
+        out_results: list[BaseResult] = []
+        for im, res in zip(imgs, results, strict=True):
+            out_results.append(self._build_result(res, im.size))
+        t3 = _time.perf_counter()
+
+        n = len(imgs)
+        pre_ms = (t1 - t0) * 1000.0 / n
+        fwd_ms = (t2 - t1) * 1000.0 / n
+        post_ms = (t3 - t2) * 1000.0 / n
+        for r in out_results:
+            md = r.metadata
+            md["batch_mode"] = "true_tensor_batch"
+            md["true_forward_batch"] = True
+            md["internal_loop"] = False
+            md["actual_batch_size"] = n
+            md["preprocess_ms"] = round(pre_ms, 3)
+            md["forward_ms"] = round(fwd_ms, 3)
+            md["postprocess_ms"] = round(post_ms, 3)
+        return out_results
 
     def infer(self, preprocessed: Any, **kwargs: Any) -> Any:
         return preprocessed

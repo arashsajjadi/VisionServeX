@@ -105,6 +105,34 @@ def list_models(task: str | None = None, *, family: str | None = None) -> list[s
     return sorted(e.id for e in default_registry().list(task=task, family=family))
 
 
+# v3.22.0 — segmentation output serialization flags (Phase 5).
+_SEG_FLAG_NAMES = (
+    "return_boxes",
+    "return_masks",
+    "return_rle",
+    "return_polygons",
+    "return_quality",
+    "max_polygon_points",
+    "polygon_simplification_tolerance",
+)
+
+
+def _pop_seg_flags(kwargs: dict[str, Any]) -> dict[str, Any]:
+    """Remove segmentation serialization flags from kwargs (don't pass to engines)."""
+    return {k: kwargs.pop(k) for k in _SEG_FLAG_NAMES if k in kwargs}
+
+
+def _apply_seg_flags(result: BaseResult, flags: dict[str, Any]) -> None:
+    """Apply serialization flags to a SegmentationResult so to_dict honors them."""
+    if not flags:
+        return
+    from visionservex.core.results import SegmentationResult
+
+    if isinstance(result, SegmentationResult):
+        for k, v in flags.items():
+            setattr(result, k, v)
+
+
 class VisionModel:
     """User-facing wrapper around an engine and a registry entry.
 
@@ -293,11 +321,23 @@ class VisionModel:
         if task is not None:
             kwargs["task"] = task
 
+        seg_flags = _pop_seg_flags(kwargs)
         self._ensure_loaded()
         pil = self._coerce_image(image)
         start = time.perf_counter()
         result = self.engine.predict(pil, prompts=prompts, **kwargs)
-        result.latency_ms = (time.perf_counter() - start) * 1000.0
+        latency_ms = (time.perf_counter() - start) * 1000.0
+        self._finalize_result(result, pil, latency_ms)
+        _apply_seg_flags(result, seg_flags)
+        if unload_after:
+            self.unload()
+        return result
+
+    def _finalize_result(
+        self, result: BaseResult, pil: Image.Image, latency_ms: float
+    ) -> BaseResult:
+        """Attach common provenance/timing fields to an engine result."""
+        result.latency_ms = latency_ms
         result.model_id = self.entry.id
         result.task = self.entry.task
         result.device = self.device
@@ -309,9 +349,20 @@ class VisionModel:
         result.cache_path = self._cache_path
         result.image_size = pil.size
         result._image = pil
-        if unload_after:
-            self.unload()
         return result
+
+    @property
+    def supports_true_batch(self) -> bool:
+        """True only if the engine runs ONE forward over a stacked batch (N>1)."""
+        return bool(getattr(self.engine, "supports_true_batch", False))
+
+    @property
+    def max_batch_size_hint(self) -> int:
+        return int(getattr(self.engine, "max_batch_size_hint", 1))
+
+    @property
+    def preferred_batch_sizes(self) -> tuple[int, ...]:
+        return tuple(getattr(self.engine, "preferred_batch_sizes", (1,)))
 
     def batch_predict(
         self,
@@ -320,9 +371,26 @@ class VisionModel:
         prompts: Sequence[str] | None = None,
         **kwargs: Any,
     ) -> list[BaseResult]:
-        results: list[BaseResult] = []
-        for img in images:
-            results.append(self.predict(img, prompts=prompts, **kwargs))
+        """Run inference over a list of images.
+
+        Delegates to ``engine.predict_batch`` — which is a TRUE tensor batch
+        (one forward over a stacked batch) for engines that set
+        ``supports_true_batch=True`` (e.g. D-FINE), and an HONEST internal loop
+        otherwise. Each result's ``metadata['batch_mode']`` reports which path
+        was taken; the worker NEVER labels a loop as a true batch.
+        """
+        seg_flags = _pop_seg_flags(kwargs)
+        self._ensure_loaded()
+        pil_images = [self._coerce_image(img) for img in images]
+        if not pil_images:
+            return []
+        start = time.perf_counter()
+        results = self.engine.predict_batch(pil_images, prompts=prompts, **kwargs)
+        total_ms = (time.perf_counter() - start) * 1000.0
+        share = total_ms / max(1, len(results))
+        for r, pil in zip(results, pil_images, strict=False):
+            self._finalize_result(r, pil, share)
+            _apply_seg_flags(r, seg_flags)
         return results
 
     def stream(
@@ -1464,7 +1532,30 @@ def model_capabilities(model_id: str) -> dict[str, Any]:
         # the training blocker (e.g. UPSTREAM_DFINE_FDR_TOPK_CRASH).
         exact_blocker = tcap.get("exact_blocker")
 
+    # v3.22.0 — TRUE-batch capability. Authoritative source is the engine class
+    # (its ``supports_true_batch`` is what the forward-call test verifies), not
+    # the static registry field. ``batch_path`` mirrors the /infer-batch contract.
+    try:
+        _eng = build_engine(entry)
+        supports_true_batch = bool(getattr(_eng, "supports_true_batch", False))
+        max_batch_size_hint = int(getattr(_eng, "max_batch_size_hint", 1))
+        preferred_batch_sizes = list(getattr(_eng, "preferred_batch_sizes", (1,)))
+    except Exception:
+        supports_true_batch = False
+        max_batch_size_hint = 1
+        preferred_batch_sizes = [1]
+    batch_path = (
+        "true_tensor_batch"
+        if supports_true_batch
+        else ("internal_loop" if engine_registered else "unsupported")
+    )
+
     return {
+        "supports_true_batch": supports_true_batch,
+        "batch_path": batch_path,
+        "max_batch_size_hint": max_batch_size_hint,
+        "preferred_batch_sizes": preferred_batch_sizes,
+        "registry_batch_support_claim": bool(entry.batch_support),
         "model_id": model_id,
         "family": entry.family,
         "task": entry.task,

@@ -70,13 +70,22 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
                     "invalid content-length",
                     "send a valid integer",
                 )
-            if size > self.limits.max_upload_bytes:
+            # v3.22.0 — media routes (video uploads, batch image sets) get a
+            # much higher cap than single-image endpoints.
+            path = request.url.path
+            is_media = path.startswith("/video/") or path == "/infer-batch"
+            cap = (
+                getattr(self.limits, "max_video_upload_bytes", self.limits.max_upload_bytes)
+                if is_media
+                else self.limits.max_upload_bytes
+            )
+            if size > cap:
                 return _err(
                     request,
                     413,
                     "REQUEST_TOO_LARGE",
-                    f"request body {size} bytes exceeds max_upload_bytes {self.limits.max_upload_bytes}",
-                    "send a smaller image or raise the limit in config",
+                    f"request body {size} bytes exceeds limit {cap}",
+                    "send a smaller file or raise the limit in config",
                 )
         return await call_next(request)
 

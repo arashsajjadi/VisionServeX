@@ -1,0 +1,58 @@
+{
+  "benchmark": "v322_video_decode_matrix",
+  "meta": {
+    "video": "/home/arash/Downloads/lv_0_20260617224920.mp4",
+    "hwaccel": true
+  },
+  "rows": [
+    {
+      "operation": "detect_hwaccel",
+      "detail": "nvenc/nvdec",
+      "elapsed_ms": "",
+      "result": "OK",
+      "evidence": "nvenc=['h264_nvenc', 'hevc_nvenc', 'av1_nvenc'] nvdec=['h264_cuvid', 'hevc_cuvid', 'vp9_cuvid', 'av1_cuvid']"
+    },
+    {
+      "operation": "ffprobe",
+      "detail": "h264/yuv420p/1280x720",
+      "elapsed_ms": 37.0,
+      "result": "OK",
+      "evidence": "faststart=False action=remux_faststart"
+    },
+    {
+      "operation": "remux_faststart",
+      "detail": "lossless -c copy",
+      "elapsed_ms": 74.2,
+      "result": "OK",
+      "evidence": "out_faststart=True size=89921611"
+    },
+    {
+      "operation": "transcode_browser_h264",
+      "detail": "720p/h264_nvenc",
+      "elapsed_ms": 4463.5,
+      "result": "OK",
+      "evidence": "nvenc=True size=52024157"
+    },
+    {
+      "operation": "extract_frames",
+      "detail": "sample_fps=1.0",
+      "elapsed_ms": 1445.9,
+      "result": "OK",
+      "evidence": "89 frames, 61.6 fps decode"
+    },
+    {
+      "operation": "extract_frames",
+      "detail": "sample_fps=5.0",
+      "elapsed_ms": 597.7,
+      "result": "OK",
+      "evidence": "120 frames, 200.8 fps decode"
+    },
+    {
+      "operation": "extract_frames",
+      "detail": "sample_fps=10.0",
+      "elapsed_ms": 489.2,
+      "result": "OK",
+      "evidence": "120 frames, 245.3 fps decode"
+    }
+  ]
+}

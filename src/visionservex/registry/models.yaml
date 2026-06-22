@@ -23,7 +23,7 @@ models:
   beginner_recommendation: true
   implementation_status: wired
   status: stable
-  batch_support: true
+  batch_support: false
   model_category: utility
   notes: Returns deterministic, image-derived fake detections. Use as a smoke test before downloading any real model.
 - id: mock-classify
@@ -45,7 +45,7 @@ models:
   beginner_recommendation: true
   implementation_status: wired
   status: stable
-  batch_support: true
+  batch_support: false
   model_category: utility
 - id: mock-segment
   display_name: Mock Segmentation (synthetic)
@@ -318,7 +318,7 @@ models:
   recommended_vram_gb: 1.0
   minimum_ram_gb: 2.0
   difficulty: very_easy
-  batch_support: false
+  batch_support: true
   export_support:
   - onnx
   best_for:
@@ -356,7 +356,7 @@ models:
   recommended_vram_gb: 2.0
   minimum_ram_gb: 3.0
   difficulty: easy
-  batch_support: false
+  batch_support: true
   export_support:
   - onnx
   best_for:
@@ -389,7 +389,7 @@ models:
   minimum_vram_gb: 2.0
   recommended_vram_gb: 4.0
   difficulty: medium
-  batch_support: false
+  batch_support: true
   export_support:
   - onnx
   status: beta
@@ -401,6 +401,7 @@ models:
   family: dfine
   backend: huggingface_dfine
   engine: dfine
+  batch_support: true
   license: Apache-2.0
   upstream_url: https://github.com/Peterande/D-FINE
   download_type: huggingface
@@ -427,6 +428,7 @@ models:
   family: dfine
   backend: huggingface_dfine
   engine: dfine
+  batch_support: true
   license: Apache-2.0
   upstream_url: https://github.com/Peterande/D-FINE
   download_type: huggingface
@@ -471,7 +473,7 @@ models:
   recommended_vram_gb: 1.0
   minimum_ram_gb: 2.0
   difficulty: very_easy
-  batch_support: false
+  batch_support: true
   best_for:
   - CPU inference
   - edge devices
@@ -504,7 +506,7 @@ models:
   minimum_vram_gb: 1.0
   recommended_vram_gb: 2.0
   difficulty: easy
-  batch_support: false
+  batch_support: true
   status: beta
   model_category: production_recommended
   notes: COCO-only trained S variant. Repo ustc-community/dfine-small-coco — verify availability before use. For guaranteed
@@ -531,7 +533,7 @@ models:
   minimum_vram_gb: 2.0
   recommended_vram_gb: 4.0
   difficulty: medium
-  batch_support: false
+  batch_support: true
   status: beta
   model_category: production_recommended
   notes: COCO-only trained M variant. Repo ustc-community/dfine-medium-coco — verify availability before use. For guaranteed
@@ -542,6 +544,7 @@ models:
   family: dfine
   backend: huggingface_dfine
   engine: dfine
+  batch_support: true
   license: Apache-2.0
   upstream_url: https://github.com/Peterande/D-FINE
   download_type: huggingface
@@ -568,6 +571,7 @@ models:
   family: dfine
   backend: huggingface_dfine
   engine: dfine
+  batch_support: true
   license: Apache-2.0
   upstream_url: https://github.com/Peterande/D-FINE
   download_type: huggingface
@@ -613,7 +617,7 @@ models:
   recommended_vram_gb: 2.0
   minimum_ram_gb: 3.0
   difficulty: easy
-  batch_support: false
+  batch_support: true
   export_support:
   - onnx
   best_for:
@@ -651,7 +655,7 @@ models:
   recommended_vram_gb: 4.0
   minimum_ram_gb: 4.0
   difficulty: medium
-  batch_support: false
+  batch_support: true
   export_support:
   - onnx
   best_for:
@@ -666,6 +670,7 @@ models:
   family: dfine
   backend: huggingface_dfine
   engine: dfine
+  batch_support: true
   license: Apache-2.0
   upstream_url: https://github.com/Peterande/D-FINE
   download_type: huggingface
@@ -695,6 +700,7 @@ models:
   family: dfine
   backend: huggingface_dfine
   engine: dfine
+  batch_support: true
   license: Apache-2.0
   upstream_url: https://github.com/Peterande/D-FINE
   download_type: huggingface
@@ -878,7 +884,7 @@ models:
   recommended_vram_gb: 1.5
   minimum_ram_gb: 2.0
   difficulty: very_easy
-  batch_support: true
+  batch_support: false
   export_support:
   - onnx
   beginner_recommendation: true
@@ -914,7 +920,7 @@ models:
   recommended_vram_gb: 3.0
   minimum_ram_gb: 4.0
   difficulty: easy
-  batch_support: true
+  batch_support: false
   export_support:
   - onnx
   beginner_recommendation: true
@@ -945,7 +951,7 @@ models:
   minimum_vram_gb: 2.0
   recommended_vram_gb: 4.0
   difficulty: easy
-  batch_support: true
+  batch_support: false
   status: beta
   model_category: accuracy_grade
 - id: rfdetr-medium
@@ -1639,7 +1645,7 @@ models:
   recommended_vram_gb: 1.0
   minimum_ram_gb: 2.0
   difficulty: very_easy
-  batch_support: true
+  batch_support: false
   beginner_recommendation: true
   status: beta
   best_for:
@@ -1670,7 +1676,7 @@ models:
   minimum_vram_gb: 1.0
   recommended_vram_gb: 2.0
   difficulty: easy
-  batch_support: true
+  batch_support: false
   beginner_recommendation: true
   status: beta
   model_category: production_recommended
@@ -1697,7 +1703,7 @@ models:
   minimum_vram_gb: 1.5
   recommended_vram_gb: 3.0
   difficulty: easy
-  batch_support: true
+  batch_support: false
   status: beta
   model_category: accuracy_grade
 - id: swinv2-large
@@ -2635,7 +2641,7 @@ models:
   recommended_vram_gb: 1.0
   minimum_ram_gb: 2.0
   difficulty: easy
-  batch_support: true
+  batch_support: false
   beginner_recommendation: true
   status: beta
   best_for:
@@ -2674,7 +2680,7 @@ models:
   recommended_vram_gb: 2.0
   minimum_ram_gb: 3.0
   difficulty: easy
-  batch_support: true
+  batch_support: false
   beginner_recommendation: true
   status: beta
   best_for:
