@@ -104,6 +104,7 @@ def test_cancel_token_wraps_job_event() -> None:
 
 # --------------------------- video inference (synthetic + mock) ---------------------------
 def _make_video(path: str, frames: int = 12):
+    pytest.importorskip("cv2")  # synthetic video generation needs OpenCV
     from visionservex.runtime.video_io import make_synthetic_video
 
     return make_synthetic_video(path, frames=frames, width=128, height=96, fps=12.0)

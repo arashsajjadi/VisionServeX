@@ -8,6 +8,7 @@ CI-safe (no torch/GPU) — builds SegmentationResult directly with numpy masks.
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from visionservex.core.results import Box, Segment, SegmentationResult
 from visionservex.runtime.mask_encoding import mask_quality, mask_to_polygons, mask_to_rle
@@ -48,6 +49,7 @@ def test_rle_roundtrip_reconstructs_mask() -> None:
 
 
 def test_polygon_extraction_and_capping() -> None:
+    pytest.importorskip("cv2")
     m = _disc_mask()
     polys = mask_to_polygons(m, max_points=8, tolerance=1.0)
     assert polys, "a filled disc must yield at least one contour"
