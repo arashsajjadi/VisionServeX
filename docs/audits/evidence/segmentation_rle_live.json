@@ -1,0 +1,10 @@
+{
+  "context": "v3.22 Phase 5 — RF-DETR-Seg mask serialization fix, live RTX 5080",
+  "model": "rfdetr-seg-nano", "device": "cuda",
+  "n_segments": 24, "masks_available": true, "default_output_mode": "boxes+masks_rle",
+  "seg0": {"mask_shape": [720,1280], "pixels_on": 266, "rle_format": "coco_rle", "rle_counts_len": 38,
+           "quality": {"valid": true, "area_frac": 0.00029, "mask_box_iou": 0.657, "warnings": ["tiny_mask"]}},
+  "rle_roundtrip_iou_vs_original_mask": 1.0,
+  "with_return_polygons": {"output_mode": "boxes+masks_rle+polygons", "n_polys": 1, "points_poly0": 8},
+  "headline": "Masks were always produced; SegmentationResult.to_dict dropped them. Now RLE-by-default (IoU 1.0 roundtrip) + polygons on request + quality checks + honest masks-unavailable warning."
+}

@@ -1,0 +1,8 @@
+{
+  "context": "v3.22 Phase 6 — tiled vs whole-frame small-object detection, live RTX 5080, owner traffic video late frame",
+  "model": "dfine-n", "threshold": 0.5,
+  "whole_frame": {"detections": 7, "smallest_box_px": 498, "classes": {"truck":1,"car":5,"bus":1}},
+  "tiled": {"tile": 512, "overlap": 0.25, "tile_count": 6, "raw_count": 36, "final_count": 22,
+            "smallest_box_px": 148, "classes": {"car":18,"truck":4}},
+  "headline": "Tiling recovered 7->22 detections (3x) and smaller objects (498px->148px min) via overlapping tiles + cross-tile class-aware NMS. Per-frame independence proven separately."
+}

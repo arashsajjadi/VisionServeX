@@ -76,10 +76,48 @@ class BaseEngine(ABC):
         raw = self.infer(pre, prompts=prompts, **kwargs)
         return self.postprocess(raw, image=image, prompts=prompts, **kwargs)
 
+    # ----- batch capability -----
+    #
+    # ``supports_true_batch`` is the contract: an engine may set it True ONLY if
+    # ``predict_batch`` runs the model forward ONCE over a stacked batch for N>1
+    # images. The Phase-2 test ``tests/test_v322_true_batch.py`` counts forward
+    # calls and FAILS any engine that claims True while looping. Do not lie here.
+    supports_true_batch: bool = False
+    max_batch_size_hint: int = 1
+    preferred_batch_sizes: tuple[int, ...] = (1,)
+
+    def predict_batch(
+        self,
+        images: Sequence[Image.Image],
+        *,
+        prompts: Sequence[str] | None = None,
+        **kwargs: Any,
+    ) -> list[BaseResult]:
+        """Honest default: a Python loop over single-image ``predict()``.
+
+        This is NOT a true tensor batch. Every result is tagged
+        ``metadata['batch_mode'] = 'internal_loop'`` so no caller (or UI) can
+        mistake the loop for a real forward batch. Engines that genuinely run a
+        single ``model.forward()`` over a stacked batch MUST override this method
+        and set ``supports_true_batch = True``.
+        """
+        results: list[BaseResult] = []
+        for img in images:
+            r = self.predict(img, prompts=prompts, **kwargs)
+            md = r.metadata
+            md.setdefault("batch_mode", "internal_loop")
+            md.setdefault("true_forward_batch", False)
+            md.setdefault("internal_loop", True)
+            results.append(r)
+        return results
+
     # ----- capabilities -----
 
     def supports(self, capability: str) -> bool:
-        return capability in {"predict"}
+        caps = {"predict"}
+        if self.supports_true_batch:
+            caps.add("true_batch")
+        return capability in caps
 
     def export(self, format: str, output_path: Path) -> Path:  # pragma: no cover - default
         raise NotImplementedError(

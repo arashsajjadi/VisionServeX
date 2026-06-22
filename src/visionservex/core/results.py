@@ -357,15 +357,80 @@ class DetectionResult(BaseResult):
 class SegmentationResult(BaseResult):
     kind: ResultKind = "segmentation"
     segments: list[Segment] = field(default_factory=list)
+    # v3.22.0 — serialization controls. These fix "segmentation returns boxes
+    # only": masks are now emitted as COCO RLE BY DEFAULT (compact + machine
+    # readable) so the HTTP contract actually transmits the masks the engine
+    # produced. Polygons are available on request (can be costly per frame).
+    return_boxes: bool = True
+    return_masks: bool = True  # mask_shape + pixel count
+    return_rle: bool = True  # COCO RLE — ON by default
+    return_polygons: bool = False
+    return_quality: bool = True
+    max_polygon_points: int = 0
+    polygon_simplification_tolerance: float = 1.0
+
+    def _has_real_masks(self) -> bool:
+        return any(getattr(s.mask, "size", 0) > 1 for s in self.segments)
+
+    def output_mode(self) -> str:
+        """Honest summary of what this serialized result actually carries."""
+        if not self.segments:
+            return "empty"
+        if not self._has_real_masks():
+            return "boxes_only_masks_unavailable"
+        parts = []
+        if self.return_boxes:
+            parts.append("boxes")
+        if self.return_rle:
+            parts.append("masks_rle")
+        elif self.return_masks:
+            parts.append("masks")
+        if self.return_polygons:
+            parts.append("polygons")
+        return "+".join(parts) if parts else "boxes"
 
     def to_dict(self) -> dict[str, Any]:
-        # masks are large and not JSON-serialisable; emit shape + RLE-like length.
+        import time as _t
+
+        from visionservex.runtime.mask_encoding import (
+            mask_quality,
+            mask_to_polygons,
+            mask_to_rle,
+        )
+
         base = _result_to_dict(self)
+        t0 = _t.perf_counter()
+        masks_present = self._has_real_masks()
         for raw, payload in zip(self.segments, base["segments"], strict=True):
             mask = raw.mask
             payload.pop("mask", None)
             payload["mask_shape"] = list(mask.shape)
             payload["mask_pixels_on"] = int(np.count_nonzero(mask))
+            if not self.return_boxes:
+                payload.pop("box", None)
+            if self.return_rle and getattr(mask, "size", 0) > 1:
+                payload["rle"] = mask_to_rle(mask)
+            if self.return_polygons and getattr(mask, "size", 0) > 1:
+                payload["polygons"] = mask_to_polygons(
+                    mask,
+                    max_points=self.max_polygon_points,
+                    tolerance=self.polygon_simplification_tolerance,
+                )
+            if self.return_quality:
+                payload["mask_quality"] = mask_quality(mask, raw.box)
+        base["output_mode"] = self.output_mode()
+        base["masks_available"] = masks_present
+        # Honest warning: a segmentation result with NO real masks must not pass
+        # silently as if it were boxes-only-by-design.
+        if self.segments and not masks_present:
+            base.setdefault("warnings", [])
+            base["warnings"].append(
+                "SEGMENTATION_MASKS_UNAVAILABLE: this segment set carries no mask "
+                "pixels (boxes only). The model/variant may be detector-only or the "
+                "mask decode failed; do not present this as segmentation."
+            )
+        base.setdefault("metadata", {})
+        base["metadata"]["mask_polygon_ms"] = round((_t.perf_counter() - t0) * 1000.0, 3)
         return base
 
     def to_coco(self) -> dict[str, Any]:

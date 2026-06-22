@@ -55,6 +55,9 @@ class AuthConfig(BaseModel):
 
 class LimitsConfig(BaseModel):
     max_upload_bytes: int = Field(default=20 * 1024 * 1024, ge=1)
+    # v3.22.0 — videos are far larger than images; media routes (/video/*,
+    # /infer-batch) use this higher cap. Default 2 GiB.
+    max_video_upload_bytes: int = Field(default=2 * 1024 * 1024 * 1024, ge=1)
     max_image_pixels: int = Field(default=33_177_600, ge=1)  # ~7680x4320
     max_image_dim: int = Field(default=8192, ge=64)
     rate_limit_per_minute: int = Field(default=120, ge=0)

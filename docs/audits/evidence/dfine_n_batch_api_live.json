@@ -1,0 +1,10 @@
+{
+  "context": "v3.22 Phase 2 — full public VisionModel.batch_predict API + verifier + telemetry, live RTX 5080",
+  "model": "dfine-n", "device": "cuda", "batch": 8, "real_frames": true,
+  "supports_true_batch": true, "max_batch_size_hint": 32,
+  "verifier": {"forward_calls": 1, "n_images": 8, "is_true_forward_batch": true, "claim_matches_reality": true},
+  "result_metadata": {"batch_mode": "true_tensor_batch", "true_forward_batch": true, "actual_batch_size": 8},
+  "telemetry": {"forward_ms": 13.496, "preprocess_ms": 16.448, "postprocess_ms": 1.616,
+                "gpu_util_avg": 3.0, "gpu_util_peak": 3, "vram_used_peak_mb": 374.5, "vram_free_min_mb": 13290.6},
+  "headline": "TRUE batch confirmed via public API; bottleneck is CPU preprocess (16.4ms) > GPU forward (13.5ms), util 3% -> explains owner 'GPU stays low'"
+}
