@@ -330,9 +330,15 @@ DOMAIN_ZOO: dict[str, dict[str, DomainRecipe]] = {
                 "2. Get binary mask from MedSAM / MedSAM2",
             ],
             recommended_models=["medsam", "medsam2"],
-            install_commands=["# Manual: see https://github.com/bowang-lab/MedSAM"],
-            runnable_today=False,
-            limitations=["MedSAM engine not yet wired in VisionServeX. Use upstream."],
+            install_commands=[
+                "pip install 'visionservex[hf]'  # MedSAM v1 (wanglab/medsam-vit-base)"
+            ],
+            runnable_today=True,
+            limitations=[
+                "MedSAM v1 is wired and runnable: `visionservex medical segment medsam IMG --box x1,y1,x2,y2`.",
+                "MedSAM2 is a RESEARCH-ONLY expert sidecar (non-commercial weights); not runnable in core.",
+                "Research/education only — not for diagnosis. MedSAM weights are not commercial-safe by default.",
+            ],
         ),
     },
     "agriculture": {

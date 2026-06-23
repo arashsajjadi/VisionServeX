@@ -156,20 +156,26 @@ class SAMHFEngine(StubEngine):
             inputs["original_sizes"].cpu(),
             inputs["reshaped_input_sizes"].cpu(),
         )
-        # masks_raw[0] shape: (1, num_masks, H, W) bool tensor
-        masks_tensor = masks_raw[0]  # (1, num_masks, H, W)
-        iou_scores = outputs.iou_scores.cpu()  # (1, 1, num_masks)
+        # masks_raw[0] shape: (num_prompts, num_masks, H, W) bool tensor. There is
+        # one prompt per box (input_boxes=(1, N, 4)); points are combined into a
+        # single prompt, so points-only stays one prompt.
+        masks_tensor = masks_raw[0]
+        if masks_tensor.ndim == 3:  # (num_masks, H, W) -> single prompt
+            masks_tensor = masks_tensor.unsqueeze(0)
+        iou_scores = outputs.iou_scores.cpu()  # (1, num_prompts, num_masks)
 
-        # Pick the best mask (highest IoU score) per prompt
+        # v3.23 fix: emit ONE segment per prompt (box), not just the first. The
+        # previous code took masks_tensor[0] and returned a single mask even when
+        # multiple boxes were supplied, silently dropping all but the first box.
+        num_prompts = masks_tensor.shape[0]
         segments: list[Segment] = []
-        if masks_tensor.shape[0] > 0:
-            # multimask: pick best by iou_scores
-            batch_masks = masks_tensor[0]  # (num_masks, H, W)
-            batch_iou = iou_scores[0, 0]  # (num_masks,)
-            best_idx = int(batch_iou.argmax())
-            mask_bool = batch_masks[best_idx].numpy()
-            mask_uint8 = mask_bool.astype(np.uint8)
-            # Tight bounding box from mask
+        for p in range(num_prompts):
+            prompt_masks = masks_tensor[p]  # (num_masks, H, W)
+            prompt_iou = iou_scores[0, p]  # (num_masks,)
+            best_idx = int(prompt_iou.argmax())
+            mask_uint8 = prompt_masks[best_idx].numpy().astype(np.uint8)
+            # Tight bounding box from the predicted mask; fall back to the input
+            # box (when given) or the full frame for an empty mask.
             ys, xs = np.where(mask_uint8)
             if len(xs) > 0:
                 box = Box(
@@ -178,7 +184,11 @@ class SAMHFEngine(StubEngine):
                     x2=float(xs.max()),
                     y2=float(ys.max()),
                 )
-                score = float(batch_iou[best_idx])
+                score = float(prompt_iou[best_idx])
+            elif boxes is not None and p < len(boxes):
+                b = boxes[p]
+                box = Box(x1=float(b[0]), y1=float(b[1]), x2=float(b[2]), y2=float(b[3]))
+                score = 0.0
             else:
                 box = Box(0, 0, float(w), float(h))
                 score = 0.0

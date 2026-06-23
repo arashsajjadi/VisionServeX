@@ -48,7 +48,7 @@ _None_
 | `anomalib-patchcore` | anomalib | anomaly | Apache-2.0 | anomalib is heavy; kept outside core dependencies.; Pipeline integration not yet wired. |
 | `osnet-x1.0` | osnet | reid | MIT | torchreid not in core dependencies. |
 | `bytetrack` | bytetrack | track | MIT | ByteTrack not packaged; tracker pipeline pending. |
-| `medsam2` | medsam2 | foundation_segment | Apache-2.0 | - |
+| `medsam2` | medsam2 | foundation_segment | Apache-2.0 code / non-commercial weights | Weights non-commercial (medical dataset provenance) — NOT commercial-safe.; Research-only dependency-gated sidecar (engine medsam2_sidecar); native MedSAM2/SAM2 predictor + checkpoint not wired in core. |
 | `nnunet-v2` | nnunet | segment | Apache-2.0 | Training/inference framework, not a single model. |
 | `rtmdet-r2-s` | rtmdet | obb | Apache-2.0 | Requires OpenMMLab MMRotate sidecar. |
 | `mobilesam` | mobilesam | foundation_segment | Apache-2.0 | No HF Hub model card for pip-installable weights. Checkpoint distributed via GitHub release.; Not yet wired in VisionServeX engine; manual download + sam_hf adapter path needed. |

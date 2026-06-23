@@ -713,12 +713,24 @@ SOURCE_MANIFEST: dict[str, ModelSource] = {
         family="medsam2",
         task="foundation_segment",
         official_repo="https://github.com/bowang-lab/MedSAM2",
-        license="Apache-2.0",
-        license_risk="check",
+        # Code is Apache-2.0 but the published checkpoints are NON-COMMERCIAL
+        # (medical dataset provenance). The license string must surface that —
+        # the authoritative policy row is ``noncommercial_restricted``.
+        license="Apache-2.0 code / non-commercial weights",
+        license_risk="non_commercial",
+        checkpoint_trust_level="unverified",
         runnable_in_visionservex=False,
-        access_status="open",
+        access_status="manual_download",
         domain="medical",
+        known_blockers=[
+            "Weights non-commercial (medical dataset provenance) — NOT commercial-safe.",
+            "Research-only dependency-gated sidecar (engine medsam2_sidecar); native "
+            "MedSAM2/SAM2 predictor + checkpoint not wired in core.",
+            "Upstream checkpoint is raw SAM 2 .pt (not HF transformers format).",
+        ],
         recommended_action="expert_sidecar",
+        notes="Research/education only. Not for diagnosis. See licensing policy "
+        "(noncommercial_restricted) and engines/medsam2_sidecar.py.",
     ),
     "nnunet-v2": ModelSource(
         model_id="nnunet-v2",

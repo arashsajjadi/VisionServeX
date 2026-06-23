@@ -451,9 +451,15 @@ def _register_routes(app: FastAPI) -> None:
             model = cache.get(body.model_id)
             return model.predict(pil, **kwargs)
 
-        result = await asyncio.get_running_loop().run_in_executor(None, lambda: _do_seg())
-        if asyncio.iscoroutine(result):
-            result = await result
+        try:
+            result = await asyncio.get_running_loop().run_in_executor(None, lambda: _do_seg())
+            if asyncio.iscoroutine(result):
+                result = await result
+        except RegistryError as exc:
+            # Unknown model (e.g. a research-only sidecar that is not a runtime
+            # registry model) is an expected condition — return a structured 404,
+            # never a 500.
+            raise not_found("MODEL_NOT_FOUND", str(exc)) from exc
         return _wire_response(request, result, warns)
 
     @app.post("/obb", response_model=PredictionResponse, tags=["inference"])

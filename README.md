@@ -381,7 +381,8 @@ See [docs/openmmlab_expert_models.md](docs/openmmlab_expert_models.md).
 - **DINOv3 CHMv2 depth head**: Requires `transformers>=5.10`; may conflict with Florence-2 (<5.0) — install in a separate env.
 - **Florence-2**: Requires isolated env (`transformers==4.46.3 + einops + timm`). Use `visionservex florence2 create-env` for the validated recipe.
 - **DEIMv2**: Registered but not wired — no HF Transformers support yet; custom loader required.
-- **MedSAM**: Research only; non-commercial restricted.
+- **MedSAM**: Research only; non-commercial restricted. 2D promptable (box/point), inference only. See `docs/medical_segmentation.md`.
+- **MedSAM2**: Research-only **expert sidecar** with **non-commercial weights** — not runnable in core, not commercial-safe, and not reachable via `predict`/HTTP (dependency-gated honest failure). See `docs/medical_segmentation.md`.
 - **SAM2.1 ONNX**: Image-encoder export works via Module shim. Full interactive decoder ONNX not yet verified.
 - **OpenMMLab** (RTMPose, RTMDet-R/R2, Co-DINO, InternImage): Expert sidecar; use `visionservex openmmlab create-env`.
 - **Apple MPS**: Implemented but not maintainer-verified.

@@ -142,6 +142,13 @@ medical = [
     # Optional medical I/O — NIfTI volume parsing for TotalSegmentator/nnU-Net.
     "nibabel>=5.0",
 ]
+medsam2 = [
+    # MedSAM2 is a RESEARCH-ONLY expert sidecar with NON-COMMERCIAL weights. Its
+    # upstream stack (Meta SAM 2 + MedSAM2) is git-installed in an isolated env per
+    # https://github.com/bowang-lab/MedSAM2 — listed here as a marker only so that
+    # `pip install visionservex[medsam2]` resolves and install hints are valid.
+    # VisionServeX never auto-installs it and never ships its weights.
+]
 classic-ml = [
     # V3 classic (weight-free) smart-annotation tools. All permissive:
     # OpenCV Apache-2.0; scikit-image / scikit-learn / scipy / numpy BSD-3.
