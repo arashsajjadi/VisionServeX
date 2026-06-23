@@ -1,6 +1,6 @@
 # Anastig Model Contract (v3.21)
 
-Source of truth: `visionservex.model_capabilities(model_id)` (v3.22.0).
+Source of truth: `visionservex.model_capabilities(model_id)` (v3.23.0).
 The **primary buckets** are a disjoint partition of all models; the **view buckets**
 are overlapping live sub-views. v3.21 adds the **sidecar dimension**: models live only
 through an isolated Docker sidecar get `*_ready_live_sidecar` primary buckets and the
