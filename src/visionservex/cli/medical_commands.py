@@ -718,6 +718,14 @@ def autoseg_doctor(json_: bool = typer.Option(False, "--json")) -> None:
 app.add_typer(monai_app, name="monai")
 app.add_typer(autoseg_app, name="autoseg")
 
+# Experimental MedSAM2 real runtime + medical training-truth sub-apps (lazy import
+# keeps the medical CLI import-light; neither pulls torch/sam2 at import time).
+from visionservex.cli.medical_train_commands import app as medical_train_app  # noqa: E402
+from visionservex.cli.medsam2_commands import app as medsam2_app  # noqa: E402
+
+app.add_typer(medsam2_app, name="medsam2")
+app.add_typer(medical_train_app, name="train")
+
 
 def _emit_err(err: MedicalError, json_: bool) -> None:
     if json_:

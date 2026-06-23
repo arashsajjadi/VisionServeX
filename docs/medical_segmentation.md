@@ -15,7 +15,8 @@ is a research-only sidecar, and what each model's license really allows.
 |---|---|---|
 | Promptable mask on a 2D medical image (box/point) | **`medsam`** (wired) | **No** — research-only weights |
 | General-purpose promptable seg you *can* use commercially on medical images (annotation assist, non-diagnostic) | **`sam2.1-hiera-*`** / `sam-vit-*` (Apache-2.0) | **Yes** (general model, with non-diagnostic disclaimer) |
-| 3D volume / video promptable medical seg | **`medsam2`** — research-only **expert sidecar**, not runnable in core | **No** — non-commercial weights |
+| Real 2D MedSAM2 promptable seg (experimental) | **`medsam2`** via `visionservex medical medsam2 …` in an isolated env | **No** — research-only weights |
+| 3D volume / video promptable medical seg | **`medsam2`** — NOT wired in VisionServeX (only `2d_slice`); use upstream | **No** — non-commercial weights |
 | CT/MR multi-organ, nnU-Net, MONAI | External sidecars (run upstream) | Varies — see table |
 
 There is currently **no commercial-safe, medical-specialized** segmentation model
@@ -27,7 +28,7 @@ SAM / SAM2 / SAM2.1 family.
 | Model ID | Upstream | Runtime status | Task | Input | Output | Fine-tune |
 |---|---|---|---|---|---|---|
 | `medsam` | [bowang-lab/MedSAM](https://github.com/bowang-lab/MedSAM) | **wired** (engine `sam_hf`) | 2D promptable seg | RGB image (PNG/JPEG) | mask (PNG + COCO RLE + box) | `NOT_TRAINABLE_BY_DESIGN` (inference only) |
-| `medsam2` | [bowang-lab/MedSAM2](https://github.com/bowang-lab/MedSAM2) | **research-only sidecar** (engine `medsam2_sidecar`, dependency-gated, not runnable in core) | (3D/video promptable — claimed upstream) | — | — | `EXTERNAL_TRAINING_ONLY` |
+| `medsam2` | [bowang-lab/MedSAM2](https://github.com/bowang-lab/MedSAM2) | **experimental 2D runtime** (`medical/medsam2_runtime.py`, isolated env only; not in registry) | 2D PNG/JPEG, NIfTI middle slice | mask (PNG + box + RLE) | `EXTERNAL_TRAINING_ONLY` |
 | `totalsegmentator` | [wasserth/TotalSegmentator](https://github.com/wasserth/TotalSegmentator) | external sidecar (run upstream) | organ seg (CT/MR) | NIfTI | volume label map | external |
 | `totalsegmentator-tissue` | same | external sidecar, **license-key gated** | tissue/body-stats | NIfTI | label map | external |
 | `nnunet-v2` | [MIC-DKFZ/nnUNet](https://github.com/MIC-DKFZ/nnUNet) | external framework | 3D seg | NIfTI | label map | external (your data) |
@@ -102,44 +103,87 @@ whether a true tensor batch or an honest loop was used). Keep GPU workers
 conservative (one model per device); do not fan out duplicate large models per
 thread.
 
-## MedSAM2 — research-only expert sidecar (not runnable in core)
+## MedSAM2 — research-only runtime (experimental, isolated env)
 
-MedSAM2 is **not** a VisionServeX runtime model and is **not** reachable via
-`VisionModel("medsam2")`, `visionservex predict medsam2`, or HTTP (`/segment/b64`
-returns a clean `404 MODEL_NOT_FOUND`). This is deliberate:
+MedSAM2 is **research/education only** (the HF model card states: *"The model
+weights can only be used for research and education purposes"*). It is therefore
+**never commercial-safe**, is **not** in the runtime registry, and is **not**
+reachable via `VisionModel("medsam2")`, `visionservex predict medsam2`, or HTTP
+(`/segment/b64` returns a clean `404 MODEL_NOT_FOUND`).
 
-* **Non-commercial weights.** The published checkpoints carry medical-dataset
-  provenance restrictions (`noncommercial_restricted`). They must never be
-  labelled commercial-safe or offered as a default.
-* **Non-HF checkpoints.** Upstream ships raw SAM 2 `.pt` files, not HF
-  `transformers` format, so `sam_hf`/`sam2_hf` cannot load them — a native
-  `build_sam2` predictor from the upstream repo is required.
+A **real 2D (slice/frame) runtime** is available through an experimental,
+dependency-gated CLI — `visionservex medical medsam2 …` — backed by the in-process
+adapter `visionservex.medical.medsam2_runtime`. It runs the genuine upstream
+`build_sam2` + `SAM2ImagePredictor` and returns a real mask normalized to the
+VisionServeX segmentation schema. **3D-volume and video are NOT wired** (only
+`2d_slice`); unsupported inputs/modes raise structured errors, never fake output.
 
-What VisionServeX provides is an **honest, dependency-gated sidecar skeleton**
-(`engines/medsam2_sidecar.py`): it fails cleanly with a structured error and an
-actionable install hint, and it **never** returns mock output as if it were real.
+### Isolated setup (CPU; reproducible)
+
+Upstream needs **Python 3.12 + torch 2.5.1**; do not install it into a normal
+VisionServeX env. The host GPU here is Blackwell (sm_120), which torch cu124
+wheels don't support, so CPU is the clean path:
 
 ```bash
-# Probe / install guidance (no download, no crash):
-visionservex medical validate medsam2 --json
-visionservex medical install-help medsam2 --json
-# Research-only setup, isolated env:
-git clone https://github.com/bowang-lab/MedSAM2 && cd MedSAM2 && pip install -e .
-# then obtain a MedSAM2 checkpoint from upstream (non-commercial).
-pip install 'visionservex[medsam2]'   # marker extra; never auto-installed
+bash scripts/medsam2/setup_isolated_env.sh
+# creates conda env vsx-medsam2 (py3.12), installs torch 2.5.1 CPU + the MedSAM2
+# fork (provides `sam2`), downloads MedSAM2_latest.pt (156 MB, research-only),
+# and runs a 2D CPU smoke. No checkpoints are written into the repo.
 ```
 
-## Fine-tuning status (no false claims)
+### Exact syntax (run inside the isolated env)
+
+```bash
+visionservex medical medsam2 doctor --json
+visionservex medical medsam2 load --checkpoint MedSAM2_latest.pt --device cpu --json
+visionservex medical medsam2 segment slice.png --checkpoint MedSAM2_latest.pt \
+    --box 64,64,192,192 --out out/ --json
+visionservex medical medsam2 batch inputs.txt --checkpoint MedSAM2_latest.pt \
+    --out out/ --workers 1 --json          # order-preserving; deterministic filenames
+visionservex medical medsam2 benchmark-smoke --checkpoint MedSAM2_latest.pt --json
+```
+
+```python
+from visionservex.medical.medsam2_runtime import load_medsam2_runtime, load_2d_input, segment_2d
+
+rt = load_medsam2_runtime("MedSAM2_latest.pt", device="cpu")
+img = load_2d_input("slice.png")
+result = segment_2d(rt, img, boxes=[[64, 64, 192, 192]])   # real SegmentationResult
+assert result.metadata["commercial_safe"] is False
+```
+
+**Structured error codes:** `MEDSAM2_REQUIRED`, `MEDSAM2_CHECKPOINT_REQUIRED`,
+`MEDSAM2_CHECKPOINT_INVALID`, `MEDSAM2_CONFIG_REQUIRED`, `MEDSAM2_RUNTIME_UNAVAILABLE`,
+`MEDSAM2_OOM`, `MEDSAM2_UNSUPPORTED_INPUT`, `MEDSAM2_LICENSE_RESTRICTED`.
+
+**Batch / parallel:** one model is loaded once and reused; a shared SAM2 predictor
+is not thread-safe, so a shared model runs sequentially (`effective_workers=1`) and
+GPU never duplicates the model. Outputs are deterministic
+(`{index:05d}_{stem}_medsam2_mask_{m:03d}.png` + a `medsam2_batch_manifest.json`)
+and never overwritten without `--overwrite`.
+
+## Medical training truth (no fake fine-tuning)
+
+VisionServeX does **not** train or fine-tune any medical model in-process. The
+machine-readable matrix lives in `visionservex.medical.training.TRAINING_MATRIX`;
+`visionservex medical train …` exposes it and offers dataset validation + **exact
+upstream command generation** (dry-run) only.
 
 | Model | Status |
 |---|---|
 | `medsam` | `NOT_TRAINABLE_BY_DESIGN` — foundation segmenter, inference only |
-| `medsam2` | `EXTERNAL_TRAINING_ONLY` — train via upstream repo, not wrapped in VSX |
-| `nnunet-v2`, `monai`, `auto3dseg` | `EXTERNAL_TRAINING_ONLY` — frameworks; train on your own data upstream |
+| `medsam2` | `EXTERNAL_TRAINING_ONLY` — train via upstream repo; VSX offers dataset-validate + command dry-run |
+| `nnunet-v2`, `monai`, `swinunetr`, `auto3dseg` | `TRAINING_FRAMEWORK_EXTERNAL` — run their own trainer; VSX dry-run generates the exact command |
+| `sam2` (general) | `NOT_TRAINABLE_IN_VSX` |
 
-VisionServeX does not implement or claim medical fine-tuning. SAM-family decoder
-fine-tuning, where offered elsewhere in the package, is a frozen-encoder /
-decoder-only path and is never advertised as full training.
+```bash
+visionservex medical train doctor --json
+visionservex medical train validate-dataset DATASET_DIR --task segmentation --json   # images/ + masks/
+visionservex medical train dry-run --framework nnunet --dataset DATASET_DIR --out OUT --json
+```
+
+No model is ever reported `trainable_in_vsx` / `finetunable_in_vsx`. Dataset
+contract: `DATASET_DIR/images/*.png` + `DATASET_DIR/masks/*.png` paired by stem.
 
 ## Troubleshooting
 
@@ -147,15 +191,25 @@ decoder-only path and is never advertised as full training.
 |---|---|---|
 | `MEDICAL_EXTRA_REQUIRED` / missing `transformers` | `[hf]` not installed | `pip install 'visionservex[hf]'` |
 | `CHECKPOINT_REQUIRED` (medsam) | weights not cached | `visionservex model pull medsam` |
-| `MEDSAM2_REQUIRED` / `MEDSAM2_CHECKPOINT_UNVERIFIED` | MedSAM2 sidecar deps/checkpoint absent | research-only setup above; not runnable in core |
-| `404 MODEL_NOT_FOUND` for `medsam2` over HTTP | MedSAM2 is not a runtime model | expected — use the CLI sidecar path |
+| `MEDSAM2_REQUIRED` | MedSAM2 runtime deps (`sam2`) absent | run in the isolated env (`scripts/medsam2/setup_isolated_env.sh`) |
+| `MEDSAM2_CHECKPOINT_REQUIRED` / `MEDSAM2_CHECKPOINT_INVALID` | checkpoint missing or incompatible | download `MedSAM2_latest.pt` from HF `wanglab/MedSAM2` (research-only) |
+| `MEDSAM2_UNSUPPORTED_INPUT` (DICOM / 3D / video) | unsupported input or mode | convert DICOM→PNG/NIfTI; only `2d_slice` is wired |
+| `MEDSAM2_OOM` | out of memory | use CPU or a smaller image |
+| `404 MODEL_NOT_FOUND` for `medsam2` over HTTP | MedSAM2 is not a runtime registry model | expected — use the `medical medsam2` CLI |
 | `NIFTI_IO_REQUIRED` | NIfTI input without `nibabel` | `pip install 'visionservex[medical]'` |
-| CUDA unavailable | no GPU | MedSAM v1 runs on CPU (slower); set `--device cpu` |
-| DICOM input | not supported in core | convert to NIfTI/PNG first |
+| CUDA unavailable / Blackwell sm_120 | torch cu124 lacks sm_120 kernels | use `--device cpu` |
+
+## What NOT to claim
+
+- ❌ MedSAM2 is commercial-safe (weights are research/education only).
+- ❌ MedSAM2 does diagnosis / has clinical accuracy.
+- ❌ VisionServeX fine-tunes / trains MedSAM, MedSAM2, nnU-Net, or MONAI.
+- ❌ MedSAM2 3D-volume or video is supported in VisionServeX (only `2d_slice`).
+- ❌ MedSAM2 runs in the normal core env (it needs an isolated py3.12 + torch 2.5.1 env).
 
 ## See also
 
 - License policy: `src/visionservex/licensing/policy.py`
-- Gap report: `docs/model_zoo_gap_report.md`
-- Sidecar engine: `src/visionservex/engines/medsam2_sidecar.py`
-- Tests: `tests/test_v323_medical_segmentation_pack.py`
+- Runtime adapter: `src/visionservex/medical/medsam2_runtime.py`
+- Isolated setup + smoke: `scripts/medsam2/setup_isolated_env.sh`, `scripts/medsam2/real_runtime_smoke.py`
+- Tests: `tests/test_v324_medsam2_runtime.py`, `tests/test_v323_medical_segmentation_pack.py`
