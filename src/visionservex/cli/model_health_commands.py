@@ -1635,4 +1635,11 @@ def cache_verify_cmd(
     )
 
 
+# Attach license-policy commands (list / explain / policy / assert-commercial-safe)
+# to the `visionservex models` group. Source of truth: visionservex.policy.
+from visionservex.cli.policy_commands import register as _register_policy_commands  # noqa: E402
+
+_register_policy_commands(app)
+
+
 __all__ = ["app"]

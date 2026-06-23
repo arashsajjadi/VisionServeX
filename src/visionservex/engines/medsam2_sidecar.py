@@ -85,7 +85,15 @@ def probe_medsam2_availability() -> dict[str, object]:
     """
     import importlib.util
 
-    missing = [m for m in MEDSAM2_REQUIRED_MODULES if importlib.util.find_spec(m) is None]
+    def _present(name: str) -> bool:
+        # find_spec returns None for an absent top-level module, but can raise on a
+        # broken/partial install — treat any failure as "absent".
+        try:
+            return importlib.util.find_spec(name) is not None
+        except Exception:
+            return False
+
+    missing = [m for m in MEDSAM2_REQUIRED_MODULES if not _present(m)]
     return {
         "model_id": "medsam2",
         "runnable": False,  # never runnable in core — research-only sidecar

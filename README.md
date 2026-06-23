@@ -30,6 +30,13 @@ machine.
 Every model in the registry carries an explicit license classification, an honest availability
 status, and a clear commercial posture. Blockers are documented — not hidden.
 
+**Commercial-safe by default:** restricted models (research-only, non-commercial, AGPL/copyleft,
+legal-review, BYO-license) are **not** enabled unless you explicitly choose a research/BYO pathway
+and acknowledge the applicable restrictions. A model is only commercial-safe when its **code AND
+weights** are verified permissive — code license alone is never enough. See
+[docs/model_policy.md](docs/model_policy.md). MedSAM2, for example, is research-only and is never
+commercial-safe.
+
 ---
 
 ## Why VisionServeX?

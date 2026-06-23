@@ -261,10 +261,11 @@ def test_cli_medical_list_includes_both_medsam_and_medsam2():
 
 
 # --------------------------------------------------------------------------- #
-# HTTP honesty: MedSAM2 is not a runtime model -> clean 404, never a 500 or a
+# HTTP honesty: MedSAM2 is research-only (non-commercial) -> the commercial-safe
+# policy applies over HTTP too: a clean 403 license error, never a 500 or a
 # fabricated mask. (Also a regression guard for the segment/b64 error path.)
 # --------------------------------------------------------------------------- #
-def test_http_segment_b64_unknown_medsam2_returns_clean_404():
+def test_http_segment_b64_medsam2_is_license_gated_not_500():
     fastapi = pytest.importorskip("fastapi")  # noqa: F841
     import base64
     import io
@@ -284,5 +285,10 @@ def test_http_segment_b64_unknown_medsam2_returns_clean_404():
         "/segment/b64",
         json={"model_id": "medsam2", "image_b64": b64, "options": {"boxes": [[1, 1, 6, 6]]}},
     )
-    assert r.status_code == 404
-    assert r.json()["error"]["code"] == "MODEL_NOT_FOUND"
+    # research-only model refused with a structured license error, never a 500
+    assert r.status_code == 403
+    assert r.json()["error"]["code"] in {
+        "MODEL_ACKNOWLEDGEMENT_REQUIRED",
+        "MODEL_LICENSE_RESTRICTED",
+        "MODEL_NOT_COMMERCIAL_SAFE",
+    }

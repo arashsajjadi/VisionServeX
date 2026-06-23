@@ -509,7 +509,9 @@ def _segment_medsam(
     try:
         from visionservex import VisionModel
 
-        model = VisionModel("medsam")
+        # MedSAM v1 is research/education-only (legal_review). The medical CLI is
+        # an explicit research pathway, so it acknowledges the restriction here.
+        model = VisionModel("medsam", use_mode="research", acknowledge_license_restrictions=True)
         predict_kwargs: dict = {}
         if parsed_boxes:
             predict_kwargs["boxes"] = parsed_boxes
