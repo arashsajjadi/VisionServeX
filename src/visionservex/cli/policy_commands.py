@@ -27,12 +27,18 @@ def register(app: typer.Typer) -> None:
             False, "--commercial-safe", help="Only commercial-safe models."
         ),
         research: bool = typer.Option(False, "--research", help="Only research-only models."),
+        byo: bool = typer.Option(False, "--byo", help="Only BYO-license/checkpoint models."),
+        legal_review: bool = typer.Option(
+            False, "--legal-review", help="Only legal-review (not commercial-safe) models."
+        ),
         json_: bool = typer.Option(False, "--json"),
     ) -> None:
         """List models with their commercial-safety status."""
         from visionservex.policy import (
             get_model_policy,
+            list_byo_models,
             list_commercial_safe_models,
+            list_legal_review_models,
             list_models,
             list_research_models,
         )
@@ -41,6 +47,10 @@ def register(app: typer.Typer) -> None:
             ids = list_commercial_safe_models()
         elif research:
             ids = list_research_models()
+        elif byo:
+            ids = list_byo_models()
+        elif legal_review:
+            ids = list_legal_review_models()
         else:
             ids = list_models()
         rows = [
@@ -65,6 +75,26 @@ def register(app: typer.Typer) -> None:
             safe = "[green]yes[/green]" if r["commercial_safe"] else "[red]no[/red]"
             table.add_row(r["model_id"], r["commercial_status"], r["tier"], safe)
         console.print(table)
+
+    @app.command("coverage")
+    def coverage_cmd(json_: bool = typer.Option(False, "--json")) -> None:
+        """Policy-coverage report: curated vs registry-derived (commercial-safe)."""
+        from visionservex.policy import policy_coverage
+
+        rep = policy_coverage()
+        if json_:
+            print(json.dumps(rep, indent=2))
+            return
+        console.print(
+            f"total={rep['total_models']}  commercial_safe={rep['commercial_safe_total']} "
+            f"(curated={rep['commercial_safe_curated']}, "
+            f"registry_derived={rep['commercial_safe_registry_derived']}, "
+            f"curated_pct={rep['commercial_safe_curated_pct']}%)"
+        )
+        console.print(f"by_status: {rep['by_commercial_status']}")
+        console.print(
+            f"registry-derived commercial-safe: {rep['registry_derived_commercial_safe_ids']}"
+        )
 
     @app.command("explain")
     def explain_cmd(model_id: str = typer.Argument(...)) -> None:

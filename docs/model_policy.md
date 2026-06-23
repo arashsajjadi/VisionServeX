@@ -44,14 +44,29 @@ registry views, docs, tests) derives from it.
 
 ## Commercial-safe model families (examples)
 
-Verified commercial-safe (permissive code **and** weights): SAM / SAM2 / SAM2.1
-(Apache-2.0), CLIP (MIT), SigLIP2, DINOv2, OWLv2 / OWL-ViT, ConvNeXtV2, SwinV2,
-MaxViT, torchvision classifiers (BSD-3), D-FINE, RF-DETR / RF-DETR-Seg core,
-LibreYOLO (YOLOX / YOLOv9 / RT-DETR / D-FINE permissive variants).
+**Curated** commercial-safe (code **and** weights verified against official
+sources, 2026-06-22): SAM / SAM2 / SAM2.1 (Apache-2.0), CLIP (MIT), SigLIP / SigLIP2
+(Apache-2.0), DINOv2 (Apache-2.0), OWLv2 / OWL-ViT (Apache-2.0), SwinV2 (MIT),
+MaxViT (Apache-2.0), torchvision classifiers (BSD-3), **D-FINE** (Apache-2.0),
+**RF-DETR / RF-DETR-Seg core** (Apache-2.0), **Grounding DINO (open)** (Apache-2.0),
+**Florence-2** (MIT), RTMPose (Apache-2.0), Grounded-SAM (Apache-2.0).
+
+> **Excluded after re-audit:** **ConvNeXtV2** — the upstream
+> `facebookresearch/ConvNeXt-V2` LICENSE is **CC-BY-NC-4.0 (non-commercial)** while
+> the HF model card tags `apache-2.0`. The conflict is resolved by the stricter
+> interpretation → ConvNeXtV2 is **not commercial-safe** (`legal_review_required`).
+> **RF-DETR-Seg XL/2XL** are held for enterprise-terms verification (not commercial-safe).
+
+Coverage is auditable: `visionservex models coverage --json` reports how many
+commercial-safe models are curated vs registry-derived (the latter are only
+weight-less built-in mocks).
 
 ```bash
-visionservex models list --commercial-safe        # the commercial-safe set
-visionservex models list --research                # research-only models
+visionservex models list --commercial-safe         # the commercial-safe set
+visionservex models list --research                 # research-only models
+visionservex models list --byo                       # BYO-license/checkpoint models
+visionservex models list --legal-review              # not commercial-safe (pending review)
+visionservex models coverage --json                  # curated vs registry-derived
 visionservex models policy sam2.1-hiera-tiny --json
 ```
 
@@ -62,7 +77,9 @@ visionservex models policy sam2.1-hiera-tiny --json
 | **MedSAM2** | `research_only` | HF model card: *weights for research & education only* | research/BYO + acknowledgement (isolated env) |
 | **MedSAM v1** | `legal_review_required` | code Apache-2.0; medical weight provenance | research pathway; not commercial-safe |
 | **SAM3 / SAM3.1** | `byo_license_only` | HF-gated upstream license | BYO token + checkpoint |
-| **HQ-SAM, OneFormer (convnext/dinat-large)** | `legal_review_required` | provenance review pending | not commercial-safe |
+| **HQ-SAM, OneFormer (swin/convnext/dinat-large)** | `legal_review_required` | provenance review pending | not commercial-safe |
+| **ConvNeXtV2** | `legal_review_required` | upstream CC-BY-NC-4.0 vs HF apache-2.0 **conflict** → stricter wins | not commercial-safe |
+| **RF-DETR-Seg XL / 2XL** | `legal_review_required` | enterprise-terms verification pending | not commercial-safe |
 | **Ultralytics YOLO** (if ever added) | `agpl_restricted` | AGPL-3.0 | requires a separate commercial license; never in the commercial-safe set |
 
 ### MedSAM2 policy (canonical example)
@@ -91,20 +108,26 @@ The experimental real MedSAM2 2D runtime lives under
 ### TotalSegmentator — task-level policy
 
 TotalSegmentator is **task-specific**: the core `total` task may be open for
-commercial use, but tissue / body-composition and certain sub-tasks are
-proprietary / license-key gated. VisionServeX does **not** mark the whole package
-globally commercial-safe — `totalsegmentator-tissue` is flagged
-`non_core_license_optional` and requires a commercial license key. Verify each
-task/checkpoint against its model card.
+commercial use, but several sub-tasks are non-commercial / license-key gated and
+must **never** be treated as commercial-safe, including (non-exhaustive):
+**appendicular bones**, **tissue types** (body-composition), **heartchambers
+highres**, and **face**. VisionServeX does **not** mark the whole package globally
+commercial-safe — `totalsegmentator-tissue` is flagged `non_core_license_optional`
+and requires a commercial license key. Verify each task/checkpoint against its
+model card.
 
 ### NVIDIA / MONAI / VISTA / nnU-Net
 
 - **nnU-Net v2, MONAI, Auto3DSeg, SwinUNETR, UNETR** are *frameworks*: the code may
   be commercially usable, but **pretrained weights are checkpoint-specific** and
   must be verified per model card. Treated as `framework_only` / external.
-- **VISTA3D / NVIDIA VISTA / NV-Segment variants** must be verified per exact
-  checkpoint/model card before any commercial claim. Not bundled or commercial-safe
-  by default.
+- **VISTA3D / NVIDIA VISTA / NV-Segment-CT / NV-Segment-CTMR** are **not present**
+  in the VisionServeX registry and are therefore not in any commercial-safe list.
+  If ever added, each must be verified per exact checkpoint/model card: NVIDIA NV /
+  VISTA weights frequently carry **non-commercial / evaluation-only** terms (or a
+  hosted NIM route under NVIDIA commercial terms) and would be gated
+  `noncommercial_restricted` / `legal_review_required` / `external` — never
+  commercial-safe unless the official license clearly permits commercial weight use.
 
 ## The acknowledgement gate
 

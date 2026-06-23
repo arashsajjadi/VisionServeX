@@ -1205,6 +1205,26 @@ def predict(
             )
             return
 
+    # Commercial-safe-by-default CLI gate: a non-commercial-safe model that IS in
+    # the registry (incl. legal-review) is refused unless the user acknowledges the
+    # restriction. Models NOT in the registry fall through to the construction gate
+    # (hard-restricted) or MODEL_NOT_FOUND, preserving those behaviours.
+    if not acknowledge_license_restrictions:
+        from visionservex import policy as _policy
+        from visionservex.registry import default_registry as _default_registry
+
+        if _default_registry().has(model_id):
+            _pol = _policy.get_model_policy(model_id)
+            if not _pol.is_commercial_safe:
+                _die(
+                    f"{model_id!r} is not commercial-safe (status={_pol.commercial_status}). "
+                    "Pass --use-mode research --acknowledge-license-restrictions to proceed.",
+                    json_mode=json_,
+                    code="MODEL_NOT_COMMERCIAL_SAFE",
+                    hint=f"visionservex models explain {model_id}",
+                )
+                return
+
     try:
         model_kwargs: dict = {
             "auto_pull": effective_auto_pull,

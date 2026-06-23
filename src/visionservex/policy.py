@@ -120,6 +120,163 @@ _VERIFIED: dict[str, dict[str, str]] = {
 #: Research-only weights override (forces research_only even if curated bucket is generic).
 _RESEARCH_ONLY_IDS = frozenset({"medsam2"})
 
+#: status -> default package tier for curated-override rows.
+_STATUS_TIER_MAP = {
+    "commercial_safe": "optional_commercial_safe",
+    "research_only": "research",
+    "noncommercial_restricted": "research",
+    "agpl_restricted": "external",
+    "legal_review_required": "hidden",
+    "byo_license_only": "byo",
+    "unknown": "hidden",
+}
+
+#: Curated per-model / per-family policy overrides, verified against OFFICIAL sources
+#: (GitHub LICENSE / HF model card) on 2026-06-22. An id key beats a family key; both
+#: beat the registry-licence fallback. This is where flagship models are made strict
+#: WITHOUT bloating the legacy licence matrix. Keep the verification date current.
+_GH = "https://github.com"
+_CURATED_OVERRIDES: dict[str, dict[str, str]] = {
+    # ---- verified commercial-safe flagships (code AND weights permissive) ----
+    "dfine": {
+        "status": "commercial_safe",
+        "code": "Apache-2.0",
+        "weights": "Apache-2.0",
+        "source": f"{_GH}/Peterande/D-FINE",
+        "note": "Apache-2.0 code+weights (gh license). Trained on Objects365+COCO — dataset provenance noted; weights released Apache-2.0 by the authors.",
+    },
+    "rfdetr": {
+        "status": "commercial_safe",
+        "code": "Apache-2.0",
+        "weights": "Apache-2.0",
+        "source": f"{_GH}/roboflow/rf-detr",
+        "note": "Apache-2.0 (gh license). Applies to standard RF-DETR variants; XL/2XL handled separately.",
+    },
+    "grounding-dino": {
+        "status": "commercial_safe",
+        "code": "Apache-2.0",
+        "weights": "Apache-2.0",
+        "source": f"{_GH}/IDEA-Research/GroundingDINO",
+        "note": "Open Grounding DINO is Apache-2.0 (gh license). API-gated 1.5/1.6/DINO-X are classified separately.",
+    },
+    "florence-2": {
+        "status": "commercial_safe",
+        "code": "MIT",
+        "weights": "MIT",
+        "source": "https://huggingface.co/microsoft/Florence-2-base",
+        "note": "Microsoft Florence-2 released under MIT (model card).",
+    },
+    "clip": {
+        "status": "commercial_safe",
+        "code": "MIT",
+        "weights": "MIT",
+        "source": "https://huggingface.co/openai/clip-vit-base-patch32",
+        "note": "OpenAI CLIP — MIT.",
+    },
+    "siglip": {
+        "status": "commercial_safe",
+        "code": "Apache-2.0",
+        "weights": "Apache-2.0",
+        "source": "https://huggingface.co/google/siglip-base-patch16-224",
+        "note": "Google SigLIP — Apache-2.0.",
+    },
+    "siglip2": {
+        "status": "commercial_safe",
+        "code": "Apache-2.0",
+        "weights": "Apache-2.0",
+        "source": "https://huggingface.co/google/siglip2-base-patch16-224",
+        "note": "Google SigLIP2 — Apache-2.0.",
+    },
+    "owlv2": {
+        "status": "commercial_safe",
+        "code": "Apache-2.0",
+        "weights": "Apache-2.0",
+        "source": "https://huggingface.co/google/owlv2-base-patch16",
+        "note": "Google OWLv2 — Apache-2.0.",
+    },
+    "owlvit": {
+        "status": "commercial_safe",
+        "code": "Apache-2.0",
+        "weights": "Apache-2.0",
+        "source": "https://huggingface.co/google/owlvit-base-patch32",
+        "note": "Google OWL-ViT — Apache-2.0.",
+    },
+    "swinv2": {
+        "status": "commercial_safe",
+        "code": "MIT",
+        "weights": "MIT",
+        "source": f"{_GH}/microsoft/Swin-Transformer",
+        "note": "Microsoft Swin Transformer V2 — MIT.",
+    },
+    "maxvit": {
+        "status": "commercial_safe",
+        "code": "Apache-2.0",
+        "weights": "Apache-2.0",
+        "source": f"{_GH}/google-research/maxvit",
+        "note": "Google MaxViT — Apache-2.0 (timm weights).",
+    },
+    "rtmpose": {
+        "status": "commercial_safe",
+        "code": "Apache-2.0",
+        "weights": "Apache-2.0",
+        "source": f"{_GH}/open-mmlab/mmpose",
+        "note": "RTMPose (OpenMMLab MMPose) — Apache-2.0.",
+    },
+    "grounded-sam": {
+        "status": "commercial_safe",
+        "code": "Apache-2.0",
+        "weights": "Apache-2.0",
+        "source": f"{_GH}/IDEA-Research/Grounded-Segment-Anything",
+        "note": "Composes Grounding DINO (Apache-2.0) + SAM (Apache-2.0); both permissive.",
+    },
+    "grounded-sam2": {
+        "status": "commercial_safe",
+        "code": "Apache-2.0",
+        "weights": "Apache-2.0",
+        "source": f"{_GH}/IDEA-Research/Grounded-SAM-2",
+        "note": "Composes Grounding DINO (Apache-2.0) + SAM 2 (Apache-2.0); both permissive.",
+    },
+    # ---- downgrades: license traps caught (NOT commercial-safe) ----
+    "convnextv2": {
+        "status": "legal_review_required",
+        "code": "MIT/CC-BY-NC (conflict)",
+        "weights": "CC-BY-NC-4.0 (upstream) vs Apache-2.0 (HF tag)",
+        "source": f"{_GH}/facebookresearch/ConvNeXt-V2",
+        "note": "CONFLICT: upstream LICENSE is CC-BY-NC-4.0 (non-commercial) while the HF model card tags apache-2.0. Stricter interpretation wins → NOT commercial-safe pending resolution.",
+    },
+    "rfdetr-seg-xlarge": {
+        "status": "legal_review_required",
+        "code": "Apache-2.0 (code)",
+        "weights": "verify (XL enterprise terms)",
+        "source": f"{_GH}/roboflow/rf-detr",
+        "note": "RF-DETR-Seg XL: enterprise-terms verification pending; not confirmed Apache-2.0 for this variant. Not commercial-safe until resolved.",
+    },
+    "rfdetr-seg-2xlarge": {
+        "status": "legal_review_required",
+        "code": "Apache-2.0 (code)",
+        "weights": "verify (2XL enterprise terms)",
+        "source": f"{_GH}/roboflow/rf-detr",
+        "note": "RF-DETR-Seg 2XL: enterprise-terms verification pending; not commercial-safe until resolved.",
+    },
+    "oneformer-swin-large": {
+        "status": "legal_review_required",
+        "code": "MIT (code)",
+        "weights": "provenance review",
+        "source": f"{_GH}/SHI-Labs/OneFormer",
+        "note": "OneFormer weights provenance review (consistency with the convnext/dinat-large variants). Not commercial-safe until resolved.",
+    },
+}
+
+
+def _lookup_override(model_id: str, family: str) -> dict[str, str] | None:
+    """Curated override for a model: exact id wins over family."""
+    if model_id in _CURATED_OVERRIDES:
+        return _CURATED_OVERRIDES[model_id]
+    if family and family in _CURATED_OVERRIDES:
+        return _CURATED_OVERRIDES[family]
+    return None
+
+
 #: Permissive licence prefixes (code+weights) used for no-curated-row fallback.
 _PERMISSIVE = ("apache", "mit", "bsd")
 _COPYLEFT = ("agpl", "gpl-3", "gplv3", "gpl-2", "lgpl")
@@ -162,6 +319,7 @@ class ModelLicensePolicy:
     last_verified_date: str
     policy_notes: str
     in_registry: bool = True
+    policy_source: str = "registry_derived"  # curated_matrix | curated_override | registry_derived
     extra: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -202,6 +360,7 @@ class ModelLicensePolicy:
             "last_verified_date": self.last_verified_date,
             "policy_notes": self.policy_notes,
             "in_registry": self.in_registry,
+            "policy_source": self.policy_source,
             "is_commercial_safe": self.is_commercial_safe,
         }
 
@@ -278,6 +437,9 @@ def get_model_policy(model_id: str) -> ModelLicensePolicy:
     license_uncertain = bool(getattr(entry, "license_uncertain", False)) if entry else False
 
     verified = _VERIFIED.get(model_id, {})
+    override = _lookup_override(model_id, family)
+    last_verified = ""
+    policy_source = "registry_derived"
 
     if curated is not None:
         status, tier = _FINAL_POLICY_MAP.get(
@@ -288,6 +450,18 @@ def get_model_policy(model_id: str) -> ModelLicensePolicy:
         source = curated.upstream_url or curated.hf_repo or ""
         notes = curated.notes or ""
         auto_dl = bool(curated.can_auto_download)
+        policy_source = "curated_matrix"
+    elif override is not None:
+        # Verified per-model/per-family policy (official source, dated).
+        status = override["status"]
+        tier = _STATUS_TIER_MAP.get(status, "hidden")
+        code_license = override.get("code", reg_license or "unknown")
+        weights_license = override.get("weights", "unknown")
+        source = override.get("source", "")
+        notes = override.get("note", "")
+        auto_dl = False
+        last_verified = "2026-06-22"
+        policy_source = "curated_override"
     else:
         # No curated row → derive from the registry licence, fail-closed on doubt.
         lclass = _classify_license_text(reg_license)
@@ -304,6 +478,7 @@ def get_model_policy(model_id: str) -> ModelLicensePolicy:
         source = getattr(entry, "upstream_url", "") if entry else ""
         notes = getattr(entry, "commercial_use_notes", "") if entry else ""
         auto_dl = bool(getattr(entry, "auto_download", False)) if entry else False
+        policy_source = "registry_derived"
 
     # Research-only weights override (e.g. MedSAM2 model card).
     if model_id in _RESEARCH_ONLY_IDS:
@@ -350,9 +525,10 @@ def get_model_policy(model_id: str) -> ModelLicensePolicy:
         not_for_diagnosis_required=medical,
         cli_warning_level=warning,
         source_url=verified.get("source", source),
-        last_verified_date=verified.get("date", ""),
+        last_verified_date=verified.get("date", last_verified),
         policy_notes=verified.get("note", notes),
         in_registry=entry is not None,
+        policy_source=policy_source,
     )
 
 
@@ -382,6 +558,51 @@ def list_research_models() -> list[str]:
         for m in candidates
         if get_model_policy(m).commercial_status in ("research_only", "noncommercial_restricted")
     )
+
+
+def list_byo_models() -> list[str]:
+    """Models that require a user-supplied checkpoint/license (BYO)."""
+    return sorted(
+        m for m in list_models() if get_model_policy(m).commercial_status == "byo_license_only"
+    )
+
+
+def list_legal_review_models() -> list[str]:
+    """Models pending legal review (not commercial-safe; ambiguous/unverified weights)."""
+    return sorted(
+        m for m in list_models() if get_model_policy(m).commercial_status == "legal_review_required"
+    )
+
+
+def policy_coverage() -> dict[str, Any]:
+    """Machine-readable policy-coverage report (curated vs registry-derived)."""
+    from collections import Counter
+
+    ids = list_models()
+    status: Counter = Counter()
+    source: Counter = Counter()
+    safe_source: Counter = Counter()
+    registry_derived_safe: list[str] = []
+    for m in ids:
+        p = get_model_policy(m)
+        status[p.commercial_status] += 1
+        source[p.policy_source] += 1
+        if p.is_commercial_safe:
+            safe_source[p.policy_source] += 1
+            if p.policy_source == "registry_derived":
+                registry_derived_safe.append(m)
+    commercial_safe = sum(1 for m in ids if get_model_policy(m).is_commercial_safe)
+    curated_safe = safe_source["curated_matrix"] + safe_source["curated_override"]
+    return {
+        "total_models": len(ids),
+        "by_commercial_status": dict(status),
+        "by_policy_source": dict(source),
+        "commercial_safe_total": commercial_safe,
+        "commercial_safe_curated": curated_safe,
+        "commercial_safe_registry_derived": safe_source["registry_derived"],
+        "commercial_safe_curated_pct": round(100 * curated_safe / max(commercial_safe, 1), 1),
+        "registry_derived_commercial_safe_ids": sorted(registry_derived_safe),
+    }
 
 
 def assert_commercial_safe(model_id: str) -> None:
@@ -479,7 +700,10 @@ __all__ = [
     "check_use_allowed",
     "explain_model_license",
     "get_model_policy",
+    "list_byo_models",
     "list_commercial_safe_models",
+    "list_legal_review_models",
     "list_models",
     "list_research_models",
+    "policy_coverage",
 ]
