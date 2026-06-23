@@ -451,9 +451,15 @@ def _register_routes(app: FastAPI) -> None:
             model = cache.get(body.model_id)
             return model.predict(pil, **kwargs)
 
-        result = await asyncio.get_running_loop().run_in_executor(None, lambda: _do_seg())
-        if asyncio.iscoroutine(result):
-            result = await result
+        try:
+            result = await asyncio.get_running_loop().run_in_executor(None, lambda: _do_seg())
+            if asyncio.iscoroutine(result):
+                result = await result
+        except RegistryError as exc:
+            # Unknown model (e.g. a research-only sidecar that is not a runtime
+            # registry model) is an expected condition — return a structured 404,
+            # never a 500.
+            raise not_found("MODEL_NOT_FOUND", str(exc)) from exc
         return _wire_response(request, result, warns)
 
     @app.post("/obb", response_model=PredictionResponse, tags=["inference"])
@@ -956,6 +962,26 @@ def _result_payload(payload: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _register_exception_handlers(app: FastAPI) -> None:
+    from visionservex.exceptions import ModelLicenseError
+
+    @app.exception_handler(ModelLicenseError)
+    async def _license_error_handler(request: Request, exc: ModelLicenseError) -> JSONResponse:
+        # The commercial-safe policy applies over HTTP too: restricted models are
+        # refused with a clean 403 + structured code (never a 500 or a fake result).
+        rid = getattr(request.state, "request_id", request_id())
+        return JSONResponse(
+            status_code=403,
+            content={
+                "request_id": rid,
+                "error": {
+                    "code": exc.code,
+                    "message": exc.message,
+                    "hint": exc.hint,
+                    "details": exc.details,
+                },
+            },
+        )
+
     @app.exception_handler(ApiError)
     async def _api_error_handler(request: Request, exc: ApiError) -> JSONResponse:
         rid = getattr(request.state, "request_id", request_id())

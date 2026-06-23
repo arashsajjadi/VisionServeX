@@ -1137,6 +1137,19 @@ def predict(
     timeout: float | None = typer.Option(None, "--timeout", help="Prediction timeout in seconds."),
     auto_pull: bool = typer.Option(False, "--auto-pull", help="Download weights if missing."),
     no_auto_pull: bool = typer.Option(False, "--no-auto-pull", help="Disable auto-pull."),
+    use_mode: str = typer.Option(
+        "commercial",
+        "--use-mode",
+        help="Use mode for restricted models: commercial|research|education|internal_evaluation|byo_license.",
+    ),
+    acknowledge_license_restrictions: bool = typer.Option(
+        False,
+        "--acknowledge-license-restrictions",
+        help="Acknowledge that a restricted (research/BYO) model is not commercial-safe.",
+    ),
+    checkpoint: str | None = typer.Option(
+        None, "--checkpoint", help="BYO checkpoint path for byo_license models."
+    ),
     json_: bool = typer.Option(False, "--json"),
     debug: bool = typer.Option(False, "--debug"),
 ) -> None:
@@ -1192,8 +1205,33 @@ def predict(
             )
             return
 
+    # Commercial-safe-by-default CLI gate: a non-commercial-safe model that IS in
+    # the registry (incl. legal-review) is refused unless the user acknowledges the
+    # restriction. Models NOT in the registry fall through to the construction gate
+    # (hard-restricted) or MODEL_NOT_FOUND, preserving those behaviours.
+    if not acknowledge_license_restrictions:
+        from visionservex import policy as _policy
+        from visionservex.registry import default_registry as _default_registry
+
+        if _default_registry().has(model_id):
+            _pol = _policy.get_model_policy(model_id)
+            if not _pol.is_commercial_safe:
+                _die(
+                    f"{model_id!r} is not commercial-safe (status={_pol.commercial_status}). "
+                    "Pass --use-mode research --acknowledge-license-restrictions to proceed.",
+                    json_mode=json_,
+                    code="MODEL_NOT_COMMERCIAL_SAFE",
+                    hint=f"visionservex models explain {model_id}",
+                )
+                return
+
     try:
-        model_kwargs: dict = {"auto_pull": effective_auto_pull}
+        model_kwargs: dict = {
+            "auto_pull": effective_auto_pull,
+            "use_mode": use_mode,
+            "acknowledge_license_restrictions": acknowledge_license_restrictions,
+            "checkpoint": checkpoint,
+        }
         if device:
             model_kwargs["device"] = device
         if precision:

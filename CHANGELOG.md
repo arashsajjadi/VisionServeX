@@ -2,6 +2,58 @@
 
 ## [Unreleased]
 
+## [3.23.0] - 2026-06-22 — Commercial-safe-by-default license policy
+
+VisionServeX core is now **commercial-safe by default**, enforced in code across the
+Python API, CLI, and HTTP server — not by documentation alone. A model is treated as
+commercial-safe only when its **code AND weights** are verified permissive; code
+license alone is never sufficient. Restricted models are blocked from the default
+path and usable only through an explicit, acknowledged research/BYO pathway.
+
+### Added
+- **Authoritative policy layer** `visionservex.policy` — single source of truth that
+  reconciles the curated licence matrix + registry into one `ModelLicensePolicy`
+  (`commercial_status`, `default_package_tier`, `allowed_use_modes`,
+  `finetuning_status`, `cli_warning_level`, `requires_acknowledgement`,
+  `requires_byo_checkpoint`, `not_for_diagnosis_required`, `source_url`,
+  `last_verified_date`, `policy_source`, `policy_notes`). Helpers: `get_model_policy`,
+  `list_models`, `list_commercial_safe_models`, `list_research_models`,
+  `list_byo_models`, `list_legal_review_models`, `assert_commercial_safe`,
+  `explain_model_license`, `check_use_allowed`, `policy_coverage`.
+- **Acknowledgement gate** on `VisionModel` (`use_mode` + `acknowledge_license_restrictions`
+  + `checkpoint`): research-only / non-commercial / AGPL / BYO / unknown are blocked at
+  construction; `legal_review` is constructible-but-never-commercial-safe and blocked
+  at the `predict` CLI. Structured errors: `MODEL_NOT_COMMERCIAL_SAFE`,
+  `MODEL_LICENSE_RESTRICTED`, `MODEL_ACKNOWLEDGEMENT_REQUIRED`,
+  `MODEL_REQUIRES_BYO_CHECKPOINT`, `MODEL_LICENSE_REVIEW_REQUIRED`,
+  `MODEL_AGPL_RESTRICTED`, `MODEL_USE_MODE_NOT_ALLOWED`.
+- **CLI** `visionservex models`: `list [--commercial-safe|--research|--byo|--legal-review]`,
+  `explain`, `policy`, `assert-commercial-safe`, `coverage`.
+- **HTTP**: restricted models return a clean **403** structured license error (never 500).
+- **Curated licence rows** for flagship models, verified against official sources
+  (GitHub LICENSE / model card, 2026-06-22): SAM/SAM2/SAM2.1, D-FINE, RF-DETR (core),
+  Grounding DINO (open), Florence-2, CLIP, SigLIP/SigLIP2, OWLv2/OWL-ViT, SwinV2,
+  MaxViT, RTMPose, Grounded-SAM. Commercial-safe coverage is now **>90% curated**;
+  the only registry-derived commercial-safe entries are weight-less built-in mocks
+  (`visionservex models coverage`).
+
+### Changed / hardened (license truth)
+- **ConvNeXtV2 downgraded** out of commercial-safe → `legal_review_required`: upstream
+  `facebookresearch/ConvNeXt-V2` LICENSE is **CC-BY-NC-4.0** while the HF model card
+  tags `apache-2.0`; the conflict is resolved by the stricter interpretation.
+- **RF-DETR-Seg XL/2XL** (`rfdetr-seg-xlarge`/`-2xlarge`) downgraded → `legal_review_required`
+  (enterprise-terms verification; previously slipped through on a curated-row id mismatch).
+- **OneFormer (swin/convnext/dinat-large)** kept `legal_review_required` (weight provenance).
+- **MedSAM2** remains `research_only`, blocked by default, never commercial-safe.
+- **TotalSegmentator** documented task-level: restricted sub-tasks (appendicular bones,
+  tissue types, heartchambers highres, face) are never commercial-safe.
+- **NV-Segment-CT / NV-Segment-CTMR / VISTA3D** are not bundled; documented as gated if added.
+- Ultralytics/AGPL is never bundled and never in the commercial-safe set (test-enforced).
+
+### Notes
+- No checkpoints/weights are committed. No diagnostic/clinical claims. Docs forbidden-claim
+  scan + docs-examples-must-be-curated tests added.
+
 ## [3.22.0] - 2026-06-22 — Video / true-batch / GPU / memory sprint
 
 Backend/worker performance, batching, video, memory, and model-output-correctness

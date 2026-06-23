@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "visionservex"
-version = "3.22.0"
+version = "3.23.0"
 description = "A permissive-license-aware framework for serving modern computer vision models locally and over Cloudflare Tunnel."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -141,6 +141,13 @@ video = [
 medical = [
     # Optional medical I/O — NIfTI volume parsing for TotalSegmentator/nnU-Net.
     "nibabel>=5.0",
+]
+medsam2 = [
+    # MedSAM2 is a RESEARCH-ONLY expert sidecar with NON-COMMERCIAL weights. Its
+    # upstream stack (Meta SAM 2 + MedSAM2) is git-installed in an isolated env per
+    # https://github.com/bowang-lab/MedSAM2 — listed here as a marker only so that
+    # `pip install visionservex[medsam2]` resolves and install hints are valid.
+    # VisionServeX never auto-installs it and never ships its weights.
 ]
 classic-ml = [
     # V3 classic (weight-free) smart-annotation tools. All permissive:

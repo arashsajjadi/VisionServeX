@@ -127,7 +127,10 @@ MEDICAL_MODELS: dict[str, MedicalModelInfo] = {
         ),
         required_modules=("medsam2",),
         structured_error_code="MEDSAM2_CHECKPOINT_UNVERIFIED",
-        license_note=("Apache-2.0. Checkpoint packaging not verified — treat as expert sidecar."),
+        license_note=(
+            "Apache-2.0 code / NON-COMMERCIAL weights (medical dataset provenance). "
+            "Research-only expert sidecar — NOT commercial-safe, not for diagnosis."
+        ),
         license_tier="expert_sidecar",
         runtime_status="expert_sidecar",
         checkpoint_status="unverified",
@@ -371,7 +374,11 @@ def segment(
     out.mkdir(parents=True, exist_ok=True)
     next_step_lookup = {
         "totalsegmentator": f"TotalSegmentator -i {input} -o {out}",
-        "medsam2": f"# See {info.upstream}/blob/main/README.md for prompt format",
+        "medsam2": (
+            "# MedSAM2 is a research-only expert sidecar (non-commercial weights, "
+            "not commercial-safe). Native predictor/checkpoint not wired in core. "
+            f"See {info.upstream} and engines/medsam2_sidecar.py."
+        ),
         "sam-med2d": f"# See {info.upstream}/blob/main/README.md",
         "nnunet-v2": f"nnUNetv2_predict -i {input} -o {out} -d <DATASET_ID> -c 3d_fullres",
         "monai-bundles": "monai-bundle list ; then load with monai.bundle.load",
@@ -502,7 +509,9 @@ def _segment_medsam(
     try:
         from visionservex import VisionModel
 
-        model = VisionModel("medsam")
+        # MedSAM v1 is research/education-only (legal_review). The medical CLI is
+        # an explicit research pathway, so it acknowledges the restriction here.
+        model = VisionModel("medsam", use_mode="research", acknowledge_license_restrictions=True)
         predict_kwargs: dict = {}
         if parsed_boxes:
             predict_kwargs["boxes"] = parsed_boxes
@@ -710,6 +719,14 @@ def autoseg_doctor(json_: bool = typer.Option(False, "--json")) -> None:
 
 app.add_typer(monai_app, name="monai")
 app.add_typer(autoseg_app, name="autoseg")
+
+# Experimental MedSAM2 real runtime + medical training-truth sub-apps (lazy import
+# keeps the medical CLI import-light; neither pulls torch/sam2 at import time).
+from visionservex.cli.medical_train_commands import app as medical_train_app  # noqa: E402
+from visionservex.cli.medsam2_commands import app as medsam2_app  # noqa: E402
+
+app.add_typer(medsam2_app, name="medsam2")
+app.add_typer(medical_train_app, name="train")
 
 
 def _emit_err(err: MedicalError, json_: bool) -> None:

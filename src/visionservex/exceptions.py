@@ -159,14 +159,118 @@ class TaskNotSupportedError(VisionServeXError):
         )
 
 
+class ModelLicenseError(VisionServeXError):
+    """Base for license-policy / commercial-safety gate errors."""
+
+
+class ModelNotCommercialSafeError(ModelLicenseError):
+    def __init__(self, model_id: str, status: str, hint: str = "") -> None:
+        super().__init__(
+            f"Model {model_id!r} is not commercial-safe (status={status!r}).",
+            code="MODEL_NOT_COMMERCIAL_SAFE",
+            hint=hint or f"visionservex models explain {model_id}",
+            details={"model_id": model_id, "commercial_status": status},
+            docs="docs/model_policy.md",
+        )
+
+
+class ModelLicenseRestrictedError(ModelLicenseError):
+    def __init__(self, model_id: str, status: str, hint: str = "") -> None:
+        super().__init__(
+            f"Model {model_id!r} has a restricted license (status={status!r}) and is "
+            "not enabled by default.",
+            code="MODEL_LICENSE_RESTRICTED",
+            hint=hint or f"visionservex models explain {model_id}",
+            details={"model_id": model_id, "commercial_status": status},
+            docs="docs/model_policy.md",
+        )
+
+
+class ModelAcknowledgementRequiredError(ModelLicenseError):
+    def __init__(self, model_id: str, status: str, acknowledgement_text: str) -> None:
+        super().__init__(
+            f"Model {model_id!r} is restricted ({status}). You must explicitly pass "
+            "use_mode and acknowledge_license_restrictions=True to use it.",
+            code="MODEL_ACKNOWLEDGEMENT_REQUIRED",
+            hint=(
+                'VisionModel("'
+                + model_id
+                + '", use_mode="research", acknowledge_license_restrictions=True)'
+            ),
+            details={
+                "model_id": model_id,
+                "commercial_status": status,
+                "acknowledgement_text": acknowledgement_text,
+            },
+            docs="docs/model_policy.md",
+        )
+
+
+class ModelRequiresBYOCheckpointError(ModelLicenseError):
+    def __init__(self, model_id: str) -> None:
+        super().__init__(
+            f"Model {model_id!r} requires you to supply your own checkpoint (BYO).",
+            code="MODEL_REQUIRES_BYO_CHECKPOINT",
+            hint=f"Pass checkpoint=... (or --checkpoint) for {model_id!r}.",
+            details={"model_id": model_id},
+            docs="docs/byo_checkpoint.md",
+        )
+
+
+class ModelLicenseReviewRequiredError(ModelLicenseError):
+    def __init__(self, model_id: str) -> None:
+        super().__init__(
+            f"Model {model_id!r} has an unclear/unverified license and is blocked by default.",
+            code="MODEL_LICENSE_REVIEW_REQUIRED",
+            hint=f"visionservex models explain {model_id}",
+            details={"model_id": model_id},
+            docs="docs/model_policy.md",
+        )
+
+
+class ModelAGPLRestrictedError(ModelLicenseError):
+    def __init__(self, model_id: str) -> None:
+        super().__init__(
+            f"Model {model_id!r} is AGPL/copyleft or enterprise-license-restricted and is "
+            "not in the commercial-safe set.",
+            code="MODEL_AGPL_RESTRICTED",
+            hint=f"visionservex models explain {model_id}",
+            details={"model_id": model_id},
+            docs="docs/model_policy.md",
+        )
+
+
+class ModelUseModeNotAllowedError(ModelLicenseError):
+    def __init__(self, model_id: str, use_mode: str, allowed: tuple[str, ...]) -> None:
+        super().__init__(
+            f"use_mode={use_mode!r} is not allowed for {model_id!r}. Allowed: {list(allowed)}.",
+            code="MODEL_USE_MODE_NOT_ALLOWED",
+            hint=f"Use one of {list(allowed)} for {model_id!r}.",
+            details={
+                "model_id": model_id,
+                "use_mode": use_mode,
+                "allowed_use_modes": list(allowed),
+            },
+            docs="docs/model_policy.md",
+        )
+
+
 __all__ = [
     "DeviceUnavailableError",
     "EngineDependencyError",
     "ExternalModelError",
     "InputNotFoundError",
     "ManualModelError",
+    "ModelAGPLRestrictedError",
+    "ModelAcknowledgementRequiredError",
+    "ModelLicenseError",
+    "ModelLicenseRestrictedError",
+    "ModelLicenseReviewRequiredError",
     "ModelMissingWeightsError",
+    "ModelNotCommercialSafeError",
     "ModelNotFoundError",
+    "ModelRequiresBYOCheckpointError",
+    "ModelUseModeNotAllowedError",
     "SidecarNotRunningError",
     "TaskNotSupportedError",
     "VisionServeXError",

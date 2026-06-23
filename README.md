@@ -14,7 +14,7 @@
   <a href="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml">
     <img src="https://github.com/arashsajjadi/VisionServeX/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-3.22.0-informational.svg" alt="v3.22.0">
+  <img src="https://img.shields.io/badge/version-3.23.0-informational.svg" alt="v3.23.0">
   <img src="https://img.shields.io/badge/code%20style-ruff-orange.svg" alt="ruff">
 </p>
 
@@ -29,6 +29,13 @@ machine.
 
 Every model in the registry carries an explicit license classification, an honest availability
 status, and a clear commercial posture. Blockers are documented — not hidden.
+
+**Commercial-safe by default:** restricted models (research-only, non-commercial, AGPL/copyleft,
+legal-review, BYO-license) are **not** enabled unless you explicitly choose a research/BYO pathway
+and acknowledge the applicable restrictions. A model is only commercial-safe when its **code AND
+weights** are verified permissive — code license alone is never enough. See
+[docs/model_policy.md](docs/model_policy.md). MedSAM2, for example, is research-only and is never
+commercial-safe.
 
 ---
 
@@ -92,7 +99,7 @@ VSX.dino("dinov2-base").embed("image.jpg")
 | SAM3/SAM3.1 BYOT masks | real mask artifacts (62 K–307 K px verified) | `[hf]` + HF token | yes, BYOT |
 | Open-vocabulary detection | Grounding DINO (tiny, swin-b), OWL-ViT, OWLv2 | `[hf]` | no |
 | Multi-task VLM | Florence-2 (base, large) | `[hf]` + isolated env | no |
-| Classification | SwinV2, ConvNeXtV2, MaxViT | `[hf]` | no |
+| Classification | SwinV2, MaxViT (ConvNeXtV2: research-only) | `[hf]` | no |
 | Dense embedding | DINOv2 (s/b/l/g), CLIP, SigLIP2 | `[hf]` | no |
 | DINOv3 BYOT embedding | dinov3-vits16 through dinov3-vit7b16 | `[dino]` + HF token | yes, BYOT |
 | DINOv3 depth head | CHMv2 DPT depth estimation (`transformers>=5.10`) | `[dino]` + HF token | yes, BYOT |
@@ -159,9 +166,11 @@ benchmarked locally and produce confirmed non-zero masks:
 | **Research / non-commercial** | local maybe | maybe | no | no | disabled |
 | **Legal review** | maybe | maybe | no until reviewed | no | disabled |
 
-**Commercial-safe core** (39 models) includes: SAM v1/2/2.1, DINOv2, RF-DETR family, Grounding
-DINO (open variants), Florence-2, CLIP, OWLv2, SigLIP2, SwinV2, ConvNeXtV2, depth-anything-small,
-and more. No token needed; weights download from official upstream sources on demand.
+**Commercial-safe core** includes: SAM v1/2/2.1, DINOv2, D-FINE, RF-DETR family, Grounding
+DINO (open variants), Florence-2, CLIP, OWLv2, SigLIP2, SwinV2, MaxViT, depth-anything-small,
+and more — code **and** weights verified permissive. No token needed; weights download from
+official upstream sources on demand. (ConvNeXtV2 is **excluded**: upstream CC-BY-NC vs HF
+apache-2.0 conflict → research-only. See [docs/model_policy.md](docs/model_policy.md).)
 
 **BYOT models** (SAM3, SAM3.1, DINOv3) are not automatically commercial-safe. Commercial use
 depends on the upstream license *you* accepted. VisionServeX provides the infrastructure; the
@@ -381,7 +390,8 @@ See [docs/openmmlab_expert_models.md](docs/openmmlab_expert_models.md).
 - **DINOv3 CHMv2 depth head**: Requires `transformers>=5.10`; may conflict with Florence-2 (<5.0) — install in a separate env.
 - **Florence-2**: Requires isolated env (`transformers==4.46.3 + einops + timm`). Use `visionservex florence2 create-env` for the validated recipe.
 - **DEIMv2**: Registered but not wired — no HF Transformers support yet; custom loader required.
-- **MedSAM**: Research only; non-commercial restricted.
+- **MedSAM**: Research only; non-commercial restricted. 2D promptable (box/point), inference only. See `docs/medical_segmentation.md`.
+- **MedSAM2**: **Research-only**, **non-commercial weights** — not commercial-safe, not in the runtime registry, not reachable via `predict`/HTTP. An **experimental real 2D runtime** is available in an isolated env via `visionservex medical medsam2 …` (CPU-verified; 3D/video NOT wired). See `docs/medical_segmentation.md`.
 - **SAM2.1 ONNX**: Image-encoder export works via Module shim. Full interactive decoder ONNX not yet verified.
 - **OpenMMLab** (RTMPose, RTMDet-R/R2, Co-DINO, InternImage): Expert sidecar; use `visionservex openmmlab create-env`.
 - **Apple MPS**: Implemented but not maintainer-verified.

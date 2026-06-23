@@ -156,8 +156,29 @@ class VisionModel:
         device: str | None = None,
         precision: str | None = None,
         auto_pull: bool = False,
+        use_mode: str = "commercial",
+        acknowledge_license_restrictions: bool = False,
+        checkpoint: str | None = None,
     ) -> None:
         self.settings = get_settings()
+
+        # Commercial-safe-by-default gate. Commercial-safe models pass straight
+        # through; restricted models (research-only / non-commercial / AGPL /
+        # legal-review / BYO) require an explicit acknowledged pathway. This runs
+        # BEFORE the registry lookup so even non-registry restricted ids (e.g.
+        # medsam2) raise a clear license error rather than a bare MODEL_NOT_FOUND.
+        from visionservex import policy as _policy
+
+        self.use_mode = use_mode
+        self.acknowledge_license_restrictions = bool(acknowledge_license_restrictions)
+        self.byo_checkpoint = checkpoint
+        self.policy = _policy.check_use_allowed(
+            model_id,
+            use_mode=use_mode,
+            acknowledged=acknowledge_license_restrictions,
+            has_checkpoint=checkpoint is not None,
+        )
+
         self.entry: ModelEntry = default_registry().get(model_id)
         if task is not None and task != self.entry.task:
             raise ValueError(
